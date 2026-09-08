@@ -41,4 +41,6 @@ deleteReference: crudRouter.deleteReference,
 createLicense: crudRouter.createLicense,
 updateLicense: crudRouter.updateLicense,
 deleteLicense: crudRouter.deleteLicense,
+upsertClause: crudRouter.upsertClause,
+deleteClause: crudRouter.deleteClause,
 };

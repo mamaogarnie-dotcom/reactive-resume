@@ -1272,3 +1272,152 @@ userId: "user-1",
 expect(returning).toHaveBeenCalledTimes(1);
 });
 });
+describe("cvmateProfileService clauses", () => {
+const clause = {
+id: "clause-1",
+masterProfileId: "profile-1",
+scope: "current" as const,
+language: "pl" as const,
+isEnabled: true,
+content: "Wyrażam zgodę na przetwarzanie danych osobowych.",
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
+it("upserts a clause inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const returning = vi.fn(() => Promise.resolve([{ ...clause }]));
+const onConflictDoUpdate = vi.fn(() => ({ returning }));
+const values = vi.fn(() => ({ onConflictDoUpdate }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.upsertClause({
+userId: "user-1",
+scope: "current",
+language: "pl",
+content: "Wyrażam zgodę na przetwarzanie danych osobowych.",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+scope: "current",
+language: "pl",
+content: "Wyrażam zgodę na przetwarzanie danych osobowych.",
+}),
+);
+
+expect(onConflictDoUpdate).toHaveBeenCalledWith(
+expect.objectContaining({
+target: [
+expect.anything(),
+expect.anything(),
+expect.anything(),
+],
+set: {
+content: "Wyrażam zgodę na przetwarzanie danych osobowych.",
+},
+}),
+);
+
+expect(result).toEqual(clause);
+});
+
+it("updates only isEnabled when content is omitted", async () => {
+setSelectResults([{ ...profile }]);
+
+const disabledClause = {
+...clause,
+isEnabled: false,
+};
+
+const returning = vi.fn(() => Promise.resolve([disabledClause]));
+const onConflictDoUpdate = vi.fn(() => ({ returning }));
+const values = vi.fn(() => ({ onConflictDoUpdate }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.upsertClause({
+userId: "user-1",
+scope: "current",
+language: "pl",
+isEnabled: false,
+});
+
+expect(onConflictDoUpdate).toHaveBeenCalledWith(
+expect.objectContaining({
+set: {
+isEnabled: false,
+},
+}),
+);
+
+expect(result.isEnabled).toBe(false);
+});
+
+it("allows explicitly clearing clause content", async () => {
+setSelectResults([{ ...profile }]);
+
+const clearedClause = {
+...clause,
+content: null,
+};
+
+const returning = vi.fn(() => Promise.resolve([clearedClause]));
+const onConflictDoUpdate = vi.fn(() => ({ returning }));
+const values = vi.fn(() => ({ onConflictDoUpdate }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.upsertClause({
+userId: "user-1",
+scope: "current",
+language: "pl",
+content: null,
+});
+
+expect(onConflictDoUpdate).toHaveBeenCalledWith(
+expect.objectContaining({
+set: {
+content: null,
+},
+}),
+);
+
+expect(result.content).toBeNull();
+});
+
+it("returns NOT_FOUND when deleting a clause that does not exist", async () => {
+setSelectResults([{ ...profile }]);
+
+mockDeleteReturning([]);
+
+await expect(
+cvmateProfileService.deleteClause({
+userId: "user-1",
+scope: "current",
+language: "pl",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+});
+
+it("deletes a clause identified by scope and language", async () => {
+setSelectResults([{ ...profile }]);
+
+const { returning } = mockDeleteReturning([{ id: "clause-1" }]);
+
+await expect(
+cvmateProfileService.deleteClause({
+userId: "user-1",
+scope: "current",
+language: "pl",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});

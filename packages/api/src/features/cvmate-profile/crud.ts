@@ -847,4 +847,47 @@ id: input.id,
 userId: context.user.id,
 }),
 ),
+
+upsertClause: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/clauses/{scope}/{language}",
+tags: ["CVMate Profile"],
+operationId: "upsertCvmateClause",
+summary: "Save clause",
+description:
+"Creates or updates the clause identified by scope and language in the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The clause was saved.",
+})
+.input(cvmateProfileDto.upsertClause.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.upsertClause.output)
+.handler(({ input, context }) =>
+cvmateProfileService.upsertClause({
+...input,
+userId: context.user.id,
+}),
+),
+
+deleteClause: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/clauses/{scope}/{language}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateClause",
+summary: "Delete clause",
+description:
+"Deletes the clause identified by scope and language from the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The clause was deleted.",
+})
+.input(cvmateProfileDto.deleteClause.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteClause.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteClause({
+scope: input.scope,
+language: input.language,
+userId: context.user.id,
+}),
+),
 };

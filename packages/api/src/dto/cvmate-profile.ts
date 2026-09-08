@@ -539,6 +539,17 @@ hasLicenseContent,
 "License must contain at least one non-empty business field.",
 );
 
+const clauseUpsertSchema = z
+.object({
+scope: clauseScopeSchema,
+language: clauseLanguageSchema,
+isEnabled: z.boolean().optional(),
+content: trimmedNullableString.optional(),
+})
+.refine(
+(value) => value.isEnabled !== undefined || value.content !== undefined,
+"Provide at least one clause field to save.",
+);
 export const cvmateProfileDto = {
 getCurrent: {
 input: z.object({}).optional().default({}),
@@ -842,9 +853,23 @@ deleteLicense: {
 input: z.object({ id: z.string() }),
 output: z.void(),
 },
+
+upsertClause: {
+input: clauseUpsertSchema,
+output: clauseSchema,
+},
+
+deleteClause: {
+input: z.object({
+scope: clauseScopeSchema,
+language: clauseLanguageSchema,
+}),
+output: z.void(),
+},
 };
 
 export {
+
 aggregateSchema as cvmateMasterProfileAggregateSchema,
 clauseLanguageSchema as cvmateClauseLanguageSchema,
 clauseScopeSchema as cvmateClauseScopeSchema,

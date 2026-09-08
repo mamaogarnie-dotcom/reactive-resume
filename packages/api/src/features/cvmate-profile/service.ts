@@ -119,6 +119,15 @@ date?: string | null | undefined;
 description?: string | null | undefined;
 sortOrder?: number | undefined;
 };
+type ClauseScope = "current" | "future";
+type ClauseLanguage = "pl" | "en";
+
+type ClauseFields = {
+scope: ClauseScope;
+language: ClauseLanguage;
+isEnabled?: boolean | undefined;
+content?: string | null | undefined;
+};
 type ProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
@@ -1734,6 +1743,70 @@ eq(schema.cvmateLicense.masterProfileId, license.masterProfileId),
 ),
 )
 .returning({ id: schema.cvmateLicense.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+upsertClause: async (input: ClauseFields & { userId: string }) => {
+const profile = await ensureProfile(input.userId);
+
+const insertValues = {
+id: generateId(),
+masterProfileId: profile.id,
+scope: input.scope,
+language: input.language,
+...(input.isEnabled !== undefined
+? { isEnabled: input.isEnabled }
+: {}),
+...(input.content !== undefined
+? { content: input.content }
+: {}),
+};
+
+const updateValues = {
+...(input.isEnabled !== undefined
+? { isEnabled: input.isEnabled }
+: {}),
+...(input.content !== undefined
+? { content: input.content }
+: {}),
+};
+
+const [clause] = await db
+.insert(schema.cvmateClause)
+.values(insertValues)
+.onConflictDoUpdate({
+target: [
+schema.cvmateClause.masterProfileId,
+schema.cvmateClause.scope,
+schema.cvmateClause.language,
+],
+set: updateValues,
+})
+.returning();
+
+if (!clause) throw new Error("CVMATE_CLAUSE_UPSERT_FAILED");
+
+return clause;
+},
+
+deleteClause: async (input: {
+userId: string;
+scope: ClauseScope;
+language: ClauseLanguage;
+}) => {
+const profile = await requireCurrentProfile(input.userId);
+
+const rows = await db
+.delete(schema.cvmateClause)
+.where(
+and(
+eq(schema.cvmateClause.masterProfileId, profile.id),
+eq(schema.cvmateClause.scope, input.scope),
+eq(schema.cvmateClause.language, input.language),
+),
+)
+.returning({ id: schema.cvmateClause.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },
