@@ -26,4 +26,7 @@ deleteCourse: crudRouter.deleteCourse,
 createCertification: crudRouter.createCertification,
 updateCertification: crudRouter.updateCertification,
 deleteCertification: crudRouter.deleteCertification,
+createVolunteer: crudRouter.createVolunteer,
+updateVolunteer: crudRouter.updateVolunteer,
+deleteVolunteer: crudRouter.deleteVolunteer,
 };

@@ -83,6 +83,14 @@ description?: string | null | undefined;
 sortOrder?: number | undefined;
 };
 
+type VolunteerFields = {
+organization?: string | null | undefined;
+role?: string | null | undefined;
+date?: string | null | undefined;
+description?: string | null | undefined;
+sortOrder?: number | undefined;
+};
+
 type ProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
@@ -283,6 +291,24 @@ if (!certification) throw new ORPCError("NOT_FOUND");
 return { profile, certification };
 }
 
+async function requireOwnedVolunteer(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [volunteer] = await db
+.select()
+.from(schema.cvmateVolunteer)
+.where(
+and(
+eq(schema.cvmateVolunteer.id, id),
+eq(schema.cvmateVolunteer.masterProfileId, profile.id),
+),
+);
+
+if (!volunteer) throw new ORPCError("NOT_FOUND");
+
+return { profile, volunteer };
+}
+
 function hasEmploymentContent(value: {
 company: string | null;
 jobTitle: string | null;
@@ -356,6 +382,17 @@ value.credentialNumber,
 value.credentialUrl,
 value.description,
 ].some((field) => typeof field === "string" && field.trim().length > 0);
+}
+
+function hasVolunteerContent(value: {
+organization: string | null;
+role: string | null;
+date: string | null;
+description: string | null;
+}) {
+return [value.organization, value.role, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
 }
 
 export const cvmateProfileService = {
@@ -1188,6 +1225,84 @@ certification.masterProfileId,
 ),
 )
 .returning({ id: schema.cvmateCertification.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createVolunteer: async (input: VolunteerFields & { userId: string }) => {
+const { userId, ...fields } = input;
+const profile = await ensureProfile(userId);
+
+const [volunteer] = await db
+.insert(schema.cvmateVolunteer)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+...fields,
+})
+.returning();
+
+if (!volunteer) throw new Error("CVMATE_VOLUNTEER_CREATE_FAILED");
+
+return volunteer;
+},
+
+updateVolunteer: async (
+input: VolunteerFields & {
+id: string;
+userId: string;
+},
+) => {
+const { volunteer } = await requireOwnedVolunteer(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const merged = {
+organization:
+fields.organization !== undefined
+? fields.organization
+: volunteer.organization,
+role: fields.role !== undefined ? fields.role : volunteer.role,
+date: fields.date !== undefined ? fields.date : volunteer.date,
+description:
+fields.description !== undefined
+? fields.description
+: volunteer.description,
+};
+
+if (!hasVolunteerContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message: "Volunteer record must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateVolunteer)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateVolunteer.id, id),
+eq(schema.cvmateVolunteer.masterProfileId, volunteer.masterProfileId),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteVolunteer: async (input: { id: string; userId: string }) => {
+const { volunteer } = await requireOwnedVolunteer(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateVolunteer)
+.where(
+and(
+eq(schema.cvmateVolunteer.id, input.id),
+eq(schema.cvmateVolunteer.masterProfileId, volunteer.masterProfileId),
+),
+)
+.returning({ id: schema.cvmateVolunteer.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },

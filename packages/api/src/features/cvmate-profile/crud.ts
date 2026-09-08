@@ -532,4 +532,67 @@ id: input.id,
 userId: context.user.id,
 }),
 ),
+
+createVolunteer: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/volunteer",
+tags: ["CVMate Profile"],
+operationId: "createCvmateVolunteer",
+summary: "Create volunteer record",
+description:
+"Creates a volunteer record in the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The volunteer record was created.",
+})
+.input(cvmateProfileDto.createVolunteer.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createVolunteer.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createVolunteer({
+...input,
+userId: context.user.id,
+}),
+),
+
+updateVolunteer: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/volunteer/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateVolunteer",
+summary: "Update volunteer record",
+description:
+"Updates a volunteer record belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The volunteer record was updated.",
+})
+.input(cvmateProfileDto.updateVolunteer.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateVolunteer.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateVolunteer({
+...input,
+userId: context.user.id,
+}),
+),
+
+deleteVolunteer: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/volunteer/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateVolunteer",
+summary: "Delete volunteer record",
+description:
+"Deletes a volunteer record belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The volunteer record was deleted.",
+})
+.input(cvmateProfileDto.deleteVolunteer.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteVolunteer.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteVolunteer({
+id: input.id,
+userId: context.user.id,
+}),
+),
 };

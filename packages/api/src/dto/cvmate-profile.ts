@@ -442,6 +442,26 @@ hasCertificationContent,
 "Certification must contain at least one non-empty business field.",
 );
 
+const volunteerEditableSchema = volunteerSchema
+.pick({
+organization: true,
+role: true,
+date: true,
+description: true,
+sortOrder: true,
+})
+.partial();
+
+const hasVolunteerContent = (value: z.infer<typeof volunteerEditableSchema>) =>
+[value.organization, value.role, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+
+const volunteerCreateSchema = volunteerEditableSchema.refine(
+hasVolunteerContent,
+"Volunteer record must contain at least one non-empty business field.",
+);
+
 export const cvmateProfileDto = {
 getCurrent: {
 input: z.object({}).optional().default({}),
@@ -627,6 +647,29 @@ output: certificationSchema,
 },
 
 deleteCertification: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+
+createVolunteer: {
+input: volunteerCreateSchema,
+output: volunteerSchema,
+},
+
+updateVolunteer: {
+input: volunteerEditableSchema
+.extend({ id: z.string() })
+.refine(
+(value) =>
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
+"Provide at least one field to update.",
+),
+output: volunteerSchema,
+},
+
+deleteVolunteer: {
 input: z.object({ id: z.string() }),
 output: z.void(),
 },

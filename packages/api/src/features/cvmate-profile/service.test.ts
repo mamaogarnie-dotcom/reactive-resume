@@ -95,6 +95,18 @@ createdAt: new Date("2026-09-08T10:00:00.000Z"),
 updatedAt: new Date("2026-09-08T10:00:00.000Z"),
 };
 
+const volunteer = {
+id: "volunteer-1",
+masterProfileId: "profile-1",
+organization: "Green Foundation",
+role: null,
+date: null,
+description: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
 const createSelectChain = (rows: unknown[]) => ({
 from: () => ({
 where: () => Promise.resolve(rows),
@@ -709,6 +721,106 @@ const { returning } = mockDeleteReturning([{ id: "certification-1" }]);
 await expect(
 cvmateProfileService.deleteCertification({
 id: "certification-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});
+
+describe("cvmateProfileService volunteer", () => {
+it("creates a volunteer record inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdVolunteer = {
+...volunteer,
+role: "Coordinator",
+};
+
+const returning = vi.fn(() => Promise.resolve([createdVolunteer]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createVolunteer({
+userId: "user-1",
+organization: "Green Foundation",
+role: "Coordinator",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+organization: "Green Foundation",
+role: "Coordinator",
+}),
+);
+expect(result).toEqual(createdVolunteer);
+});
+
+it("rejects an update that would leave an entirely empty volunteer record", async () => {
+setSelectResults([{ ...profile }], [{ ...volunteer }]);
+
+await expect(
+cvmateProfileService.updateVolunteer({
+id: "volunteer-1",
+userId: "user-1",
+organization: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("returns NOT_FOUND when the volunteer record is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateVolunteer({
+id: "volunteer-other-user",
+userId: "user-1",
+role: "Coordinator",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned volunteer record when at least one business field remains", async () => {
+setSelectResults([{ ...profile }], [{ ...volunteer }]);
+
+const updatedVolunteer = {
+...volunteer,
+role: "Coordinator",
+};
+
+const { set } = mockUpdateReturning([updatedVolunteer]);
+
+const result = await cvmateProfileService.updateVolunteer({
+id: "volunteer-1",
+userId: "user-1",
+role: "Coordinator",
+});
+
+expect(set).toHaveBeenCalledWith({
+role: "Coordinator",
+});
+expect(result.role).toBe("Coordinator");
+});
+
+it("deletes only a volunteer record owned by the current user's profile", async () => {
+setSelectResults([{ ...profile }], [{ ...volunteer }]);
+
+const { returning } = mockDeleteReturning([{ id: "volunteer-1" }]);
+
+await expect(
+cvmateProfileService.deleteVolunteer({
+id: "volunteer-1",
 userId: "user-1",
 }),
 ).resolves.toBeUndefined();
