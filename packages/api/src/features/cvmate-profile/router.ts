@@ -29,4 +29,7 @@ deleteCertification: crudRouter.deleteCertification,
 createVolunteer: crudRouter.createVolunteer,
 updateVolunteer: crudRouter.updateVolunteer,
 deleteVolunteer: crudRouter.deleteVolunteer,
+createLanguage: crudRouter.createLanguage,
+updateLanguage: crudRouter.updateLanguage,
+deleteLanguage: crudRouter.deleteLanguage,
 };

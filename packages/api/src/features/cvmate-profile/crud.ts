@@ -595,4 +595,67 @@ id: input.id,
 userId: context.user.id,
 }),
 ),
+
+createLanguage: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/languages",
+tags: ["CVMate Profile"],
+operationId: "createCvmateLanguage",
+summary: "Create language",
+description:
+"Creates a language record in the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The language record was created.",
+})
+.input(cvmateProfileDto.createLanguage.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createLanguage.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createLanguage({
+...input,
+userId: context.user.id,
+}),
+),
+
+updateLanguage: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/languages/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateLanguage",
+summary: "Update language",
+description:
+"Updates a language record belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The language record was updated.",
+})
+.input(cvmateProfileDto.updateLanguage.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateLanguage.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateLanguage({
+...input,
+userId: context.user.id,
+}),
+),
+
+deleteLanguage: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/languages/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateLanguage",
+summary: "Delete language",
+description:
+"Deletes a language record belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The language record was deleted.",
+})
+.input(cvmateProfileDto.deleteLanguage.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteLanguage.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteLanguage({
+id: input.id,
+userId: context.user.id,
+}),
+),
 };

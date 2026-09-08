@@ -462,6 +462,24 @@ hasVolunteerContent,
 "Volunteer record must contain at least one non-empty business field.",
 );
 
+const languageEditableSchema = languageSchema
+.pick({
+language: true,
+level: true,
+sortOrder: true,
+})
+.partial();
+
+const hasLanguageContent = (value: z.infer<typeof languageEditableSchema>) =>
+[value.language, value.level].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+
+const languageCreateSchema = languageEditableSchema.refine(
+hasLanguageContent,
+"Language record must contain at least one non-empty business field.",
+);
+
 export const cvmateProfileDto = {
 getCurrent: {
 input: z.object({}).optional().default({}),
@@ -670,6 +688,29 @@ output: volunteerSchema,
 },
 
 deleteVolunteer: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+
+createLanguage: {
+input: languageCreateSchema,
+output: languageSchema,
+},
+
+updateLanguage: {
+input: languageEditableSchema
+.extend({ id: z.string() })
+.refine(
+(value) =>
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
+"Provide at least one field to update.",
+),
+output: languageSchema,
+},
+
+deleteLanguage: {
 input: z.object({ id: z.string() }),
 output: z.void(),
 },

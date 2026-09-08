@@ -107,6 +107,16 @@ createdAt: new Date("2026-09-08T10:00:00.000Z"),
 updatedAt: new Date("2026-09-08T10:00:00.000Z"),
 };
 
+const language = {
+id: "language-1",
+masterProfileId: "profile-1",
+language: "English",
+level: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
 const createSelectChain = (rows: unknown[]) => ({
 from: () => ({
 where: () => Promise.resolve(rows),
@@ -821,6 +831,106 @@ const { returning } = mockDeleteReturning([{ id: "volunteer-1" }]);
 await expect(
 cvmateProfileService.deleteVolunteer({
 id: "volunteer-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});
+
+describe("cvmateProfileService languages", () => {
+it("creates a language record inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdLanguage = {
+...language,
+level: "C1",
+};
+
+const returning = vi.fn(() => Promise.resolve([createdLanguage]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createLanguage({
+userId: "user-1",
+language: "English",
+level: "C1",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+language: "English",
+level: "C1",
+}),
+);
+expect(result).toEqual(createdLanguage);
+});
+
+it("rejects an update that would leave an entirely empty language record", async () => {
+setSelectResults([{ ...profile }], [{ ...language }]);
+
+await expect(
+cvmateProfileService.updateLanguage({
+id: "language-1",
+userId: "user-1",
+language: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("returns NOT_FOUND when the language record is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateLanguage({
+id: "language-other-user",
+userId: "user-1",
+level: "B2",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned language record when at least one business field remains", async () => {
+setSelectResults([{ ...profile }], [{ ...language }]);
+
+const updatedLanguage = {
+...language,
+level: "C1",
+};
+
+const { set } = mockUpdateReturning([updatedLanguage]);
+
+const result = await cvmateProfileService.updateLanguage({
+id: "language-1",
+userId: "user-1",
+level: "C1",
+});
+
+expect(set).toHaveBeenCalledWith({
+level: "C1",
+});
+expect(result.level).toBe("C1");
+});
+
+it("deletes only a language record owned by the current user's profile", async () => {
+setSelectResults([{ ...profile }], [{ ...language }]);
+
+const { returning } = mockDeleteReturning([{ id: "language-1" }]);
+
+await expect(
+cvmateProfileService.deleteLanguage({
+id: "language-1",
 userId: "user-1",
 }),
 ).resolves.toBeUndefined();

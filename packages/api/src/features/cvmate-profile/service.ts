@@ -91,6 +91,12 @@ description?: string | null | undefined;
 sortOrder?: number | undefined;
 };
 
+type LanguageFields = {
+language?: string | null | undefined;
+level?: string | null | undefined;
+sortOrder?: number | undefined;
+};
+
 type ProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
@@ -309,6 +315,24 @@ if (!volunteer) throw new ORPCError("NOT_FOUND");
 return { profile, volunteer };
 }
 
+async function requireOwnedLanguage(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [language] = await db
+.select()
+.from(schema.cvmateLanguage)
+.where(
+and(
+eq(schema.cvmateLanguage.id, id),
+eq(schema.cvmateLanguage.masterProfileId, profile.id),
+),
+);
+
+if (!language) throw new ORPCError("NOT_FOUND");
+
+return { profile, language };
+}
+
 function hasEmploymentContent(value: {
 company: string | null;
 jobTitle: string | null;
@@ -391,6 +415,15 @@ date: string | null;
 description: string | null;
 }) {
 return [value.organization, value.role, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+}
+
+function hasLanguageContent(value: {
+language: string | null;
+level: string | null;
+}) {
+return [value.language, value.level].some(
 (field) => typeof field === "string" && field.trim().length > 0,
 );
 }
@@ -1303,6 +1336,77 @@ eq(schema.cvmateVolunteer.masterProfileId, volunteer.masterProfileId),
 ),
 )
 .returning({ id: schema.cvmateVolunteer.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createLanguage: async (input: LanguageFields & { userId: string }) => {
+const { userId, ...fields } = input;
+const profile = await ensureProfile(userId);
+
+const [language] = await db
+.insert(schema.cvmateLanguage)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+...fields,
+})
+.returning();
+
+if (!language) throw new Error("CVMATE_LANGUAGE_CREATE_FAILED");
+
+return language;
+},
+
+updateLanguage: async (
+input: LanguageFields & {
+id: string;
+userId: string;
+},
+) => {
+const { language } = await requireOwnedLanguage(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const merged = {
+language:
+fields.language !== undefined ? fields.language : language.language,
+level: fields.level !== undefined ? fields.level : language.level,
+};
+
+if (!hasLanguageContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message: "Language record must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateLanguage)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateLanguage.id, id),
+eq(schema.cvmateLanguage.masterProfileId, language.masterProfileId),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteLanguage: async (input: { id: string; userId: string }) => {
+const { language } = await requireOwnedLanguage(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateLanguage)
+.where(
+and(
+eq(schema.cvmateLanguage.id, input.id),
+eq(schema.cvmateLanguage.masterProfileId, language.masterProfileId),
+),
+)
+.returning({ id: schema.cvmateLanguage.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },
