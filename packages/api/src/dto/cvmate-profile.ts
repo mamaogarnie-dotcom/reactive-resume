@@ -480,6 +480,65 @@ hasLanguageContent,
 "Language record must contain at least one non-empty business field.",
 );
 
+const awardEditableSchema = awardSchema
+.pick({
+name: true,
+organizer: true,
+date: true,
+description: true,
+sortOrder: true,
+})
+.partial();
+
+const hasAwardContent = (value: z.infer<typeof awardEditableSchema>) =>
+[value.name, value.organizer, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+
+const awardCreateSchema = awardEditableSchema.refine(
+hasAwardContent,
+"Award must contain at least one non-empty business field.",
+);
+
+const referenceEditableSchema = referenceSchema
+.pick({
+name: true,
+issuer: true,
+date: true,
+description: true,
+sortOrder: true,
+})
+.partial();
+
+const hasReferenceContent = (value: z.infer<typeof referenceEditableSchema>) =>
+[value.name, value.issuer, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+
+const referenceCreateSchema = referenceEditableSchema.refine(
+hasReferenceContent,
+"Reference must contain at least one non-empty business field.",
+);
+
+const licenseEditableSchema = licenseSchema
+.pick({
+name: true,
+date: true,
+description: true,
+sortOrder: true,
+})
+.partial();
+
+const hasLicenseContent = (value: z.infer<typeof licenseEditableSchema>) =>
+[value.name, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+
+const licenseCreateSchema = licenseEditableSchema.refine(
+hasLicenseContent,
+"License must contain at least one non-empty business field.",
+);
+
 export const cvmateProfileDto = {
 getCurrent: {
 input: z.object({}).optional().default({}),
@@ -711,6 +770,75 @@ output: languageSchema,
 },
 
 deleteLanguage: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+
+createAward: {
+input: awardCreateSchema,
+output: awardSchema,
+},
+
+updateAward: {
+input: awardEditableSchema
+.extend({ id: z.string() })
+.refine(
+(value) =>
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
+"Provide at least one field to update.",
+),
+output: awardSchema,
+},
+
+deleteAward: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+
+createReference: {
+input: referenceCreateSchema,
+output: referenceSchema,
+},
+
+updateReference: {
+input: referenceEditableSchema
+.extend({ id: z.string() })
+.refine(
+(value) =>
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
+"Provide at least one field to update.",
+),
+output: referenceSchema,
+},
+
+deleteReference: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+
+createLicense: {
+input: licenseCreateSchema,
+output: licenseSchema,
+},
+
+updateLicense: {
+input: licenseEditableSchema
+.extend({ id: z.string() })
+.refine(
+(value) =>
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
+"Provide at least one field to update.",
+),
+output: licenseSchema,
+},
+
+deleteLicense: {
 input: z.object({ id: z.string() }),
 output: z.void(),
 },

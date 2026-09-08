@@ -97,6 +97,28 @@ level?: string | null | undefined;
 sortOrder?: number | undefined;
 };
 
+type AwardFields = {
+name?: string | null | undefined;
+organizer?: string | null | undefined;
+date?: string | null | undefined;
+description?: string | null | undefined;
+sortOrder?: number | undefined;
+};
+
+type ReferenceFields = {
+name?: string | null | undefined;
+issuer?: string | null | undefined;
+date?: string | null | undefined;
+description?: string | null | undefined;
+sortOrder?: number | undefined;
+};
+
+type LicenseFields = {
+name?: string | null | undefined;
+date?: string | null | undefined;
+description?: string | null | undefined;
+sortOrder?: number | undefined;
+};
 type ProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
@@ -333,6 +355,59 @@ if (!language) throw new ORPCError("NOT_FOUND");
 return { profile, language };
 }
 
+async function requireOwnedAward(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [award] = await db
+.select()
+.from(schema.cvmateAward)
+.where(
+and(
+eq(schema.cvmateAward.id, id),
+eq(schema.cvmateAward.masterProfileId, profile.id),
+),
+);
+
+if (!award) throw new ORPCError("NOT_FOUND");
+
+return { profile, award };
+}
+
+async function requireOwnedReference(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [reference] = await db
+.select()
+.from(schema.cvmateReference)
+.where(
+and(
+eq(schema.cvmateReference.id, id),
+eq(schema.cvmateReference.masterProfileId, profile.id),
+),
+);
+
+if (!reference) throw new ORPCError("NOT_FOUND");
+
+return { profile, reference };
+}
+
+async function requireOwnedLicense(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [license] = await db
+.select()
+.from(schema.cvmateLicense)
+.where(
+and(
+eq(schema.cvmateLicense.id, id),
+eq(schema.cvmateLicense.masterProfileId, profile.id),
+),
+);
+
+if (!license) throw new ORPCError("NOT_FOUND");
+
+return { profile, license };
+}
 function hasEmploymentContent(value: {
 company: string | null;
 jobTitle: string | null;
@@ -428,6 +503,37 @@ return [value.language, value.level].some(
 );
 }
 
+function hasAwardContent(value: {
+name: string | null;
+organizer: string | null;
+date: string | null;
+description: string | null;
+}) {
+return [value.name, value.organizer, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+}
+
+function hasReferenceContent(value: {
+name: string | null;
+issuer: string | null;
+date: string | null;
+description: string | null;
+}) {
+return [value.name, value.issuer, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+}
+
+function hasLicenseContent(value: {
+name: string | null;
+date: string | null;
+description: string | null;
+}) {
+return [value.name, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+}
 export const cvmateProfileService = {
 getCurrent: async (input: { userId: string }) => {
 const profile = await findCurrentProfile(input.userId);
@@ -1407,6 +1513,227 @@ eq(schema.cvmateLanguage.masterProfileId, language.masterProfileId),
 ),
 )
 .returning({ id: schema.cvmateLanguage.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createAward: async (input: AwardFields & { userId: string }) => {
+const { userId, ...fields } = input;
+const profile = await ensureProfile(userId);
+
+const [award] = await db
+.insert(schema.cvmateAward)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+...fields,
+})
+.returning();
+
+if (!award) throw new Error("CVMATE_AWARD_CREATE_FAILED");
+
+return award;
+},
+
+updateAward: async (
+input: AwardFields & {
+id: string;
+userId: string;
+},
+) => {
+const { award } = await requireOwnedAward(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const merged = {
+name: fields.name !== undefined ? fields.name : award.name,
+organizer:
+fields.organizer !== undefined ? fields.organizer : award.organizer,
+date: fields.date !== undefined ? fields.date : award.date,
+description:
+fields.description !== undefined ? fields.description : award.description,
+};
+
+if (!hasAwardContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message: "Award must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateAward)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateAward.id, id),
+eq(schema.cvmateAward.masterProfileId, award.masterProfileId),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteAward: async (input: { id: string; userId: string }) => {
+const { award } = await requireOwnedAward(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateAward)
+.where(
+and(
+eq(schema.cvmateAward.id, input.id),
+eq(schema.cvmateAward.masterProfileId, award.masterProfileId),
+),
+)
+.returning({ id: schema.cvmateAward.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createReference: async (input: ReferenceFields & { userId: string }) => {
+const { userId, ...fields } = input;
+const profile = await ensureProfile(userId);
+
+const [reference] = await db
+.insert(schema.cvmateReference)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+...fields,
+})
+.returning();
+
+if (!reference) throw new Error("CVMATE_REFERENCE_CREATE_FAILED");
+
+return reference;
+},
+
+updateReference: async (
+input: ReferenceFields & {
+id: string;
+userId: string;
+},
+) => {
+const { reference } = await requireOwnedReference(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const merged = {
+name: fields.name !== undefined ? fields.name : reference.name,
+issuer: fields.issuer !== undefined ? fields.issuer : reference.issuer,
+date: fields.date !== undefined ? fields.date : reference.date,
+description:
+fields.description !== undefined
+? fields.description
+: reference.description,
+};
+
+if (!hasReferenceContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message: "Reference must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateReference)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateReference.id, id),
+eq(schema.cvmateReference.masterProfileId, reference.masterProfileId),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteReference: async (input: { id: string; userId: string }) => {
+const { reference } = await requireOwnedReference(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateReference)
+.where(
+and(
+eq(schema.cvmateReference.id, input.id),
+eq(schema.cvmateReference.masterProfileId, reference.masterProfileId),
+),
+)
+.returning({ id: schema.cvmateReference.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createLicense: async (input: LicenseFields & { userId: string }) => {
+const { userId, ...fields } = input;
+const profile = await ensureProfile(userId);
+
+const [license] = await db
+.insert(schema.cvmateLicense)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+...fields,
+})
+.returning();
+
+if (!license) throw new Error("CVMATE_LICENSE_CREATE_FAILED");
+
+return license;
+},
+
+updateLicense: async (
+input: LicenseFields & {
+id: string;
+userId: string;
+},
+) => {
+const { license } = await requireOwnedLicense(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const merged = {
+name: fields.name !== undefined ? fields.name : license.name,
+date: fields.date !== undefined ? fields.date : license.date,
+description:
+fields.description !== undefined ? fields.description : license.description,
+};
+
+if (!hasLicenseContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message: "License must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateLicense)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateLicense.id, id),
+eq(schema.cvmateLicense.masterProfileId, license.masterProfileId),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteLicense: async (input: { id: string; userId: string }) => {
+const { license } = await requireOwnedLicense(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateLicense)
+.where(
+and(
+eq(schema.cvmateLicense.id, input.id),
+eq(schema.cvmateLicense.masterProfileId, license.masterProfileId),
+),
+)
+.returning({ id: schema.cvmateLicense.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },

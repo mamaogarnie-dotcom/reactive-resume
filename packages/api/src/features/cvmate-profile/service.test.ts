@@ -938,3 +938,337 @@ userId: "user-1",
 expect(returning).toHaveBeenCalledTimes(1);
 });
 });
+describe("cvmateProfileService awards", () => {
+const award = {
+id: "award-1",
+masterProfileId: "profile-1",
+name: "Best Project",
+organizer: null,
+date: null,
+description: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
+it("creates an award inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdAward = {
+...award,
+organizer: "Industry Association",
+};
+
+const returning = vi.fn(() => Promise.resolve([createdAward]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createAward({
+userId: "user-1",
+name: "Best Project",
+organizer: "Industry Association",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+name: "Best Project",
+organizer: "Industry Association",
+}),
+);
+expect(result).toEqual(createdAward);
+});
+
+it("rejects an update that would leave an entirely empty award", async () => {
+setSelectResults([{ ...profile }], [{ ...award }]);
+
+await expect(
+cvmateProfileService.updateAward({
+id: "award-1",
+userId: "user-1",
+name: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("returns NOT_FOUND when the award is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateAward({
+id: "award-other-user",
+userId: "user-1",
+description: "Changed",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned award when at least one business field remains", async () => {
+setSelectResults([{ ...profile }], [{ ...award }]);
+
+const updatedAward = {
+...award,
+description: "Awarded for innovation",
+};
+
+const { set } = mockUpdateReturning([updatedAward]);
+
+const result = await cvmateProfileService.updateAward({
+id: "award-1",
+userId: "user-1",
+description: "Awarded for innovation",
+});
+
+expect(set).toHaveBeenCalledWith({
+description: "Awarded for innovation",
+});
+expect(result.description).toBe("Awarded for innovation");
+});
+
+it("deletes only an award owned by the current user's profile", async () => {
+setSelectResults([{ ...profile }], [{ ...award }]);
+
+const { returning } = mockDeleteReturning([{ id: "award-1" }]);
+
+await expect(
+cvmateProfileService.deleteAward({
+id: "award-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});
+
+describe("cvmateProfileService references", () => {
+const reference = {
+id: "reference-1",
+masterProfileId: "profile-1",
+name: "Professional Reference",
+issuer: null,
+date: null,
+description: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
+it("creates a reference inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdReference = {
+...reference,
+issuer: "Former Employer",
+};
+
+const returning = vi.fn(() => Promise.resolve([createdReference]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createReference({
+userId: "user-1",
+name: "Professional Reference",
+issuer: "Former Employer",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+name: "Professional Reference",
+issuer: "Former Employer",
+}),
+);
+expect(result).toEqual(createdReference);
+});
+
+it("rejects an update that would leave an entirely empty reference", async () => {
+setSelectResults([{ ...profile }], [{ ...reference }]);
+
+await expect(
+cvmateProfileService.updateReference({
+id: "reference-1",
+userId: "user-1",
+name: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("returns NOT_FOUND when the reference is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateReference({
+id: "reference-other-user",
+userId: "user-1",
+description: "Changed",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned reference when at least one business field remains", async () => {
+setSelectResults([{ ...profile }], [{ ...reference }]);
+
+const updatedReference = {
+...reference,
+description: "Strong professional recommendation",
+};
+
+const { set } = mockUpdateReturning([updatedReference]);
+
+const result = await cvmateProfileService.updateReference({
+id: "reference-1",
+userId: "user-1",
+description: "Strong professional recommendation",
+});
+
+expect(set).toHaveBeenCalledWith({
+description: "Strong professional recommendation",
+});
+expect(result.description).toBe("Strong professional recommendation");
+});
+
+it("deletes only a reference owned by the current user's profile", async () => {
+setSelectResults([{ ...profile }], [{ ...reference }]);
+
+const { returning } = mockDeleteReturning([{ id: "reference-1" }]);
+
+await expect(
+cvmateProfileService.deleteReference({
+id: "reference-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});
+
+describe("cvmateProfileService licenses", () => {
+const license = {
+id: "license-1",
+masterProfileId: "profile-1",
+name: "Driving Licence B",
+date: null,
+description: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
+it("creates a license inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdLicense = {
+...license,
+description: "Category B",
+};
+
+const returning = vi.fn(() => Promise.resolve([createdLicense]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createLicense({
+userId: "user-1",
+name: "Driving Licence B",
+description: "Category B",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+name: "Driving Licence B",
+description: "Category B",
+}),
+);
+expect(result).toEqual(createdLicense);
+});
+
+it("rejects an update that would leave an entirely empty license", async () => {
+setSelectResults([{ ...profile }], [{ ...license }]);
+
+await expect(
+cvmateProfileService.updateLicense({
+id: "license-1",
+userId: "user-1",
+name: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("returns NOT_FOUND when the license is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateLicense({
+id: "license-other-user",
+userId: "user-1",
+description: "Changed",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned license when at least one business field remains", async () => {
+setSelectResults([{ ...profile }], [{ ...license }]);
+
+const updatedLicense = {
+...license,
+description: "Valid category B licence",
+};
+
+const { set } = mockUpdateReturning([updatedLicense]);
+
+const result = await cvmateProfileService.updateLicense({
+id: "license-1",
+userId: "user-1",
+description: "Valid category B licence",
+});
+
+expect(set).toHaveBeenCalledWith({
+description: "Valid category B licence",
+});
+expect(result.description).toBe("Valid category B licence");
+});
+
+it("deletes only a license owned by the current user's profile", async () => {
+setSelectResults([{ ...profile }], [{ ...license }]);
+
+const { returning } = mockDeleteReturning([{ id: "license-1" }]);
+
+await expect(
+cvmateProfileService.deleteLicense({
+id: "license-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});

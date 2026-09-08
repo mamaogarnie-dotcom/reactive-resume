@@ -658,4 +658,193 @@ id: input.id,
 userId: context.user.id,
 }),
 ),
+
+createAward: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/awards",
+tags: ["CVMate Profile"],
+operationId: "createCvmateAward",
+summary: "Create award",
+description:
+"Creates an award in the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The award was created.",
+})
+.input(cvmateProfileDto.createAward.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createAward.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createAward({
+...input,
+userId: context.user.id,
+}),
+),
+
+updateAward: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/awards/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateAward",
+summary: "Update award",
+description:
+"Updates an award belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The award was updated.",
+})
+.input(cvmateProfileDto.updateAward.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateAward.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateAward({
+...input,
+userId: context.user.id,
+}),
+),
+
+deleteAward: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/awards/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateAward",
+summary: "Delete award",
+description:
+"Deletes an award belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The award was deleted.",
+})
+.input(cvmateProfileDto.deleteAward.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteAward.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteAward({
+id: input.id,
+userId: context.user.id,
+}),
+),
+
+createReference: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/references",
+tags: ["CVMate Profile"],
+operationId: "createCvmateReference",
+summary: "Create reference",
+description:
+"Creates a reference in the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The reference was created.",
+})
+.input(cvmateProfileDto.createReference.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createReference.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createReference({
+...input,
+userId: context.user.id,
+}),
+),
+
+updateReference: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/references/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateReference",
+summary: "Update reference",
+description:
+"Updates a reference belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The reference was updated.",
+})
+.input(cvmateProfileDto.updateReference.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateReference.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateReference({
+...input,
+userId: context.user.id,
+}),
+),
+
+deleteReference: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/references/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateReference",
+summary: "Delete reference",
+description:
+"Deletes a reference belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The reference was deleted.",
+})
+.input(cvmateProfileDto.deleteReference.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteReference.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteReference({
+id: input.id,
+userId: context.user.id,
+}),
+),
+
+createLicense: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/licenses",
+tags: ["CVMate Profile"],
+operationId: "createCvmateLicense",
+summary: "Create license",
+description:
+"Creates a license in the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The license was created.",
+})
+.input(cvmateProfileDto.createLicense.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createLicense.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createLicense({
+...input,
+userId: context.user.id,
+}),
+),
+
+updateLicense: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/licenses/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateLicense",
+summary: "Update license",
+description:
+"Updates a license belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The license was updated.",
+})
+.input(cvmateProfileDto.updateLicense.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateLicense.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateLicense({
+...input,
+userId: context.user.id,
+}),
+),
+
+deleteLicense: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/licenses/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateLicense",
+summary: "Delete license",
+description:
+"Deletes a license belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The license was deleted.",
+})
+.input(cvmateProfileDto.deleteLicense.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteLicense.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteLicense({
+id: input.id,
+userId: context.user.id,
+}),
+),
 };
