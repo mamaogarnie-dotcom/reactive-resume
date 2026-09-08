@@ -890,4 +890,130 @@ language: input.language,
 userId: context.user.id,
 }),
 ),
+
+createCustomSection: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/custom-sections",
+tags: ["CVMate Profile"],
+operationId: "createCvmateCustomSection",
+summary: "Create custom section",
+description:
+"Creates a custom section in the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The custom section was created.",
+})
+.input(cvmateProfileDto.createCustomSection.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createCustomSection.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createCustomSection({
+...input,
+userId: context.user.id,
+}),
+),
+
+updateCustomSection: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/custom-sections/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateCustomSection",
+summary: "Update custom section",
+description:
+"Updates a custom section belonging to the authenticated user's CVMate Master Profile. Standard sections cannot be modified through this endpoint. Requires authentication.",
+successDescription: "The custom section was updated.",
+})
+.input(cvmateProfileDto.updateCustomSection.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateCustomSection.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateCustomSection({
+...input,
+userId: context.user.id,
+}),
+),
+
+deleteCustomSection: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/custom-sections/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateCustomSection",
+summary: "Delete custom section",
+description:
+"Deletes a custom section belonging to the authenticated user's CVMate Master Profile. Standard sections cannot be deleted through this endpoint. Requires authentication.",
+successDescription: "The custom section was deleted.",
+})
+.input(cvmateProfileDto.deleteCustomSection.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteCustomSection.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteCustomSection({
+id: input.id,
+userId: context.user.id,
+}),
+),
+
+createCustomSectionItem: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/custom-sections/{profileSectionId}/items",
+tags: ["CVMate Profile"],
+operationId: "createCvmateCustomSectionItem",
+summary: "Create custom section item",
+description:
+"Creates an item inside a custom section belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The custom section item was created.",
+})
+.input(cvmateProfileDto.createCustomSectionItem.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createCustomSectionItem.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createCustomSectionItem({
+...input,
+userId: context.user.id,
+}),
+),
+
+updateCustomSectionItem: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/custom-section-items/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateCustomSectionItem",
+summary: "Update custom section item",
+description:
+"Updates an item belonging to a custom section in the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The custom section item was updated.",
+})
+.input(cvmateProfileDto.updateCustomSectionItem.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateCustomSectionItem.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateCustomSectionItem({
+...input,
+userId: context.user.id,
+}),
+),
+
+deleteCustomSectionItem: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/custom-section-items/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateCustomSectionItem",
+summary: "Delete custom section item",
+description:
+"Deletes an item belonging to a custom section in the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The custom section item was deleted.",
+})
+.input(cvmateProfileDto.deleteCustomSectionItem.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteCustomSectionItem.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteCustomSectionItem({
+id: input.id,
+userId: context.user.id,
+}),
+),
 };

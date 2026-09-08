@@ -550,6 +550,62 @@ content: trimmedNullableString.optional(),
 (value) => value.isEnabled !== undefined || value.content !== undefined,
 "Provide at least one clause field to save.",
 );
+const customSectionCreateSchema = z.object({
+title: nonBlankString,
+isVisible: z.boolean().optional(),
+sortOrder: z.number().int().optional(),
+});
+
+const customSectionUpdateSchema = z
+.object({
+id: z.string(),
+title: nonBlankString.optional(),
+isVisible: z.boolean().optional(),
+sortOrder: z.number().int().optional(),
+})
+.refine(
+(value) =>
+value.title !== undefined ||
+value.isVisible !== undefined ||
+value.sortOrder !== undefined,
+"Provide at least one field to update.",
+);
+
+const customSectionItemEditableSchema = z.object({
+title: trimmedNullableString.optional(),
+subtitle: trimmedNullableString.optional(),
+date: nullablePartialDateSchema.optional(),
+description: trimmedNullableString.optional(),
+url: httpUrlSchema.nullable().optional(),
+fields: z.record(z.string(), z.unknown()).nullable().optional(),
+sortOrder: z.number().int().optional(),
+});
+
+const hasCustomSectionItemContent = (value: {
+title?: string | null | undefined;
+subtitle?: string | null | undefined;
+date?: string | null | undefined;
+description?: string | null | undefined;
+url?: string | null | undefined;
+fields?: Record<string, unknown> | null | undefined;
+}) =>
+Boolean(
+value.title?.trim() ||
+value.subtitle?.trim() ||
+value.date?.trim() ||
+value.description?.trim() ||
+value.url?.trim() ||
+(value.fields && Object.keys(value.fields).length > 0),
+);
+
+const customSectionItemCreateSchema = customSectionItemEditableSchema
+.extend({
+profileSectionId: z.string(),
+})
+.refine(
+hasCustomSectionItemContent,
+"Custom section item must contain at least one non-empty business field.",
+);
 export const cvmateProfileDto = {
 getCurrent: {
 input: z.object({}).optional().default({}),
@@ -864,6 +920,43 @@ input: z.object({
 scope: clauseScopeSchema,
 language: clauseLanguageSchema,
 }),
+output: z.void(),
+},
+createCustomSection: {
+input: customSectionCreateSchema,
+output: profileSectionSchema,
+},
+
+updateCustomSection: {
+input: customSectionUpdateSchema,
+output: profileSectionSchema,
+},
+
+deleteCustomSection: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+
+createCustomSectionItem: {
+input: customSectionItemCreateSchema,
+output: customSectionItemSchema,
+},
+
+updateCustomSectionItem: {
+input: customSectionItemEditableSchema
+.extend({ id: z.string() })
+.refine(
+(value) =>
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
+"Provide at least one field to update.",
+),
+output: customSectionItemSchema,
+},
+
+deleteCustomSectionItem: {
+input: z.object({ id: z.string() }),
 output: z.void(),
 },
 };

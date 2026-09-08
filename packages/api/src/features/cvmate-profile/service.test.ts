@@ -1421,3 +1421,244 @@ language: "pl",
 expect(returning).toHaveBeenCalledTimes(1);
 });
 });
+describe("cvmateProfileService custom sections", () => {
+const customSection = {
+id: "custom-section-1",
+masterProfileId: "profile-1",
+kind: "custom" as const,
+title: "Additional Experience",
+isVisible: true,
+sortOrder: 20,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
+it("creates a section with kind forced to custom", async () => {
+setSelectResults([{ ...profile }]);
+
+const returning = vi.fn(() => Promise.resolve([{ ...customSection }]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createCustomSection({
+userId: "user-1",
+title: "Additional Experience",
+sortOrder: 20,
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+kind: "custom",
+title: "Additional Experience",
+sortOrder: 20,
+}),
+);
+
+expect(result).toEqual(customSection);
+});
+
+it("does not allow a standard section to be updated through the custom section API", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateCustomSection({
+id: "experience-section",
+userId: "user-1",
+title: "Changed",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned custom section", async () => {
+setSelectResults([{ ...profile }], [{ ...customSection }]);
+
+const updatedSection = {
+...customSection,
+title: "Selected Projects",
+isVisible: false,
+};
+
+const { set } = mockUpdateReturning([updatedSection]);
+
+const result = await cvmateProfileService.updateCustomSection({
+id: "custom-section-1",
+userId: "user-1",
+title: "Selected Projects",
+isVisible: false,
+});
+
+expect(set).toHaveBeenCalledWith({
+title: "Selected Projects",
+isVisible: false,
+});
+expect(result).toEqual(updatedSection);
+});
+
+it("returns NOT_FOUND for a custom section outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.deleteCustomSection({
+id: "custom-section-other-user",
+userId: "user-1",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.delete).not.toHaveBeenCalled();
+});
+
+it("deletes an owned custom section", async () => {
+setSelectResults([{ ...profile }], [{ ...customSection }]);
+
+const { returning } = mockDeleteReturning([
+{ id: "custom-section-1" },
+]);
+
+await expect(
+cvmateProfileService.deleteCustomSection({
+id: "custom-section-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});
+
+describe("cvmateProfileService custom section items", () => {
+const customSection = {
+id: "custom-section-1",
+masterProfileId: "profile-1",
+kind: "custom" as const,
+title: "Additional Experience",
+isVisible: true,
+sortOrder: 20,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
+const customItem = {
+id: "custom-item-1",
+profileSectionId: "custom-section-1",
+title: "Conference Speaker",
+subtitle: null,
+date: "2026",
+description: null,
+url: null,
+fields: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
+it("creates an item only inside an owned custom section", async () => {
+setSelectResults([{ ...profile }], [{ ...customSection }]);
+
+const returning = vi.fn(() => Promise.resolve([{ ...customItem }]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createCustomSectionItem({
+userId: "user-1",
+profileSectionId: "custom-section-1",
+title: "Conference Speaker",
+date: "2026",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+profileSectionId: "custom-section-1",
+title: "Conference Speaker",
+date: "2026",
+}),
+);
+
+expect(result).toEqual(customItem);
+});
+
+it("rejects an entirely empty custom section item", async () => {
+setSelectResults([{ ...profile }], [{ ...customSection }]);
+
+await expect(
+cvmateProfileService.createCustomSectionItem({
+userId: "user-1",
+profileSectionId: "custom-section-1",
+title: null,
+fields: {},
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.insert).not.toHaveBeenCalled();
+});
+
+it("does not allow items to be created inside a standard section", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.createCustomSectionItem({
+userId: "user-1",
+profileSectionId: "experience-section",
+title: "Should not be created",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.insert).not.toHaveBeenCalled();
+});
+
+it("rejects an update that would leave a custom section item empty", async () => {
+const itemWithOnlyTitle = {
+...customItem,
+date: null,
+};
+
+setSelectResults(
+[{ ...itemWithOnlyTitle }],
+[{ ...profile }],
+[{ ...customSection }],
+);
+
+await expect(
+cvmateProfileService.updateCustomSectionItem({
+id: "custom-item-1",
+userId: "user-1",
+title: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("deletes an item only when its parent custom section is owned by the user", async () => {
+setSelectResults(
+[{ ...customItem }],
+[{ ...profile }],
+[{ ...customSection }],
+);
+
+const { returning } = mockDeleteReturning([{ id: "custom-item-1" }]);
+
+await expect(
+cvmateProfileService.deleteCustomSectionItem({
+id: "custom-item-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});

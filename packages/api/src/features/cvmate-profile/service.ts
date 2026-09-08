@@ -128,6 +128,15 @@ language: ClauseLanguage;
 isEnabled?: boolean | undefined;
 content?: string | null | undefined;
 };
+type CustomSectionItemFields = {
+title?: string | null | undefined;
+subtitle?: string | null | undefined;
+date?: string | null | undefined;
+description?: string | null | undefined;
+url?: string | null | undefined;
+fields?: Record<string, unknown> | null | undefined;
+sortOrder?: number | undefined;
+};
 type ProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
@@ -416,6 +425,62 @@ eq(schema.cvmateLicense.masterProfileId, profile.id),
 if (!license) throw new ORPCError("NOT_FOUND");
 
 return { profile, license };
+}
+async function requireOwnedCustomSection(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [section] = await db
+.select()
+.from(schema.cvmateProfileSection)
+.where(
+and(
+eq(schema.cvmateProfileSection.id, id),
+eq(schema.cvmateProfileSection.masterProfileId, profile.id),
+eq(schema.cvmateProfileSection.kind, "custom"),
+),
+);
+
+if (!section) throw new ORPCError("NOT_FOUND");
+
+return { profile, section };
+}
+
+async function requireOwnedCustomSectionItem(id: string, userId: string) {
+const [item] = await db
+.select()
+.from(schema.cvmateCustomSectionItem)
+.where(eq(schema.cvmateCustomSectionItem.id, id));
+
+if (!item) throw new ORPCError("NOT_FOUND");
+
+const { profile, section } = await requireOwnedCustomSection(
+item.profileSectionId,
+userId,
+);
+
+return { profile, section, item };
+}
+
+function hasCustomSectionItemContent(value: {
+title: string | null;
+subtitle: string | null;
+date: string | null;
+description: string | null;
+url: string | null;
+fields: Record<string, unknown> | null;
+}) {
+return (
+[
+value.title,
+value.subtitle,
+value.date,
+value.description,
+value.url,
+].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+) ||
+(value.fields !== null && Object.keys(value.fields).length > 0)
+);
 }
 function hasEmploymentContent(value: {
 company: string | null;
@@ -1807,6 +1872,207 @@ eq(schema.cvmateClause.language, input.language),
 ),
 )
 .returning({ id: schema.cvmateClause.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createCustomSection: async (input: {
+userId: string;
+title: string;
+isVisible?: boolean | undefined;
+sortOrder?: number | undefined;
+}) => {
+const profile = await ensureProfile(input.userId);
+
+const [section] = await db
+.insert(schema.cvmateProfileSection)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+kind: "custom",
+title: input.title,
+...(input.isVisible !== undefined
+? { isVisible: input.isVisible }
+: {}),
+...(input.sortOrder !== undefined
+? { sortOrder: input.sortOrder }
+: {}),
+})
+.returning();
+
+if (!section) throw new Error("CVMATE_CUSTOM_SECTION_CREATE_FAILED");
+
+return section;
+},
+
+updateCustomSection: async (input: {
+id: string;
+userId: string;
+title?: string | undefined;
+isVisible?: boolean | undefined;
+sortOrder?: number | undefined;
+}) => {
+const { section } = await requireOwnedCustomSection(
+input.id,
+input.userId,
+);
+const { id, userId, ...fields } = input;
+
+const [updated] = await db
+.update(schema.cvmateProfileSection)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateProfileSection.id, id),
+eq(
+schema.cvmateProfileSection.masterProfileId,
+section.masterProfileId,
+),
+eq(schema.cvmateProfileSection.kind, "custom"),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteCustomSection: async (input: { id: string; userId: string }) => {
+const { section } = await requireOwnedCustomSection(
+input.id,
+input.userId,
+);
+
+const rows = await db
+.delete(schema.cvmateProfileSection)
+.where(
+and(
+eq(schema.cvmateProfileSection.id, input.id),
+eq(
+schema.cvmateProfileSection.masterProfileId,
+section.masterProfileId,
+),
+eq(schema.cvmateProfileSection.kind, "custom"),
+),
+)
+.returning({ id: schema.cvmateProfileSection.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createCustomSectionItem: async (
+input: CustomSectionItemFields & {
+userId: string;
+profileSectionId: string;
+},
+) => {
+const { userId, profileSectionId, ...fields } = input;
+
+await requireOwnedCustomSection(profileSectionId, userId);
+
+const businessFields = {
+title: fields.title ?? null,
+subtitle: fields.subtitle ?? null,
+date: fields.date ?? null,
+description: fields.description ?? null,
+url: fields.url ?? null,
+fields: fields.fields ?? null,
+};
+
+if (!hasCustomSectionItemContent(businessFields)) {
+throw new ORPCError("BAD_REQUEST", {
+message:
+"Custom section item must contain at least one non-empty business field.",
+});
+}
+
+const [item] = await db
+.insert(schema.cvmateCustomSectionItem)
+.values({
+id: generateId(),
+profileSectionId,
+...fields,
+})
+.returning();
+
+if (!item) throw new Error("CVMATE_CUSTOM_SECTION_ITEM_CREATE_FAILED");
+
+return item;
+},
+
+updateCustomSectionItem: async (
+input: CustomSectionItemFields & {
+id: string;
+userId: string;
+},
+) => {
+const { item } = await requireOwnedCustomSectionItem(
+input.id,
+input.userId,
+);
+const { id, userId, ...fields } = input;
+
+const merged = {
+title: fields.title !== undefined ? fields.title : item.title,
+subtitle:
+fields.subtitle !== undefined ? fields.subtitle : item.subtitle,
+date: fields.date !== undefined ? fields.date : item.date,
+description:
+fields.description !== undefined
+? fields.description
+: item.description,
+url: fields.url !== undefined ? fields.url : item.url,
+fields: fields.fields !== undefined ? fields.fields : item.fields,
+};
+
+if (!hasCustomSectionItemContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message:
+"Custom section item must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateCustomSectionItem)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateCustomSectionItem.id, id),
+eq(
+schema.cvmateCustomSectionItem.profileSectionId,
+item.profileSectionId,
+),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteCustomSectionItem: async (input: {
+id: string;
+userId: string;
+}) => {
+const { item } = await requireOwnedCustomSectionItem(
+input.id,
+input.userId,
+);
+
+const rows = await db
+.delete(schema.cvmateCustomSectionItem)
+.where(
+and(
+eq(schema.cvmateCustomSectionItem.id, input.id),
+eq(
+schema.cvmateCustomSectionItem.profileSectionId,
+item.profileSectionId,
+),
+),
+)
+.returning({ id: schema.cvmateCustomSectionItem.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },
