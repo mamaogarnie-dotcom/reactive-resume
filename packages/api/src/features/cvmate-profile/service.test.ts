@@ -68,6 +68,18 @@ createdAt: new Date("2026-09-08T10:00:00.000Z"),
 updatedAt: new Date("2026-09-08T10:00:00.000Z"),
 };
 
+const course = {
+id: "course-1",
+masterProfileId: "profile-1",
+name: "AI Fundamentals",
+organizer: null,
+date: null,
+description: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
 const createSelectChain = (rows: unknown[]) => ({
 from: () => ({
 where: () => Promise.resolve(rows),
@@ -482,6 +494,106 @@ const { returning } = mockDeleteReturning([{ id: "education-1" }]);
 await expect(
 cvmateProfileService.deleteEducation({
 id: "education-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});
+
+describe("cvmateProfileService courses", () => {
+it("creates a course inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdCourse = {
+...course,
+organizer: "OpenAI Academy",
+};
+
+const returning = vi.fn(() => Promise.resolve([createdCourse]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createCourse({
+userId: "user-1",
+name: "AI Fundamentals",
+organizer: "OpenAI Academy",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+name: "AI Fundamentals",
+organizer: "OpenAI Academy",
+}),
+);
+expect(result).toEqual(createdCourse);
+});
+
+it("rejects an update that would leave an entirely empty course", async () => {
+setSelectResults([{ ...profile }], [{ ...course }]);
+
+await expect(
+cvmateProfileService.updateCourse({
+id: "course-1",
+userId: "user-1",
+name: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("returns NOT_FOUND when the course is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateCourse({
+id: "course-other-user",
+userId: "user-1",
+description: "Changed",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned course when at least one business field remains", async () => {
+setSelectResults([{ ...profile }], [{ ...course }]);
+
+const updatedCourse = {
+...course,
+description: "Completed with certificate",
+};
+
+const { set } = mockUpdateReturning([updatedCourse]);
+
+const result = await cvmateProfileService.updateCourse({
+id: "course-1",
+userId: "user-1",
+description: "Completed with certificate",
+});
+
+expect(set).toHaveBeenCalledWith({
+description: "Completed with certificate",
+});
+expect(result.description).toBe("Completed with certificate");
+});
+
+it("deletes only a course owned by the current user's profile", async () => {
+setSelectResults([{ ...profile }], [{ ...course }]);
+
+const { returning } = mockDeleteReturning([{ id: "course-1" }]);
+
+await expect(
+cvmateProfileService.deleteCourse({
+id: "course-1",
 userId: "user-1",
 }),
 ).resolves.toBeUndefined();

@@ -406,4 +406,67 @@ id: input.id,
 userId: context.user.id,
 }),
 ),
+
+createCourse: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/courses",
+tags: ["CVMate Profile"],
+operationId: "createCvmateCourse",
+summary: "Create course",
+description:
+"Adds a course to the authenticated user's CVMate Master Profile. The record must contain at least one non-empty business field. Requires authentication.",
+successDescription: "The created course.",
+})
+.input(cvmateProfileDto.createCourse.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createCourse.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createCourse({
+userId: context.user.id,
+...input,
+}),
+),
+
+updateCourse: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/courses/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateCourse",
+summary: "Update course",
+description:
+"Updates a course belonging to the authenticated user's CVMate Master Profile. An update cannot leave the course entirely empty. Requires authentication.",
+successDescription: "The updated course.",
+})
+.input(cvmateProfileDto.updateCourse.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateCourse.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateCourse({
+userId: context.user.id,
+...input,
+}),
+),
+
+deleteCourse: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/courses/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateCourse",
+summary: "Delete course",
+description:
+"Deletes a course belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The course was deleted.",
+})
+.input(cvmateProfileDto.deleteCourse.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteCourse.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteCourse({
+id: input.id,
+userId: context.user.id,
+}),
+),
 };

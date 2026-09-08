@@ -64,6 +64,14 @@ description?: string | null | undefined;
 sortOrder?: number | undefined;
 };
 
+type CourseFields = {
+name?: string | null | undefined;
+organizer?: string | null | undefined;
+date?: string | null | undefined;
+description?: string | null | undefined;
+sortOrder?: number | undefined;
+};
+
 type ProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
@@ -82,7 +90,9 @@ return profile;
 
 async function requireCurrentProfile(userId: string) {
 const profile = await findCurrentProfile(userId);
+
 if (!profile) throw new ORPCError("NOT_FOUND");
+
 return profile;
 }
 
@@ -107,6 +117,7 @@ sortOrder,
 
 async function ensureProfile(userId: string) {
 const existing = await findCurrentProfile(userId);
+
 if (existing) return existing;
 
 return db.transaction(async (tx) => {
@@ -225,6 +236,24 @@ if (!education) throw new ORPCError("NOT_FOUND");
 return { profile, education };
 }
 
+async function requireOwnedCourse(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [course] = await db
+.select()
+.from(schema.cvmateCourse)
+.where(
+and(
+eq(schema.cvmateCourse.id, id),
+eq(schema.cvmateCourse.masterProfileId, profile.id),
+),
+);
+
+if (!course) throw new ORPCError("NOT_FOUND");
+
+return { profile, course };
+}
+
 function hasEmploymentContent(value: {
 company: string | null;
 jobTitle: string | null;
@@ -269,9 +298,21 @@ value.description,
 ].some((field) => typeof field === "string" && field.trim().length > 0);
 }
 
+function hasCourseContent(value: {
+name: string | null;
+organizer: string | null;
+date: string | null;
+description: string | null;
+}) {
+return [value.name, value.organizer, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+}
+
 export const cvmateProfileService = {
 getCurrent: async (input: { userId: string }) => {
 const profile = await findCurrentProfile(input.userId);
+
 if (!profile) return null;
 
 const sections = await db
@@ -930,6 +971,79 @@ eq(schema.cvmateEducation.masterProfileId, education.masterProfileId),
 ),
 )
 .returning({ id: schema.cvmateEducation.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createCourse: async (input: CourseFields & { userId: string }) => {
+const { userId, ...fields } = input;
+const profile = await ensureProfile(userId);
+
+const [course] = await db
+.insert(schema.cvmateCourse)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+...fields,
+})
+.returning();
+
+if (!course) throw new Error("CVMATE_COURSE_CREATE_FAILED");
+
+return course;
+},
+
+updateCourse: async (
+input: CourseFields & {
+id: string;
+userId: string;
+},
+) => {
+const { course } = await requireOwnedCourse(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const merged = {
+name: fields.name !== undefined ? fields.name : course.name,
+organizer: fields.organizer !== undefined ? fields.organizer : course.organizer,
+date: fields.date !== undefined ? fields.date : course.date,
+description:
+fields.description !== undefined ? fields.description : course.description,
+};
+
+if (!hasCourseContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message: "Course must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateCourse)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateCourse.id, id),
+eq(schema.cvmateCourse.masterProfileId, course.masterProfileId),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteCourse: async (input: { id: string; userId: string }) => {
+const { course } = await requireOwnedCourse(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateCourse)
+.where(
+and(
+eq(schema.cvmateCourse.id, input.id),
+eq(schema.cvmateCourse.masterProfileId, course.masterProfileId),
+),
+)
+.returning({ id: schema.cvmateCourse.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },

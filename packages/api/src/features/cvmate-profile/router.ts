@@ -20,4 +20,7 @@ deleteProject: crudRouter.deleteProject,
 createEducation: crudRouter.createEducation,
 updateEducation: crudRouter.updateEducation,
 deleteEducation: crudRouter.deleteEducation,
+createCourse: crudRouter.createCourse,
+updateCourse: crudRouter.updateCourse,
+deleteCourse: crudRouter.deleteCourse,
 };

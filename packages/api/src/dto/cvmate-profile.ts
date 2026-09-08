@@ -391,6 +391,26 @@ hasEducationContent,
 "Education must contain at least one non-empty business field.",
 );
 
+const courseEditableSchema = courseSchema
+.pick({
+name: true,
+organizer: true,
+date: true,
+description: true,
+sortOrder: true,
+})
+.partial();
+
+const hasCourseContent = (value: z.infer<typeof courseEditableSchema>) =>
+[value.name, value.organizer, value.date, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+
+const courseCreateSchema = courseEditableSchema.refine(
+hasCourseContent,
+"Course must contain at least one non-empty business field.",
+);
+
 export const cvmateProfileDto = {
 getCurrent: {
 input: z.object({}).optional().default({}),
@@ -524,6 +544,27 @@ output: educationSchema,
 },
 
 deleteEducation: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+
+createCourse: {
+input: courseCreateSchema,
+output: courseSchema,
+},
+
+updateCourse: {
+input: courseEditableSchema
+.extend({ id: z.string() })
+.refine(
+(value) =>
+Object.entries(value).some(([key, field]) => key !== "id" && field !== undefined),
+"Provide at least one field to update.",
+),
+output: courseSchema,
+},
+
+deleteCourse: {
 input: z.object({ id: z.string() }),
 output: z.void(),
 },
