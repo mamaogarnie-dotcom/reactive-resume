@@ -343,4 +343,67 @@ id: input.id,
 userId: context.user.id,
 }),
 ),
+
+createEducation: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/education",
+tags: ["CVMate Profile"],
+operationId: "createCvmateEducation",
+summary: "Create education",
+description:
+"Adds an education record to the authenticated user's CVMate Master Profile. The record must contain at least one non-empty business field. Requires authentication.",
+successDescription: "The created education record.",
+})
+.input(cvmateProfileDto.createEducation.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createEducation.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createEducation({
+userId: context.user.id,
+...input,
+}),
+),
+
+updateEducation: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/education/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateEducation",
+summary: "Update education",
+description:
+"Updates an education record belonging to the authenticated user's CVMate Master Profile. An update cannot leave the education record entirely empty. Requires authentication.",
+successDescription: "The updated education record.",
+})
+.input(cvmateProfileDto.updateEducation.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateEducation.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateEducation({
+userId: context.user.id,
+...input,
+}),
+),
+
+deleteEducation: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/education/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateEducation",
+summary: "Delete education",
+description:
+"Deletes an education record belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The education record was deleted.",
+})
+.input(cvmateProfileDto.deleteEducation.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteEducation.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteEducation({
+id: input.id,
+userId: context.user.id,
+}),
+),
 };

@@ -53,6 +53,17 @@ description?: string | null | undefined;
 sortOrder?: number | undefined;
 };
 
+type EducationFields = {
+institution?: string | null | undefined;
+fieldOfStudy?: string | null | undefined;
+specialization?: string | null | undefined;
+degree?: string | null | undefined;
+startDate?: string | null | undefined;
+endDate?: string | null | undefined;
+description?: string | null | undefined;
+sortOrder?: number | undefined;
+};
+
 type ProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
@@ -196,6 +207,24 @@ if (!project) throw new ORPCError("NOT_FOUND");
 return { profile, project };
 }
 
+async function requireOwnedEducation(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [education] = await db
+.select()
+.from(schema.cvmateEducation)
+.where(
+and(
+eq(schema.cvmateEducation.id, id),
+eq(schema.cvmateEducation.masterProfileId, profile.id),
+),
+);
+
+if (!education) throw new ORPCError("NOT_FOUND");
+
+return { profile, education };
+}
+
 function hasEmploymentContent(value: {
 company: string | null;
 jobTitle: string | null;
@@ -218,6 +247,26 @@ description: string | null;
 return [value.name, value.company, value.startDate, value.endDate, value.description].some(
 (field) => typeof field === "string" && field.trim().length > 0,
 );
+}
+
+function hasEducationContent(value: {
+institution: string | null;
+fieldOfStudy: string | null;
+specialization: string | null;
+degree: string | null;
+startDate: string | null;
+endDate: string | null;
+description: string | null;
+}) {
+return [
+value.institution,
+value.fieldOfStudy,
+value.specialization,
+value.degree,
+value.startDate,
+value.endDate,
+value.description,
+].some((field) => typeof field === "string" && field.trim().length > 0);
 }
 
 export const cvmateProfileService = {
@@ -800,6 +849,87 @@ eq(schema.cvmateProject.masterProfileId, project.masterProfileId),
 ),
 )
 .returning({ id: schema.cvmateProject.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createEducation: async (input: EducationFields & { userId: string }) => {
+const { userId, ...fields } = input;
+const profile = await ensureProfile(userId);
+
+const [education] = await db
+.insert(schema.cvmateEducation)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+...fields,
+})
+.returning();
+
+if (!education) throw new Error("CVMATE_EDUCATION_CREATE_FAILED");
+
+return education;
+},
+
+updateEducation: async (
+input: EducationFields & {
+id: string;
+userId: string;
+},
+) => {
+const { education } = await requireOwnedEducation(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const merged = {
+institution:
+fields.institution !== undefined ? fields.institution : education.institution,
+fieldOfStudy:
+fields.fieldOfStudy !== undefined ? fields.fieldOfStudy : education.fieldOfStudy,
+specialization:
+fields.specialization !== undefined
+? fields.specialization
+: education.specialization,
+degree: fields.degree !== undefined ? fields.degree : education.degree,
+startDate: fields.startDate !== undefined ? fields.startDate : education.startDate,
+endDate: fields.endDate !== undefined ? fields.endDate : education.endDate,
+description:
+fields.description !== undefined ? fields.description : education.description,
+};
+
+if (!hasEducationContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message: "Education must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateEducation)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateEducation.id, id),
+eq(schema.cvmateEducation.masterProfileId, education.masterProfileId),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteEducation: async (input: { id: string; userId: string }) => {
+const { education } = await requireOwnedEducation(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateEducation)
+.where(
+and(
+eq(schema.cvmateEducation.id, input.id),
+eq(schema.cvmateEducation.masterProfileId, education.masterProfileId),
+),
+)
+.returning({ id: schema.cvmateEducation.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },

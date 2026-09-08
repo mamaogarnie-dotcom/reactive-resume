@@ -53,6 +53,21 @@ createdAt: new Date("2026-09-08T10:00:00.000Z"),
 updatedAt: new Date("2026-09-08T10:00:00.000Z"),
 };
 
+const education = {
+id: "education-1",
+masterProfileId: "profile-1",
+institution: "University of Wroclaw",
+fieldOfStudy: null,
+specialization: null,
+degree: null,
+startDate: null,
+endDate: null,
+description: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
 const createSelectChain = (rows: unknown[]) => ({
 from: () => ({
 where: () => Promise.resolve(rows),
@@ -367,6 +382,106 @@ const { returning } = mockDeleteReturning([{ id: "project-1" }]);
 await expect(
 cvmateProfileService.deleteProject({
 id: "project-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});
+
+describe("cvmateProfileService education", () => {
+it("creates an education record inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdEducation = {
+...education,
+fieldOfStudy: "Biology",
+};
+
+const returning = vi.fn(() => Promise.resolve([createdEducation]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createEducation({
+userId: "user-1",
+institution: "University of Wroclaw",
+fieldOfStudy: "Biology",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+institution: "University of Wroclaw",
+fieldOfStudy: "Biology",
+}),
+);
+expect(result).toEqual(createdEducation);
+});
+
+it("rejects an update that would leave an entirely empty education record", async () => {
+setSelectResults([{ ...profile }], [{ ...education }]);
+
+await expect(
+cvmateProfileService.updateEducation({
+id: "education-1",
+userId: "user-1",
+institution: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("returns NOT_FOUND when the education record is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateEducation({
+id: "education-other-user",
+userId: "user-1",
+degree: "Master",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned education record when at least one business field remains", async () => {
+setSelectResults([{ ...profile }], [{ ...education }]);
+
+const updatedEducation = {
+...education,
+degree: "Master",
+};
+
+const { set } = mockUpdateReturning([updatedEducation]);
+
+const result = await cvmateProfileService.updateEducation({
+id: "education-1",
+userId: "user-1",
+degree: "Master",
+});
+
+expect(set).toHaveBeenCalledWith({
+degree: "Master",
+});
+expect(result.degree).toBe("Master");
+});
+
+it("deletes only an education record owned by the current user's profile", async () => {
+setSelectResults([{ ...profile }], [{ ...education }]);
+
+const { returning } = mockDeleteReturning([{ id: "education-1" }]);
+
+await expect(
+cvmateProfileService.deleteEducation({
+id: "education-1",
 userId: "user-1",
 }),
 ).resolves.toBeUndefined();

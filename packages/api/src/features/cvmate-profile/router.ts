@@ -17,4 +17,7 @@ deleteListItem: crudRouter.deleteListItem,
 createProject: crudRouter.createProject,
 updateProject: crudRouter.updateProject,
 deleteProject: crudRouter.deleteProject,
+createEducation: crudRouter.createEducation,
+updateEducation: crudRouter.updateEducation,
+deleteEducation: crudRouter.deleteEducation,
 };
