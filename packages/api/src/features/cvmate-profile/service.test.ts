@@ -9,6 +9,27 @@ transaction: vi.fn(),
 }));
 
 vi.mock("@reactive-resume/db/client", () => ({ db: dbMock }));
+const photoStorageMock = vi.hoisted(() => ({
+processImageForUpload: vi.fn(),
+uploadFile: vi.fn(),
+delete: vi.fn(),
+}));
+
+const sharpMetadataMock = vi.hoisted(() => vi.fn());
+
+vi.mock("../storage/service", () => ({
+processImageForUpload: photoStorageMock.processImageForUpload,
+uploadFile: photoStorageMock.uploadFile,
+getStorageService: () => ({
+delete: photoStorageMock.delete,
+}),
+}));
+
+vi.mock("sharp", () => ({
+default: vi.fn(() => ({
+metadata: sharpMetadataMock,
+})),
+}));
 
 const { cvmateProfileService } = await import("./service");
 
@@ -159,6 +180,28 @@ dbMock.update.mockReset();
 dbMock.delete.mockReset();
 dbMock.transaction.mockReset();
 dbMock.transaction.mockImplementation((callback) => callback(dbMock));
+
+photoStorageMock.processImageForUpload.mockReset();
+photoStorageMock.uploadFile.mockReset();
+photoStorageMock.delete.mockReset();
+sharpMetadataMock.mockReset();
+
+photoStorageMock.processImageForUpload.mockResolvedValue({
+data: new Uint8Array([1, 2, 3]),
+contentType: "image/jpeg",
+});
+
+photoStorageMock.uploadFile.mockResolvedValue({
+key: "uploads/user-1/pictures/photo.jpeg",
+url: "http://localhost:3000/api/uploads/user-1/pictures/photo.jpeg",
+});
+
+photoStorageMock.delete.mockResolvedValue(true);
+
+sharpMetadataMock.mockResolvedValue({
+width: 600,
+height: 800,
+});
 
 setSelectResults([]);
 });
@@ -1660,5 +1703,145 @@ userId: "user-1",
 ).resolves.toBeUndefined();
 
 expect(returning).toHaveBeenCalledTimes(1);
+});
+});
+describe("cvmateProfileService photos", () => {
+const photo = {
+id: "photo-1",
+masterProfileId: "profile-1",
+storageKey: "uploads/user-1/pictures/photo.jpeg",
+filename: "portrait.png",
+mediaType: "image/jpeg",
+size: 3,
+width: 600,
+height: 800,
+label: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
+it("uploads an image and stores metadata in the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const returning = vi.fn(() => Promise.resolve([{ ...photo }]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const file = new File([new Uint8Array([9, 8, 7])], "portrait.png", {
+type: "image/png",
+});
+
+const result = await cvmateProfileService.createPhoto({
+userId: "user-1",
+file,
+});
+
+expect(photoStorageMock.processImageForUpload).toHaveBeenCalledWith(file);
+
+expect(photoStorageMock.uploadFile).toHaveBeenCalledWith({
+userId: "user-1",
+data: new Uint8Array([1, 2, 3]),
+contentType: "image/jpeg",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+storageKey: "uploads/user-1/pictures/photo.jpeg",
+filename: "portrait.png",
+mediaType: "image/jpeg",
+size: 3,
+width: 600,
+height: 800,
+}),
+);
+
+expect(result).toEqual(photo);
+});
+
+it("removes the uploaded file when the database record cannot be created", async () => {
+setSelectResults([{ ...profile }]);
+
+const returning = vi.fn(() => Promise.resolve([]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const file = new File([new Uint8Array([9, 8, 7])], "portrait.png", {
+type: "image/png",
+});
+
+await expect(
+cvmateProfileService.createPhoto({
+userId: "user-1",
+file,
+}),
+).rejects.toThrow("CVMATE_PROFILE_PHOTO_CREATE_FAILED");
+
+expect(photoStorageMock.delete).toHaveBeenCalledWith(
+"uploads/user-1/pictures/photo.jpeg",
+);
+});
+
+it("updates editable metadata of an owned photo", async () => {
+setSelectResults([{ ...profile }], [{ ...photo }]);
+
+const updatedPhoto = {
+...photo,
+label: "Professional portrait",
+sortOrder: 2,
+};
+
+const { set } = mockUpdateReturning([updatedPhoto]);
+
+const result = await cvmateProfileService.updatePhoto({
+id: "photo-1",
+userId: "user-1",
+label: "Professional portrait",
+sortOrder: 2,
+});
+
+expect(set).toHaveBeenCalledWith({
+label: "Professional portrait",
+sortOrder: 2,
+});
+
+expect(result).toEqual(updatedPhoto);
+});
+
+it("returns NOT_FOUND when the photo is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updatePhoto({
+id: "photo-other-user",
+userId: "user-1",
+label: "Changed",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("deletes the database record and then removes the owned file from storage", async () => {
+setSelectResults([{ ...profile }], [{ ...photo }]);
+
+const { returning } = mockDeleteReturning([{ id: "photo-1" }]);
+
+await expect(
+cvmateProfileService.deletePhoto({
+id: "photo-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+expect(photoStorageMock.delete).toHaveBeenCalledWith(
+"uploads/user-1/pictures/photo.jpeg",
+);
 });
 });

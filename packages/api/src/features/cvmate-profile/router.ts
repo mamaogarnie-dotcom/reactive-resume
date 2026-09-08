@@ -49,4 +49,7 @@ deleteCustomSection: crudRouter.deleteCustomSection,
 createCustomSectionItem: crudRouter.createCustomSectionItem,
 updateCustomSectionItem: crudRouter.updateCustomSectionItem,
 deleteCustomSectionItem: crudRouter.deleteCustomSectionItem,
+createPhoto: crudRouter.createPhoto,
+updatePhoto: crudRouter.updatePhoto,
+deletePhoto: crudRouter.deletePhoto,
 };

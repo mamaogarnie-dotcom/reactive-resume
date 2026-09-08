@@ -3,6 +3,12 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { generateId } from "@reactive-resume/utils/string";
+import sharp from "sharp";
+import {
+getStorageService,
+processImageForUpload,
+uploadFile,
+} from "../storage/service";
 
 const DEFAULT_SECTION_KINDS = [
 "basics",
@@ -481,6 +487,23 @@ value.url,
 ) ||
 (value.fields !== null && Object.keys(value.fields).length > 0)
 );
+}
+async function requireOwnedPhoto(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [photo] = await db
+.select()
+.from(schema.cvmateProfilePhoto)
+.where(
+and(
+eq(schema.cvmateProfilePhoto.id, id),
+eq(schema.cvmateProfilePhoto.masterProfileId, profile.id),
+),
+);
+
+if (!photo) throw new ORPCError("NOT_FOUND");
+
+return { profile, photo };
 }
 function hasEmploymentContent(value: {
 company: string | null;
@@ -2075,5 +2098,92 @@ item.profileSectionId,
 .returning({ id: schema.cvmateCustomSectionItem.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createPhoto: async (input: { userId: string; file: File }) => {
+const profile = await ensureProfile(input.userId);
+
+const processed = await processImageForUpload(input.file);
+const metadata = await sharp(processed.data).metadata();
+
+const uploaded = await uploadFile({
+userId: input.userId,
+data: processed.data,
+contentType: processed.contentType,
+});
+
+try {
+const [photo] = await db
+.insert(schema.cvmateProfilePhoto)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+storageKey: uploaded.key,
+filename: input.file.name,
+mediaType: processed.contentType,
+size: processed.data.byteLength,
+width: metadata.width ?? null,
+height: metadata.height ?? null,
+})
+.returning();
+
+if (!photo) {
+throw new Error("CVMATE_PROFILE_PHOTO_CREATE_FAILED");
+}
+
+return photo;
+} catch (error) {
+await getStorageService().delete(uploaded.key).catch(() => false);
+throw error;
+}
+},
+
+updatePhoto: async (input: {
+id: string;
+userId: string;
+label?: string | null | undefined;
+sortOrder?: number | undefined;
+}) => {
+const { photo } = await requireOwnedPhoto(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const [updated] = await db
+.update(schema.cvmateProfilePhoto)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateProfilePhoto.id, id),
+eq(
+schema.cvmateProfilePhoto.masterProfileId,
+photo.masterProfileId,
+),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deletePhoto: async (input: { id: string; userId: string }) => {
+const { photo } = await requireOwnedPhoto(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateProfilePhoto)
+.where(
+and(
+eq(schema.cvmateProfilePhoto.id, input.id),
+eq(
+schema.cvmateProfilePhoto.masterProfileId,
+photo.masterProfileId,
+),
+),
+)
+.returning({ id: schema.cvmateProfilePhoto.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+
+await getStorageService().delete(photo.storageKey).catch(() => false);
 },
 };

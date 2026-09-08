@@ -1,6 +1,9 @@
 import { protectedProcedure } from "../../context";
 import { cvmateProfileDto } from "../../dto/cvmate-profile";
-import { resumeMutationRateLimit } from "../../middleware/rate-limit";
+import {
+resumeMutationRateLimit,
+storageUploadRateLimit,
+} from "../../middleware/rate-limit";
 import { cvmateProfileService } from "./service";
 
 export const crudRouter = {
@@ -1012,6 +1015,69 @@ successDescription: "The custom section item was deleted.",
 .output(cvmateProfileDto.deleteCustomSectionItem.output)
 .handler(({ input, context }) =>
 cvmateProfileService.deleteCustomSectionItem({
+id: input.id,
+userId: context.user.id,
+}),
+),
+
+createPhoto: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/photos",
+tags: ["CVMate Profile"],
+operationId: "createCvmateProfilePhoto",
+summary: "Upload profile photo",
+description:
+"Uploads an image, processes it using the existing storage pipeline, and saves its metadata in the authenticated user's CVMate Master Profile. Maximum file size is 10MB. Requires authentication.",
+successDescription: "The profile photo was uploaded.",
+})
+.input(cvmateProfileDto.createPhoto.input)
+.use(storageUploadRateLimit)
+.output(cvmateProfileDto.createPhoto.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createPhoto({
+userId: context.user.id,
+file: input,
+}),
+),
+
+updatePhoto: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/photos/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateProfilePhoto",
+summary: "Update profile photo metadata",
+description:
+"Updates editable metadata of a photo belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The profile photo metadata was updated.",
+})
+.input(cvmateProfileDto.updatePhoto.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updatePhoto.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updatePhoto({
+...input,
+userId: context.user.id,
+}),
+),
+
+deletePhoto: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/photos/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateProfilePhoto",
+summary: "Delete profile photo",
+description:
+"Deletes a photo record belonging to the authenticated user's CVMate Master Profile and removes the corresponding file from storage. Requires authentication.",
+successDescription: "The profile photo was deleted.",
+})
+.input(cvmateProfileDto.deletePhoto.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deletePhoto.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deletePhoto({
 id: input.id,
 userId: context.user.id,
 }),

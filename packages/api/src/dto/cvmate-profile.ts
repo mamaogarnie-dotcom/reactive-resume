@@ -279,6 +279,28 @@ createdAt: z.date(),
 updatedAt: z.date(),
 });
 
+const profilePhotoUploadSchema = z
+.file()
+.max(10 * 1024 * 1024, "Photo size must be less than 10MB.")
+.refine(
+(file) =>
+["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+file.type,
+),
+"Photo must be a JPEG, PNG, WebP, or GIF image.",
+);
+
+const profilePhotoUpdateSchema = z
+.object({
+id: z.string(),
+label: trimmedNullableString.optional(),
+sortOrder: z.number().int().optional(),
+})
+.refine(
+(value) =>
+value.label !== undefined || value.sortOrder !== undefined,
+"Provide at least one field to update.",
+);
 const masterProfilePublicSchema = masterProfileSchema.omit({ userId: true });
 
 const aggregateSchema = z.object({
@@ -956,6 +978,20 @@ output: customSectionItemSchema,
 },
 
 deleteCustomSectionItem: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+createPhoto: {
+input: profilePhotoUploadSchema,
+output: profilePhotoSchema,
+},
+
+updatePhoto: {
+input: profilePhotoUpdateSchema,
+output: profilePhotoSchema,
+},
+
+deletePhoto: {
 input: z.object({ id: z.string() }),
 output: z.void(),
 },
