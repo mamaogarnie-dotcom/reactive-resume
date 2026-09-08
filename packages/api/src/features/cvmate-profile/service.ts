@@ -44,6 +44,15 @@ isCurrent?: boolean | undefined;
 sortOrder?: number | undefined;
 };
 
+type ProjectFields = {
+name?: string | null | undefined;
+company?: string | null | undefined;
+startDate?: string | null | undefined;
+endDate?: string | null | undefined;
+description?: string | null | undefined;
+sortOrder?: number | undefined;
+};
+
 type ProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
@@ -169,6 +178,24 @@ if (!item) throw new ORPCError("NOT_FOUND");
 return { profile, item };
 }
 
+async function requireOwnedProject(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [project] = await db
+.select()
+.from(schema.cvmateProject)
+.where(
+and(
+eq(schema.cvmateProject.id, id),
+eq(schema.cvmateProject.masterProfileId, profile.id),
+),
+);
+
+if (!project) throw new ORPCError("NOT_FOUND");
+
+return { profile, project };
+}
+
 function hasEmploymentContent(value: {
 company: string | null;
 jobTitle: string | null;
@@ -177,6 +204,18 @@ startDate: string | null;
 endDate: string | null;
 }) {
 return [value.company, value.jobTitle, value.location, value.startDate, value.endDate].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+}
+
+function hasProjectContent(value: {
+name: string | null;
+company: string | null;
+startDate: string | null;
+endDate: string | null;
+description: string | null;
+}) {
+return [value.name, value.company, value.startDate, value.endDate, value.description].some(
 (field) => typeof field === "string" && field.trim().length > 0,
 );
 }
@@ -688,6 +727,79 @@ eq(schema.cvmateProfileListItem.masterProfileId, item.masterProfileId),
 ),
 )
 .returning({ id: schema.cvmateProfileListItem.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createProject: async (input: ProjectFields & { userId: string }) => {
+const { userId, ...fields } = input;
+const profile = await ensureProfile(userId);
+
+const [project] = await db
+.insert(schema.cvmateProject)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+...fields,
+})
+.returning();
+
+if (!project) throw new Error("CVMATE_PROJECT_CREATE_FAILED");
+
+return project;
+},
+
+updateProject: async (
+input: ProjectFields & {
+id: string;
+userId: string;
+},
+) => {
+const { project } = await requireOwnedProject(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const merged = {
+name: fields.name !== undefined ? fields.name : project.name,
+company: fields.company !== undefined ? fields.company : project.company,
+startDate: fields.startDate !== undefined ? fields.startDate : project.startDate,
+endDate: fields.endDate !== undefined ? fields.endDate : project.endDate,
+description: fields.description !== undefined ? fields.description : project.description,
+};
+
+if (!hasProjectContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message: "Project must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateProject)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateProject.id, id),
+eq(schema.cvmateProject.masterProfileId, project.masterProfileId),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteProject: async (input: { id: string; userId: string }) => {
+const { project } = await requireOwnedProject(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateProject)
+.where(
+and(
+eq(schema.cvmateProject.id, input.id),
+eq(schema.cvmateProject.masterProfileId, project.masterProfileId),
+),
+)
+.returning({ id: schema.cvmateProject.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },

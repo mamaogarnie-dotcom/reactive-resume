@@ -17,7 +17,9 @@ successDescription: "The current CVMate Master Profile, or null if none exists."
 })
 .input(cvmateProfileDto.getCurrent.input)
 .output(cvmateProfileDto.getCurrent.output)
-.handler(({ context }) => cvmateProfileService.getCurrent({ userId: context.user.id })),
+.handler(({ context }) =>
+cvmateProfileService.getCurrent({ userId: context.user.id }),
+),
 
 updateBasics: protectedProcedure
 .route({
@@ -274,6 +276,69 @@ successDescription: "The profile list item was deleted.",
 .output(cvmateProfileDto.deleteListItem.output)
 .handler(({ input, context }) =>
 cvmateProfileService.deleteListItem({
+id: input.id,
+userId: context.user.id,
+}),
+),
+
+createProject: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/projects",
+tags: ["CVMate Profile"],
+operationId: "createCvmateProject",
+summary: "Create project",
+description:
+"Adds a project to the authenticated user's CVMate Master Profile. The record must contain at least one non-empty business field. Requires authentication.",
+successDescription: "The created project.",
+})
+.input(cvmateProfileDto.createProject.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createProject.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createProject({
+userId: context.user.id,
+...input,
+}),
+),
+
+updateProject: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/projects/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateProject",
+summary: "Update project",
+description:
+"Updates a project belonging to the authenticated user's CVMate Master Profile. An update cannot leave the project entirely empty. Requires authentication.",
+successDescription: "The updated project.",
+})
+.input(cvmateProfileDto.updateProject.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateProject.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateProject({
+userId: context.user.id,
+...input,
+}),
+),
+
+deleteProject: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/projects/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateProject",
+summary: "Delete project",
+description:
+"Deletes a project belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The project was deleted.",
+})
+.input(cvmateProfileDto.deleteProject.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteProject.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteProject({
 id: input.id,
 userId: context.user.id,
 }),

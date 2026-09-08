@@ -40,6 +40,19 @@ createdAt: new Date("2026-09-08T10:00:00.000Z"),
 updatedAt: new Date("2026-09-08T10:00:00.000Z"),
 };
 
+const project = {
+id: "project-1",
+masterProfileId: "profile-1",
+name: "CVMate",
+company: null,
+startDate: null,
+endDate: null,
+description: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
 const createSelectChain = (rows: unknown[]) => ({
 from: () => ({
 where: () => Promise.resolve(rows),
@@ -64,6 +77,15 @@ const set = vi.fn(() => ({ where }));
 dbMock.update.mockReturnValue({ set });
 
 return { set, where, returning };
+};
+
+const mockDeleteReturning = (rows: unknown[]) => {
+const returning = vi.fn(() => Promise.resolve(rows));
+const where = vi.fn(() => ({ returning }));
+
+dbMock.delete.mockReturnValue({ where });
+
+return { where, returning };
 };
 
 beforeEach(() => {
@@ -166,18 +188,18 @@ dbMock.insert.mockReturnValueOnce({ values: profileValues });
 
 const updatedProfile = {
 ...profile,
-location: "Wroc�aw",
+location: "Wroclaw",
 };
 
 mockUpdateReturning([updatedProfile]);
 
 const result = await cvmateProfileService.updateBasics({
 userId: "user-1",
-location: "Wroc�aw",
+location: "Wroclaw",
 });
 
 expect(dbMock.insert).toHaveBeenCalledTimes(1);
-expect(result.location).toBe("Wroc�aw");
+expect(result.location).toBe("Wroclaw");
 });
 });
 
@@ -250,5 +272,105 @@ code: "NOT_FOUND",
 });
 
 expect(dbMock.insert).not.toHaveBeenCalled();
+});
+});
+
+describe("cvmateProfileService projects", () => {
+it("creates a project inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdProject = {
+...project,
+description: "Commercial CV builder",
+};
+
+const returning = vi.fn(() => Promise.resolve([createdProject]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createProject({
+userId: "user-1",
+name: "CVMate",
+description: "Commercial CV builder",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+name: "CVMate",
+description: "Commercial CV builder",
+}),
+);
+expect(result).toEqual(createdProject);
+});
+
+it("rejects an update that would leave an entirely empty project", async () => {
+setSelectResults([{ ...profile }], [{ ...project }]);
+
+await expect(
+cvmateProfileService.updateProject({
+id: "project-1",
+userId: "user-1",
+name: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("returns NOT_FOUND when the project is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateProject({
+id: "project-other-user",
+userId: "user-1",
+description: "Changed",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned project when at least one business field remains", async () => {
+setSelectResults([{ ...profile }], [{ ...project }]);
+
+const updatedProject = {
+...project,
+description: "Updated project description",
+};
+
+const { set } = mockUpdateReturning([updatedProject]);
+
+const result = await cvmateProfileService.updateProject({
+id: "project-1",
+userId: "user-1",
+description: "Updated project description",
+});
+
+expect(set).toHaveBeenCalledWith({
+description: "Updated project description",
+});
+expect(result.description).toBe("Updated project description");
+});
+
+it("deletes only a project owned by the current user's profile", async () => {
+setSelectResults([{ ...profile }], [{ ...project }]);
+
+const { returning } = mockDeleteReturning([{ id: "project-1" }]);
+
+await expect(
+cvmateProfileService.deleteProject({
+id: "project-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
 });
 });

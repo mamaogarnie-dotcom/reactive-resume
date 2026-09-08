@@ -14,4 +14,7 @@ unlinkEmploymentFact: crudRouter.unlinkEmploymentFact,
 createListItem: crudRouter.createListItem,
 updateListItem: crudRouter.updateListItem,
 deleteListItem: crudRouter.deleteListItem,
+createProject: crudRouter.createProject,
+updateProject: crudRouter.updateProject,
+deleteProject: crudRouter.deleteProject,
 };

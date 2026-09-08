@@ -341,6 +341,27 @@ hasEmploymentContent,
 "Employment must contain at least one non-empty business field.",
 );
 
+const projectEditableSchema = projectSchema
+.pick({
+name: true,
+company: true,
+startDate: true,
+endDate: true,
+description: true,
+sortOrder: true,
+})
+.partial();
+
+const hasProjectContent = (value: z.infer<typeof projectEditableSchema>) =>
+[value.name, value.company, value.startDate, value.endDate, value.description].some(
+(field) => typeof field === "string" && field.trim().length > 0,
+);
+
+const projectCreateSchema = projectEditableSchema.refine(
+hasProjectContent,
+"Project must contain at least one non-empty business field.",
+);
+
 export const cvmateProfileDto = {
 getCurrent: {
 input: z.object({}).optional().default({}),
@@ -432,6 +453,27 @@ output: profileListItemSchema,
 },
 
 deleteListItem: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+
+createProject: {
+input: projectCreateSchema,
+output: projectSchema,
+},
+
+updateProject: {
+input: projectEditableSchema
+.extend({ id: z.string() })
+.refine(
+(value) =>
+Object.entries(value).some(([key, field]) => key !== "id" && field !== undefined),
+"Provide at least one field to update.",
+),
+output: projectSchema,
+},
+
+deleteProject: {
 input: z.object({ id: z.string() }),
 output: z.void(),
 },
