@@ -72,6 +72,17 @@ description?: string | null | undefined;
 sortOrder?: number | undefined;
 };
 
+type CertificationFields = {
+name?: string | null | undefined;
+issuingOrganization?: string | null | undefined;
+issueDate?: string | null | undefined;
+expiryDate?: string | null | undefined;
+credentialNumber?: string | null | undefined;
+credentialUrl?: string | null | undefined;
+description?: string | null | undefined;
+sortOrder?: number | undefined;
+};
+
 type ProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
@@ -254,6 +265,24 @@ if (!course) throw new ORPCError("NOT_FOUND");
 return { profile, course };
 }
 
+async function requireOwnedCertification(id: string, userId: string) {
+const profile = await requireCurrentProfile(userId);
+
+const [certification] = await db
+.select()
+.from(schema.cvmateCertification)
+.where(
+and(
+eq(schema.cvmateCertification.id, id),
+eq(schema.cvmateCertification.masterProfileId, profile.id),
+),
+);
+
+if (!certification) throw new ORPCError("NOT_FOUND");
+
+return { profile, certification };
+}
+
 function hasEmploymentContent(value: {
 company: string | null;
 jobTitle: string | null;
@@ -307,6 +336,26 @@ description: string | null;
 return [value.name, value.organizer, value.date, value.description].some(
 (field) => typeof field === "string" && field.trim().length > 0,
 );
+}
+
+function hasCertificationContent(value: {
+name: string | null;
+issuingOrganization: string | null;
+issueDate: string | null;
+expiryDate: string | null;
+credentialNumber: string | null;
+credentialUrl: string | null;
+description: string | null;
+}) {
+return [
+value.name,
+value.issuingOrganization,
+value.issueDate,
+value.expiryDate,
+value.credentialNumber,
+value.credentialUrl,
+value.description,
+].some((field) => typeof field === "string" && field.trim().length > 0);
 }
 
 export const cvmateProfileService = {
@@ -1044,6 +1093,101 @@ eq(schema.cvmateCourse.masterProfileId, course.masterProfileId),
 ),
 )
 .returning({ id: schema.cvmateCourse.id });
+
+if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+},
+
+createCertification: async (input: CertificationFields & { userId: string }) => {
+const { userId, ...fields } = input;
+const profile = await ensureProfile(userId);
+
+const [certification] = await db
+.insert(schema.cvmateCertification)
+.values({
+id: generateId(),
+masterProfileId: profile.id,
+...fields,
+})
+.returning();
+
+if (!certification) throw new Error("CVMATE_CERTIFICATION_CREATE_FAILED");
+
+return certification;
+},
+
+updateCertification: async (
+input: CertificationFields & {
+id: string;
+userId: string;
+},
+) => {
+const { certification } = await requireOwnedCertification(input.id, input.userId);
+const { id, userId, ...fields } = input;
+
+const merged = {
+name: fields.name !== undefined ? fields.name : certification.name,
+issuingOrganization:
+fields.issuingOrganization !== undefined
+? fields.issuingOrganization
+: certification.issuingOrganization,
+issueDate:
+fields.issueDate !== undefined ? fields.issueDate : certification.issueDate,
+expiryDate:
+fields.expiryDate !== undefined ? fields.expiryDate : certification.expiryDate,
+credentialNumber:
+fields.credentialNumber !== undefined
+? fields.credentialNumber
+: certification.credentialNumber,
+credentialUrl:
+fields.credentialUrl !== undefined
+? fields.credentialUrl
+: certification.credentialUrl,
+description:
+fields.description !== undefined
+? fields.description
+: certification.description,
+};
+
+if (!hasCertificationContent(merged)) {
+throw new ORPCError("BAD_REQUEST", {
+message: "Certification must contain at least one non-empty business field.",
+});
+}
+
+const [updated] = await db
+.update(schema.cvmateCertification)
+.set(fields)
+.where(
+and(
+eq(schema.cvmateCertification.id, id),
+eq(
+schema.cvmateCertification.masterProfileId,
+certification.masterProfileId,
+),
+),
+)
+.returning();
+
+if (!updated) throw new ORPCError("NOT_FOUND");
+
+return updated;
+},
+
+deleteCertification: async (input: { id: string; userId: string }) => {
+const { certification } = await requireOwnedCertification(input.id, input.userId);
+
+const rows = await db
+.delete(schema.cvmateCertification)
+.where(
+and(
+eq(schema.cvmateCertification.id, input.id),
+eq(
+schema.cvmateCertification.masterProfileId,
+certification.masterProfileId,
+),
+),
+)
+.returning({ id: schema.cvmateCertification.id });
 
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },

@@ -80,6 +80,21 @@ createdAt: new Date("2026-09-08T10:00:00.000Z"),
 updatedAt: new Date("2026-09-08T10:00:00.000Z"),
 };
 
+const certification = {
+id: "certification-1",
+masterProfileId: "profile-1",
+name: "Certified AI Specialist",
+issuingOrganization: null,
+issueDate: null,
+expiryDate: null,
+credentialNumber: null,
+credentialUrl: null,
+description: null,
+sortOrder: 0,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
+
 const createSelectChain = (rows: unknown[]) => ({
 from: () => ({
 where: () => Promise.resolve(rows),
@@ -594,6 +609,106 @@ const { returning } = mockDeleteReturning([{ id: "course-1" }]);
 await expect(
 cvmateProfileService.deleteCourse({
 id: "course-1",
+userId: "user-1",
+}),
+).resolves.toBeUndefined();
+
+expect(returning).toHaveBeenCalledTimes(1);
+});
+});
+
+describe("cvmateProfileService certifications", () => {
+it("creates a certification inside the current user's master profile", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdCertification = {
+...certification,
+issuingOrganization: "AI Institute",
+};
+
+const returning = vi.fn(() => Promise.resolve([createdCertification]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createCertification({
+userId: "user-1",
+name: "Certified AI Specialist",
+issuingOrganization: "AI Institute",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+name: "Certified AI Specialist",
+issuingOrganization: "AI Institute",
+}),
+);
+expect(result).toEqual(createdCertification);
+});
+
+it("rejects an update that would leave an entirely empty certification", async () => {
+setSelectResults([{ ...profile }], [{ ...certification }]);
+
+await expect(
+cvmateProfileService.updateCertification({
+id: "certification-1",
+userId: "user-1",
+name: null,
+}),
+).rejects.toMatchObject({
+code: "BAD_REQUEST",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("returns NOT_FOUND when the certification is outside the current user's profile", async () => {
+setSelectResults([{ ...profile }], []);
+
+await expect(
+cvmateProfileService.updateCertification({
+id: "certification-other-user",
+userId: "user-1",
+credentialNumber: "CERT-123",
+}),
+).rejects.toMatchObject({
+code: "NOT_FOUND",
+});
+
+expect(dbMock.update).not.toHaveBeenCalled();
+});
+
+it("updates an owned certification when at least one business field remains", async () => {
+setSelectResults([{ ...profile }], [{ ...certification }]);
+
+const updatedCertification = {
+...certification,
+credentialNumber: "CERT-123",
+};
+
+const { set } = mockUpdateReturning([updatedCertification]);
+
+const result = await cvmateProfileService.updateCertification({
+id: "certification-1",
+userId: "user-1",
+credentialNumber: "CERT-123",
+});
+
+expect(set).toHaveBeenCalledWith({
+credentialNumber: "CERT-123",
+});
+expect(result.credentialNumber).toBe("CERT-123");
+});
+
+it("deletes only a certification owned by the current user's profile", async () => {
+setSelectResults([{ ...profile }], [{ ...certification }]);
+
+const { returning } = mockDeleteReturning([{ id: "certification-1" }]);
+
+await expect(
+cvmateProfileService.deleteCertification({
+id: "certification-1",
 userId: "user-1",
 }),
 ).resolves.toBeUndefined();

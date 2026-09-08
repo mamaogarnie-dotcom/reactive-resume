@@ -411,6 +411,37 @@ hasCourseContent,
 "Course must contain at least one non-empty business field.",
 );
 
+const certificationEditableSchema = certificationSchema
+.pick({
+name: true,
+issuingOrganization: true,
+issueDate: true,
+expiryDate: true,
+credentialNumber: true,
+credentialUrl: true,
+description: true,
+sortOrder: true,
+})
+.partial();
+
+const hasCertificationContent = (
+value: z.infer<typeof certificationEditableSchema>,
+) =>
+[
+value.name,
+value.issuingOrganization,
+value.issueDate,
+value.expiryDate,
+value.credentialNumber,
+value.credentialUrl,
+value.description,
+].some((field) => typeof field === "string" && field.trim().length > 0);
+
+const certificationCreateSchema = certificationEditableSchema.refine(
+hasCertificationContent,
+"Certification must contain at least one non-empty business field.",
+);
+
 export const cvmateProfileDto = {
 getCurrent: {
 input: z.object({}).optional().default({}),
@@ -432,7 +463,9 @@ input: employmentEditableSchema
 .extend({ id: z.string() })
 .refine(
 (value) =>
-Object.entries(value).some(([key, field]) => key !== "id" && field !== undefined),
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
 "Provide at least one field to update.",
 ),
 output: employmentSchema,
@@ -516,7 +549,9 @@ input: projectEditableSchema
 .extend({ id: z.string() })
 .refine(
 (value) =>
-Object.entries(value).some(([key, field]) => key !== "id" && field !== undefined),
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
 "Provide at least one field to update.",
 ),
 output: projectSchema,
@@ -537,7 +572,9 @@ input: educationEditableSchema
 .extend({ id: z.string() })
 .refine(
 (value) =>
-Object.entries(value).some(([key, field]) => key !== "id" && field !== undefined),
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
 "Provide at least one field to update.",
 ),
 output: educationSchema,
@@ -558,13 +595,38 @@ input: courseEditableSchema
 .extend({ id: z.string() })
 .refine(
 (value) =>
-Object.entries(value).some(([key, field]) => key !== "id" && field !== undefined),
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
 "Provide at least one field to update.",
 ),
 output: courseSchema,
 },
 
 deleteCourse: {
+input: z.object({ id: z.string() }),
+output: z.void(),
+},
+
+createCertification: {
+input: certificationCreateSchema,
+output: certificationSchema,
+},
+
+updateCertification: {
+input: certificationEditableSchema
+.extend({ id: z.string() })
+.refine(
+(value) =>
+Object.entries(value).some(
+([key, field]) => key !== "id" && field !== undefined,
+),
+"Provide at least one field to update.",
+),
+output: certificationSchema,
+},
+
+deleteCertification: {
 input: z.object({ id: z.string() }),
 output: z.void(),
 },

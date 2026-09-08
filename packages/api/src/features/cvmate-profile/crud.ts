@@ -469,4 +469,67 @@ id: input.id,
 userId: context.user.id,
 }),
 ),
+
+createCertification: protectedProcedure
+.route({
+method: "POST",
+path: "/cvmate/profile/certifications",
+tags: ["CVMate Profile"],
+operationId: "createCvmateCertification",
+summary: "Create certification",
+description:
+"Adds a certification to the authenticated user's CVMate Master Profile. The record must contain at least one non-empty business field. Requires authentication.",
+successDescription: "The created certification.",
+})
+.input(cvmateProfileDto.createCertification.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.createCertification.output)
+.handler(({ input, context }) =>
+cvmateProfileService.createCertification({
+userId: context.user.id,
+...input,
+}),
+),
+
+updateCertification: protectedProcedure
+.route({
+method: "PUT",
+path: "/cvmate/profile/certifications/{id}",
+tags: ["CVMate Profile"],
+operationId: "updateCvmateCertification",
+summary: "Update certification",
+description:
+"Updates a certification belonging to the authenticated user's CVMate Master Profile. An update cannot leave the certification entirely empty. Requires authentication.",
+successDescription: "The updated certification.",
+})
+.input(cvmateProfileDto.updateCertification.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.updateCertification.output)
+.handler(({ input, context }) =>
+cvmateProfileService.updateCertification({
+userId: context.user.id,
+...input,
+}),
+),
+
+deleteCertification: protectedProcedure
+.route({
+method: "DELETE",
+path: "/cvmate/profile/certifications/{id}",
+tags: ["CVMate Profile"],
+operationId: "deleteCvmateCertification",
+summary: "Delete certification",
+description:
+"Deletes a certification belonging to the authenticated user's CVMate Master Profile. Requires authentication.",
+successDescription: "The certification was deleted.",
+})
+.input(cvmateProfileDto.deleteCertification.input)
+.use(resumeMutationRateLimit)
+.output(cvmateProfileDto.deleteCertification.output)
+.handler(({ input, context }) =>
+cvmateProfileService.deleteCertification({
+id: input.id,
+userId: context.user.id,
+}),
+),
 };
