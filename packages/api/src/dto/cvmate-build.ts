@@ -17,6 +17,7 @@ const cvmateBuildStatusSchema = z.enum(["active", "completed", "abandoned"]);
 const cvmateGapOriginSchema = z.enum(["detected", "user"]);
 const cvmateGapStatusSchema = z.enum(["open", "resolved", "dismissed"]);
 const cvmateRequirementPrioritySchema = z.enum(["critical", "important", "additional"]);
+const cvmateGeneratedContentKindSchema = z.enum(["professional_summary", "experience_fact", "section_title", "other"]);
 
 const cvmateSelectionSourceTypeSchema = z.enum([
 	"employment",
@@ -88,6 +89,25 @@ const cvmateGapSchema = createSelectSchema(schema.cvmateCvGap, {
 	updatedAt: z.date(),
 });
 
+const cvmateGeneratedContentSchema = createSelectSchema(schema.cvmateCvGeneratedContent, {
+	id: z.string(),
+	cvBuildId: z.string(),
+	selectionItemId: z.string().nullable(),
+	kind: cvmateGeneratedContentKindSchema,
+	sourceText: z.string().nullable(),
+	sourceDataSnapshot: jsonObjectSchema,
+	aiText: z.string().nullable(),
+	finalText: z.string().nullable(),
+	model: z.string().nullable(),
+	promptVersion: z.string().nullable(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+const updateGeneratedContentFinalTextSchema = z.object({
+	id: z.string().trim().min(1),
+	finalText: nullableTrimmedStringSchema,
+});
 const createBuildSchema = z.object({
 	jobOfferId: z.string().nullable().optional(),
 	targetLanguage: nullableTrimmedStringSchema.optional(),
@@ -234,6 +254,15 @@ export const cvmateBuildDto = {
 		input: z.object({ id: z.string().trim().min(1) }),
 		output: z.void(),
 	},
+	listGeneratedContent: {
+		input: z.object({ cvBuildId: z.string().trim().min(1) }),
+		output: z.array(cvmateGeneratedContentSchema),
+	},
+
+	updateGeneratedContentFinalText: {
+		input: updateGeneratedContentFinalTextSchema,
+		output: cvmateGeneratedContentSchema,
+	},
 };
 
 export {
@@ -243,6 +272,8 @@ export {
 	cvmateGapOriginSchema,
 	cvmateGapSchema,
 	cvmateGapStatusSchema,
+	cvmateGeneratedContentKindSchema,
+	cvmateGeneratedContentSchema,
 	cvmateRequirementPrioritySchema,
 	cvmateSelectionItemSchema,
 	cvmateSelectionSourceTypeSchema,

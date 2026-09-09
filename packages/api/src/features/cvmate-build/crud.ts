@@ -268,4 +268,44 @@ export const crudRouter = {
 				userId: context.user.id,
 			}),
 		),
+	listGeneratedContent: protectedProcedure
+		.route({
+			method: "GET",
+			path: "/cvmate/builds/{cvBuildId}/generated-content",
+			tags: ["CVMate CV Build"],
+			operationId: "listCvmateCvGeneratedContent",
+			summary: "List CV generated content",
+			description:
+				"Returns generated content records belonging to an authenticated user's CV build. Requires authentication.",
+			successDescription: "The CV build generated content records.",
+		})
+		.input(cvmateBuildDto.listGeneratedContent.input)
+		.output(cvmateBuildDto.listGeneratedContent.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.listGeneratedContent({
+				cvBuildId: input.cvBuildId,
+				userId: context.user.id,
+			}),
+		),
+
+	updateGeneratedContentFinalText: protectedProcedure
+		.route({
+			method: "PUT",
+			path: "/cvmate/generated-content/{id}/final-text",
+			tags: ["CVMate CV Build"],
+			operationId: "updateCvmateCvGeneratedContentFinalText",
+			summary: "Update generated content final text",
+			description:
+				"Updates or clears only the user-editable final text of an owned generated content record. AI text, source snapshots, model and prompt metadata remain server-owned. Requires authentication.",
+			successDescription: "The updated generated content record.",
+		})
+		.input(cvmateBuildDto.updateGeneratedContentFinalText.input)
+		.use(resumeMutationRateLimit)
+		.output(cvmateBuildDto.updateGeneratedContentFinalText.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.updateGeneratedContentFinalText({
+				userId: context.user.id,
+				...input,
+			}),
+		),
 };

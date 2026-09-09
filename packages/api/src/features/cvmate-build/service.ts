@@ -96,6 +96,18 @@ async function requireOwnedGap(id: string, userId: string) {
 	return { gap, build };
 }
 
+async function requireOwnedGeneratedContent(id: string, userId: string) {
+	const [generatedContent] = await db
+		.select()
+		.from(schema.cvmateCvGeneratedContent)
+		.where(eq(schema.cvmateCvGeneratedContent.id, id));
+
+	if (!generatedContent) throw new ORPCError("NOT_FOUND");
+
+	await requireOwnedBuild(generatedContent.cvBuildId, userId);
+
+	return generatedContent;
+}
 async function resolveGapResolutionSource(cvBuildId: string, sourceType: CvmateSelectionSourceType, sourceId: string) {
 	const [selectionItem] = await db
 		.select()
@@ -760,5 +772,35 @@ export const cvmateBuildService = {
 			.returning({ id: schema.cvmateCvGap.id });
 
 		if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+	},
+	listGeneratedContent: async (input: { cvBuildId: string; userId: string }) => {
+		const build = await requireOwnedBuild(input.cvBuildId, input.userId);
+
+		return db
+			.select()
+			.from(schema.cvmateCvGeneratedContent)
+			.where(eq(schema.cvmateCvGeneratedContent.cvBuildId, build.id))
+			.orderBy(asc(schema.cvmateCvGeneratedContent.createdAt));
+	},
+
+	updateGeneratedContentFinalText: async (input: { id: string; userId: string; finalText: string | null }) => {
+		const generatedContent = await requireOwnedGeneratedContent(input.id, input.userId);
+
+		const [updated] = await db
+			.update(schema.cvmateCvGeneratedContent)
+			.set({
+				finalText: input.finalText,
+			})
+			.where(
+				and(
+					eq(schema.cvmateCvGeneratedContent.id, input.id),
+					eq(schema.cvmateCvGeneratedContent.cvBuildId, generatedContent.cvBuildId),
+				),
+			)
+			.returning();
+
+		if (!updated) throw new ORPCError("NOT_FOUND");
+
+		return updated;
 	},
 };

@@ -34,6 +34,11 @@ vi.mock("@reactive-resume/db/schema", () => ({
 		sortOrder: "sort_order",
 		createdAt: "created_at",
 	},
+	cvmateCvGeneratedContent: {
+		id: "generated_content_id",
+		cvBuildId: "cv_build_id",
+		createdAt: "created_at",
+	},
 }));
 
 vi.mock("drizzle-orm", () => ({
@@ -217,6 +222,20 @@ const resolvedGap = {
 	resolutionSourceId: "fact-1",
 	resolutionTextSnapshot: experienceFact.text,
 	resolvedAt: new Date("2026-09-09T12:20:00.000Z"),
+};
+const generatedContent = {
+	id: "generated-1",
+	cvBuildId: "build-1",
+	selectionItemId: "selection-1",
+	kind: "experience_fact" as const,
+	sourceText: experienceFact.text,
+	sourceDataSnapshot: { ...experienceFact },
+	aiText: "AI rewritten experience fact.",
+	finalText: null,
+	model: "test-model",
+	promptVersion: "v1",
+	createdAt: new Date("2026-09-09T12:40:00.000Z"),
+	updatedAt: new Date("2026-09-09T12:40:00.000Z"),
 };
 
 const createSelectChain = (rows: unknown[]) => {
@@ -1118,5 +1137,99 @@ describe("cvmateBuildService.deleteGap", () => {
 		});
 
 		expect(dbMock.delete).not.toHaveBeenCalled();
+	});
+});
+describe("cvmateBuildService.listGeneratedContent", () => {
+	it("lists generated content only after verifying ownership of the CV build", async () => {
+		setSelectResults([{ ...build }], [{ ...generatedContent }]);
+
+		const result = await cvmateBuildService.listGeneratedContent({
+			cvBuildId: "build-1",
+			userId: "user-1",
+		});
+
+		expect(result).toEqual([generatedContent]);
+	});
+
+	it("rejects listing generated content for an inaccessible CV build", async () => {
+		setSelectResults([]);
+
+		await expect(
+			cvmateBuildService.listGeneratedContent({
+				cvBuildId: "build-other-user",
+				userId: "user-1",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+	});
+});
+
+describe("cvmateBuildService.updateGeneratedContentFinalText", () => {
+	it("updates only finalText on an owned generated content record", async () => {
+		setSelectResults([{ ...generatedContent }], [{ ...build }]);
+
+		const updated = {
+			...generatedContent,
+			finalText: "User-approved final experience text.",
+		};
+
+		const { set } = mockUpdateReturning([updated]);
+
+		const result = await cvmateBuildService.updateGeneratedContentFinalText({
+			id: "generated-1",
+			userId: "user-1",
+			finalText: "User-approved final experience text.",
+		});
+
+		expect(set).toHaveBeenCalledWith({
+			finalText: "User-approved final experience text.",
+		});
+
+		expect(result).toEqual(updated);
+	});
+
+	it("clears the finalText override with null", async () => {
+		const contentWithFinalText = {
+			...generatedContent,
+			finalText: "User-approved final experience text.",
+		};
+
+		setSelectResults([contentWithFinalText], [{ ...build }]);
+
+		const updated = {
+			...contentWithFinalText,
+			finalText: null,
+		};
+
+		const { set } = mockUpdateReturning([updated]);
+
+		const result = await cvmateBuildService.updateGeneratedContentFinalText({
+			id: "generated-1",
+			userId: "user-1",
+			finalText: null,
+		});
+
+		expect(set).toHaveBeenCalledWith({
+			finalText: null,
+		});
+
+		expect(result).toEqual(updated);
+	});
+
+	it("does not update generated content whose CV build is inaccessible", async () => {
+		setSelectResults([{ ...generatedContent }], []);
+
+		await expect(
+			cvmateBuildService.updateGeneratedContentFinalText({
+				id: "generated-1",
+				userId: "user-other",
+				finalText: "Unauthorized edit.",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+
+		expect(dbMock.update).not.toHaveBeenCalled();
 	});
 });

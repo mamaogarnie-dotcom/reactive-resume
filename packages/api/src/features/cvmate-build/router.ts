@@ -14,4 +14,6 @@ export const cvmateBuildRouter = {
 	createGap: crudRouter.createGap,
 	updateGap: crudRouter.updateGap,
 	deleteGap: crudRouter.deleteGap,
+	listGeneratedContent: crudRouter.listGeneratedContent,
+	updateGeneratedContentFinalText: crudRouter.updateGeneratedContentFinalText,
 };
