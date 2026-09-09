@@ -15,6 +15,24 @@ const cvmateBuildStepSchema = z.enum([
 
 const cvmateBuildStatusSchema = z.enum(["active", "completed", "abandoned"]);
 
+const cvmateSelectionSourceTypeSchema = z.enum([
+	"employment",
+	"experience_fact",
+	"project",
+	"education",
+	"course",
+	"certification",
+	"volunteer",
+	"language",
+	"award",
+	"reference",
+	"license",
+	"profile_list_item",
+	"clause",
+	"profile_photo",
+	"custom_section_item",
+]);
+
 const jsonObjectSchema = z.record(z.string(), z.unknown());
 const nullableTrimmedStringSchema = z.string().trim().min(1).nullable();
 
@@ -29,6 +47,22 @@ const cvmateBuildSchema = createSelectSchema(schema.cvmateCvBuild, {
 	jobOfferSnapshot: jsonObjectSchema.nullable(),
 	designSettings: jsonObjectSchema.nullable(),
 	completedAt: z.date().nullable(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+const cvmateSelectionItemSchema = createSelectSchema(schema.cvmateCvSelectionItem, {
+	id: z.string(),
+	cvBuildId: z.string(),
+	parentSelectionItemId: z.string().nullable(),
+	sourceType: cvmateSelectionSourceTypeSchema,
+	sourceId: z.string(),
+	sourceTextSnapshot: z.string().nullable(),
+	sourceDataSnapshot: jsonObjectSchema,
+	recommended: z.boolean(),
+	selected: z.boolean(),
+	recommendationReason: z.string().nullable(),
+	sortOrder: z.number().int(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
@@ -58,6 +92,28 @@ const updateBuildSchema = z
 		"Provide at least one CV build field to update.",
 	);
 
+const createSelectionItemSchema = z.object({
+	cvBuildId: z.string(),
+	parentSelectionItemId: z.string().trim().min(1).nullable().optional(),
+	sourceType: cvmateSelectionSourceTypeSchema,
+	sourceId: z.string().trim().min(1),
+	selected: z.boolean().optional(),
+	sortOrder: z.number().int().optional(),
+});
+
+const updateSelectionItemSchema = z
+	.object({
+		id: z.string(),
+		parentSelectionItemId: z.string().trim().min(1).nullable().optional(),
+		selected: z.boolean().optional(),
+		sortOrder: z.number().int().optional(),
+	})
+	.refine(
+		(value) =>
+			value.parentSelectionItemId !== undefined || value.selected !== undefined || value.sortOrder !== undefined,
+		"Provide at least one selection item field to update.",
+	);
+
 export const cvmateBuildDto = {
 	list: {
 		input: z.object({}).optional().default({}),
@@ -83,6 +139,32 @@ export const cvmateBuildDto = {
 		input: z.object({ id: z.string() }),
 		output: z.void(),
 	},
+
+	listSelectionItems: {
+		input: z.object({ cvBuildId: z.string() }),
+		output: z.array(cvmateSelectionItemSchema),
+	},
+
+	createSelectionItem: {
+		input: createSelectionItemSchema,
+		output: cvmateSelectionItemSchema,
+	},
+
+	updateSelectionItem: {
+		input: updateSelectionItemSchema,
+		output: cvmateSelectionItemSchema,
+	},
+
+	deleteSelectionItem: {
+		input: z.object({ id: z.string() }),
+		output: z.void(),
+	},
 };
 
-export { cvmateBuildSchema, cvmateBuildStatusSchema, cvmateBuildStepSchema };
+export {
+	cvmateBuildSchema,
+	cvmateBuildStatusSchema,
+	cvmateBuildStepSchema,
+	cvmateSelectionItemSchema,
+	cvmateSelectionSourceTypeSchema,
+};

@@ -1,7 +1,7 @@
+import type { CvmateBuildStatus, CvmateBuildStep, CvmateSelectionSourceType } from "@reactive-resume/db/schema";
 import { ORPCError } from "@orpc/client";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
-import { type CvmateBuildStatus, type CvmateBuildStep } from "@reactive-resume/db/schema";
 import * as schema from "@reactive-resume/db/schema";
 import { generateId } from "@reactive-resume/utils/string";
 import { cvmateJobOfferService } from "../cvmate-job-offer/service";
@@ -21,6 +21,22 @@ type BuildUpdateFields = {
 	designSettings?: Record<string, unknown> | null | undefined;
 };
 
+type SelectionItemCreateFields = {
+	parentSelectionItemId?: string | null | undefined;
+	sourceType: CvmateSelectionSourceType;
+	sourceId: string;
+	selected?: boolean | undefined;
+	sortOrder?: number | undefined;
+};
+
+type SelectionItemUpdateFields = {
+	parentSelectionItemId?: string | null | undefined;
+	selected?: boolean | undefined;
+	sortOrder?: number | undefined;
+};
+
+type CurrentProfile = NonNullable<Awaited<ReturnType<typeof cvmateProfileService.getCurrent>>>;
+
 const stripUserId = <T extends { userId: string }>(row: T) => {
 	const { userId: _userId, ...rest } = row;
 	return rest;
@@ -35,6 +51,19 @@ async function requireOwnedBuild(id: string, userId: string) {
 	if (!build) throw new ORPCError("NOT_FOUND");
 
 	return build;
+}
+
+async function requireOwnedSelectionItem(id: string, userId: string) {
+	const [selectionItem] = await db
+		.select()
+		.from(schema.cvmateCvSelectionItem)
+		.where(eq(schema.cvmateCvSelectionItem.id, id));
+
+	if (!selectionItem) throw new ORPCError("NOT_FOUND");
+
+	const build = await requireOwnedBuild(selectionItem.cvBuildId, userId);
+
+	return { selectionItem, build };
 }
 
 async function getJobOfferSnapshot(jobOfferId: string, userId: string) {
@@ -55,6 +84,247 @@ function validateCompletionState(currentStep: CvmateBuildStep, status: CvmateBui
 			message: 'CV build step "completed" and status "completed" must be set together.',
 		});
 	}
+}
+
+async function getBuildProfile(build: Awaited<ReturnType<typeof requireOwnedBuild>>, userId: string) {
+	if (!build.masterProfileId) {
+		throw new ORPCError("BAD_REQUEST", {
+			message: "The CV build Master Profile is no longer available.",
+		});
+	}
+
+	const profile = await cvmateProfileService.getCurrent({ userId });
+
+	if (!profile || profile.profile.id !== build.masterProfileId) {
+		throw new ORPCError("BAD_REQUEST", {
+			message: "The CV build Master Profile is no longer available.",
+		});
+	}
+
+	return profile;
+}
+
+function findSelectionSource(profile: CurrentProfile, sourceType: CvmateSelectionSourceType, sourceId: string) {
+	switch (sourceType) {
+		case "employment":
+			return profile.employments.find((item) => item.id === sourceId);
+		case "experience_fact":
+			return profile.experienceFacts.find((item) => item.id === sourceId);
+		case "project":
+			return profile.projects.find((item) => item.id === sourceId);
+		case "education":
+			return profile.education.find((item) => item.id === sourceId);
+		case "course":
+			return profile.courses.find((item) => item.id === sourceId);
+		case "certification":
+			return profile.certifications.find((item) => item.id === sourceId);
+		case "volunteer":
+			return profile.volunteer.find((item) => item.id === sourceId);
+		case "language":
+			return profile.languages.find((item) => item.id === sourceId);
+		case "award":
+			return profile.awards.find((item) => item.id === sourceId);
+		case "reference":
+			return profile.references.find((item) => item.id === sourceId);
+		case "license":
+			return profile.licenses.find((item) => item.id === sourceId);
+		case "profile_list_item":
+			return profile.listItems.find((item) => item.id === sourceId);
+		case "clause":
+			return profile.clauses.find((item) => item.id === sourceId);
+		case "profile_photo":
+			return profile.photos.find((item) => item.id === sourceId);
+		case "custom_section_item":
+			return profile.customSectionItems.find((item) => item.id === sourceId);
+	}
+}
+
+function firstText(...values: Array<string | null | undefined>) {
+	for (const value of values) {
+		if (typeof value === "string" && value.trim().length > 0) {
+			return value.trim();
+		}
+	}
+
+	return null;
+}
+
+function getSelectionSourceText(sourceType: CvmateSelectionSourceType, source: ReturnType<typeof findSelectionSource>) {
+	if (!source) return null;
+
+	switch (sourceType) {
+		case "employment": {
+			const value = source as CurrentProfile["employments"][number];
+			const parts = [value.jobTitle, value.company]
+				.filter((part): part is string => typeof part === "string" && part.trim().length > 0)
+				.map((part) => part.trim());
+
+			return parts.length > 0 ? parts.join(" — ") : null;
+		}
+
+		case "experience_fact":
+			return firstText((source as CurrentProfile["experienceFacts"][number]).text);
+
+		case "project": {
+			const value = source as CurrentProfile["projects"][number];
+			return firstText(value.description, value.name, value.company);
+		}
+
+		case "education": {
+			const value = source as CurrentProfile["education"][number];
+			return firstText(value.description, value.degree, value.fieldOfStudy, value.institution);
+		}
+
+		case "course": {
+			const value = source as CurrentProfile["courses"][number];
+			return firstText(value.description, value.name, value.organizer);
+		}
+
+		case "certification": {
+			const value = source as CurrentProfile["certifications"][number];
+			return firstText(value.description, value.name, value.issuingOrganization);
+		}
+
+		case "volunteer": {
+			const value = source as CurrentProfile["volunteer"][number];
+			return firstText(value.description, value.role, value.organization);
+		}
+
+		case "language": {
+			const value = source as CurrentProfile["languages"][number];
+			const parts = [value.language, value.level]
+				.filter((part): part is string => typeof part === "string" && part.trim().length > 0)
+				.map((part) => part.trim());
+
+			return parts.length > 0 ? parts.join(" — ") : null;
+		}
+
+		case "award": {
+			const value = source as CurrentProfile["awards"][number];
+			return firstText(value.description, value.name, value.organizer);
+		}
+
+		case "reference": {
+			const value = source as CurrentProfile["references"][number];
+			return firstText(value.description, value.name, value.issuer);
+		}
+
+		case "license": {
+			const value = source as CurrentProfile["licenses"][number];
+			return firstText(value.description, value.name);
+		}
+
+		case "profile_list_item":
+			return firstText((source as CurrentProfile["listItems"][number]).value);
+
+		case "clause":
+			return firstText((source as CurrentProfile["clauses"][number]).content);
+
+		case "profile_photo": {
+			const value = source as CurrentProfile["photos"][number];
+			return firstText(value.label, value.filename);
+		}
+
+		case "custom_section_item": {
+			const value = source as CurrentProfile["customSectionItems"][number];
+			return firstText(value.description, value.title, value.subtitle);
+		}
+	}
+}
+
+async function resolveSelectionSource(
+	build: Awaited<ReturnType<typeof requireOwnedBuild>>,
+	userId: string,
+	sourceType: CvmateSelectionSourceType,
+	sourceId: string,
+) {
+	const profile = await getBuildProfile(build, userId);
+	const source = findSelectionSource(profile, sourceType, sourceId);
+
+	if (!source) {
+		throw new ORPCError("NOT_FOUND", {
+			message: "The selected Master Profile source does not exist.",
+		});
+	}
+
+	return {
+		profile,
+		sourceTextSnapshot: getSelectionSourceText(sourceType, source),
+		sourceDataSnapshot: structuredClone(source) as Record<string, unknown>,
+	};
+}
+
+async function requireParentSelectionItem(parentSelectionItemId: string, cvBuildId: string, userId: string) {
+	const { selectionItem } = await requireOwnedSelectionItem(parentSelectionItemId, userId);
+
+	if (selectionItem.cvBuildId !== cvBuildId) {
+		throw new ORPCError("BAD_REQUEST", {
+			message: "Parent selection item must belong to the same CV build.",
+		});
+	}
+
+	return selectionItem;
+}
+
+function validateEmploymentFactParent(
+	profile: CurrentProfile,
+	sourceType: CvmateSelectionSourceType,
+	sourceId: string,
+	parentSelectionItem: Awaited<ReturnType<typeof requireParentSelectionItem>> | null,
+) {
+	if (sourceType !== "experience_fact" || !parentSelectionItem || parentSelectionItem.sourceType !== "employment") {
+		return;
+	}
+
+	const linked = profile.employmentFacts.some(
+		(link) => link.employmentId === parentSelectionItem.sourceId && link.experienceFactId === sourceId,
+	);
+
+	if (!linked) {
+		throw new ORPCError("BAD_REQUEST", {
+			message: "The experience fact is not linked to the selected employment in the Master Profile.",
+		});
+	}
+}
+
+async function validateSelectionParentUpdate(
+	selectionItem: Awaited<ReturnType<typeof requireOwnedSelectionItem>>["selectionItem"],
+	parentSelectionItemId: string | null,
+	userId: string,
+) {
+	if (parentSelectionItemId === null) return null;
+
+	if (parentSelectionItemId === selectionItem.id) {
+		throw new ORPCError("BAD_REQUEST", {
+			message: "A selection item cannot be its own parent.",
+		});
+	}
+
+	let current = await requireParentSelectionItem(parentSelectionItemId, selectionItem.cvBuildId, userId);
+
+	const visited = new Set<string>();
+
+	while (current) {
+		if (current.id === selectionItem.id) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "Selection item parent hierarchy cannot contain a cycle.",
+			});
+		}
+
+		if (visited.has(current.id)) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "Selection item parent hierarchy contains a cycle.",
+			});
+		}
+
+		visited.add(current.id);
+
+		if (!current.parentSelectionItemId) break;
+
+		current = await requireParentSelectionItem(current.parentSelectionItemId, selectionItem.cvBuildId, userId);
+	}
+
+	return requireParentSelectionItem(parentSelectionItemId, selectionItem.cvBuildId, userId);
 }
 
 export const cvmateBuildService = {
@@ -177,6 +447,121 @@ export const cvmateBuildService = {
 			.delete(schema.cvmateCvBuild)
 			.where(and(eq(schema.cvmateCvBuild.id, input.id), eq(schema.cvmateCvBuild.userId, input.userId)))
 			.returning({ id: schema.cvmateCvBuild.id });
+
+		if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+	},
+
+	listSelectionItems: async (input: { cvBuildId: string; userId: string }) => {
+		const build = await requireOwnedBuild(input.cvBuildId, input.userId);
+
+		return db
+			.select()
+			.from(schema.cvmateCvSelectionItem)
+			.where(eq(schema.cvmateCvSelectionItem.cvBuildId, build.id))
+			.orderBy(asc(schema.cvmateCvSelectionItem.sortOrder), asc(schema.cvmateCvSelectionItem.createdAt));
+	},
+
+	createSelectionItem: async (
+		input: SelectionItemCreateFields & {
+			cvBuildId: string;
+			userId: string;
+		},
+	) => {
+		const build = await requireOwnedBuild(input.cvBuildId, input.userId);
+
+		const { profile, sourceTextSnapshot, sourceDataSnapshot } = await resolveSelectionSource(
+			build,
+			input.userId,
+			input.sourceType,
+			input.sourceId,
+		);
+
+		const parentSelectionItem = input.parentSelectionItemId
+			? await requireParentSelectionItem(input.parentSelectionItemId, build.id, input.userId)
+			: null;
+
+		validateEmploymentFactParent(profile, input.sourceType, input.sourceId, parentSelectionItem);
+
+		const [selectionItem] = await db
+			.insert(schema.cvmateCvSelectionItem)
+			.values({
+				id: generateId(),
+				cvBuildId: build.id,
+				parentSelectionItemId: input.parentSelectionItemId ?? null,
+				sourceType: input.sourceType,
+				sourceId: input.sourceId,
+				sourceTextSnapshot,
+				sourceDataSnapshot,
+				selected: input.selected ?? false,
+				sortOrder: input.sortOrder ?? 0,
+			})
+			.returning();
+
+		if (!selectionItem) {
+			throw new Error("CVMATE_CV_SELECTION_ITEM_CREATE_FAILED");
+		}
+
+		return selectionItem;
+	},
+
+	updateSelectionItem: async (
+		input: SelectionItemUpdateFields & {
+			id: string;
+			userId: string;
+		},
+	) => {
+		const { selectionItem, build } = await requireOwnedSelectionItem(input.id, input.userId);
+
+		const { id, userId, ...fields } = input;
+
+		if (Object.keys(fields).length === 0) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "Provide at least one selection item field to update.",
+			});
+		}
+
+		if (fields.parentSelectionItemId !== undefined) {
+			const parentSelectionItem = await validateSelectionParentUpdate(
+				selectionItem,
+				fields.parentSelectionItemId,
+				userId,
+			);
+
+			if (selectionItem.sourceType === "experience_fact" && parentSelectionItem?.sourceType === "employment") {
+				const profile = await getBuildProfile(build, userId);
+
+				validateEmploymentFactParent(profile, selectionItem.sourceType, selectionItem.sourceId, parentSelectionItem);
+			}
+		}
+
+		const [updated] = await db
+			.update(schema.cvmateCvSelectionItem)
+			.set(fields)
+			.where(
+				and(
+					eq(schema.cvmateCvSelectionItem.id, id),
+					eq(schema.cvmateCvSelectionItem.cvBuildId, selectionItem.cvBuildId),
+				),
+			)
+			.returning();
+
+		if (!updated) throw new ORPCError("NOT_FOUND");
+
+		return updated;
+	},
+
+	deleteSelectionItem: async (input: { id: string; userId: string }) => {
+		const { selectionItem } = await requireOwnedSelectionItem(input.id, input.userId);
+
+		const rows = await db
+			.delete(schema.cvmateCvSelectionItem)
+			.where(
+				and(
+					eq(schema.cvmateCvSelectionItem.id, input.id),
+					eq(schema.cvmateCvSelectionItem.cvBuildId, selectionItem.cvBuildId),
+				),
+			)
+			.returning({ id: schema.cvmateCvSelectionItem.id });
 
 		if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 	},

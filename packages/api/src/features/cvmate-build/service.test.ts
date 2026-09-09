@@ -19,10 +19,17 @@ vi.mock("@reactive-resume/db/schema", () => ({
 		userId: "user_id",
 		updatedAt: "updated_at",
 	},
+	cvmateCvSelectionItem: {
+		id: "selection_item_id",
+		cvBuildId: "cv_build_id",
+		sortOrder: "sort_order",
+		createdAt: "created_at",
+	},
 }));
 
 vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => args,
+	asc: (value: unknown) => value,
 	desc: (value: unknown) => value,
 	eq: (...args: unknown[]) => args,
 }));
@@ -63,6 +70,11 @@ const build = {
 	updatedAt: new Date("2026-09-09T11:00:00.000Z"),
 };
 
+const secondBuild = {
+	...build,
+	id: "build-2",
+};
+
 const jobOfferDetail = {
 	id: "offer-1",
 	sourceUrl: "https://example.com/job",
@@ -77,6 +89,99 @@ const jobOfferDetail = {
 	updatedAt: new Date("2026-09-09T09:00:00.000Z"),
 	assets: [],
 	requirements: [],
+};
+
+const employment = {
+	id: "employment-1",
+	masterProfileId: "profile-1",
+	company: "Acme",
+	jobTitle: "Operations Manager",
+	location: "Wroclaw",
+	startDate: "2020-01",
+	endDate: null,
+	isCurrent: true,
+	sortOrder: 0,
+	createdAt: new Date("2026-09-09T07:00:00.000Z"),
+	updatedAt: new Date("2026-09-09T07:00:00.000Z"),
+};
+
+const experienceFact = {
+	id: "fact-1",
+	masterProfileId: "profile-1",
+	text: "Coordinated a multinational production team.",
+	createdAt: new Date("2026-09-09T07:10:00.000Z"),
+	updatedAt: new Date("2026-09-09T07:10:00.000Z"),
+};
+
+const unlinkedExperienceFact = {
+	id: "fact-unlinked",
+	masterProfileId: "profile-1",
+	text: "Prepared tender documentation.",
+	createdAt: new Date("2026-09-09T07:11:00.000Z"),
+	updatedAt: new Date("2026-09-09T07:11:00.000Z"),
+};
+
+const employmentFact = {
+	employmentId: "employment-1",
+	experienceFactId: "fact-1",
+	masterProfileId: "profile-1",
+	sortOrder: 0,
+	createdAt: new Date("2026-09-09T07:20:00.000Z"),
+};
+
+const masterProfile = {
+	profile: {
+		id: "profile-1",
+	},
+	sections: [],
+	employments: [employment],
+	experienceFacts: [experienceFact, unlinkedExperienceFact],
+	employmentFacts: [employmentFact],
+	listItems: [],
+	projects: [],
+	education: [],
+	courses: [],
+	certifications: [],
+	volunteer: [],
+	languages: [],
+	awards: [],
+	references: [],
+	licenses: [],
+	clauses: [],
+	customSectionItems: [],
+	photos: [],
+};
+
+const selectionItem = {
+	id: "selection-1",
+	cvBuildId: "build-1",
+	parentSelectionItemId: null,
+	sourceType: "experience_fact" as const,
+	sourceId: "fact-1",
+	sourceTextSnapshot: experienceFact.text,
+	sourceDataSnapshot: { ...experienceFact },
+	recommended: false,
+	selected: true,
+	recommendationReason: null,
+	sortOrder: 0,
+	createdAt: new Date("2026-09-09T12:00:00.000Z"),
+	updatedAt: new Date("2026-09-09T12:00:00.000Z"),
+};
+
+const employmentSelectionItem = {
+	id: "selection-employment",
+	cvBuildId: "build-1",
+	parentSelectionItemId: null,
+	sourceType: "employment" as const,
+	sourceId: "employment-1",
+	sourceTextSnapshot: "Operations Manager — Acme",
+	sourceDataSnapshot: { ...employment },
+	recommended: false,
+	selected: true,
+	recommendationReason: null,
+	sortOrder: 0,
+	createdAt: new Date("2026-09-09T11:50:00.000Z"),
+	updatedAt: new Date("2026-09-09T11:50:00.000Z"),
 };
 
 const createSelectChain = (rows: unknown[]) => {
@@ -111,6 +216,15 @@ const mockInsert = () => {
 	return { values };
 };
 
+const mockInsertReturning = (rows: unknown[]) => {
+	const returning = vi.fn(() => Promise.resolve(rows));
+	const values = vi.fn(() => ({ returning }));
+
+	dbMock.insert.mockReturnValue({ values });
+
+	return { values, returning };
+};
+
 const mockUpdateReturning = (rows: unknown[]) => {
 	const returning = vi.fn(() => Promise.resolve(rows));
 	const where = vi.fn(() => ({ returning }));
@@ -141,13 +255,7 @@ beforeEach(() => {
 	getJobOfferByIdMock.mockReset();
 
 	generateIdMock.mockReturnValue("generated-build-id");
-
-	getCurrentProfileMock.mockResolvedValue({
-		profile: {
-			id: "profile-1",
-		},
-	});
-
+	getCurrentProfileMock.mockResolvedValue(masterProfile);
 	getJobOfferByIdMock.mockResolvedValue(jobOfferDetail);
 
 	setSelectResults([]);
@@ -428,6 +536,321 @@ describe("cvmateBuildService.delete", () => {
 			cvmateBuildService.delete({
 				id: "build-other-user",
 				userId: "user-1",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+
+		expect(dbMock.delete).not.toHaveBeenCalled();
+	});
+});
+
+describe("cvmateBuildService.listSelectionItems", () => {
+	it("lists selection items only after verifying ownership of the CV build", async () => {
+		setSelectResults([{ ...build }], [{ ...selectionItem }]);
+
+		const result = await cvmateBuildService.listSelectionItems({
+			cvBuildId: "build-1",
+			userId: "user-1",
+		});
+
+		expect(result).toEqual([selectionItem]);
+	});
+
+	it("rejects listing selection items for an inaccessible CV build", async () => {
+		setSelectResults([]);
+
+		await expect(
+			cvmateBuildService.listSelectionItems({
+				cvBuildId: "build-other-user",
+				userId: "user-1",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+	});
+});
+
+describe("cvmateBuildService.createSelectionItem", () => {
+	it("creates server-owned snapshots from an existing Master Profile source", async () => {
+		setSelectResults([{ ...build }]);
+		generateIdMock.mockReturnValue("selection-generated");
+
+		const created = {
+			...selectionItem,
+			id: "selection-generated",
+			selected: false,
+			sortOrder: 0,
+		};
+
+		const { values } = mockInsertReturning([created]);
+
+		const result = await cvmateBuildService.createSelectionItem({
+			cvBuildId: "build-1",
+			userId: "user-1",
+			sourceType: "experience_fact",
+			sourceId: "fact-1",
+		});
+
+		expect(values).toHaveBeenCalledWith({
+			id: "selection-generated",
+			cvBuildId: "build-1",
+			parentSelectionItemId: null,
+			sourceType: "experience_fact",
+			sourceId: "fact-1",
+			sourceTextSnapshot: experienceFact.text,
+			sourceDataSnapshot: experienceFact,
+			selected: false,
+			sortOrder: 0,
+		});
+
+		expect(result).toEqual(created);
+	});
+
+	it("creates a deterministic text snapshot for an employment", async () => {
+		setSelectResults([{ ...build }]);
+		generateIdMock.mockReturnValue("selection-employment-generated");
+
+		const created = {
+			...employmentSelectionItem,
+			id: "selection-employment-generated",
+		};
+
+		const { values } = mockInsertReturning([created]);
+
+		await cvmateBuildService.createSelectionItem({
+			cvBuildId: "build-1",
+			userId: "user-1",
+			sourceType: "employment",
+			sourceId: "employment-1",
+			selected: true,
+		});
+
+		expect(values).toHaveBeenCalledWith(
+			expect.objectContaining({
+				sourceTextSnapshot: "Operations Manager — Acme",
+				sourceDataSnapshot: employment,
+				selected: true,
+			}),
+		);
+	});
+
+	it("rejects a source that does not exist in the build Master Profile", async () => {
+		setSelectResults([{ ...build }]);
+
+		await expect(
+			cvmateBuildService.createSelectionItem({
+				cvBuildId: "build-1",
+				userId: "user-1",
+				sourceType: "experience_fact",
+				sourceId: "missing-fact",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+
+		expect(dbMock.insert).not.toHaveBeenCalled();
+	});
+
+	it("rejects a parent selection item belonging to another CV build", async () => {
+		const otherBuildParent = {
+			...employmentSelectionItem,
+			id: "selection-other-build",
+			cvBuildId: "build-2",
+		};
+
+		setSelectResults([{ ...build }], [otherBuildParent], [{ ...secondBuild }]);
+
+		await expect(
+			cvmateBuildService.createSelectionItem({
+				cvBuildId: "build-1",
+				userId: "user-1",
+				parentSelectionItemId: "selection-other-build",
+				sourceType: "experience_fact",
+				sourceId: "fact-1",
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(dbMock.insert).not.toHaveBeenCalled();
+	});
+
+	it("allows an experience fact under an employment when the Master Profile links them", async () => {
+		setSelectResults([{ ...build }], [{ ...employmentSelectionItem }], [{ ...build }]);
+
+		generateIdMock.mockReturnValue("selection-fact-child");
+
+		const created = {
+			...selectionItem,
+			id: "selection-fact-child",
+			parentSelectionItemId: "selection-employment",
+		};
+
+		const { values } = mockInsertReturning([created]);
+
+		await cvmateBuildService.createSelectionItem({
+			cvBuildId: "build-1",
+			userId: "user-1",
+			parentSelectionItemId: "selection-employment",
+			sourceType: "experience_fact",
+			sourceId: "fact-1",
+			selected: true,
+		});
+
+		expect(values).toHaveBeenCalledWith(
+			expect.objectContaining({
+				parentSelectionItemId: "selection-employment",
+				sourceType: "experience_fact",
+				sourceId: "fact-1",
+			}),
+		);
+	});
+
+	it("rejects an experience fact under an employment when the Master Profile does not link them", async () => {
+		setSelectResults([{ ...build }], [{ ...employmentSelectionItem }], [{ ...build }]);
+
+		await expect(
+			cvmateBuildService.createSelectionItem({
+				cvBuildId: "build-1",
+				userId: "user-1",
+				parentSelectionItemId: "selection-employment",
+				sourceType: "experience_fact",
+				sourceId: "fact-unlinked",
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(dbMock.insert).not.toHaveBeenCalled();
+	});
+});
+
+describe("cvmateBuildService.updateSelectionItem", () => {
+	it("updates only user-editable selection fields", async () => {
+		setSelectResults([{ ...selectionItem }], [{ ...build }]);
+
+		const updated = {
+			...selectionItem,
+			selected: false,
+			sortOrder: 5,
+		};
+
+		const { set } = mockUpdateReturning([updated]);
+
+		const result = await cvmateBuildService.updateSelectionItem({
+			id: "selection-1",
+			userId: "user-1",
+			selected: false,
+			sortOrder: 5,
+		});
+
+		expect(set).toHaveBeenCalledWith({
+			selected: false,
+			sortOrder: 5,
+		});
+
+		expect(result).toEqual(updated);
+	});
+
+	it("rejects using the selection item itself as its parent", async () => {
+		setSelectResults([{ ...selectionItem }], [{ ...build }]);
+
+		await expect(
+			cvmateBuildService.updateSelectionItem({
+				id: "selection-1",
+				userId: "user-1",
+				parentSelectionItemId: "selection-1",
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(dbMock.update).not.toHaveBeenCalled();
+	});
+
+	it("rejects a parent hierarchy cycle", async () => {
+		const cyclicParent = {
+			...employmentSelectionItem,
+			id: "selection-parent",
+			parentSelectionItemId: "selection-1",
+		};
+
+		setSelectResults(
+			[{ ...selectionItem }],
+			[{ ...build }],
+			[cyclicParent],
+			[{ ...build }],
+			[{ ...selectionItem }],
+			[{ ...build }],
+		);
+
+		await expect(
+			cvmateBuildService.updateSelectionItem({
+				id: "selection-1",
+				userId: "user-1",
+				parentSelectionItemId: "selection-parent",
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(dbMock.update).not.toHaveBeenCalled();
+	});
+
+	it("rejects moving an experience fact under an unlinked employment", async () => {
+		const unlinkedSelection = {
+			...selectionItem,
+			sourceId: "fact-unlinked",
+			sourceTextSnapshot: unlinkedExperienceFact.text,
+			sourceDataSnapshot: { ...unlinkedExperienceFact },
+		};
+
+		setSelectResults(
+			[unlinkedSelection],
+			[{ ...build }],
+			[{ ...employmentSelectionItem }],
+			[{ ...build }],
+			[{ ...employmentSelectionItem }],
+			[{ ...build }],
+		);
+
+		await expect(
+			cvmateBuildService.updateSelectionItem({
+				id: "selection-1",
+				userId: "user-1",
+				parentSelectionItemId: "selection-employment",
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(dbMock.update).not.toHaveBeenCalled();
+	});
+});
+
+describe("cvmateBuildService.deleteSelectionItem", () => {
+	it("deletes an owned selection item", async () => {
+		setSelectResults([{ ...selectionItem }], [{ ...build }]);
+		mockDeleteReturning([{ id: "selection-1" }]);
+
+		await expect(
+			cvmateBuildService.deleteSelectionItem({
+				id: "selection-1",
+				userId: "user-1",
+			}),
+		).resolves.toBeUndefined();
+
+		expect(dbMock.delete).toHaveBeenCalled();
+	});
+
+	it("does not delete a selection item whose CV build is inaccessible", async () => {
+		setSelectResults([{ ...selectionItem }], []);
+
+		await expect(
+			cvmateBuildService.deleteSelectionItem({
+				id: "selection-1",
+				userId: "user-other",
 			}),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",

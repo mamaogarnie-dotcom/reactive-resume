@@ -104,4 +104,87 @@ export const crudRouter = {
 				userId: context.user.id,
 			}),
 		),
+
+	listSelectionItems: protectedProcedure
+		.route({
+			method: "GET",
+			path: "/cvmate/builds/{cvBuildId}/selection-items",
+			tags: ["CVMate CV Build"],
+			operationId: "listCvmateCvSelectionItems",
+			summary: "List CV selection items",
+			description:
+				"Returns selection items belonging to an authenticated user's CV build, ordered by sort order and creation time. Requires authentication.",
+			successDescription: "The CV build selection items.",
+		})
+		.input(cvmateBuildDto.listSelectionItems.input)
+		.output(cvmateBuildDto.listSelectionItems.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.listSelectionItems({
+				cvBuildId: input.cvBuildId,
+				userId: context.user.id,
+			}),
+		),
+
+	createSelectionItem: protectedProcedure
+		.route({
+			method: "POST",
+			path: "/cvmate/builds/{cvBuildId}/selection-items",
+			tags: ["CVMate CV Build"],
+			operationId: "createCvmateCvSelectionItem",
+			summary: "Create CV selection item",
+			description:
+				"Adds a Master Profile source to an owned CV build. Source snapshots are resolved and stored by the server and cannot be supplied by the client. Requires authentication.",
+			successDescription: "The created CV selection item.",
+		})
+		.input(cvmateBuildDto.createSelectionItem.input)
+		.use(resumeMutationRateLimit)
+		.output(cvmateBuildDto.createSelectionItem.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.createSelectionItem({
+				userId: context.user.id,
+				...input,
+			}),
+		),
+
+	updateSelectionItem: protectedProcedure
+		.route({
+			method: "PUT",
+			path: "/cvmate/selection-items/{id}",
+			tags: ["CVMate CV Build"],
+			operationId: "updateCvmateCvSelectionItem",
+			summary: "Update CV selection item",
+			description:
+				"Updates user-editable fields of an owned CV selection item. Source identity and stored source snapshots cannot be changed through this endpoint. Requires authentication.",
+			successDescription: "The updated CV selection item.",
+		})
+		.input(cvmateBuildDto.updateSelectionItem.input)
+		.use(resumeMutationRateLimit)
+		.output(cvmateBuildDto.updateSelectionItem.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.updateSelectionItem({
+				userId: context.user.id,
+				...input,
+			}),
+		),
+
+	deleteSelectionItem: protectedProcedure
+		.route({
+			method: "DELETE",
+			path: "/cvmate/selection-items/{id}",
+			tags: ["CVMate CV Build"],
+			operationId: "deleteCvmateCvSelectionItem",
+			summary: "Delete CV selection item",
+			description:
+				"Deletes a CV selection item belonging to an authenticated user's CV build. Child selection items are removed according to database cascade rules. Requires authentication.",
+			successDescription: "The CV selection item was deleted.",
+		})
+		.input(cvmateBuildDto.deleteSelectionItem.input)
+		.use(resumeMutationRateLimit)
+		.output(cvmateBuildDto.deleteSelectionItem.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.deleteSelectionItem({
+				id: input.id,
+				userId: context.user.id,
+			}),
+		),
 };
