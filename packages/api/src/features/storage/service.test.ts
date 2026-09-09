@@ -33,13 +33,29 @@ vi.mock("@aws-sdk/client-s3", () => ({
 	ListObjectsV2Command: vi.fn(),
 }));
 
-const { getStorageService, inferContentType, isImageFile, processImageForUpload } = await import("./service");
+const { buildPublicUrl, getStorageService, inferContentType, isImageFile, processImageForUpload } = await import(
+	"./service"
+);
 
 const makeFile = (bytes: Uint8Array, type = "image/png") =>
 	({
 		arrayBuffer: async () => bytes.buffer,
 		type,
 	}) as unknown as File;
+
+describe("buildPublicUrl", () => {
+	it("builds the public API URL from a storage key", () => {
+		expect(buildPublicUrl("uploads/user-1/pictures/photo.jpeg")).toBe(
+			"https://example.com/api/uploads/user-1/pictures/photo.jpeg",
+		);
+	});
+
+	it("does not duplicate the API prefix", () => {
+		expect(buildPublicUrl("/api/uploads/user-1/pictures/photo.jpeg")).toBe(
+			"https://example.com/api/uploads/user-1/pictures/photo.jpeg",
+		);
+	});
+});
 
 describe("inferContentType", () => {
 	it("maps common image extensions to their MIME types", () => {

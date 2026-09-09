@@ -1,1 +1,1 @@
-export { getStorageService, inferContentType } from "./service";
+export { buildPublicUrl, getStorageService, inferContentType } from "./service";

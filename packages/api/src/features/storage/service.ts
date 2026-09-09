@@ -72,7 +72,7 @@ function buildFileKey(userId: string, contentType: string): string {
 	return `uploads/${userId}/pictures/${Date.now()}.${extension}`;
 }
 
-function buildPublicUrl(path: string): string {
+export function buildPublicUrl(path: string): string {
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 	const apiPath = normalizedPath.startsWith("/api/") ? normalizedPath : `/api${normalizedPath}`;
 	return new URL(apiPath, env.APP_URL).toString();
