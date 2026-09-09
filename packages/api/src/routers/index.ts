@@ -4,6 +4,7 @@ import { aiProvidersRouter } from "../features/ai-providers/router";
 import { applicationsRouter } from "../features/applications/router";
 import { authRouter } from "../features/auth/router";
 import { coverLettersRouter } from "../features/cover-letters/router";
+import { cvmateBuildRouter } from "../features/cvmate-build/router";
 import { cvmateJobOfferRouter } from "../features/cvmate-job-offer/router";
 import { cvmatePreferencesRouter } from "../features/cvmate-preferences/router";
 import { cvmateProfileRouter } from "../features/cvmate-profile/router";
@@ -19,6 +20,7 @@ agent: agentRouter,
 applications: applicationsRouter,
 auth: authRouter,
 coverLetters: coverLettersRouter,
+cvmateBuild: cvmateBuildRouter,
 cvmateJobOffer: cvmateJobOfferRouter,
 cvmatePreferences: cvmatePreferencesRouter,
 cvmateProfile: cvmateProfileRouter,
