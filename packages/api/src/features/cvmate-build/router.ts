@@ -10,4 +10,8 @@ export const cvmateBuildRouter = {
 	createSelectionItem: crudRouter.createSelectionItem,
 	updateSelectionItem: crudRouter.updateSelectionItem,
 	deleteSelectionItem: crudRouter.deleteSelectionItem,
+	listGaps: crudRouter.listGaps,
+	createGap: crudRouter.createGap,
+	updateGap: crudRouter.updateGap,
+	deleteGap: crudRouter.deleteGap,
 };

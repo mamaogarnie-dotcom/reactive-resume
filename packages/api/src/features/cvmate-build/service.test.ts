@@ -22,6 +22,15 @@ vi.mock("@reactive-resume/db/schema", () => ({
 	cvmateCvSelectionItem: {
 		id: "selection_item_id",
 		cvBuildId: "cv_build_id",
+		sourceType: "source_type",
+		sourceId: "source_id",
+		selected: "selected",
+		sortOrder: "sort_order",
+		createdAt: "created_at",
+	},
+	cvmateCvGap: {
+		id: "gap_id",
+		cvBuildId: "cv_build_id",
 		sortOrder: "sort_order",
 		createdAt: "created_at",
 	},
@@ -182,6 +191,32 @@ const employmentSelectionItem = {
 	sortOrder: 0,
 	createdAt: new Date("2026-09-09T11:50:00.000Z"),
 	updatedAt: new Date("2026-09-09T11:50:00.000Z"),
+};
+const gap = {
+	id: "gap-1",
+	cvBuildId: "build-1",
+	jobRequirementId: null,
+	requirementTextSnapshot: null,
+	text: "Missing advanced Excel experience.",
+	severity: "important" as const,
+	origin: "user" as const,
+	status: "open" as const,
+	resolutionSourceType: null,
+	resolutionSourceId: null,
+	resolutionTextSnapshot: null,
+	sortOrder: 0,
+	resolvedAt: null,
+	createdAt: new Date("2026-09-09T12:10:00.000Z"),
+	updatedAt: new Date("2026-09-09T12:10:00.000Z"),
+};
+
+const resolvedGap = {
+	...gap,
+	status: "resolved" as const,
+	resolutionSourceType: "experience_fact" as const,
+	resolutionSourceId: "fact-1",
+	resolutionTextSnapshot: experienceFact.text,
+	resolvedAt: new Date("2026-09-09T12:20:00.000Z"),
 };
 
 const createSelectChain = (rows: unknown[]) => {
@@ -850,6 +885,232 @@ describe("cvmateBuildService.deleteSelectionItem", () => {
 		await expect(
 			cvmateBuildService.deleteSelectionItem({
 				id: "selection-1",
+				userId: "user-other",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+
+		expect(dbMock.delete).not.toHaveBeenCalled();
+	});
+});
+describe("cvmateBuildService.listGaps", () => {
+	it("lists gaps only after verifying ownership of the CV build", async () => {
+		setSelectResults([{ ...build }], [{ ...gap }]);
+
+		const result = await cvmateBuildService.listGaps({
+			cvBuildId: "build-1",
+			userId: "user-1",
+		});
+
+		expect(result).toEqual([gap]);
+	});
+
+	it("rejects listing gaps for an inaccessible CV build", async () => {
+		setSelectResults([]);
+
+		await expect(
+			cvmateBuildService.listGaps({
+				cvBuildId: "build-other-user",
+				userId: "user-1",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+	});
+});
+
+describe("cvmateBuildService.createGap", () => {
+	it("creates a manual gap with server-owned defaults", async () => {
+		setSelectResults([{ ...build }]);
+		generateIdMock.mockReturnValue("gap-generated");
+
+		const created = {
+			...gap,
+			id: "gap-generated",
+			severity: "additional" as const,
+		};
+
+		const { values } = mockInsertReturning([created]);
+
+		const result = await cvmateBuildService.createGap({
+			cvBuildId: "build-1",
+			userId: "user-1",
+			text: "Missing advanced Excel experience.",
+		});
+
+		expect(values).toHaveBeenCalledWith({
+			id: "gap-generated",
+			cvBuildId: "build-1",
+			jobRequirementId: null,
+			requirementTextSnapshot: null,
+			text: "Missing advanced Excel experience.",
+			severity: "additional",
+			origin: "user",
+			status: "open",
+			resolutionSourceType: null,
+			resolutionSourceId: null,
+			resolutionTextSnapshot: null,
+			sortOrder: 0,
+			resolvedAt: null,
+		});
+
+		expect(result).toEqual(created);
+	});
+
+	it("rejects creating a gap for an inaccessible CV build", async () => {
+		setSelectResults([]);
+
+		await expect(
+			cvmateBuildService.createGap({
+				cvBuildId: "build-other-user",
+				userId: "user-1",
+				text: "Missing requirement.",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+
+		expect(dbMock.insert).not.toHaveBeenCalled();
+	});
+});
+
+describe("cvmateBuildService.updateGap", () => {
+	it("updates user-editable gap fields", async () => {
+		setSelectResults([{ ...gap }], [{ ...build }]);
+
+		const updated = {
+			...gap,
+			text: "Updated gap text.",
+			severity: "critical" as const,
+			sortOrder: 4,
+		};
+
+		const { set } = mockUpdateReturning([updated]);
+
+		const result = await cvmateBuildService.updateGap({
+			id: "gap-1",
+			userId: "user-1",
+			text: "Updated gap text.",
+			severity: "critical",
+			sortOrder: 4,
+		});
+
+		expect(set).toHaveBeenCalledWith({
+			text: "Updated gap text.",
+			severity: "critical",
+			sortOrder: 4,
+			resolvedAt: null,
+			resolutionSourceType: null,
+			resolutionSourceId: null,
+			resolutionTextSnapshot: null,
+		});
+
+		expect(result).toEqual(updated);
+	});
+
+	it("resolves a gap with a selected source from the same CV build", async () => {
+		setSelectResults([{ ...gap }], [{ ...build }], [{ ...selectionItem }]);
+
+		const updated = {
+			...gap,
+			status: "resolved" as const,
+			resolutionSourceType: "experience_fact" as const,
+			resolutionSourceId: "fact-1",
+			resolutionTextSnapshot: experienceFact.text,
+			resolvedAt: new Date("2026-09-09T12:30:00.000Z"),
+		};
+
+		const { set } = mockUpdateReturning([updated]);
+
+		const result = await cvmateBuildService.updateGap({
+			id: "gap-1",
+			userId: "user-1",
+			resolutionSourceType: "experience_fact",
+			resolutionSourceId: "fact-1",
+		});
+
+		expect(set).toHaveBeenCalledWith({
+			resolutionSourceType: "experience_fact",
+			resolutionSourceId: "fact-1",
+			resolutionTextSnapshot: experienceFact.text,
+			status: "resolved",
+			resolvedAt: expect.any(Date),
+		});
+
+		expect(result).toEqual(updated);
+	});
+
+	it("rejects a resolution source that is not selected in the same CV build", async () => {
+		setSelectResults([{ ...gap }], [{ ...build }], []);
+
+		await expect(
+			cvmateBuildService.updateGap({
+				id: "gap-1",
+				userId: "user-1",
+				resolutionSourceType: "experience_fact",
+				resolutionSourceId: "fact-1",
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(dbMock.update).not.toHaveBeenCalled();
+	});
+
+	it("clears resolution metadata when a resolved gap is reopened", async () => {
+		setSelectResults([{ ...resolvedGap }], [{ ...build }]);
+
+		const updated = {
+			...resolvedGap,
+			status: "open" as const,
+			resolutionSourceType: null,
+			resolutionSourceId: null,
+			resolutionTextSnapshot: null,
+			resolvedAt: null,
+		};
+
+		const { set } = mockUpdateReturning([updated]);
+
+		const result = await cvmateBuildService.updateGap({
+			id: "gap-1",
+			userId: "user-1",
+			status: "open",
+		});
+
+		expect(set).toHaveBeenCalledWith({
+			status: "open",
+			resolvedAt: null,
+			resolutionSourceType: null,
+			resolutionSourceId: null,
+			resolutionTextSnapshot: null,
+		});
+
+		expect(result).toEqual(updated);
+	});
+});
+
+describe("cvmateBuildService.deleteGap", () => {
+	it("deletes an owned gap", async () => {
+		setSelectResults([{ ...gap }], [{ ...build }]);
+		mockDeleteReturning([{ id: "gap-1" }]);
+
+		await expect(
+			cvmateBuildService.deleteGap({
+				id: "gap-1",
+				userId: "user-1",
+			}),
+		).resolves.toBeUndefined();
+
+		expect(dbMock.delete).toHaveBeenCalled();
+	});
+
+	it("does not delete a gap whose CV build is inaccessible", async () => {
+		setSelectResults([{ ...gap }], []);
+
+		await expect(
+			cvmateBuildService.deleteGap({
+				id: "gap-1",
 				userId: "user-other",
 			}),
 		).rejects.toMatchObject({

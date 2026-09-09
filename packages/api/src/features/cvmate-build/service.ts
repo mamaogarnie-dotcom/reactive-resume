@@ -1,4 +1,10 @@
-import type { CvmateBuildStatus, CvmateBuildStep, CvmateSelectionSourceType } from "@reactive-resume/db/schema";
+import type {
+	CvmateBuildStatus,
+	CvmateBuildStep,
+	CvmateGapStatus,
+	CvmateRequirementPriority,
+	CvmateSelectionSourceType,
+} from "@reactive-resume/db/schema";
 import { ORPCError } from "@orpc/client";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
@@ -34,6 +40,20 @@ type SelectionItemUpdateFields = {
 	selected?: boolean | undefined;
 	sortOrder?: number | undefined;
 };
+type GapCreateFields = {
+	text: string;
+	severity?: CvmateRequirementPriority | undefined;
+	sortOrder?: number | undefined;
+};
+
+type GapUpdateFields = {
+	text?: string | undefined;
+	severity?: CvmateRequirementPriority | undefined;
+	status?: CvmateGapStatus | undefined;
+	resolutionSourceType?: CvmateSelectionSourceType | null | undefined;
+	resolutionSourceId?: string | null | undefined;
+	sortOrder?: number | undefined;
+};
 
 type CurrentProfile = NonNullable<Awaited<ReturnType<typeof cvmateProfileService.getCurrent>>>;
 
@@ -66,6 +86,37 @@ async function requireOwnedSelectionItem(id: string, userId: string) {
 	return { selectionItem, build };
 }
 
+async function requireOwnedGap(id: string, userId: string) {
+	const [gap] = await db.select().from(schema.cvmateCvGap).where(eq(schema.cvmateCvGap.id, id));
+
+	if (!gap) throw new ORPCError("NOT_FOUND");
+
+	const build = await requireOwnedBuild(gap.cvBuildId, userId);
+
+	return { gap, build };
+}
+
+async function resolveGapResolutionSource(cvBuildId: string, sourceType: CvmateSelectionSourceType, sourceId: string) {
+	const [selectionItem] = await db
+		.select()
+		.from(schema.cvmateCvSelectionItem)
+		.where(
+			and(
+				eq(schema.cvmateCvSelectionItem.cvBuildId, cvBuildId),
+				eq(schema.cvmateCvSelectionItem.sourceType, sourceType),
+				eq(schema.cvmateCvSelectionItem.sourceId, sourceId),
+				eq(schema.cvmateCvSelectionItem.selected, true),
+			),
+		);
+
+	if (!selectionItem) {
+		throw new ORPCError("BAD_REQUEST", {
+			message: "Gap resolution source must be a selected item in the same CV build.",
+		});
+	}
+
+	return selectionItem.sourceTextSnapshot;
+}
 async function getJobOfferSnapshot(jobOfferId: string, userId: string) {
 	const offer = await cvmateJobOfferService.getById({
 		id: jobOfferId,
@@ -562,6 +613,151 @@ export const cvmateBuildService = {
 				),
 			)
 			.returning({ id: schema.cvmateCvSelectionItem.id });
+
+		if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+	},
+	listGaps: async (input: { cvBuildId: string; userId: string }) => {
+		const build = await requireOwnedBuild(input.cvBuildId, input.userId);
+
+		return db
+			.select()
+			.from(schema.cvmateCvGap)
+			.where(eq(schema.cvmateCvGap.cvBuildId, build.id))
+			.orderBy(asc(schema.cvmateCvGap.sortOrder), asc(schema.cvmateCvGap.createdAt));
+	},
+
+	createGap: async (
+		input: GapCreateFields & {
+			cvBuildId: string;
+			userId: string;
+		},
+	) => {
+		const build = await requireOwnedBuild(input.cvBuildId, input.userId);
+
+		const [gap] = await db
+			.insert(schema.cvmateCvGap)
+			.values({
+				id: generateId(),
+				cvBuildId: build.id,
+				jobRequirementId: null,
+				requirementTextSnapshot: null,
+				text: input.text,
+				severity: input.severity ?? "additional",
+				origin: "user",
+				status: "open",
+				resolutionSourceType: null,
+				resolutionSourceId: null,
+				resolutionTextSnapshot: null,
+				sortOrder: input.sortOrder ?? 0,
+				resolvedAt: null,
+			})
+			.returning();
+
+		if (!gap) {
+			throw new Error("CVMATE_CV_GAP_CREATE_FAILED");
+		}
+
+		return gap;
+	},
+
+	updateGap: async (
+		input: GapUpdateFields & {
+			id: string;
+			userId: string;
+		},
+	) => {
+		const { gap } = await requireOwnedGap(input.id, input.userId);
+		const { id, userId, ...fields } = input;
+
+		if (Object.keys(fields).length === 0) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "Provide at least one CV gap field to update.",
+			});
+		}
+
+		const updates: {
+			text?: string;
+			severity?: CvmateRequirementPriority;
+			status?: CvmateGapStatus;
+			resolutionSourceType?: CvmateSelectionSourceType | null;
+			resolutionSourceId?: string | null;
+			resolutionTextSnapshot?: string | null;
+			sortOrder?: number;
+			resolvedAt?: Date | null;
+		} = {};
+
+		if (fields.text !== undefined) updates.text = fields.text;
+		if (fields.severity !== undefined) updates.severity = fields.severity;
+		if (fields.sortOrder !== undefined) updates.sortOrder = fields.sortOrder;
+
+		let nextStatus = fields.status ?? gap.status;
+
+		const resolutionSourceProvided =
+			fields.resolutionSourceType !== undefined || fields.resolutionSourceId !== undefined;
+
+		if (resolutionSourceProvided) {
+			const sourceType = fields.resolutionSourceType;
+			const sourceId = fields.resolutionSourceId;
+
+			if (sourceType === null && sourceId === null) {
+				updates.resolutionSourceType = null;
+				updates.resolutionSourceId = null;
+				updates.resolutionTextSnapshot = null;
+			} else if (typeof sourceType === "string" && typeof sourceId === "string") {
+				if (fields.status !== undefined && fields.status !== "resolved") {
+					throw new ORPCError("BAD_REQUEST", {
+						message: "A gap with a resolution source must have resolved status.",
+					});
+				}
+
+				const resolutionTextSnapshot = await resolveGapResolutionSource(gap.cvBuildId, sourceType, sourceId);
+
+				updates.resolutionSourceType = sourceType;
+				updates.resolutionSourceId = sourceId;
+				updates.resolutionTextSnapshot = resolutionTextSnapshot;
+
+				if (fields.status === undefined) {
+					nextStatus = "resolved";
+					updates.status = "resolved";
+				}
+			} else {
+				throw new ORPCError("BAD_REQUEST", {
+					message: "Resolution source type and ID must be provided together or cleared together.",
+				});
+			}
+		}
+
+		if (fields.status !== undefined) {
+			updates.status = fields.status;
+		}
+
+		if (nextStatus === "resolved") {
+			updates.resolvedAt = gap.resolvedAt ?? new Date();
+		} else {
+			updates.resolvedAt = null;
+			updates.resolutionSourceType = null;
+			updates.resolutionSourceId = null;
+			updates.resolutionTextSnapshot = null;
+		}
+
+		const [updated] = await db
+			.update(schema.cvmateCvGap)
+			.set(updates)
+			.where(and(eq(schema.cvmateCvGap.id, id), eq(schema.cvmateCvGap.cvBuildId, gap.cvBuildId)))
+			.returning();
+
+		if (!updated) throw new ORPCError("NOT_FOUND");
+
+		return updated;
+	},
+
+	deleteGap: async (input: { id: string; userId: string }) => {
+		const { gap } = await requireOwnedGap(input.id, input.userId);
+
+		const rows = await db
+			.delete(schema.cvmateCvGap)
+			.where(and(eq(schema.cvmateCvGap.id, input.id), eq(schema.cvmateCvGap.cvBuildId, gap.cvBuildId)))
+			.returning({ id: schema.cvmateCvGap.id });
 
 		if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 	},

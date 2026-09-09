@@ -187,4 +187,85 @@ export const crudRouter = {
 				userId: context.user.id,
 			}),
 		),
+	listGaps: protectedProcedure
+		.route({
+			method: "GET",
+			path: "/cvmate/builds/{cvBuildId}/gaps",
+			tags: ["CVMate CV Build"],
+			operationId: "listCvmateCvGaps",
+			summary: "List CV gaps",
+			description:
+				"Returns gaps belonging to an authenticated user's CV build, ordered by sort order and creation time. Requires authentication.",
+			successDescription: "The CV build gaps.",
+		})
+		.input(cvmateBuildDto.listGaps.input)
+		.output(cvmateBuildDto.listGaps.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.listGaps({
+				cvBuildId: input.cvBuildId,
+				userId: context.user.id,
+			}),
+		),
+
+	createGap: protectedProcedure
+		.route({
+			method: "POST",
+			path: "/cvmate/builds/{cvBuildId}/gaps",
+			tags: ["CVMate CV Build"],
+			operationId: "createCvmateCvGap",
+			summary: "Create CV gap",
+			description:
+				"Creates a manual gap in an owned CV build. Gap origin and server-owned snapshots cannot be supplied by the client. Requires authentication.",
+			successDescription: "The created CV gap.",
+		})
+		.input(cvmateBuildDto.createGap.input)
+		.use(resumeMutationRateLimit)
+		.output(cvmateBuildDto.createGap.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.createGap({
+				userId: context.user.id,
+				...input,
+			}),
+		),
+
+	updateGap: protectedProcedure
+		.route({
+			method: "PUT",
+			path: "/cvmate/gaps/{id}",
+			tags: ["CVMate CV Build"],
+			operationId: "updateCvmateCvGap",
+			summary: "Update CV gap",
+			description:
+				"Updates user-editable fields of an owned CV gap. Resolution snapshots and resolved timestamps are managed by the server. Requires authentication.",
+			successDescription: "The updated CV gap.",
+		})
+		.input(cvmateBuildDto.updateGap.input)
+		.use(resumeMutationRateLimit)
+		.output(cvmateBuildDto.updateGap.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.updateGap({
+				userId: context.user.id,
+				...input,
+			}),
+		),
+
+	deleteGap: protectedProcedure
+		.route({
+			method: "DELETE",
+			path: "/cvmate/gaps/{id}",
+			tags: ["CVMate CV Build"],
+			operationId: "deleteCvmateCvGap",
+			summary: "Delete CV gap",
+			description: "Deletes a CV gap belonging to an authenticated user's CV build. Requires authentication.",
+			successDescription: "The CV gap was deleted.",
+		})
+		.input(cvmateBuildDto.deleteGap.input)
+		.use(resumeMutationRateLimit)
+		.output(cvmateBuildDto.deleteGap.output)
+		.handler(({ input, context }) =>
+			cvmateBuildService.deleteGap({
+				id: input.id,
+				userId: context.user.id,
+			}),
+		),
 };

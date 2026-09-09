@@ -14,6 +14,9 @@ const cvmateBuildStepSchema = z.enum([
 ]);
 
 const cvmateBuildStatusSchema = z.enum(["active", "completed", "abandoned"]);
+const cvmateGapOriginSchema = z.enum(["detected", "user"]);
+const cvmateGapStatusSchema = z.enum(["open", "resolved", "dismissed"]);
+const cvmateRequirementPrioritySchema = z.enum(["critical", "important", "additional"]);
 
 const cvmateSelectionSourceTypeSchema = z.enum([
 	"employment",
@@ -67,6 +70,24 @@ const cvmateSelectionItemSchema = createSelectSchema(schema.cvmateCvSelectionIte
 	updatedAt: z.date(),
 });
 
+const cvmateGapSchema = createSelectSchema(schema.cvmateCvGap, {
+	id: z.string(),
+	cvBuildId: z.string(),
+	jobRequirementId: z.string().nullable(),
+	requirementTextSnapshot: z.string().nullable(),
+	text: z.string(),
+	severity: cvmateRequirementPrioritySchema,
+	origin: cvmateGapOriginSchema,
+	status: cvmateGapStatusSchema,
+	resolutionSourceType: cvmateSelectionSourceTypeSchema.nullable(),
+	resolutionSourceId: z.string().nullable(),
+	resolutionTextSnapshot: z.string().nullable(),
+	sortOrder: z.number().int(),
+	resolvedAt: z.date().nullable(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
 const createBuildSchema = z.object({
 	jobOfferId: z.string().nullable().optional(),
 	targetLanguage: nullableTrimmedStringSchema.optional(),
@@ -114,6 +135,41 @@ const updateSelectionItemSchema = z
 		"Provide at least one selection item field to update.",
 	);
 
+const createGapSchema = z.object({
+	cvBuildId: z.string().trim().min(1),
+	text: z.string().trim().min(1),
+	severity: cvmateRequirementPrioritySchema.optional(),
+	sortOrder: z.number().int().optional(),
+});
+
+const updateGapSchema = z
+	.object({
+		id: z.string().trim().min(1),
+		text: z.string().trim().min(1).optional(),
+		severity: cvmateRequirementPrioritySchema.optional(),
+		status: cvmateGapStatusSchema.optional(),
+		resolutionSourceType: cvmateSelectionSourceTypeSchema.nullable().optional(),
+		resolutionSourceId: z.string().trim().min(1).nullable().optional(),
+		sortOrder: z.number().int().optional(),
+	})
+	.refine(
+		(value) =>
+			value.text !== undefined ||
+			value.severity !== undefined ||
+			value.status !== undefined ||
+			value.resolutionSourceType !== undefined ||
+			value.resolutionSourceId !== undefined ||
+			value.sortOrder !== undefined,
+		"Provide at least one CV gap field to update.",
+	)
+	.refine(
+		(value) =>
+			(value.resolutionSourceType === undefined && value.resolutionSourceId === undefined) ||
+			(value.resolutionSourceType === null && value.resolutionSourceId === null) ||
+			(typeof value.resolutionSourceType === "string" && typeof value.resolutionSourceId === "string"),
+		"Resolution source type and ID must be provided together or cleared together.",
+	);
+
 export const cvmateBuildDto = {
 	list: {
 		input: z.object({}).optional().default({}),
@@ -159,12 +215,35 @@ export const cvmateBuildDto = {
 		input: z.object({ id: z.string() }),
 		output: z.void(),
 	},
+	listGaps: {
+		input: z.object({ cvBuildId: z.string().trim().min(1) }),
+		output: z.array(cvmateGapSchema),
+	},
+
+	createGap: {
+		input: createGapSchema,
+		output: cvmateGapSchema,
+	},
+
+	updateGap: {
+		input: updateGapSchema,
+		output: cvmateGapSchema,
+	},
+
+	deleteGap: {
+		input: z.object({ id: z.string().trim().min(1) }),
+		output: z.void(),
+	},
 };
 
 export {
 	cvmateBuildSchema,
 	cvmateBuildStatusSchema,
 	cvmateBuildStepSchema,
+	cvmateGapOriginSchema,
+	cvmateGapSchema,
+	cvmateGapStatusSchema,
+	cvmateRequirementPrioritySchema,
 	cvmateSelectionItemSchema,
 	cvmateSelectionSourceTypeSchema,
 };
