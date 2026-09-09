@@ -998,11 +998,25 @@ output: z.void(),
 };
 
 export {
-
 aggregateSchema as cvmateMasterProfileAggregateSchema,
+awardSchema as cvmateAwardSchema,
+certificationSchema as cvmateCertificationSchema,
 clauseLanguageSchema as cvmateClauseLanguageSchema,
+clauseSchema as cvmateClauseSchema,
 clauseScopeSchema as cvmateClauseScopeSchema,
+courseSchema as cvmateCourseSchema,
+customSectionItemSchema as cvmateCustomSectionItemSchema,
+educationSchema as cvmateEducationSchema,
+employmentSchema as cvmateEmploymentSchema,
+experienceFactSchema as cvmateExperienceFactSchema,
+languageSchema as cvmateLanguageSchema,
+licenseSchema as cvmateLicenseSchema,
 partialDateSchema as cvmatePartialDateSchema,
 profileListItemKindSchema as cvmateProfileListItemKindSchema,
+profileListItemSchema as cvmateProfileListItemSchema,
+profilePhotoSchema as cvmateProfilePhotoSchema,
 profileSectionKindSchema as cvmateProfileSectionKindSchema,
+projectSchema as cvmateProjectSchema,
+referenceSchema as cvmateReferenceSchema,
+volunteerSchema as cvmateVolunteerSchema,
 };
