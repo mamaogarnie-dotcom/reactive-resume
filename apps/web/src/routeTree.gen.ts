@@ -35,6 +35,7 @@ import { Route as DashboardCoverLettersRouteImport } from "./routes/dashboard/co
 import { Route as TemplatesSplatRouteImport } from "./routes/templates/$";
 import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
 import { Route as DashboardApplicationsIndexRouteImport } from "./routes/dashboard/applications/index";
+import { Route as DashboardCvmateProfileRouteImport } from "./routes/dashboard/cvmate/profile";
 import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/resumes/index";
 import { Route as DashboardSettingsAccountRouteImport } from "./routes/dashboard/settings/account";
 import { Route as DashboardSettingsApiKeysRouteImport } from "./routes/dashboard/settings/api-keys";
@@ -174,6 +175,11 @@ const DashboardApplicationsIndexRoute =
     path: "/applications/",
     getParentRoute: () => DashboardRouteRoute,
   } as any);
+const DashboardCvmateProfileRoute = DashboardCvmateProfileRouteImport.update({
+  id: "/cvmate/profile",
+  path: "/cvmate/profile",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
 const DashboardResumesIndexRoute = DashboardResumesIndexRouteImport.update({
   id: "/resumes/",
   path: "/resumes/",
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
+  "/dashboard/cvmate/profile": typeof DashboardCvmateProfileRoute;
   "/dashboard/settings/account": typeof DashboardSettingsAccountRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
   "/dashboard/settings/job-search": typeof DashboardSettingsJobSearchRoute;
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   "/auth": typeof AuthIndexRoute;
   "/dashboard": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
+  "/dashboard/cvmate/profile": typeof DashboardCvmateProfileRoute;
   "/dashboard/settings/account": typeof DashboardSettingsAccountRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
   "/dashboard/settings/job-search": typeof DashboardSettingsJobSearchRoute;
@@ -315,6 +323,7 @@ export interface FileRoutesById {
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
+  "/dashboard/cvmate/profile": typeof DashboardCvmateProfileRoute;
   "/dashboard/settings/account": typeof DashboardSettingsAccountRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
   "/dashboard/settings/job-search": typeof DashboardSettingsJobSearchRoute;
@@ -352,6 +361,7 @@ export interface FileRouteTypes {
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
+    | "/dashboard/cvmate/profile"
     | "/dashboard/settings/account"
     | "/dashboard/settings/api-keys"
     | "/dashboard/settings/job-search"
@@ -383,6 +393,7 @@ export interface FileRouteTypes {
     | "/auth"
     | "/dashboard"
     | "/dashboard/settings/integrations"
+    | "/dashboard/cvmate/profile"
     | "/dashboard/settings/account"
     | "/dashboard/settings/api-keys"
     | "/dashboard/settings/job-search"
@@ -419,6 +430,7 @@ export interface FileRouteTypes {
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
+    | "/dashboard/cvmate/profile"
     | "/dashboard/settings/account"
     | "/dashboard/settings/api-keys"
     | "/dashboard/settings/job-search"
@@ -624,6 +636,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardApplicationsIndexRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    "/dashboard/cvmate/profile": {
+      id: "/dashboard/cvmate/profile";
+      path: "/cvmate/profile";
+      fullPath: "/dashboard/cvmate/profile";
+      preLoaderRoute: typeof DashboardCvmateProfileRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
     "/dashboard/resumes/": {
       id: "/dashboard/resumes/";
       path: "/resumes";
@@ -747,6 +766,7 @@ interface DashboardRouteRouteChildren {
   DashboardCoverLettersRoute: typeof DashboardCoverLettersRoute;
   DashboardIndexRoute: typeof DashboardIndexRoute;
   DashboardSettingsIntegrationsRouteRoute: typeof DashboardSettingsIntegrationsRouteRoute;
+  DashboardCvmateProfileRoute: typeof DashboardCvmateProfileRoute;
   DashboardSettingsAccountRoute: typeof DashboardSettingsAccountRoute;
   DashboardSettingsApiKeysRoute: typeof DashboardSettingsApiKeysRoute;
   DashboardSettingsJobSearchRoute: typeof DashboardSettingsJobSearchRoute;
@@ -762,6 +782,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardSettingsIntegrationsRouteRoute:
     DashboardSettingsIntegrationsRouteRoute,
+  DashboardCvmateProfileRoute: DashboardCvmateProfileRoute,
   DashboardSettingsAccountRoute: DashboardSettingsAccountRoute,
   DashboardSettingsApiKeysRoute: DashboardSettingsApiKeysRoute,
   DashboardSettingsJobSearchRoute: DashboardSettingsJobSearchRoute,

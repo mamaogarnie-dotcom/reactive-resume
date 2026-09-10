@@ -49,6 +49,11 @@ type SidebarItem = {
 
 const appSidebarItems = [
 	{
+		icon: <UserCircleIcon />,
+		label: msg`Master Profile`,
+		href: "/dashboard/cvmate/profile",
+	},
+	{
 		icon: <ReadCvLogoIcon />,
 		label: msg`Resumes`,
 		href: "/dashboard/resumes",
