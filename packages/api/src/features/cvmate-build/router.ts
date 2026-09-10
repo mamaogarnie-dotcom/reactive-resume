@@ -1,8 +1,10 @@
 import { crudRouter } from "./crud";
+import { recommendationsRouter } from "./recommendations-route";
 
 export const cvmateBuildRouter = {
 	list: crudRouter.list,
 	getById: crudRouter.getById,
+	generateRecommendations: recommendationsRouter.generate,
 	create: crudRouter.create,
 	update: crudRouter.update,
 	delete: crudRouter.delete,

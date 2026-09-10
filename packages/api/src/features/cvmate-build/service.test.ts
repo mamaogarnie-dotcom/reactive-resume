@@ -5,6 +5,7 @@ const dbMock = vi.hoisted(() => ({
 	insert: vi.fn(),
 	update: vi.fn(),
 	delete: vi.fn(),
+	transaction: vi.fn(),
 }));
 
 const generateIdMock = vi.hoisted(() => vi.fn());
@@ -303,6 +304,10 @@ beforeEach(() => {
 	dbMock.insert.mockReset();
 	dbMock.update.mockReset();
 	dbMock.delete.mockReset();
+	dbMock.transaction.mockReset();
+	dbMock.transaction.mockImplementation(
+		async (callback: (tx: typeof dbMock) => Promise<unknown>) => callback(dbMock),
+	);
 
 	generateIdMock.mockReset();
 	getCurrentProfileMock.mockReset();
@@ -388,6 +393,11 @@ describe("cvmateBuildService.create", () => {
 	it("creates a build linked to the current Master Profile", async () => {
 		const { values } = mockInsert();
 
+		generateIdMock
+			.mockReturnValueOnce("generated-build-id")
+			.mockReturnValueOnce("selection-employment-id")
+			.mockReturnValueOnce("selection-fact-id");
+
 		const result = await cvmateBuildService.create({
 			userId: "user-1",
 			targetLanguage: "pl",
@@ -405,7 +415,37 @@ describe("cvmateBuildService.create", () => {
 			designSettings: null,
 		});
 
-		expect(getJobOfferByIdMock).not.toHaveBeenCalled();
+		expect(values).toHaveBeenNthCalledWith(2, [
+expect.objectContaining({
+id: "selection-employment-id",
+cvBuildId: "generated-build-id",
+parentSelectionItemId: null,
+sourceType: "employment",
+sourceId: "employment-1",
+selected: false,
+sortOrder: 0,
+}),
+expect.objectContaining({
+id: "selection-fact-id",
+cvBuildId: "generated-build-id",
+parentSelectionItemId: "selection-employment-id",
+sourceType: "experience_fact",
+sourceId: "fact-1",
+selected: false,
+sortOrder: 1,
+}),
+]);
+
+expect(values).not.toHaveBeenCalledWith(
+expect.arrayContaining([
+expect.objectContaining({
+sourceId: "fact-unlinked",
+}),
+]),
+);
+
+expect(dbMock.transaction).toHaveBeenCalledTimes(1);
+expect(getJobOfferByIdMock).not.toHaveBeenCalled();
 	});
 
 	it("stores a snapshot of an owned job offer", async () => {

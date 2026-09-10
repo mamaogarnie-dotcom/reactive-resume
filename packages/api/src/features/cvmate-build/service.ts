@@ -295,48 +295,175 @@ function getSelectionSourceText(sourceType: CvmateSelectionSourceType, source: R
 	}
 }
 
-async function resolveSelectionSource(
-	build: Awaited<ReturnType<typeof requireOwnedBuild>>,
-	userId: string,
-	sourceType: CvmateSelectionSourceType,
-	sourceId: string,
+function snapshotSelectionSource(
+profile: CurrentProfile,
+sourceType: CvmateSelectionSourceType,
+sourceId: string,
 ) {
-	const profile = await getBuildProfile(build, userId);
-	const source = findSelectionSource(profile, sourceType, sourceId);
+const source = findSelectionSource(profile, sourceType, sourceId);
 
-	if (!source) {
-		throw new ORPCError("NOT_FOUND", {
-			message: "The selected Master Profile source does not exist.",
-		});
-	}
+if (!source) {
+throw new ORPCError("NOT_FOUND", {
+message: "The selected Master Profile source does not exist.",
+});
+}
 
-	let sourceDataSnapshot: Record<string, unknown>;
+let sourceDataSnapshot: Record<string, unknown>;
 
-	if (sourceType === "custom_section_item") {
-		const customItem = source as CurrentProfile["customSectionItems"][number];
-		const section = profile.sections.find(
-			(candidate) => candidate.id === customItem.profileSectionId && candidate.kind === "custom",
-		);
+if (sourceType === "custom_section_item") {
+const customItem =
+source as CurrentProfile["customSectionItems"][number];
+const section = profile.sections.find(
+(candidate) =>
+candidate.id === customItem.profileSectionId &&
+candidate.kind === "custom",
+);
 
-		if (!section) {
-			throw new ORPCError("BAD_REQUEST", {
-				message: "The selected custom section is no longer available.",
-			});
-		}
+if (!section) {
+throw new ORPCError("BAD_REQUEST", {
+message:
+"The selected custom section is no longer available.",
+});
+}
 
-		sourceDataSnapshot = structuredClone({
-			...customItem,
-			section,
-		});
-	} else {
-		sourceDataSnapshot = structuredClone(source) as Record<string, unknown>;
-	}
+sourceDataSnapshot = structuredClone({
+...customItem,
+section,
+});
+} else {
+sourceDataSnapshot = structuredClone(source) as Record<
+string,
+unknown
+>;
+}
 
-	return {
-		profile,
-		sourceTextSnapshot: getSelectionSourceText(sourceType, source),
-		sourceDataSnapshot,
-	};
+return {
+sourceTextSnapshot: getSelectionSourceText(sourceType, source),
+sourceDataSnapshot,
+};
+}
+
+function buildInitialSelectionItems(
+profile: CurrentProfile,
+cvBuildId: string,
+) {
+const rows: Array<{
+id: string;
+cvBuildId: string;
+parentSelectionItemId: string | null;
+sourceType: CvmateSelectionSourceType;
+sourceId: string;
+sourceTextSnapshot: string | null;
+sourceDataSnapshot: Record<string, unknown>;
+selected: boolean;
+sortOrder: number;
+}> = [];
+
+let sortOrder = 0;
+
+const add = (
+sourceType: CvmateSelectionSourceType,
+sourceId: string,
+parentSelectionItemId: string | null = null,
+) => {
+const snapshot = snapshotSelectionSource(
+profile,
+sourceType,
+sourceId,
+);
+const id = generateId();
+
+rows.push({
+id,
+cvBuildId,
+parentSelectionItemId,
+sourceType,
+sourceId,
+sourceTextSnapshot: snapshot.sourceTextSnapshot,
+sourceDataSnapshot: snapshot.sourceDataSnapshot,
+selected: false,
+sortOrder,
+});
+
+sortOrder += 1;
+return id;
+};
+
+const employmentSelectionIds = new Map<string, string>();
+
+for (const employment of profile.employments) {
+employmentSelectionIds.set(
+employment.id,
+add("employment", employment.id),
+);
+}
+
+for (const link of profile.employmentFacts) {
+const parentSelectionItemId = employmentSelectionIds.get(
+link.employmentId,
+);
+
+if (!parentSelectionItemId) {
+throw new ORPCError("BAD_REQUEST", {
+message:
+"The Master Profile contains an experience fact linked to an unavailable employment.",
+});
+}
+
+const factExists = profile.experienceFacts.some(
+(fact) => fact.id === link.experienceFactId,
+);
+
+if (!factExists) {
+throw new ORPCError("BAD_REQUEST", {
+message:
+"The Master Profile contains an unavailable linked experience fact.",
+});
+}
+
+add(
+"experience_fact",
+link.experienceFactId,
+parentSelectionItemId,
+);
+}
+
+for (const item of profile.projects) add("project", item.id);
+for (const item of profile.education) add("education", item.id);
+for (const item of profile.courses) add("course", item.id);
+for (const item of profile.certifications)
+add("certification", item.id);
+for (const item of profile.volunteer) add("volunteer", item.id);
+for (const item of profile.languages) add("language", item.id);
+for (const item of profile.awards) add("award", item.id);
+for (const item of profile.references) add("reference", item.id);
+for (const item of profile.licenses) add("license", item.id);
+for (const item of profile.listItems)
+add("profile_list_item", item.id);
+for (const item of profile.clauses) add("clause", item.id);
+for (const item of profile.photos) add("profile_photo", item.id);
+for (const item of profile.customSectionItems)
+add("custom_section_item", item.id);
+
+return rows;
+}
+async function resolveSelectionSource(
+build: Awaited<ReturnType<typeof requireOwnedBuild>>,
+userId: string,
+sourceType: CvmateSelectionSourceType,
+sourceId: string,
+) {
+const profile = await getBuildProfile(build, userId);
+const snapshot = snapshotSelectionSource(
+profile,
+sourceType,
+sourceId,
+);
+
+return {
+profile,
+...snapshot,
+};
 }
 
 async function requireParentSelectionItem(parentSelectionItemId: string, cvBuildId: string, userId: string) {
@@ -428,33 +555,47 @@ export const cvmateBuildService = {
 		return stripUserId(build);
 	},
 
-	create: async (input: BuildCreateFields & { userId: string }) => {
-		const profile = await cvmateProfileService.getCurrent({
-			userId: input.userId,
-		});
+create: async (input: BuildCreateFields & { userId: string }) => {
+const profile = await cvmateProfileService.getCurrent({
+userId: input.userId,
+});
 
-		if (!profile) {
-			throw new ORPCError("BAD_REQUEST", {
-				message: "Create a Master Profile before starting a CV build.",
-			});
-		}
+if (!profile) {
+throw new ORPCError("BAD_REQUEST", {
+message:
+"Create a Master Profile before starting a CV build.",
+});
+}
 
-		const id = generateId();
-		const jobOfferId = input.jobOfferId ?? null;
-		const jobOfferSnapshot = jobOfferId === null ? null : await getJobOfferSnapshot(jobOfferId, input.userId);
+const id = generateId();
+const jobOfferId = input.jobOfferId ?? null;
+const jobOfferSnapshot =
+jobOfferId === null
+? null
+: await getJobOfferSnapshot(jobOfferId, input.userId);
 
-		await db.insert(schema.cvmateCvBuild).values({
-			id,
-			userId: input.userId,
-			masterProfileId: profile.profile.id,
-			jobOfferId,
-			jobOfferSnapshot,
-			targetLanguage: input.targetLanguage ?? null,
-			designSettings: input.designSettings ?? null,
-		});
+const selectionItems = buildInitialSelectionItems(profile, id);
 
-		return id;
-	},
+await db.transaction(async (tx) => {
+await tx.insert(schema.cvmateCvBuild).values({
+id,
+userId: input.userId,
+masterProfileId: profile.profile.id,
+jobOfferId,
+jobOfferSnapshot,
+targetLanguage: input.targetLanguage ?? null,
+designSettings: input.designSettings ?? null,
+});
+
+if (selectionItems.length > 0) {
+await tx
+.insert(schema.cvmateCvSelectionItem)
+.values(selectionItems);
+}
+});
+
+return id;
+},
 
 	update: async (
 		input: BuildUpdateFields & {

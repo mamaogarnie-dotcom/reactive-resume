@@ -1,0 +1,459 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const dbMock = vi.hoisted(() => ({
+	transaction: vi.fn(),
+}));
+
+const providerMock = vi.hoisted(() => ({
+	getRunnableById: vi.fn(),
+	getDefaultRunnable: vi.fn(),
+	markUsed: vi.fn(),
+}));
+
+const buildServiceMock = vi.hoisted(() => ({
+	getById: vi.fn(),
+	listSelectionItems: vi.fn(),
+	listGaps: vi.fn(),
+}));
+
+const generateJsonMock = vi.hoisted(() => vi.fn());
+const getModelMock = vi.hoisted(() => vi.fn(() => ({ model: true })));
+const generateIdMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@reactive-resume/db/client", () => ({ db: dbMock }));
+
+vi.mock("@reactive-resume/db/schema", () => ({
+	cvmateCvSelectionItem: {
+		id: "selection_id",
+		cvBuildId: "selection_build_id",
+	},
+	cvmateCvGap: {
+		cvBuildId: "gap_build_id",
+		origin: "gap_origin",
+		status: "gap_status",
+	},
+}));
+
+vi.mock("drizzle-orm", () => ({
+	and: (...args: unknown[]) => args,
+	eq: (...args: unknown[]) => args,
+}));
+
+vi.mock("@reactive-resume/utils/string", () => ({
+	generateId: generateIdMock,
+}));
+
+vi.mock("../ai-providers/service", () => ({
+	aiProvidersService: providerMock,
+}));
+
+vi.mock("../ai/generate-json", () => ({
+	generateJson: generateJsonMock,
+}));
+
+vi.mock("../ai/service", () => ({
+	getModel: getModelMock,
+}));
+
+vi.mock("./service", () => ({
+	cvmateBuildService: buildServiceMock,
+}));
+
+const { __testables, cvmateBuildAiRecommendationOutputSchema, cvmateBuildRecommendationsService } = await import(
+	"./recommendations"
+);
+
+const provider = {
+	id: "provider-1",
+	provider: "openai" as const,
+	model: "test-model",
+	apiKey: "secret",
+	baseURL: "",
+};
+
+const jobOfferSnapshot: Parameters<typeof __testables.buildPrompt>[0]["jobOffer"] = {
+	roleTitle: "Office Manager",
+	companyName: "Acme",
+	location: "Wroclaw",
+	language: "pl",
+	requirements: [
+		{
+			id: "req-1",
+			category: "required",
+			priority: "critical",
+			sourceText: "Excel required",
+			text: "Excel",
+		},
+		{
+			id: "req-2",
+			category: "preferred",
+			priority: "important",
+			sourceText: "CRM preferred",
+			text: "CRM",
+		},
+		{
+			id: "req-3",
+			category: "responsibility",
+			priority: "important",
+			sourceText: "Prepare reports",
+			text: "Prepare reports",
+		},
+	],
+};
+
+const build = {
+	id: "build-1",
+	jobOfferSnapshot,
+	targetLanguage: "pl",
+};
+
+const selectionItems: Parameters<typeof __testables.buildPrompt>[0]["selectionItems"] = [
+	{
+		id: "employment-1",
+		cvBuildId: "build-1",
+		parentSelectionItemId: null,
+		sourceType: "employment",
+		sourceId: "employment-source-1",
+		sourceTextSnapshot: "Office Manager - Example Ltd",
+		sourceDataSnapshot: {
+			company: "Example Ltd",
+			jobTitle: "Office Manager",
+		},
+		recommended: false,
+		selected: true,
+		recommendationReason: null,
+		sortOrder: 0,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	},
+	{
+		id: "fact-1",
+		cvBuildId: "build-1",
+		parentSelectionItemId: "employment-1",
+		sourceType: "experience_fact",
+		sourceId: "fact-source-1",
+		sourceTextSnapshot: "Prepared Excel reports.",
+		sourceDataSnapshot: {
+			text: "Prepared Excel reports.",
+		},
+		recommended: false,
+		selected: false,
+		recommendationReason: null,
+		sortOrder: 1,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	},
+	{
+		id: "course-1",
+		cvBuildId: "build-1",
+		parentSelectionItemId: null,
+		sourceType: "course",
+		sourceId: "course-source-1",
+		sourceTextSnapshot: "First Aid",
+		sourceDataSnapshot: {
+			name: "First Aid",
+		},
+		recommended: true,
+		selected: true,
+		recommendationReason: "Old recommendation",
+		sortOrder: 2,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	},
+];
+
+const existingGaps: Parameters<typeof __testables.resolveGapRequirements>[2] = [
+	{
+		id: "user-gap",
+		cvBuildId: "build-1",
+		jobRequirementId: null,
+		requirementTextSnapshot: null,
+		text: "User-created gap",
+		severity: "important",
+		origin: "user",
+		status: "open",
+		resolutionSourceType: null,
+		resolutionSourceId: null,
+		resolutionTextSnapshot: null,
+		sortOrder: 0,
+		resolvedAt: null,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	},
+	{
+		id: "dismissed-gap",
+		cvBuildId: "build-1",
+		jobRequirementId: null,
+		requirementTextSnapshot: "CRM",
+		text: "CRM",
+		severity: "important",
+		origin: "detected",
+		status: "dismissed",
+		resolutionSourceType: null,
+		resolutionSourceId: null,
+		resolutionTextSnapshot: null,
+		sortOrder: 1,
+		resolvedAt: null,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	},
+];
+
+function createTransactionMock() {
+	const where = vi.fn(async () => undefined);
+	const set = vi.fn((_value: Record<string, unknown>) => ({ where }));
+	const update = vi.fn(() => ({ set }));
+
+	const deleteWhere = vi.fn(async () => undefined);
+	const deleteFn = vi.fn(() => ({ where: deleteWhere }));
+
+	const values = vi.fn(async () => undefined);
+	const insert = vi.fn(() => ({ values }));
+
+	const tx = {
+		update,
+		delete: deleteFn,
+		insert,
+	};
+
+	dbMock.transaction.mockImplementationOnce(async (callback: (value: typeof tx) => Promise<unknown>) => callback(tx));
+
+	return {
+		tx,
+		update,
+		set,
+		where,
+		deleteFn,
+		deleteWhere,
+		insert,
+		values,
+	};
+}
+
+beforeEach(() => {
+	vi.clearAllMocks();
+
+	buildServiceMock.getById.mockResolvedValue(build);
+	buildServiceMock.listSelectionItems.mockResolvedValue(selectionItems);
+	buildServiceMock.listGaps.mockResolvedValue(existingGaps);
+
+	providerMock.getDefaultRunnable.mockResolvedValue(provider);
+	providerMock.getRunnableById.mockResolvedValue(provider);
+	providerMock.markUsed.mockResolvedValue(undefined);
+
+	generateIdMock.mockReturnValue("gap-1");
+});
+
+describe("cvmateBuildAiRecommendationOutputSchema", () => {
+	it("accepts IDs and reasons without candidate rewrite text", () => {
+		expect(
+			cvmateBuildAiRecommendationOutputSchema.parse({
+				recommendations: [
+					{
+						selectionItemId: "fact-1",
+						reason: "Direct Excel evidence.",
+					},
+				],
+				gapRequirementIds: ["req-2"],
+			}),
+		).toEqual({
+			recommendations: [
+				{
+					selectionItemId: "fact-1",
+					reason: "Direct Excel evidence.",
+				},
+			],
+			gapRequirementIds: ["req-2"],
+		});
+	});
+});
+
+describe("recommendation helpers", () => {
+	it("builds a prompt from frozen offer and candidate snapshots", () => {
+		const prompt = __testables.buildPrompt({
+			jobOffer: jobOfferSnapshot,
+			selectionItems,
+		});
+
+		expect(prompt).toContain("Prepared Excel reports.");
+		expect(prompt).toContain('"id":"req-1"');
+		expect(prompt).toContain("<GAP_ELIGIBLE_REQUIREMENT_IDS>");
+		expect(__testables.SYSTEM_PROMPT).toContain("Never invent, infer, embellish, or add candidate experience");
+	});
+
+	it("automatically recommends a parent when its child is recommended", () => {
+		const result = __testables.validateAndExpandRecommendations(
+			{
+				recommendations: [
+					{
+						selectionItemId: "fact-1",
+						reason: "Direct Excel evidence.",
+					},
+				],
+				gapRequirementIds: [],
+			},
+			selectionItems,
+		);
+
+		expect(result.get("fact-1")).toBe("Direct Excel evidence.");
+		expect(result.get("employment-1")).toBe("Direct Excel evidence.");
+		expect(result.has("course-1")).toBe(false);
+	});
+
+	it("rejects a recommendation for an unknown candidate item", () => {
+		expect(() =>
+			__testables.validateAndExpandRecommendations(
+				{
+					recommendations: [
+						{
+							selectionItemId: "invented-item",
+							reason: "Made up.",
+						},
+					],
+					gapRequirementIds: [],
+				},
+				selectionItems,
+			),
+		).toThrow();
+	});
+
+	it("rejects gaps outside eligible frozen requirements and preserves dismissed detected gaps", () => {
+		expect(() =>
+			__testables.resolveGapRequirements(
+				{
+					recommendations: [],
+					gapRequirementIds: ["req-3"],
+				},
+				jobOfferSnapshot.requirements,
+				existingGaps,
+			),
+		).toThrow();
+
+		const result = __testables.resolveGapRequirements(
+			{
+				recommendations: [],
+				gapRequirementIds: ["req-1", "req-2"],
+			},
+			jobOfferSnapshot.requirements,
+			existingGaps,
+		);
+
+		expect(result.map((item) => item.id)).toEqual(["req-1"]);
+	});
+});
+
+describe("cvmateBuildRecommendationsService.generate", () => {
+	it("updates recommendation fields only and replaces only open detected gaps", async () => {
+		const tx = createTransactionMock();
+
+		generateJsonMock.mockResolvedValue({
+			recommendations: [
+				{
+					selectionItemId: "fact-1",
+					reason: "Direct Excel evidence.",
+				},
+			],
+			gapRequirementIds: ["req-1", "req-2"],
+		});
+
+		await cvmateBuildRecommendationsService.generate({
+			id: "build-1",
+			userId: "user-1",
+		});
+
+		expect(getModelMock).toHaveBeenCalledWith({
+			provider: "openai",
+			model: "test-model",
+			apiKey: "secret",
+			baseURL: "",
+		});
+
+		expect(tx.set).toHaveBeenCalledWith({
+			recommended: true,
+			recommendationReason: "Direct Excel evidence.",
+		});
+
+		expect(tx.set).toHaveBeenCalledWith({
+			recommended: false,
+			recommendationReason: null,
+		});
+
+		for (const [value] of tx.set.mock.calls) {
+			expect(value).not.toHaveProperty("selected");
+		}
+
+		expect(tx.deleteWhere).toHaveBeenCalledWith([
+			["gap_build_id", "build-1"],
+			["gap_origin", "detected"],
+			["gap_status", "open"],
+		]);
+
+		expect(tx.values).toHaveBeenCalledWith([
+			{
+				id: "gap-1",
+				cvBuildId: "build-1",
+				jobRequirementId: null,
+				requirementTextSnapshot: "Excel",
+				text: "Excel",
+				severity: "critical",
+				origin: "detected",
+				status: "open",
+				resolutionSourceType: null,
+				resolutionSourceId: null,
+				resolutionTextSnapshot: null,
+				sortOrder: 0,
+				resolvedAt: null,
+			},
+		]);
+
+		expect(providerMock.markUsed).toHaveBeenCalledWith({
+			id: "provider-1",
+			userId: "user-1",
+		});
+	});
+
+	it("rejects an invalid AI selection before mutating the database", async () => {
+		generateJsonMock.mockResolvedValue({
+			recommendations: [
+				{
+					selectionItemId: "invented-item",
+					reason: "Invented match.",
+				},
+			],
+			gapRequirementIds: [],
+		});
+
+		await expect(
+			cvmateBuildRecommendationsService.generate({
+				id: "build-1",
+				userId: "user-1",
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(dbMock.transaction).not.toHaveBeenCalled();
+	});
+
+	it("requires an analyzed job-offer snapshot", async () => {
+		buildServiceMock.getById.mockResolvedValue({
+			...build,
+			jobOfferSnapshot: {
+				...jobOfferSnapshot,
+				requirements: [],
+			},
+		});
+
+		await expect(
+			cvmateBuildRecommendationsService.generate({
+				id: "build-1",
+				userId: "user-1",
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(providerMock.getDefaultRunnable).not.toHaveBeenCalled();
+		expect(generateJsonMock).not.toHaveBeenCalled();
+	});
+});
