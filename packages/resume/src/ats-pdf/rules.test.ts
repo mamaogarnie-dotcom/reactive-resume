@@ -411,3 +411,36 @@ describe("content checks", () => {
 		expect(result.findings.map((finding) => finding.code)).not.toContain("EMPLOYMENT_GAP");
 	});
 });
+
+describe("Polish PDF ATS support", () => {
+	it("recognizes standard Polish section headings when the PDF declares pl-PL", () => {
+		const polish = makeRawExtraction({
+			lines: [
+				{ text: "Jan Kowalski", size: 18 },
+				"jan.kowalski@example.com",
+				"Warszawa, Polska",
+				{ text: "Podsumowanie zawodowe", size: 12 },
+				"Specjalista administracyjny z doświadczeniem w koordynacji dokumentów i projektów.",
+				{ text: "Doświadczenie zawodowe", size: 12 },
+				"Koordynator — Fundacja",
+				"2020 - 2024",
+				"• Koordynacja dokumentacji i realizacji projektów",
+				{ text: "Wykształcenie", size: 12 },
+				"Uniwersytet Wrocławski",
+				"2010",
+				{ text: "Umiejętności", size: 12 },
+				"Excel, CRM, zamówienia publiczne",
+			],
+			metadata: { language: "pl-PL" },
+		});
+
+		const result = report(polish);
+
+		expect(statusOf(result, "NO_RECOGNIZED_HEADINGS")).toBe("pass");
+		expect(statusOf(result, "NO_EXPERIENCE_SECTION")).toBe("pass");
+		expect(statusOf(result, "NO_EDUCATION_SECTION")).toBe("pass");
+		expect(statusOf(result, "NO_SKILLS_SECTION")).toBe("pass");
+		expect(statusOf(result, "NO_SUMMARY_SECTION")).toBe("pass");
+		expect(skipReasonOf(result, "NO_EXPERIENCE_SECTION")).toBeUndefined();
+	});
+});

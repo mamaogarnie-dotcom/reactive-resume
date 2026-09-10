@@ -168,3 +168,28 @@ describe("matchJobDescription", () => {
 		expect(report.weightedCoverage).toBe(0);
 	});
 });
+
+describe("Polish job description matching", () => {
+	it("recognizes Polish requirement headings and removes generic recruiting words", () => {
+		const result = matchJobDescription({
+			jobDescription: [
+				"Excel",
+				"Wymagania",
+				"- Kubernetes",
+				"- Doświadczenie i umiejętności w pracy z zespołem",
+			].join("\n"),
+			resumeText: "Excel Kubernetes",
+		});
+
+		const terms = new Map(result.terms.map((term) => [term.term, term]));
+		const excelWeight = terms.get("excel")?.weight ?? 0;
+		const kubernetesWeight = terms.get("kubernetes")?.weight ?? 0;
+		const names = result.terms.map((term) => term.term);
+
+		expect(kubernetesWeight).toBeGreaterThan(excelWeight);
+		expect(result.matchedTerms).toContain("kubernetes");
+		expect(names).not.toContain("wymagania");
+		expect(names).not.toContain("doświadczenie");
+		expect(names).not.toContain("umiejętności");
+	});
+});

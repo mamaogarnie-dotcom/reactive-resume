@@ -12,7 +12,7 @@ const KNOWN_SKILL_BOOST = 2;
 /** Each additional word makes a phrase more specific, and slightly more worth matching. */
 const PHRASE_BONUS_PER_WORD = 0.4;
 const REQUIREMENTS_HEADING =
-	/\b(?:requirement|qualification|must[- ]have|nice[- ]to[- ]have|what you(?:'| a|)ll (?:need|bring|do)|about you|we(?:'| a|)re looking for|your (?:profile|background)|you (?:have|bring)|minimum|preferred)\b/;
+	/\b(?:requirement|qualification|must[- ]have|nice[- ]to[- ]have|what you(?:'| a|)ll (?:need|bring|do)|about you|we(?:'| a|)re looking for|your (?:profile|background)|you (?:have|bring)|minimum|preferred|wymagania|kwalifikacje|oczekujemy|oczekiwania|wymagane|preferowane|mile widziane|kogo szukamy|czego oczekujemy)\b/;
 
 const DEFAULT_MAX_TERMS = 35;
 

@@ -104,6 +104,22 @@ const EXTRA_PDF_HEADING_ALIASES: Partial<Record<CustomSectionType, readonly stri
 	profiles: ["contact", "contact information", "contact details", "online profiles", "find me online"],
 };
 
+const POLISH_PDF_HEADING_ALIASES: Partial<Record<CustomSectionType, readonly string[]>> = {
+	summary: ["podsumowanie", "podsumowanie zawodowe", "profil zawodowy", "o mnie"],
+	experience: ["doświadczenie", "doświadczenie zawodowe", "historia zatrudnienia"],
+	education: ["wykształcenie", "edukacja"],
+	projects: ["projekty", "projekty zawodowe"],
+	skills: ["umiejętności", "kompetencje", "kluczowe kompetencje", "umiejętności techniczne"],
+	languages: ["języki", "języki obce", "znajomość języków"],
+	interests: ["zainteresowania"],
+	awards: ["nagrody", "osiągnięcia", "nagrody i osiągnięcia"],
+	certifications: ["certyfikaty", "certyfikaty i licencje", "uprawnienia", "kursy", "kursy i szkolenia"],
+	publications: ["publikacje"],
+	volunteer: ["wolontariat", "działalność społeczna"],
+	references: ["referencje"],
+	profiles: ["linki", "profile online"],
+};
+
 function buildHeadingLookup(): ReadonlyMap<string, CustomSectionType> {
 	const lookup = new Map<string, CustomSectionType>();
 
@@ -112,6 +128,12 @@ function buildHeadingLookup(): ReadonlyMap<string, CustomSectionType> {
 	}
 
 	for (const [type, aliases] of Object.entries(EXTRA_PDF_HEADING_ALIASES)) {
+		for (const alias of aliases) {
+			if (!lookup.has(alias)) lookup.set(alias, type as CustomSectionType);
+		}
+	}
+
+	for (const [type, aliases] of Object.entries(POLISH_PDF_HEADING_ALIASES)) {
 		for (const alias of aliases) {
 			if (!lookup.has(alias)) lookup.set(alias, type as CustomSectionType);
 		}

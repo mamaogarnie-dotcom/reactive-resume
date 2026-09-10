@@ -32,6 +32,21 @@ const RECRUITING_BOILERPLATE =
 	"regard religion remote required requirement requirements responsibilities responsibility role roles salary " +
 	"seeking sex sexual skills status team teams thrive time title veteran welcome work working workplace years";
 
+const POLISH_FUNCTION_WORDS =
+	"a aby albo ale ani bez bo bowiem by być był była było były co czy dla do gdy gdzie i ich im jak jako jest jeśli już " +
+	"kiedy która które którego której który których lecz lub ma mają między może na nad nam nas nie niż o od oraz po pod " +
+	"ponad przed przez przy są się ta tak także ten to tych tym w we według więc z za ze że";
+
+const POLISH_RECRUITING_BOILERPLATE =
+	"aplikacja aplikować firma firmie kandydat kandydaci kandydatka kandydatki mile oferta oferujemy oczekujemy oczekiwania " +
+	"doświadczenie praca pracę pracy pracownik stanowisko stanowisku umiejętności kompetencje wymagania wymagane wymogi " +
+	"wymóg widziane wynagrodzenie zespół zespole";
+
 export const JD_STOPWORDS: ReadonlySet<string> = new Set(
-	[...FUNCTION_WORDS.split(" "), ...RECRUITING_BOILERPLATE.split(" ")].filter(Boolean),
+	[
+		...FUNCTION_WORDS.split(" "),
+		...RECRUITING_BOILERPLATE.split(" "),
+		...POLISH_FUNCTION_WORDS.split(" "),
+		...POLISH_RECRUITING_BOILERPLATE.split(" "),
+	].filter(Boolean),
 );
