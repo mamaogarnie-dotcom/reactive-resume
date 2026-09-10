@@ -1,6 +1,8 @@
 import { protectedProcedure } from "../../context";
 import { cvmateBuildDto } from "../../dto/cvmate-build";
+import { cvmateBuildMaterializeDto } from "../../dto/cvmate-build-materialize";
 import { resumeMutationRateLimit } from "../../middleware/rate-limit";
+import { cvmateBuildMaterializeService } from "./materialize";
 import { cvmateBuildService } from "./service";
 
 export const crudRouter = {
@@ -306,6 +308,27 @@ export const crudRouter = {
 			cvmateBuildService.updateGeneratedContentFinalText({
 				userId: context.user.id,
 				...input,
+			}),
+		),
+
+	materialize: protectedProcedure
+		.route({
+			method: "POST",
+			path: "/cvmate/builds/{id}/materialize",
+			tags: ["CVMate CV Build"],
+			operationId: "materializeCvmateCvBuild",
+			summary: "Materialize CV build",
+			description:
+				"Creates a Reactive Resume from an owned CVMate build, or updates the existing materialized resume for that build. Requires authentication.",
+			successDescription: "The materialized CVMate document and Reactive Resume identifiers.",
+		})
+		.input(cvmateBuildMaterializeDto.materialize.input)
+		.use(resumeMutationRateLimit)
+		.output(cvmateBuildMaterializeDto.materialize.output)
+		.handler(({ input, context }) =>
+			cvmateBuildMaterializeService.materialize({
+				id: input.id,
+				userId: context.user.id,
 			}),
 		),
 };

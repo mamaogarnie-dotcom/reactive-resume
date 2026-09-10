@@ -16,4 +16,5 @@ export const cvmateBuildRouter = {
 	deleteGap: crudRouter.deleteGap,
 	listGeneratedContent: crudRouter.listGeneratedContent,
 	updateGeneratedContentFinalText: crudRouter.updateGeneratedContentFinalText,
+	materialize: crudRouter.materialize,
 };
