@@ -661,6 +661,73 @@ describe("cvmateBuildService.createSelectionItem", () => {
 		expect(result).toEqual(created);
 	});
 
+	it("includes frozen custom section metadata in a custom section item snapshot", async () => {
+		const customSection = {
+			id: "custom-section-1",
+			masterProfileId: "profile-1",
+			kind: "custom" as const,
+			title: "Additional Experience",
+			isVisible: true,
+			sortOrder: 20,
+			createdAt: new Date("2026-09-08T10:00:00.000Z"),
+			updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+		};
+		const customItem = {
+			id: "custom-item-1",
+			profileSectionId: "custom-section-1",
+			title: "Conference Speaker",
+			subtitle: null,
+			date: "2026",
+			description: null,
+			url: null,
+			fields: null,
+			sortOrder: 0,
+			createdAt: new Date("2026-09-08T10:00:00.000Z"),
+			updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+		};
+
+		getCurrentProfileMock.mockResolvedValue({
+			...masterProfile,
+			sections: [customSection],
+			customSectionItems: [customItem],
+		});
+		setSelectResults([{ ...build }]);
+		generateIdMock.mockReturnValue("selection-custom-generated");
+
+		const created = {
+			...selectionItem,
+			id: "selection-custom-generated",
+			sourceType: "custom_section_item" as const,
+			sourceId: "custom-item-1",
+			sourceTextSnapshot: "Conference Speaker",
+			sourceDataSnapshot: {
+				...customItem,
+				section: customSection,
+			},
+		};
+
+		const { values } = mockInsertReturning([created]);
+
+		await cvmateBuildService.createSelectionItem({
+			cvBuildId: "build-1",
+			userId: "user-1",
+			sourceType: "custom_section_item",
+			sourceId: "custom-item-1",
+			selected: true,
+		});
+
+		expect(values).toHaveBeenCalledWith(
+			expect.objectContaining({
+				sourceType: "custom_section_item",
+				sourceId: "custom-item-1",
+				sourceTextSnapshot: "Conference Speaker",
+				sourceDataSnapshot: {
+					...customItem,
+					section: customSection,
+				},
+			}),
+		);
+	});
 	it("creates a deterministic text snapshot for an employment", async () => {
 		setSelectResults([{ ...build }]);
 		generateIdMock.mockReturnValue("selection-employment-generated");

@@ -310,10 +310,32 @@ async function resolveSelectionSource(
 		});
 	}
 
+	let sourceDataSnapshot: Record<string, unknown>;
+
+	if (sourceType === "custom_section_item") {
+		const customItem = source as CurrentProfile["customSectionItems"][number];
+		const section = profile.sections.find(
+			(candidate) => candidate.id === customItem.profileSectionId && candidate.kind === "custom",
+		);
+
+		if (!section) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "The selected custom section is no longer available.",
+			});
+		}
+
+		sourceDataSnapshot = structuredClone({
+			...customItem,
+			section,
+		});
+	} else {
+		sourceDataSnapshot = structuredClone(source) as Record<string, unknown>;
+	}
+
 	return {
 		profile,
 		sourceTextSnapshot: getSelectionSourceText(sourceType, source),
-		sourceDataSnapshot: structuredClone(source) as Record<string, unknown>,
+		sourceDataSnapshot,
 	};
 }
 
