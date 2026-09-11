@@ -390,7 +390,6 @@ msgid "Add another layer of protection to your account."
 msgstr "നിങ്ങളുടെ അക്കൗണ്ടിന് ഒരു സുരക്ഷാ പാളി കൂടി ചേർക്കുക."
 
 #: src/features/applications/components/application-form-sheet.tsx
-#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Add application"
 msgstr "ആപ്ലിക്കേഷൻ ചേർക്കുക"
@@ -402,6 +401,10 @@ msgstr "നിങ്ങളുടെ പ്രദേശവുമായി റോ�
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Add contact"
 msgstr "കോൺടാക്റ്റ് ചേർക്കുക"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Add favorite"
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "Add figures where you have them: volumes, percentages, timeframes, team sizes."
@@ -480,18 +483,9 @@ msgstr "ആഫ്രിക്കാൻസ്"
 msgid "Against the job description"
 msgstr "ജോലി വിവരണത്തിനെതിരെ"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Agent"
-msgstr "ഏജന്റ്"
-
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Agent ready"
 msgstr "ഏജന്റ് തയ്യാറാണ്"
-
-#: src/routes/dashboard/-components/sidebar.tsx
-msgid "Agents"
-msgstr "ഏജന്റുമാർ"
 
 #: src/dialogs/resume/import.tsx
 msgid "AI"
@@ -533,9 +527,21 @@ msgstr "ENCRYPTION_SECRET കോൺഫിഗർ ചെയ്യുന്നത�
 msgid "AI providers require REDIS_URL and ENCRYPTION_SECRET to be configured."
 msgstr "AI ദാതാക്കൾക്ക് REDIS_URL ഉം ENCRYPTION_SECRET ഉം കോൺഫിഗർ ചെയ്യേണ്ടതുണ്ട്."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations are suggestions only. You decide what is included in the final CV."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations could not be generated. You can still select content manually."
+msgstr ""
+
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "അൽബേനിയൻ"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "All"
+msgstr ""
 
 #: src/features/applications/components/export-applications-sheet.tsx
 msgid "All applications (including archived)"
@@ -577,6 +583,26 @@ msgstr "ഒരു അപ്രതീക്ഷിത പിശക് ഈ പേ�
 #: src/dialogs/resume/import.tsx
 msgid "An unknown error occurred while importing your resume."
 msgstr "നിങ്ങളുടെ റിസ്യൂം ഇംപോർട്ട് ചെയ്യുന്നതിനിടെ അജ്ഞാതമായ ഒരു പിശക് സംഭവിച്ചു."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed, but no structured requirements were extracted."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyze another offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzed job offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzing..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "And many more..."
@@ -669,9 +695,6 @@ msgstr "ആപ്ലിക്കേഷൻ സ്റ്റാറ്റിസ്�
 msgid "Application updated."
 msgstr "ആപ്ലിക്കേഷൻ അപ്ഡേറ്റ് ചെയ്തു."
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Applications"
 msgstr "അപേക്ഷകൾ"
@@ -774,10 +797,12 @@ msgstr "ഈ റെസ്യൂമെയെക്കുറിച്ച് എന�
 msgid "Aspect Ratio"
 msgstr "ആസ്പെക്ട് റേഷ്യോ"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/libs/resume/section.tsx
 msgid "ATS Check"
 msgstr "എടിഎസ് പരിശോധന"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/_home/-sections/features.tsx
 #: src/routes/_home/ats-checker.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
@@ -1017,6 +1042,10 @@ msgstr "ഭാഷ… ആക്കുക"
 msgid "Change the colors, fonts, and design to suit you."
 msgstr "നിങ്ങൾക്ക് ഇണങ്ങുംവിധം നിറങ്ങളും ഫോണ്ടുകളും ഡിസൈനും മാറ്റുക."
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Change the filter or update one of your CVs."
+msgstr ""
+
 #: src/features/command-palette/pages/preferences/index.tsx
 msgid "Change theme to…"
 msgstr "തീം… ആക്കുക"
@@ -1114,6 +1143,10 @@ msgstr "സംരക്ഷിച്ച ഒരു കവർ ലെറ്റർ �
 msgid "Choose an application"
 msgstr "ഒരു ആപ്ലിക്കേഷൻ തിരഞ്ഞെടുക്കുക"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Choose CV content"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
 msgstr "PDF, DOCX, Markdown, അല്ലെങ്കിൽ JSON തിരഞ്ഞെടുക്കുക. ലഭ്യമാകുമ്പോൾ നിങ്ങളുടെ റെസ്യൂമെയും കവർ ലെറ്ററും വെവ്വേറെ എക്സ്പോർട്ട് ചെയ്യുക."
@@ -1181,10 +1214,6 @@ msgstr "കമാൻഡ് പാലറ്റ് - {currentPage}"
 #: src/routes/_home/-sections/footer.tsx
 msgid "Community"
 msgstr "കമ്മ്യൂണിറ്റി"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Compact"
-msgstr "സംക്ഷിപ്തമായ"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/features/applications/components/application-form-sheet.tsx
@@ -1282,6 +1311,10 @@ msgstr "ഉള്ളടക്കം ഒരു ഗ്രിഡിലായി ക
 #: src/features/auth/pages/register.tsx
 msgid "Continue"
 msgstr "തുടരുക"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Continue to tailored content"
+msgstr ""
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -1407,6 +1440,10 @@ msgstr "തിരഞ്ഞെടുത്ത റെസ്യൂം ലോഡ് 
 msgid "Could not load this cover letter."
 msgstr "ഈ കവർ ലെറ്റർ ലോഡ് ചെയ്യാനായില്ല."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not load your Master Profile."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not prepare your resume for printing. Please try again."
 msgstr "പ്രിന്റിംഗിനായി നിങ്ങളുടെ റിസ്യൂം തയ്യാറാക്കാനായില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക."
@@ -1424,6 +1461,10 @@ msgstr "ഈ പാച്ച് പുനഃസ്ഥാപിക്കാൻ ക
 msgid "Could not save the cover letter. Please try again."
 msgstr "കവർ ലെറ്റർ സംരക്ഷിക്കാനായില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not save your profile."
+msgstr ""
+
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Could not set up two-factor authentication."
 msgstr "ടു-ഫാക്ടർ ഓത്‌ന്റിക്കേഷൻ സജ്ജമാക്കാനായില്ല."
@@ -1432,6 +1473,10 @@ msgstr "ടു-ഫാക്ടർ ഓത്‌ന്റിക്കേഷൻ സ
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Could not sort these items; they stayed at the end: {0}."
 msgstr "ഈ ഇനങ്ങൾ അടുക്കാൻ കഴിഞ്ഞില്ല; അവർ അവസാനം താമസിച്ചു: {0}."
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Could not update this CV."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Could not verify provider connection."
@@ -1510,7 +1555,6 @@ msgstr "കവർ ലെറ്റർ"
 msgid "Cover letter draft"
 msgstr "കവർ ലെറ്റർ ഡ്രാഫ്റ്റ്"
 
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/cover-letters.tsx
 msgid "Cover Letters"
 msgstr "കവർ ലെറ്ററുകൾ"
@@ -1534,13 +1578,16 @@ msgstr "കവർ ലെറ്ററുകൾ"
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/features/cover-letters/library.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Create"
 msgstr "സൃഷ്‌ടിക്കുക"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Create a copy tuned to this job"
 msgstr "ഈ ജോലിയിൽ ട്യൂൺ ചെയ്ത ഒരു പകർപ്പ് സൃഷ്ടിക്കുക"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Create a CV build from your Master Profile and let AI recommend only facts already stored there."
+msgstr ""
 
 #: src/features/auth/pages/register.tsx
 msgid "Create a new account"
@@ -1600,7 +1647,6 @@ msgid "Create a new reference"
 msgstr "ഒരു പുതിയ റഫറൻസ് സൃഷ്‌ടിക്കുക"
 
 #: src/dialogs/resume/index.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
@@ -1622,6 +1668,10 @@ msgstr "ഒരു പുതിയ വളന്റിയർ അനുഭവം �
 msgid "Create a Sample Resume"
 msgstr "ഒരു സാമ്പിള്‍ റിസ്യൂം സൃഷ്‌ടിക്കുക"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create a tailored CV from a job offer to see it here."
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Create as many resumes as you want."
 msgstr "നിങ്ങൾക്ക് വേണ്ടത്ര റിസ്യൂമുകൾ ഉണ്ടാക്കുക."
@@ -1629,6 +1679,14 @@ msgstr "നിങ്ങൾക്ക് വേണ്ടത്ര റിസ്യ�
 #: src/features/cover-letters/library.tsx
 msgid "Create cover letter"
 msgstr "കവർ ലെറ്റർ സൃഷ്ടിക്കുക"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/create.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create CV"
+msgstr ""
 
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Create from scratch"
@@ -1709,6 +1767,11 @@ msgstr "കസ്റ്റം സെക്ഷനുകൾ"
 #: src/libs/resume/section.tsx
 msgid "Custom Styles"
 msgstr "ഇഷ്ടാനുസൃത ശൈലികൾ"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "CV"
+msgstr ""
 
 #: src/libs/locale.ts
 msgid "Czech"
@@ -1932,6 +1995,7 @@ msgid "Discord"
 msgstr "ഡിസ്‌കോർഡ്"
 
 #: src/features/applications/components/application-ai-copilot.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Dismiss"
 msgstr "നിരസിക്കുക"
 
@@ -2000,6 +2064,10 @@ msgstr "PDF ഡൗൺലോഡ് ചെയ്യുക"
 msgid "Downloads"
 msgstr "ഡൗൺലോഡുകൾ"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Draft"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Draft a cover letter"
 msgstr "ഒരു കവർ ലെറ്റർ തയ്യാറാക്കുക"
@@ -2011,6 +2079,10 @@ msgstr "ഒരു ഫോളോ-അപ്പ് തയ്യാറാക്കു
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Drafting failed."
 msgstr "ഡ്രാഫ്റ്റിംഗ് failed."
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Drafts"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Drag and drop sections here to move them between columns"
@@ -2127,6 +2199,10 @@ msgstr "കുറിപ്പ് തിരുത്തുക"
 msgid "Editable in Word, Google Docs, and Pages."
 msgstr "Word, Google Docs, Pages എന്നിവയിൽ എഡിറ്റുചെയ്യാനാകും."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Edited"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/index.tsx
 msgid "Editing is disabled until you unlock it."
 msgstr "നിങ്ങൾ അത് അൺലോക്ക് ചെയ്യുന്നതുവരെ എഡിറ്റിംഗ് പ്രവർത്തനരഹിതമാക്കിയിരിക്കും."
@@ -2142,6 +2218,7 @@ msgid "Education"
 msgstr "വിദ്യാഭ്യാസം"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Email"
 msgstr "ഇമെയിൽ"
 
@@ -2272,6 +2349,10 @@ msgstr "മുഴുവൻ സ്ക്രീനിൽ നിന്ന് പു
 #: src/libs/resume/section.tsx
 msgid "Experience"
 msgstr "അനുഭവം"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Experience fact"
+msgstr ""
 
 #: src/dialogs/api-key/create.tsx
 msgid "Expires in"
@@ -2500,6 +2581,14 @@ msgstr "നിങ്ങളുടെ കോഡ് പരിശോധിക്ക�
 msgid "Fatal error"
 msgstr "ഗുരുതരമായ പിശക്"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorite"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorites"
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Features"
 msgstr "സവിശേഷതകൾ"
@@ -2535,6 +2624,10 @@ msgstr "ഫിന്നിഷ്"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Fireworks"
 msgstr "വെടിക്കെട്ട്"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "First name"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Fit"
@@ -2644,6 +2737,10 @@ msgstr "മുഴുവൻ സ്ക്രീൻ"
 msgid "Fullscreen Editor"
 msgstr "ഫുൾസ്ക്രീൻ എഡിറ്റർ"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Gaps"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Gaps:"
 msgstr "വിടവുകൾ:"
@@ -2651,6 +2748,10 @@ msgstr "വിടവുകൾ:"
 #: src/dialogs/resume/index.tsx
 msgid "Generate a random name"
 msgstr "ഒരു റാൻഡം പേരുണ്ടാക്കുക"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Generating tailored content..."
+msgstr ""
 
 #: src/features/resume/export/use-resume-export.ts
 #: src/routes/agent/-components/resume-pane.tsx
@@ -2723,10 +2824,6 @@ msgstr "ഗ്രേഡ്"
 #: src/libs/locale.ts
 msgid "Greek"
 msgstr "ഗ്രീക്ക്"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Grid"
-msgstr "ഗ്രിഡ്"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Groq"
@@ -2899,7 +2996,6 @@ msgid "Images cover most of the page."
 msgstr "ചിത്രങ്ങൾ പേജിന്റെ ഭൂരിഭാഗവും മൂടുന്നു."
 
 #: src/dialogs/resume/import.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Import"
 msgstr "ഇംപോർട്ട്"
 
@@ -3051,10 +3147,6 @@ msgstr "ഇറ്റാലിക്ക്"
 msgid "Japanese"
 msgstr "ജാപ്പനീസ്"
 
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Job"
-msgstr "ഇയ്യോബ്"
-
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Job description"
 msgstr "ജോലി വിവരണം"
@@ -3063,6 +3155,10 @@ msgstr "ജോലി വിവരണം"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "Job description (optional)"
 msgstr "ജോലി വിവരണം (ഐച്ഛികം)"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Job offer"
+msgstr ""
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Job posting"
@@ -3075,10 +3171,6 @@ msgstr "ജോലി പോസ്റ്റിംഗ് ലിങ്ക്"
 #: src/features/applications/components/insights-view.tsx
 msgid "Job search pipeline"
 msgstr "ജോലി തിരച്ചിൽ പൈപ്പ്‌ലൈൻ"
-
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Jobs"
-msgstr "ജോലികൾ"
 
 #. Example full name placeholder on profile settings form
 #. Example full name placeholder on registration form
@@ -3201,7 +3293,12 @@ msgstr "ഭാഷകൾ"
 msgid "Last downloaded on {0}"
 msgstr "അവസാനം {0}-ന് ഡൗൺലോഡ് ചെയ്തു"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Last name"
+msgstr ""
+
 #: src/routes/dashboard/applications/index.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Last updated"
 msgstr "അവസാനം അപ്ഡേറ്റ് ചെയ്തത്"
 
@@ -3325,6 +3422,7 @@ msgstr "ലിങ്ക് ചെയ്‌ത Reactive Resume"
 #: src/features/auth/components/social-auth.tsx
 #: src/features/settings/authentication/components/hooks.tsx
 #: src/routes/_home/-sections/footer.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "LinkedIn"
 msgstr "ലിങ്ക്ഡ്ഇൻ"
 
@@ -3335,10 +3433,6 @@ msgstr "LinkedIn, റഫറൽ…"
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Linking your {providerName} account..."
 msgstr "നിങ്ങളുടെ {providerName} അക്കൗണ്ട് ലിങ്ക് ചെയ്യുന്നു..."
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "List"
-msgstr "ലിസ്റ്റ്"
 
 #: src/features/ats-checker/messages.ts
 msgid "List the tools and technologies you use. Recruiters search skills more than any other field."
@@ -3352,13 +3446,13 @@ msgstr "ലിത്വാനിയൻ"
 msgid "Loading AI providers. Please try again in a moment."
 msgstr "AI ദാതാക്കളെ ലോഡ് ചെയ്യുന്നു. ദയവായി അൽപ്പസമയത്തിനുശേഷം വീണ്ടും ശ്രമിക്കുക."
 
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Loading applications…"
-msgstr "ആപ്ലിക്കേഷനുകൾ ലോഡ് ചെയ്യുന്നു…"
-
 #: src/features/auth/pages/consent.tsx
 msgid "Loading connection request..."
 msgstr "കണക്ഷൻ അഭ്യർത്ഥന ലോഡ് ചെയ്യുന്നു..."
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Loading profile..."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-provider-picker.tsx
 #: src/features/settings/integrations/components/ai-section.tsx
@@ -3370,10 +3464,13 @@ msgstr "ദാതാക്കളെ ലോഡ് ചെയ്യുന്നു�
 msgid "Loading resumes…"
 msgstr "റെസ്യൂമെകൾ ലോഡ് ചെയ്യുന്നു…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Loading threads…"
 msgstr "ത്രെഡുകൾ ലോഡ് ചെയ്യുന്നു…"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Loading your CVs…"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/version-history.tsx
 msgid "Loading…"
@@ -3386,6 +3483,7 @@ msgstr "… ലോഡ് ചെയ്യുന്നു"
 #: src/features/applications/components/table-view.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Location"
 msgstr "സ്ഥലം"
 
@@ -3459,13 +3557,39 @@ msgstr "മാർജിൻ (തിരശ്ചീനം)"
 msgid "Margin (Vertical)"
 msgstr "മാർജിൻ (ലംബം)"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark draft"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark ready"
+msgstr ""
+
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Mark rejected"
 msgstr "മാർക്ക് നിരസിച്ചു"
 
+#: src/features/command-palette/pages/navigation.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match Master Profile"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Match scoring failed."
 msgstr "മാച്ച് സ്കോറിംഗ് failed."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match your Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Matching profile..."
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-results.tsx
 msgid "Medium impact"
@@ -3532,6 +3656,10 @@ msgstr "സ്റ്റേജ് നീക്കുക"
 msgid "Move to"
 msgstr "ഇതിലേക്കു മാറ്റുക"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Move to trash"
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "നിങ്ങളുടെ ഇമെയിലും ഫോൺ നമ്പറും ഒന്നാം പേജിന്റെ മുകളിലേക്ക് നീക്കുക."
@@ -3548,6 +3676,13 @@ msgstr "മൾടിലിംഗ്വൽ"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Must start with https://"
 msgstr "https:// എന്നതിൽ തുടങ്ങണം"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "My CV"
+msgstr ""
 
 #. Label for full name input on registration form
 #: src/dialogs/api-key/create.tsx
@@ -3596,9 +3731,8 @@ msgid "New account sign-ups are currently disabled on this server."
 msgstr "ഈ സെർവറിൽ പുതിയ അക്കൗണ്ട് രജിസ്ട്രേഷനുകൾ നിലവിൽ പ്രവർത്തനരഹിതമാണ്."
 
 #: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Application"
-msgstr "പുതിയ ആപ്ലിക്കേഷൻ"
+msgid "New CV"
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "New features land regularly, so check back now and then."
@@ -3627,14 +3761,8 @@ msgstr "പുതിയ സെക്ഷൻ"
 msgid "New tag…"
 msgstr "പുതിയ ടാഗ്…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "New thread"
-msgstr "പുതിയ ത്രെഡ്"
-
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Thread"
 msgstr "പുതിയ ത്രെഡ്"
 
 #: src/features/cover-letters/library.tsx
@@ -3682,6 +3810,10 @@ msgstr "പതിവ് വിഭാഗ തലക്കെട്ടുകളൊ�
 msgid "No cover letters found. Create one or import an existing letter."
 msgstr "കവർ ലെറ്ററുകളൊന്നും കണ്ടെത്തിയില്ല. ഒരെണ്ണം സൃഷ്‌ടിക്കുക അല്ലെങ്കിൽ നിലവിലുള്ള ഒരു കത്ത് ഇറക്കുമതി ചെയ്യുക."
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "No CVs in this view"
+msgstr ""
+
 #. Error shown when AI import endpoint returns no parsed resume data
 #: src/dialogs/resume/import.tsx
 msgid "No data was returned from the AI provider."
@@ -3706,6 +3838,10 @@ msgstr "ജോലി പേരും തൊഴിലുടമയും ചേർ
 #: src/routes/_home/ats-checker.tsx
 msgid "No one-page rule, and no treating a font or a career gap as a fault."
 msgstr "ഒരു പേജ് നിയമമില്ല, ഫോണ്ടോ കരിയർ ഇടവേളയോ പിഴവായി കണക്കാക്കുന്നുമില്ല."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "No open gaps detected."
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "No passkeys registered yet."
@@ -3876,6 +4012,7 @@ msgstr "ആദ്യത്തെ പേജുകൾ മാത്രമേ പര
 #. Resume card dropdown action to open the resume editor
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Open"
 msgstr "ഓപ്പൺ ചെയ്യുക"
 
@@ -3899,6 +4036,10 @@ msgstr "ഫോക്കസ് മോഡ് തുറക്കുക"
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Open in builder"
 msgstr "ബിൽഡറിൽ തുറക്കുക"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Open in CV editor"
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Open Integrations Settings"
@@ -3945,6 +4086,10 @@ msgstr "ഐച്ഛികമായി, ഒരു ജോലി പോസ്റ�
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "Options for {title}"
 msgstr "{title} എന്നതിനുള്ള ഓപ്ഷനുകൾ"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Or attach a file"
+msgstr ""
 
 #: src/features/auth/components/social-auth.tsx
 msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) instead of email and password"
@@ -4055,13 +4200,25 @@ msgstr "പാസ്‌വേഡുകൾ പൊരുത്തപ്പെട�
 msgid "Paste a posting to see which of its terms already appear in your resume."
 msgstr "നിങ്ങളുടെ റിസ്യൂമിൽ ഇതിനകം ഏതെല്ലാം പദങ്ങൾ കാണുന്നുവെന്ന് കാണാൻ ഒരു പോസ്റ്റിംഗ് പേസ്റ്റ് ചെയ്യുക."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste job offer"
+msgstr ""
+
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source, Tags, Contact Name, Contact Email and Contact Phone."
 msgstr "വരികൾ ഒട്ടിക്കുക അല്ലെങ്കിൽ ഒരു .csv അപ്‌ലോഡ് ചെയ്യുക. കമ്പനി, റോൾ, സ്റ്റേജ്, സ്റ്റേജ് തീയതി, ശമ്പളം, ഉറവിടം, ടാഗുകൾ, കോൺടാക്റ്റ് പേര്, കോൺടാക്റ്റ് ഇമെയിൽ, കോൺടാക്റ്റ് ഫോൺ തുടങ്ങിയ കോളങ്ങൾ ഞങ്ങൾ മാപ്പ് ചെയ്യുന്നു."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the complete job offer here..."
+msgstr ""
+
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Paste the full job description here…"
 msgstr "പൂർണ്ണമായ ജോലി വിവരണം ഇവിടെ ഒട്ടിക്കുക…"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the job offer or attach a PDF/image. CVMate will analyze it before building your tailored CV."
+msgstr ""
 
 #: src/features/ats-checker/tool.tsx
 msgid "Paste the posting to see which of its terms already appear in your resume."
@@ -4099,6 +4256,10 @@ msgstr "പാച്ച് തിരികെ ചുരുട്ടി."
 msgid "PDF snapshot attached to the application."
 msgstr "PDF സ്‌നാപ്പ്‌ഷോട്ട് അപ്ലിക്കേഷനിൽ ഘടിപ്പിച്ചിരിക്കുന്നു."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "PDF, JPEG, PNG, WebP or GIF, up to 10 MB."
+msgstr ""
+
 #: src/features/cover-letters/editor-dialog.tsx
 msgid "PDFs already attached to applications will remain available."
 msgstr "ആപ്ലിക്കേഷനുകളിൽ ഇതിനകം അറ്റാച്ച് ചെയ്തിട്ടുള്ള PDF-കൾ തുടർന്നും ലഭ്യമാകും."
@@ -4118,9 +4279,14 @@ msgstr "ആശയക്കുഴപ്പം"
 msgid "Persian"
 msgstr "പേഴ്‌സിയൻ"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Personal details"
+msgstr ""
+
 #: src/dialogs/resume/sections/reference.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Phone"
 msgstr "ഫോൺ"
 
@@ -4213,6 +4379,10 @@ msgstr "പ്രിഫറൻസുകൾ"
 msgid "Prepare a conservative patch that improves clarity without changing the story of my career."
 msgstr "എന്റെ കരിയറിന്റെ കഥ മാറ്റാതെ വ്യക്തത മാത്രം മെച്ചപ്പെടുത്തുന്ന ഒരു സൂക്ഷ്മമായ തിരുത്ത് തയ്യാറാക്കുക."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Preparing CV..."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Preparing your resume for printing..."
 msgstr "നിങ്ങളുടെ റെസ്യൂമെ പ്രിന്റിംഗിനായി തയ്യാറാക്കുന്നു..."
@@ -4258,6 +4428,10 @@ msgstr "പ്രൈമറി നിറം"
 msgid "Print or export the form to a flat PDF before sending it."
 msgstr "അയക്കുന്നതിന് മുൻപ് ഫോം ഒരു ഫ്ലാറ്റ് PDF ആയി പ്രിന്റ് ചെയ്യുകയോ എക്സ്പോർട്ട് ചെയ്യുകയോ ചെയ്യുക."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Professional summary"
+msgstr ""
+
 #: src/dialogs/resume/sections/skill.tsx
 msgid "Proficiency"
 msgstr "പ്രാവീണ്യം"
@@ -4267,6 +4441,10 @@ msgstr "പ്രാവീണ്യം"
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Profile"
 msgstr "പ്രൊഫൈൽ"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Profile saved."
+msgstr ""
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -4423,6 +4601,10 @@ msgstr "{0}-ൽ {1} പേജ് വായിക്കുന്നു…"
 msgid "Reading the posting…"
 msgstr "പോസ്റ്റിംഗ് വായിക്കുന്നു…"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Ready"
+msgstr ""
+
 #: src/features/resume/stylesheet/status.tsx
 msgid "Ready to activate"
 msgstr "സജീവമാക്കാൻ തയ്യാറാണ്"
@@ -4439,6 +4621,18 @@ msgstr "മുന്നറിയിപ്പുകൾ നൽകി സജീവ�
 #: src/features/cover-letters/editor.tsx
 msgid "Recipient"
 msgstr "സ്വീകർത്താവ്"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommendations could not be generated."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "recommended"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommended"
+msgstr ""
 
 #: src/components/level/combobox.tsx
 msgid "Rectangle"
@@ -4465,6 +4659,10 @@ msgstr "റഫറൻസുകൾ"
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Referred by…, things to emphasize, etc."
 msgstr "പരാമർശിക്കുന്നത്..., ഊന്നിപ്പറയേണ്ട കാര്യങ്ങൾ മുതലായവ."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Regenerate tailored content"
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Register New Device"
@@ -4498,6 +4696,10 @@ msgstr "കോൺടാക്റ്റ് നീക്കം ചെയ്യു�
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Remove custom field"
 msgstr "ഇഷ്ടാനുസൃത ഫീൽഡ് നീക്കം ചെയ്യുക"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Remove favorite"
+msgstr ""
 
 #: src/features/applications/components/file-attachment-field.tsx
 msgid "Remove file"
@@ -4599,6 +4801,7 @@ msgid "Resources"
 msgstr "റിസോഴ്സുകൾ"
 
 #: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Restore"
 msgstr "പുനഃസ്ഥാപിക്കുക"
 
@@ -4611,6 +4814,7 @@ msgid "Restore this version?"
 msgstr "ഈ പതിപ്പ് പുനഃസ്ഥാപിക്കണോ?"
 
 #: src/features/applications/components/application-form-sheet.tsx
+#: src/features/command-palette/pages/navigation.tsx
 #: src/features/resume/export/download-dialog.tsx
 #: src/routes/agent/-components/resume-pane.tsx
 #: src/routes/agent/$threadId.tsx
@@ -4653,8 +4857,6 @@ msgstr "വിവിധ തൊഴിലുകൾക്കും അഭിരു�
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
 #: src/routes/_home/-sections/statistics.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Resumes"
 msgstr "റെസ്യൂമെകൾ"
 
@@ -4664,9 +4866,17 @@ msgstr "റെസ്യൂമെകൾ"
 msgid "Retry"
 msgstr "വീണ്ടും ശ്രമിക്കുക"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Retry AI recommendations"
+msgstr ""
+
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review edits"
 msgstr "എഡിറ്റുകൾ അവലോകനം ചെയ്യുക"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Review the AI wording before opening the CV editor. Your edits are saved as final text and preserved when AI content is regenerated."
+msgstr ""
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review the resume against a job description, and ask me before changing anything you're unsure about."
@@ -4752,6 +4962,7 @@ msgstr "ശമ്പള പരിധി"
 #. Passkey rename prompt confirm action in authentication settings
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Save"
 msgstr "സേവ് ചെയ്യുക"
 
@@ -4762,6 +4973,10 @@ msgstr "സേവ് & ടെസ്റ്റ് ദാതാവ്"
 #: src/features/ats-checker/messages.ts
 msgid "Save an unprotected copy, with no password and no permissions restrictions."
 msgstr "പാസ്‌വേഡോ അനുമതി നിയന്ത്രണങ്ങളോ ഇല്ലാത്ത, സംരക്ഷിക്കപ്പെടാത്ത ഒരു പകർപ്പ് സേവ് ചെയ്യുക."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Save and analyze"
+msgstr ""
 
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Save changes"
@@ -4817,6 +5032,10 @@ msgstr "സംരക്ഷിച്ചു"
 msgid "Saving is taking longer than expected. Your changes are still open."
 msgstr "ലാഭിക്കാൻ പ്രതീക്ഷിച്ചതിലും കൂടുതൽ സമയമെടുക്കുന്നു. നിങ്ങളുടെ മാറ്റങ്ങൾ ഇപ്പോഴും തുറന്നിരിക്കുന്നു."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Saving..."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Saving…"
 msgstr "… സംരക്ഷിക്കുന്നു"
@@ -4858,6 +5077,10 @@ msgstr "കവർ ലെറ്ററുകൾ തിരയുക"
 msgid "Search cover letters..."
 msgstr "കവർ ലെറ്ററുകൾ തിരയുക..."
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Search CVs..."
+msgstr ""
+
 #. Accessible label for icon picker search input
 #. Placeholder text in icon picker search input
 #: src/components/input/icon-picker.tsx
@@ -4867,10 +5090,6 @@ msgstr "ഒരു ഐക്കൺ തിരയുക"
 #: src/features/command-palette/pages/resumes.tsx
 msgid "Search for…"
 msgstr "… തിരയുക"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Search resumes..."
-msgstr "തിരയൽ റെസ്യൂമെകൾ..."
 
 #: src/components/ui/combobox.tsx
 msgid "Search..."
@@ -4924,6 +5143,10 @@ msgstr "ഒരു ത്രെഡ് തിരഞ്ഞെടുക്കുക"
 msgid "Select all"
 msgstr "എല്ലാം തിരഞ്ഞെടുക്കുക"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Select all recommended"
+msgstr ""
+
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Select an agent model"
 msgstr "ഒരു ഏജന്റ് മോഡൽ തിരഞ്ഞെടുക്കുക"
@@ -4937,8 +5160,13 @@ msgid "Select..."
 msgstr "തിരഞ്ഞെടുക്കുക..."
 
 #: src/features/applications/components/table-view.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "selected"
 msgstr "തിരഞ്ഞെടുത്തു"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Selecting..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Self-Host with Docker"
@@ -5554,6 +5782,14 @@ msgstr "Tailor എൻ്റെ ബയോഡാറ്റ"
 msgid "Tailor this resume to a product manager job description, and emphasize roadmap ownership, stakeholder communication, and measurable launch outcomes."
 msgstr "ഒരു പ്രോഡക്ട് മാനേജർ ജോലി വിവരണത്തിന് അനുയോജ്യമായി ഈ റിസ്യൂം ക്രമീകരിക്കുക, റോഡ്‌മാപ്പ് ഉടമസ്ഥത, പങ്കാളികളുമായുള്ള ആശയവിനിമയം, അളക്കാവുന്ന ലോഞ്ച് ഫലങ്ങൾ എന്നിവയ്ക്ക് ഊന്നൽ നൽകുക."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content could not be generated."
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Tailoring failed."
 msgstr "ടെയ്ലറിംഗ് പരാജയപ്പെട്ടു."
@@ -5662,6 +5898,10 @@ msgstr "നിങ്ങളെ ഇവിടേക്ക് അയച്ച ആപ
 msgid "The checks above are mechanical. This asks a language model what a reader would think of your bullets, and suggests rewrites. It produces no score."
 msgstr "മുകളിലുള്ള പരിശോധനകൾ യാന്ത്രികമാണ്. ഇത് നിങ്ങളുടെ ബുള്ളറ്റുകളെക്കുറിച്ച് ഒരു വായനക്കാരൻ എന്ത് ചിന്തിക്കുമെന്ന് ഒരു ഭാഷാ മോഡലിനോട് ചോദിക്കുകയും പുനരെഴുത്തുകൾ നിർദ്ദേശിക്കുകയും ചെയ്യുന്നു. ഇത് ഒരു സ്കോറും നൽകുന്നില്ല."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The CV could not be opened in the editor."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "The deep check could not finish. Please try again."
 msgstr "വിശദ പരിശോധന പൂർത്തിയാക്കാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക."
@@ -5670,6 +5910,10 @@ msgstr "വിശദ പരിശോധന പൂർത്തിയാക്ക�
 #: src/dialogs/resume/import.tsx
 msgid "The imported file could not be parsed into a valid resume."
 msgstr "ഇറക്കുമതി ചെയ്ത ഫയൽ ഒരു സാധുവായ റെസ്യൂമെയായി മാറ്റാൻ കഴിഞ്ഞില്ല."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The job offer could not be analyzed."
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "The order the text is stored in disagrees badly with the order it reads in."
@@ -5766,6 +6010,10 @@ msgstr "സംഗ്രഹ ഖണ്ഡിക ഇല്ല."
 #: src/features/ats-checker/messages.ts
 msgid "There was not enough information to run this check."
 msgstr "ഈ പരിശോധന നടത്താൻ ആവശ്യമായ വിവരങ്ങൾ ഇല്ലായിരുന്നു."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "These are required or preferred job requirements for which CVMate found no direct evidence in your Master Profile."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "These checks run as you type and never leave your browser. They test whether software can read your resume, not how well it is written."
@@ -6046,8 +6294,6 @@ msgstr "ത്രെഡ് ആർക്കൈവ് ചെയ്‌തു."
 msgid "Thread deleted."
 msgstr "ത്രെഡ് ഇല്ലാതാക്കി."
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 #: src/routes/agent/$threadId.tsx
 msgid "Threads"
@@ -6135,6 +6381,14 @@ msgstr "നിങ്ങളുടെ റിസ്യൂമിന്റെ വ്�
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Translations"
 msgstr "തർജ്ജമകൾ"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash is empty"
+msgstr ""
 
 #: src/components/layout/error-screen.tsx
 msgid "Try again"
@@ -6629,6 +6883,7 @@ msgstr "വെബ് തിരയൽ"
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Website"
 msgstr "വെബ്സൈറ്റ്"
 
@@ -6847,6 +7102,10 @@ msgstr "നിങ്ങളുടെ ഇമെയിൽ വിലാസം ദാ
 msgid "Your file stays here"
 msgstr "നിങ്ങളുടെ ഫയൽ ഇവിടെ തന്നെ നിലനിൽക്കുന്നു"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Your final text could not be saved."
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Your headings look the same as your body text."
 msgstr "നിങ്ങളുടെ തലക്കെട്ടുകൾ ബോഡി ടെക്സ്റ്റ് പോലെ തന്നെ കാണപ്പെടുന്നു."
@@ -6867,6 +7126,14 @@ msgstr "നിങ്ങളുടെ വരികൾ വളരെ കർശനമ
 #: src/features/ats-checker/messages.ts
 msgid "Your margins are very narrow."
 msgstr "നിങ്ങളുടെ മാർജിനുകൾ വളരെ ഇടുങ്ങിയതാണ്."
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile has not been created yet. Saving these details will create it automatically."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile is the permanent source of facts used by CVMate when creating tailored resumes."
+msgstr ""
 
 #: src/libs/resume/ats.ts
 msgid "Your page margins are very narrow."
@@ -6973,4 +7240,3 @@ msgstr "സൂം ഔട്ട് ചെയ്യുക"
 #: src/libs/locale.ts
 msgid "Zulu"
 msgstr "സൂളു"
-

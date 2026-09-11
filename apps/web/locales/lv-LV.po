@@ -390,7 +390,6 @@ msgid "Add another layer of protection to your account."
 msgstr "Pievienojiet savam kontam vēl vienu aizsardzības slāni."
 
 #: src/features/applications/components/application-form-sheet.tsx
-#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Add application"
 msgstr "Pievienot pieteikumu"
@@ -402,6 +401,10 @@ msgstr "Pievienojiet vismaz pilsētu un valsti, lai lomas varētu saskaņot ar j
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Add contact"
 msgstr "Pievienot kontaktu"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Add favorite"
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "Add figures where you have them: volumes, percentages, timeframes, team sizes."
@@ -480,18 +483,9 @@ msgstr "Afrikandu"
 msgid "Against the job description"
 msgstr "Salīdzinājumā ar amata aprakstu"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Agent"
-msgstr "Aģents"
-
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Agent ready"
 msgstr "Aģents gatavs"
-
-#: src/routes/dashboard/-components/sidebar.tsx
-msgid "Agents"
-msgstr "Aģenti"
 
 #: src/dialogs/resume/import.tsx
 msgid "AI"
@@ -533,9 +527,21 @@ msgstr "MI pakalpojumu sniedzēji nav pieejami, kamēr nav konfigurēts ENCRYPTI
 msgid "AI providers require REDIS_URL and ENCRYPTION_SECRET to be configured."
 msgstr "Mākslīgā intelekta pakalpojumu sniedzējiem ir jākonfigurē REDIS_URL un ENCRYPTION_SECRET."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations are suggestions only. You decide what is included in the final CV."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations could not be generated. You can still select content manually."
+msgstr ""
+
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "Albāņu"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "All"
+msgstr ""
 
 #: src/features/applications/components/export-applications-sheet.tsx
 msgid "All applications (including archived)"
@@ -577,6 +583,26 @@ msgstr "Negaidīta kļūda apturēja šīs lapas ielādi. Varat mēģināt vēlr
 #: src/dialogs/resume/import.tsx
 msgid "An unknown error occurred while importing your resume."
 msgstr "Importējot jūsu CV, radās nezināma kļūda."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed, but no structured requirements were extracted."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyze another offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzed job offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzing..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "And many more..."
@@ -669,9 +695,6 @@ msgstr "Lietotnes statistika"
 msgid "Application updated."
 msgstr "Pieteikums atjaunināts."
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Applications"
 msgstr "Pieteikumi"
@@ -774,10 +797,12 @@ msgstr "Jautājiet jebko par šo CV"
 msgid "Aspect Ratio"
 msgstr "Proporcijas"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/libs/resume/section.tsx
 msgid "ATS Check"
 msgstr "ATS pārbaude"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/_home/-sections/features.tsx
 #: src/routes/_home/ats-checker.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
@@ -1017,6 +1042,10 @@ msgstr "Mainīt valodu uz…"
 msgid "Change the colors, fonts, and design to suit you."
 msgstr "Mainiet krāsas, fontus un dizainu pēc savas gaumes."
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Change the filter or update one of your CVs."
+msgstr ""
+
 #: src/features/command-palette/pages/preferences/index.tsx
 msgid "Change theme to…"
 msgstr "Mainīt tēmu uz…"
@@ -1114,6 +1143,10 @@ msgstr "Izvēlieties saglabāto pavadvēstuli"
 msgid "Choose an application"
 msgstr "Izvēlieties lietojumprogrammu"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Choose CV content"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
 msgstr "Izvēlieties PDF, DOCX, Markdown vai JSON formātu. Eksportējiet savu CV un motivācijas vēstuli atsevišķi, ja tas ir pieejams."
@@ -1181,10 +1214,6 @@ msgstr "Komandu palete - {currentPage}"
 #: src/routes/_home/-sections/footer.tsx
 msgid "Community"
 msgstr "Kopiena"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Compact"
-msgstr "Kompakts"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/features/applications/components/application-form-sheet.tsx
@@ -1282,6 +1311,10 @@ msgstr "Saturs ir izkārtots režģī."
 #: src/features/auth/pages/register.tsx
 msgid "Continue"
 msgstr "Turpināt"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Continue to tailored content"
+msgstr ""
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -1407,6 +1440,10 @@ msgstr "Nevarēja ielādēt atlasīto CV."
 msgid "Could not load this cover letter."
 msgstr "Nevarēja ielādēt šo pavadvēstuli."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not load your Master Profile."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not prepare your resume for printing. Please try again."
 msgstr "Neizdevās sagatavot jūsu CV drukāšanai. Lūdzu, mēģiniet vēlreiz."
@@ -1424,6 +1461,10 @@ msgstr "Nevarēja atjaunot šo ielāpu."
 msgid "Could not save the cover letter. Please try again."
 msgstr "Nevarēja saglabāt pavadvēstuli. Lūdzu, mēģiniet vēlreiz."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not save your profile."
+msgstr ""
+
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Could not set up two-factor authentication."
 msgstr "Neizdevās iestatīt divu faktoru autentifikāciju."
@@ -1432,6 +1473,10 @@ msgstr "Neizdevās iestatīt divu faktoru autentifikāciju."
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Could not sort these items; they stayed at the end: {0}."
 msgstr "Nevarēja kārtot šos vienumus; viņi palika beigās: {0}."
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Could not update this CV."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Could not verify provider connection."
@@ -1510,7 +1555,6 @@ msgstr "Motivācijas vēstule"
 msgid "Cover letter draft"
 msgstr "Motivācijas vēstules melnraksts"
 
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/cover-letters.tsx
 msgid "Cover Letters"
 msgstr "Motivācijas vēstules"
@@ -1534,13 +1578,16 @@ msgstr "Motivācijas vēstules"
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/features/cover-letters/library.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Create"
 msgstr "Izveidot"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Create a copy tuned to this job"
 msgstr "Izveidot šim darbam pielāgotu kopiju"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Create a CV build from your Master Profile and let AI recommend only facts already stored there."
+msgstr ""
 
 #: src/features/auth/pages/register.tsx
 msgid "Create a new account"
@@ -1600,7 +1647,6 @@ msgid "Create a new reference"
 msgstr "Izveidot jaunu atsauksmi"
 
 #: src/dialogs/resume/index.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
@@ -1622,6 +1668,10 @@ msgstr "Izveidot jaunu brīvprātīgo pieredzi"
 msgid "Create a Sample Resume"
 msgstr "Izveidot paraugu CV"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create a tailored CV from a job offer to see it here."
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Create as many resumes as you want."
 msgstr "Izveidojiet tik daudz CV, cik vēlaties."
@@ -1629,6 +1679,14 @@ msgstr "Izveidojiet tik daudz CV, cik vēlaties."
 #: src/features/cover-letters/library.tsx
 msgid "Create cover letter"
 msgstr "Izveidojiet pavadvēstuli"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/create.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create CV"
+msgstr ""
 
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Create from scratch"
@@ -1709,6 +1767,11 @@ msgstr "Pielāgotās sadaļas"
 #: src/libs/resume/section.tsx
 msgid "Custom Styles"
 msgstr "Pielāgoti stili"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "CV"
+msgstr ""
 
 #: src/libs/locale.ts
 msgid "Czech"
@@ -1932,6 +1995,7 @@ msgid "Discord"
 msgstr "Discord"
 
 #: src/features/applications/components/application-ai-copilot.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Dismiss"
 msgstr "Noraidīt"
 
@@ -2000,6 +2064,10 @@ msgstr "Lejupielādēt PDF"
 msgid "Downloads"
 msgstr "Lejupielādes"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Draft"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Draft a cover letter"
 msgstr "Sagatavot motivācijas vēstules melnrakstu"
@@ -2011,6 +2079,10 @@ msgstr "Sagatavot sekojuma melnrakstu"
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Drafting failed."
 msgstr "Melnraksta sagatavošana neizdevās."
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Drafts"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Drag and drop sections here to move them between columns"
@@ -2127,6 +2199,10 @@ msgstr "Rediģēt piezīmi"
 msgid "Editable in Word, Google Docs, and Pages."
 msgstr "Rediģējams Word, Google Docs un Pages."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Edited"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/index.tsx
 msgid "Editing is disabled until you unlock it."
 msgstr "Rediģēšana ir atspējota, līdz to atbloķējat."
@@ -2142,6 +2218,7 @@ msgid "Education"
 msgstr "Izglītība"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Email"
 msgstr "E-pasts"
 
@@ -2272,6 +2349,10 @@ msgstr "Iziet no pilnekrāna"
 #: src/libs/resume/section.tsx
 msgid "Experience"
 msgstr "Pieredze"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Experience fact"
+msgstr ""
 
 #: src/dialogs/api-key/create.tsx
 msgid "Expires in"
@@ -2500,6 +2581,14 @@ msgstr "Jūsu kodu neizdevās pārbaudīt. Lūdzu, mēģiniet vēlreiz."
 msgid "Fatal error"
 msgstr "Kritiska kļūda"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorite"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorites"
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Features"
 msgstr "Funkcijas"
@@ -2535,6 +2624,10 @@ msgstr "Somu"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Fireworks"
 msgstr "Uguņošana"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "First name"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Fit"
@@ -2644,6 +2737,10 @@ msgstr "Pilnekrāns"
 msgid "Fullscreen Editor"
 msgstr "Pilnekrāna ekrāna redaktors"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Gaps"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Gaps:"
 msgstr "Trūkumi:"
@@ -2651,6 +2748,10 @@ msgstr "Trūkumi:"
 #: src/dialogs/resume/index.tsx
 msgid "Generate a random name"
 msgstr "Ģenerēt nejaušu nosaukumu"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Generating tailored content..."
+msgstr ""
 
 #: src/features/resume/export/use-resume-export.ts
 #: src/routes/agent/-components/resume-pane.tsx
@@ -2723,10 +2824,6 @@ msgstr "Atzīme"
 #: src/libs/locale.ts
 msgid "Greek"
 msgstr "Grieķu"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Grid"
-msgstr "Režģis"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Groq"
@@ -2899,7 +2996,6 @@ msgid "Images cover most of the page."
 msgstr "Attēli aizņem lielāko daļu lapas."
 
 #: src/dialogs/resume/import.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Import"
 msgstr "Importēt"
 
@@ -3051,10 +3147,6 @@ msgstr "Slīpraksts"
 msgid "Japanese"
 msgstr "Japāņu"
 
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Job"
-msgstr "Darbs"
-
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Job description"
 msgstr "Darba apraksts"
@@ -3063,6 +3155,10 @@ msgstr "Darba apraksts"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "Job description (optional)"
 msgstr "Amata apraksts (nav obligāts)"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Job offer"
+msgstr ""
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Job posting"
@@ -3075,10 +3171,6 @@ msgstr "Darba sludinājuma saite"
 #: src/features/applications/components/insights-view.tsx
 msgid "Job search pipeline"
 msgstr "Darba meklēšanas process"
-
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Jobs"
-msgstr "Darbs"
 
 #. Example full name placeholder on profile settings form
 #. Example full name placeholder on registration form
@@ -3201,7 +3293,12 @@ msgstr "Valodas"
 msgid "Last downloaded on {0}"
 msgstr "Pēdējo reizi lejupielādēts {0}"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Last name"
+msgstr ""
+
 #: src/routes/dashboard/applications/index.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Last updated"
 msgstr "Pēdējoreiz atjaunināts"
 
@@ -3325,6 +3422,7 @@ msgstr "Piesaistīts Reactive Resume"
 #: src/features/auth/components/social-auth.tsx
 #: src/features/settings/authentication/components/hooks.tsx
 #: src/routes/_home/-sections/footer.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
@@ -3335,10 +3433,6 @@ msgstr "LinkedIn, ieteikums…"
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Linking your {providerName} account..."
 msgstr "Tiek savienots jūsu {providerName} konts..."
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "List"
-msgstr "Saraksts"
 
 #: src/features/ats-checker/messages.ts
 msgid "List the tools and technologies you use. Recruiters search skills more than any other field."
@@ -3352,13 +3446,13 @@ msgstr "Lietuviešu"
 msgid "Loading AI providers. Please try again in a moment."
 msgstr "Notiek mākslīgā intelekta pakalpojumu sniedzēju ielāde. Lūdzu, mēģiniet vēlreiz pēc brīža."
 
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Loading applications…"
-msgstr "Notiek pieteikumu ielāde…"
-
 #: src/features/auth/pages/consent.tsx
 msgid "Loading connection request..."
 msgstr "Notiek savienojuma pieprasījuma ielāde..."
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Loading profile..."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-provider-picker.tsx
 #: src/features/settings/integrations/components/ai-section.tsx
@@ -3370,10 +3464,13 @@ msgstr "Notiek pakalpojumu sniedzēju ielāde…"
 msgid "Loading resumes…"
 msgstr "Notiek CV ielāde…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Loading threads…"
 msgstr "Notiek pavedienu ielāde…"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Loading your CVs…"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/version-history.tsx
 msgid "Loading…"
@@ -3386,6 +3483,7 @@ msgstr "Notiek ielāde…"
 #: src/features/applications/components/table-view.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Location"
 msgstr "Atrašanās vieta"
 
@@ -3459,13 +3557,39 @@ msgstr "Mala (horizontāli)"
 msgid "Margin (Vertical)"
 msgstr "Mala (vertikāli)"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark draft"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark ready"
+msgstr ""
+
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Mark rejected"
 msgstr "Atzīmēt kā noraidītu"
 
+#: src/features/command-palette/pages/navigation.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match Master Profile"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Match scoring failed."
 msgstr "Atbilstības vērtēšana neizdevās."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match your Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Matching profile..."
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-results.tsx
 msgid "Medium impact"
@@ -3532,6 +3656,10 @@ msgstr "Pārvietot posmu"
 msgid "Move to"
 msgstr "Pārvietot uz"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Move to trash"
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "Pārvietojiet savu e-pastu un tālruņa numuru pirmās lapas augšpusē."
@@ -3548,6 +3676,13 @@ msgstr "Daudzvalodu"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Must start with https://"
 msgstr "Jāuzsāk ar https://"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "My CV"
+msgstr ""
 
 #. Label for full name input on registration form
 #: src/dialogs/api-key/create.tsx
@@ -3596,9 +3731,8 @@ msgid "New account sign-ups are currently disabled on this server."
 msgstr "Jaunu kontu reģistrācija šajā serverī pašlaik ir atspējota."
 
 #: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Application"
-msgstr "Jauns pieteikums"
+msgid "New CV"
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "New features land regularly, so check back now and then."
@@ -3627,14 +3761,8 @@ msgstr "Jauna sadaļa"
 msgid "New tag…"
 msgstr "Jauna birka…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "New thread"
-msgstr "Jauna tēma"
-
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Thread"
 msgstr "Jauna tēma"
 
 #: src/features/cover-letters/library.tsx
@@ -3682,6 +3810,10 @@ msgstr "Ierastie sadaļu virsraksti nav atrasti."
 msgid "No cover letters found. Create one or import an existing letter."
 msgstr "Motivācijas vēstules netika atrastas. Izveidojiet to vai importējiet esošu burtu."
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "No CVs in this view"
+msgstr ""
+
 #. Error shown when AI import endpoint returns no parsed resume data
 #: src/dialogs/resume/import.tsx
 msgid "No data was returned from the AI provider."
@@ -3706,6 +3838,10 @@ msgstr "Neviena rinda neizskatās pēc amata nosaukuma kopā ar darba devēju."
 #: src/routes/_home/ats-checker.tsx
 msgid "No one-page rule, and no treating a font or a career gap as a fault."
 msgstr "Nekādu vienas lapas noteikumu, un fonts vai karjeras pārtraukums netiek uzskatīts par kļūdu."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "No open gaps detected."
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "No passkeys registered yet."
@@ -3876,6 +4012,7 @@ msgstr "Pārbaudītas tikai pirmās lapas."
 #. Resume card dropdown action to open the resume editor
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Open"
 msgstr "Atvērt"
 
@@ -3899,6 +4036,10 @@ msgstr "Atvērt fokusa režīmu"
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Open in builder"
 msgstr "Atvērt veidotājā"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Open in CV editor"
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Open Integrations Settings"
@@ -3945,6 +4086,10 @@ msgstr "Pēc izvēles — kuri termini no darba sludinājuma jau parādās."
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "Options for {title}"
 msgstr "Iespējas priekš {title}"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Or attach a file"
+msgstr ""
 
 #: src/features/auth/components/social-auth.tsx
 msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) instead of email and password"
@@ -4055,13 +4200,25 @@ msgstr "Paroles nesakrīt."
 msgid "Paste a posting to see which of its terms already appear in your resume."
 msgstr "Ielīmējiet sludinājumu, lai redzētu, kuri tā termini jau parādās jūsu CV."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste job offer"
+msgstr ""
+
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source, Tags, Contact Name, Contact Email and Contact Phone."
 msgstr "Ielīmējiet rindas vai augšupielādējiet .csv failu. Mēs kartējam tādas kolonnas kā uzņēmums, loma, stadija, posma datums, alga, avots, atzīmes, kontaktpersonas vārds, kontakta e-pasts un kontakttālrunis."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the complete job offer here..."
+msgstr ""
+
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Paste the full job description here…"
 msgstr "Ielīmējiet šeit visu amata aprakstu…"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the job offer or attach a PDF/image. CVMate will analyze it before building your tailored CV."
+msgstr ""
 
 #: src/features/ats-checker/tool.tsx
 msgid "Paste the posting to see which of its terms already appear in your resume."
@@ -4099,6 +4256,10 @@ msgstr "Ielāps atritināts."
 msgid "PDF snapshot attached to the application."
 msgstr "Pieteikumam pievienots momentuzņēmums PDF formātā."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "PDF, JPEG, PNG, WebP or GIF, up to 10 MB."
+msgstr ""
+
 #: src/features/cover-letters/editor-dialog.tsx
 msgid "PDFs already attached to applications will remain available."
 msgstr "Pieteikumiem jau pievienotie PDF faili paliks pieejami."
@@ -4118,9 +4279,14 @@ msgstr "Apjukums"
 msgid "Persian"
 msgstr "Persiešu"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Personal details"
+msgstr ""
+
 #: src/dialogs/resume/sections/reference.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Phone"
 msgstr "Tālrunis"
 
@@ -4213,6 +4379,10 @@ msgstr "Preferences"
 msgid "Prepare a conservative patch that improves clarity without changing the story of my career."
 msgstr "Sagatavojiet piesardzīgu labojumu, kas uzlabo skaidrību, nemainot manas karjeras stāstu."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Preparing CV..."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Preparing your resume for printing..."
 msgstr "Gatavojam CV drukāšanai..."
@@ -4258,6 +4428,10 @@ msgstr "Primārā krāsa"
 msgid "Print or export the form to a flat PDF before sending it."
 msgstr "Pirms nosūtīšanas izdrukājiet vai eksportējiet veidlapu kā saplacinātu PDF."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Professional summary"
+msgstr ""
+
 #: src/dialogs/resume/sections/skill.tsx
 msgid "Proficiency"
 msgstr "Prasmju līmenis"
@@ -4267,6 +4441,10 @@ msgstr "Prasmju līmenis"
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Profile"
 msgstr "Profils"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Profile saved."
+msgstr ""
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -4423,6 +4601,10 @@ msgstr "Nolasa lapu {0} no {1}…"
 msgid "Reading the posting…"
 msgstr "Notiek sludinājuma lasīšana…"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Ready"
+msgstr ""
+
 #: src/features/resume/stylesheet/status.tsx
 msgid "Ready to activate"
 msgstr "Gatavs aktivizēšanai"
@@ -4439,6 +4621,18 @@ msgstr "Gatavs aktivizēšanai ar brīdinājumiem"
 #: src/features/cover-letters/editor.tsx
 msgid "Recipient"
 msgstr "Saņēmējs"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommendations could not be generated."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "recommended"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommended"
+msgstr ""
 
 #: src/components/level/combobox.tsx
 msgid "Rectangle"
@@ -4465,6 +4659,10 @@ msgstr "Atsauksmes"
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Referred by…, things to emphasize, etc."
 msgstr "Ieteica…, lietas, ko uzsvērt, utt."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Regenerate tailored content"
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Register New Device"
@@ -4498,6 +4696,10 @@ msgstr "Noņemt kontaktu"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Remove custom field"
 msgstr "Noņemt pielāgoto lauku"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Remove favorite"
+msgstr ""
 
 #: src/features/applications/components/file-attachment-field.tsx
 msgid "Remove file"
@@ -4599,6 +4801,7 @@ msgid "Resources"
 msgstr "Resursi"
 
 #: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Restore"
 msgstr "Atjaunot"
 
@@ -4611,6 +4814,7 @@ msgid "Restore this version?"
 msgstr "Vai atjaunot šo versiju?"
 
 #: src/features/applications/components/application-form-sheet.tsx
+#: src/features/command-palette/pages/navigation.tsx
 #: src/features/resume/export/download-dialog.tsx
 #: src/routes/agent/-components/resume-pane.tsx
 #: src/routes/agent/$threadId.tsx
@@ -4653,8 +4857,6 @@ msgstr "CV veidnes dažādām profesijām un gaumēm. Izvēlieties to, kas jums 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
 #: src/routes/_home/-sections/statistics.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Resumes"
 msgstr "CV"
 
@@ -4664,9 +4866,17 @@ msgstr "CV"
 msgid "Retry"
 msgstr "Mēģināt vēlreiz"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Retry AI recommendations"
+msgstr ""
+
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review edits"
 msgstr "Pārskatīt labojumus"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Review the AI wording before opening the CV editor. Your edits are saved as final text and preserved when AI content is regenerated."
+msgstr ""
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review the resume against a job description, and ask me before changing anything you're unsure about."
@@ -4752,6 +4962,7 @@ msgstr "Algas diapazons"
 #. Passkey rename prompt confirm action in authentication settings
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Save"
 msgstr "Saglabāt"
 
@@ -4762,6 +4973,10 @@ msgstr "Saglabāšanas un testēšanas pakalpojumu sniedzējs"
 #: src/features/ats-checker/messages.ts
 msgid "Save an unprotected copy, with no password and no permissions restrictions."
 msgstr "Saglabājiet neaizsargātu kopiju bez paroles un bez atļauju ierobežojumiem."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Save and analyze"
+msgstr ""
 
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Save changes"
@@ -4817,6 +5032,10 @@ msgstr "Saglabāts"
 msgid "Saving is taking longer than expected. Your changes are still open."
 msgstr "Saglabāšana aizņem ilgāku laiku, nekā paredzēts. Jūsu izmaiņas joprojām ir atvērtas."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Saving..."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Saving…"
 msgstr "Saglabā…"
@@ -4858,6 +5077,10 @@ msgstr "Meklēt pavadvēstules"
 msgid "Search cover letters..."
 msgstr "Meklēt pavadvēstules..."
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Search CVs..."
+msgstr ""
+
 #. Accessible label for icon picker search input
 #. Placeholder text in icon picker search input
 #: src/components/input/icon-picker.tsx
@@ -4867,10 +5090,6 @@ msgstr "Meklēt ikonu"
 #: src/features/command-palette/pages/resumes.tsx
 msgid "Search for…"
 msgstr "Meklēt…"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Search resumes..."
-msgstr "Meklēt CV..."
 
 #: src/components/ui/combobox.tsx
 msgid "Search..."
@@ -4924,6 +5143,10 @@ msgstr "Atlasīt pavedienu"
 msgid "Select all"
 msgstr "Atlasīt visu"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Select all recommended"
+msgstr ""
+
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Select an agent model"
 msgstr "Izvēlieties aģenta modeli"
@@ -4937,8 +5160,13 @@ msgid "Select..."
 msgstr "Atlasīt..."
 
 #: src/features/applications/components/table-view.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "selected"
 msgstr "atlasīts"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Selecting..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Self-Host with Docker"
@@ -5554,6 +5782,14 @@ msgstr "Pielāgot manu CV"
 msgid "Tailor this resume to a product manager job description, and emphasize roadmap ownership, stakeholder communication, and measurable launch outcomes."
 msgstr "Pielāgojiet šo CV produkta vadītāja darba aprakstam un uzsveriet atbildību par attīstības plānu, saziņu ar iesaistītajām pusēm un izmērāmus laidienu rezultātus."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content could not be generated."
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Tailoring failed."
 msgstr "Pielāgošana neizdevās."
@@ -5662,6 +5898,10 @@ msgstr "Lietotne, kas jūs atsūtīja šeit, veica nederīgu autorizācijas piep
 msgid "The checks above are mechanical. This asks a language model what a reader would think of your bullets, and suggests rewrites. It produces no score."
 msgstr "Iepriekš minētās pārbaudes ir mehāniskas. Šī funkcija vaicā valodas modelim, ko lasītājs domātu par jūsu aizzīmēm, un iesaka pārrakstījumus. Tā nesniedz rezultātu."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The CV could not be opened in the editor."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "The deep check could not finish. Please try again."
 msgstr "Padziļināto pārbaudi neizdevās pabeigt. Lūdzu, mēģiniet vēlreiz."
@@ -5670,6 +5910,10 @@ msgstr "Padziļināto pārbaudi neizdevās pabeigt. Lūdzu, mēģiniet vēlreiz.
 #: src/dialogs/resume/import.tsx
 msgid "The imported file could not be parsed into a valid resume."
 msgstr "Importēto failu nav iespējams analizēt kā derīgu atsākumu."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The job offer could not be analyzed."
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "The order the text is stored in disagrees badly with the order it reads in."
@@ -5766,6 +6010,10 @@ msgstr "Nav kopsavilkuma rindkopas."
 #: src/features/ats-checker/messages.ts
 msgid "There was not enough information to run this check."
 msgstr "Nebija pietiekami daudz informācijas, lai veiktu šo pārbaudi."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "These are required or preferred job requirements for which CVMate found no direct evidence in your Master Profile."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "These checks run as you type and never leave your browser. They test whether software can read your resume, not how well it is written."
@@ -6046,8 +6294,6 @@ msgstr "Tēma arhivēta."
 msgid "Thread deleted."
 msgstr "Tēma izdzēsta."
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 #: src/routes/agent/$threadId.tsx
 msgid "Threads"
@@ -6135,6 +6381,14 @@ msgstr "Izsekojiet sava CV skatījumiem un lejupielādēm"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Translations"
 msgstr "Tulkojumi"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash is empty"
+msgstr ""
 
 #: src/components/layout/error-screen.tsx
 msgid "Try again"
@@ -6629,6 +6883,7 @@ msgstr "Meklēšana tīmeklī"
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Website"
 msgstr "Tīmekļa vietne"
 
@@ -6847,6 +7102,10 @@ msgstr "Jūsu e-pasta adrese nav apstiprināta pie pakalpojumu sniedzēja."
 msgid "Your file stays here"
 msgstr "Jūsu fails paliek šeit"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Your final text could not be saved."
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Your headings look the same as your body text."
 msgstr "Jūsu virsraksti izskatās tāpat kā pamatteksts."
@@ -6867,6 +7126,14 @@ msgstr "Jūsu rindas ir ļoti cieši iesaiņotas."
 #: src/features/ats-checker/messages.ts
 msgid "Your margins are very narrow."
 msgstr "Jūsu malas ir ļoti šauras."
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile has not been created yet. Saving these details will create it automatically."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile is the permanent source of facts used by CVMate when creating tailored resumes."
+msgstr ""
 
 #: src/libs/resume/ats.ts
 msgid "Your page margins are very narrow."
@@ -6973,4 +7240,3 @@ msgstr "Tālināt"
 #: src/libs/locale.ts
 msgid "Zulu"
 msgstr "Zulu"
-

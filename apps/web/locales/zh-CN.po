@@ -390,7 +390,6 @@ msgid "Add another layer of protection to your account."
 msgstr "为你的账户再加一层保护。"
 
 #: src/features/applications/components/application-form-sheet.tsx
-#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Add application"
 msgstr "添加申请"
@@ -402,6 +401,10 @@ msgstr "至少添加一个城市和国家，以便角色可以与您所在的地
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Add contact"
 msgstr "添加联系人"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Add favorite"
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "Add figures where you have them: volumes, percentages, timeframes, team sizes."
@@ -480,18 +483,9 @@ msgstr "南非语"
 msgid "Against the job description"
 msgstr "对照职位描述"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Agent"
-msgstr "代理人"
-
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Agent ready"
 msgstr "代理已准备就绪"
-
-#: src/routes/dashboard/-components/sidebar.tsx
-msgid "Agents"
-msgstr "代理人"
 
 #: src/dialogs/resume/import.tsx
 msgid "AI"
@@ -533,9 +527,21 @@ msgstr "在配置 ENCRYPTION_SECRET 之前，AI 提供商将不可用。"
 msgid "AI providers require REDIS_URL and ENCRYPTION_SECRET to be configured."
 msgstr "AI 提供商需要配置 REDIS_URL 和 ENCRYPTION_SECRET。"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations are suggestions only. You decide what is included in the final CV."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations could not be generated. You can still select content manually."
+msgstr ""
+
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "阿尔巴尼亚语"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "All"
+msgstr ""
 
 #: src/features/applications/components/export-applications-sheet.tsx
 msgid "All applications (including archived)"
@@ -577,6 +583,26 @@ msgstr "页面加载出现意外错误，您可以重试或返回。"
 #: src/dialogs/resume/import.tsx
 msgid "An unknown error occurred while importing your resume."
 msgstr "导入你的简历时发生未知错误。"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed, but no structured requirements were extracted."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyze another offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzed job offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzing..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "And many more..."
@@ -669,9 +695,6 @@ msgstr "应用统计数据"
 msgid "Application updated."
 msgstr "申请已更新。"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Applications"
 msgstr "申请"
@@ -774,10 +797,12 @@ msgstr "关于这份简历，有什么想问的吗？"
 msgid "Aspect Ratio"
 msgstr "宽高比"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/libs/resume/section.tsx
 msgid "ATS Check"
 msgstr "ATS检查”"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/_home/-sections/features.tsx
 #: src/routes/_home/ats-checker.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
@@ -1017,6 +1042,10 @@ msgstr "将语言更改为…"
 msgid "Change the colors, fonts, and design to suit you."
 msgstr "更改颜色、字体和设计，做成你喜欢的样子。"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Change the filter or update one of your CVs."
+msgstr ""
+
 #: src/features/command-palette/pages/preferences/index.tsx
 msgid "Change theme to…"
 msgstr "更改主题为…"
@@ -1114,6 +1143,10 @@ msgstr "选择已保存的求职信"
 msgid "Choose an application"
 msgstr "选择申请"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Choose CV content"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
 msgstr "选择 PDF、DOCX、Markdown 或 JSON 格式。如有简历和求职信，请分别导出。"
@@ -1181,10 +1214,6 @@ msgstr "命令调板 - {currentPage}"
 #: src/routes/_home/-sections/footer.tsx
 msgid "Community"
 msgstr "社区"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Compact"
-msgstr "紧凑型"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/features/applications/components/application-form-sheet.tsx
@@ -1282,6 +1311,10 @@ msgstr "内容以网格形式排列。"
 #: src/features/auth/pages/register.tsx
 msgid "Continue"
 msgstr "继续"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Continue to tailored content"
+msgstr ""
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -1407,6 +1440,10 @@ msgstr "无法加载所选简历。"
 msgid "Could not load this cover letter."
 msgstr "无法加载此求职信。"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not load your Master Profile."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not prepare your resume for printing. Please try again."
 msgstr "无法为打印准备你的简历。请重试。"
@@ -1424,6 +1461,10 @@ msgstr "无法恢复此补丁。"
 msgid "Could not save the cover letter. Please try again."
 msgstr "无法保存求职信，请重试。"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not save your profile."
+msgstr ""
+
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Could not set up two-factor authentication."
 msgstr "无法设置双重身份验证。"
@@ -1432,6 +1473,10 @@ msgstr "无法设置双重身份验证。"
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Could not sort these items; they stayed at the end: {0}."
 msgstr "无法排序这些条目，它们已留在末尾：{0}。"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Could not update this CV."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Could not verify provider connection."
@@ -1510,7 +1555,6 @@ msgstr "求职信"
 msgid "Cover letter draft"
 msgstr "求职信草稿"
 
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/cover-letters.tsx
 msgid "Cover Letters"
 msgstr "求职信"
@@ -1534,13 +1578,16 @@ msgstr "求职信"
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/features/cover-letters/library.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Create"
 msgstr "创建"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Create a copy tuned to this job"
 msgstr "创建一份针对该职位调整的副本"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Create a CV build from your Master Profile and let AI recommend only facts already stored there."
+msgstr ""
 
 #: src/features/auth/pages/register.tsx
 msgid "Create a new account"
@@ -1600,7 +1647,6 @@ msgid "Create a new reference"
 msgstr "创建新推荐人"
 
 #: src/dialogs/resume/index.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
@@ -1622,6 +1668,10 @@ msgstr "创建新的志愿者经历"
 msgid "Create a Sample Resume"
 msgstr "创建简历样例"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create a tailored CV from a job offer to see it here."
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Create as many resumes as you want."
 msgstr "想创建多少份简历都可以。"
@@ -1629,6 +1679,14 @@ msgstr "想创建多少份简历都可以。"
 #: src/features/cover-letters/library.tsx
 msgid "Create cover letter"
 msgstr "创建求职信"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/create.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create CV"
+msgstr ""
 
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Create from scratch"
@@ -1709,6 +1767,11 @@ msgstr "自定义章节"
 #: src/libs/resume/section.tsx
 msgid "Custom Styles"
 msgstr "自定义样式"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "CV"
+msgstr ""
 
 #: src/libs/locale.ts
 msgid "Czech"
@@ -1932,6 +1995,7 @@ msgid "Discord"
 msgstr "Discord 频道"
 
 #: src/features/applications/components/application-ai-copilot.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Dismiss"
 msgstr "忽略"
 
@@ -2000,6 +2064,10 @@ msgstr "下载为 PDF 文档"
 msgid "Downloads"
 msgstr "下载"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Draft"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Draft a cover letter"
 msgstr "起草求职信"
@@ -2011,6 +2079,10 @@ msgstr "起草跟进消息"
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Drafting failed."
 msgstr "起草失败。"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Drafts"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Drag and drop sections here to move them between columns"
@@ -2127,6 +2199,10 @@ msgstr "编辑备注"
 msgid "Editable in Word, Google Docs, and Pages."
 msgstr "可在 Word、Google Docs 和 Pages 中编辑。"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Edited"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/index.tsx
 msgid "Editing is disabled until you unlock it."
 msgstr "编辑功能目前处于禁用状态，需解锁后方可编辑。"
@@ -2142,6 +2218,7 @@ msgid "Education"
 msgstr "教育经历"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Email"
 msgstr "电子邮件"
 
@@ -2272,6 +2349,10 @@ msgstr "退出全屏"
 #: src/libs/resume/section.tsx
 msgid "Experience"
 msgstr "工作经历"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Experience fact"
+msgstr ""
 
 #: src/dialogs/api-key/create.tsx
 msgid "Expires in"
@@ -2500,6 +2581,14 @@ msgstr "验证您的代码失败。请重试。"
 msgid "Fatal error"
 msgstr "严重错误"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorite"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorites"
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Features"
 msgstr "功能"
@@ -2535,6 +2624,10 @@ msgstr "芬兰语"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Fireworks"
 msgstr "烟花"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "First name"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Fit"
@@ -2644,6 +2737,10 @@ msgstr "全屏"
 msgid "Fullscreen Editor"
 msgstr "全屏编辑器"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Gaps"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Gaps:"
 msgstr "差距："
@@ -2651,6 +2748,10 @@ msgstr "差距："
 #: src/dialogs/resume/index.tsx
 msgid "Generate a random name"
 msgstr "生成一个随机名称"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Generating tailored content..."
+msgstr ""
 
 #: src/features/resume/export/use-resume-export.ts
 #: src/routes/agent/-components/resume-pane.tsx
@@ -2723,10 +2824,6 @@ msgstr "成绩"
 #: src/libs/locale.ts
 msgid "Greek"
 msgstr "希腊语"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Grid"
-msgstr "网格"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Groq"
@@ -2899,7 +2996,6 @@ msgid "Images cover most of the page."
 msgstr "图片占据了页面的大部分空间。"
 
 #: src/dialogs/resume/import.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Import"
 msgstr "导入"
 
@@ -3051,10 +3147,6 @@ msgstr "斜体"
 msgid "Japanese"
 msgstr "日语"
 
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Job"
-msgstr "工作"
-
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Job description"
 msgstr "职位描述"
@@ -3063,6 +3155,10 @@ msgstr "职位描述"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "Job description (optional)"
 msgstr "职位描述（可选）"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Job offer"
+msgstr ""
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Job posting"
@@ -3075,10 +3171,6 @@ msgstr "招聘信息链接"
 #: src/features/applications/components/insights-view.tsx
 msgid "Job search pipeline"
 msgstr "求职流程"
-
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Jobs"
-msgstr "工作机会"
 
 #. Example full name placeholder on profile settings form
 #. Example full name placeholder on registration form
@@ -3201,7 +3293,12 @@ msgstr "语言"
 msgid "Last downloaded on {0}"
 msgstr "上次下载于 {0}"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Last name"
+msgstr ""
+
 #: src/routes/dashboard/applications/index.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Last updated"
 msgstr "上次更新"
 
@@ -3325,6 +3422,7 @@ msgstr "已关联的 Reactive Resume"
 #: src/features/auth/components/social-auth.tsx
 #: src/features/settings/authentication/components/hooks.tsx
 #: src/routes/_home/-sections/footer.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
@@ -3335,10 +3433,6 @@ msgstr "LinkedIn、内推…"
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Linking your {providerName} account..."
 msgstr "正在关联你的 {providerName} 账号…"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "List"
-msgstr "列表"
 
 #: src/features/ats-checker/messages.ts
 msgid "List the tools and technologies you use. Recruiters search skills more than any other field."
@@ -3352,13 +3446,13 @@ msgstr "立陶宛语"
 msgid "Loading AI providers. Please try again in a moment."
 msgstr "正在加载人工智能提供商。请稍后再试。"
 
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Loading applications…"
-msgstr "正在加载应用程序…"
-
 #: src/features/auth/pages/consent.tsx
 msgid "Loading connection request..."
 msgstr "正在加载连接请求…"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Loading profile..."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-provider-picker.tsx
 #: src/features/settings/integrations/components/ai-section.tsx
@@ -3370,10 +3464,13 @@ msgstr "正在加载提供商…"
 msgid "Loading resumes…"
 msgstr "正在加载简历…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Loading threads…"
 msgstr "正在加载会话…"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Loading your CVs…"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/version-history.tsx
 msgid "Loading…"
@@ -3386,6 +3483,7 @@ msgstr "加载中…"
 #: src/features/applications/components/table-view.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Location"
 msgstr "位置"
 
@@ -3459,13 +3557,39 @@ msgstr "页边距（水平）"
 msgid "Margin (Vertical)"
 msgstr "页边距（垂直）"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark draft"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark ready"
+msgstr ""
+
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Mark rejected"
 msgstr "标记为被拒"
 
+#: src/features/command-palette/pages/navigation.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match Master Profile"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Match scoring failed."
 msgstr "匹配评分失败。"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match your Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Matching profile..."
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-results.tsx
 msgid "Medium impact"
@@ -3532,6 +3656,10 @@ msgstr "移动阶段"
 msgid "Move to"
 msgstr "移动到"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Move to trash"
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "把你的电子邮件和电话号码移到第一页顶部。"
@@ -3548,6 +3676,13 @@ msgstr "多语言"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Must start with https://"
 msgstr "必须从 https:// 开始"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "My CV"
+msgstr ""
 
 #. Label for full name input on registration form
 #: src/dialogs/api-key/create.tsx
@@ -3596,9 +3731,8 @@ msgid "New account sign-ups are currently disabled on this server."
 msgstr "此服务器当前已停用新账户注册。"
 
 #: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Application"
-msgstr "新申请"
+msgid "New CV"
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "New features land regularly, so check back now and then."
@@ -3627,14 +3761,8 @@ msgstr "新章节"
 msgid "New tag…"
 msgstr "新标签…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "New thread"
-msgstr "新建会话"
-
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Thread"
 msgstr "新建会话"
 
 #: src/features/cover-letters/library.tsx
@@ -3682,6 +3810,10 @@ msgstr "未找到常规的部分标题。"
 msgid "No cover letters found. Create one or import an existing letter."
 msgstr "未找到求职信。请新建一封，或导入已有的求职信。"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "No CVs in this view"
+msgstr ""
+
 #. Error shown when AI import endpoint returns no parsed resume data
 #: src/dialogs/resume/import.tsx
 msgid "No data was returned from the AI provider."
@@ -3706,6 +3838,10 @@ msgstr "没有看起来像“职位 + 雇主”这种搭配的行。"
 #: src/routes/_home/ats-checker.tsx
 msgid "No one-page rule, and no treating a font or a career gap as a fault."
 msgstr "不强制一页原则，也不把字体或职业空窗期视为缺陷。"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "No open gaps detected."
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "No passkeys registered yet."
@@ -3876,6 +4012,7 @@ msgstr "只检查了前几页。"
 #. Resume card dropdown action to open the resume editor
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Open"
 msgstr "打开"
 
@@ -3899,6 +4036,10 @@ msgstr "打开对焦模式"
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Open in builder"
 msgstr "在构建器中打开"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Open in CV editor"
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Open Integrations Settings"
@@ -3945,6 +4086,10 @@ msgstr "还可以选择查看招聘启事中的哪些词已经出现。"
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "Options for {title}"
 msgstr "{title} 的选项"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Or attach a file"
+msgstr ""
 
 #: src/features/auth/components/social-auth.tsx
 msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) instead of email and password"
@@ -4055,13 +4200,25 @@ msgstr "密码不匹配。"
 msgid "Paste a posting to see which of its terms already appear in your resume."
 msgstr "粘贴一则招聘启事，查看其中哪些词已经出现在你的简历中。"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste job offer"
+msgstr ""
+
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source, Tags, Contact Name, Contact Email and Contact Phone."
 msgstr "粘贴表格行或上传 .csv 文件。我们会映射公司、职位、阶段、阶段日期、薪资、来源、标签、联系人姓名、联系人邮箱和联系人电话等列。"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the complete job offer here..."
+msgstr ""
+
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Paste the full job description here…"
 msgstr "在此粘贴完整的职位描述…"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the job offer or attach a PDF/image. CVMate will analyze it before building your tailored CV."
+msgstr ""
 
 #: src/features/ats-checker/tool.tsx
 msgid "Paste the posting to see which of its terms already appear in your resume."
@@ -4099,6 +4256,10 @@ msgstr "补丁已回滚。"
 msgid "PDF snapshot attached to the application."
 msgstr "PDF 快照已附加到该申请。"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "PDF, JPEG, PNG, WebP or GIF, up to 10 MB."
+msgstr ""
+
 #: src/features/cover-letters/editor-dialog.tsx
 msgid "PDFs already attached to applications will remain available."
 msgstr "已附加到申请的 PDF 仍然可用。"
@@ -4118,9 +4279,14 @@ msgstr "困惑"
 msgid "Persian"
 msgstr "波斯语"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Personal details"
+msgstr ""
+
 #: src/dialogs/resume/sections/reference.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Phone"
 msgstr "电话"
 
@@ -4213,6 +4379,10 @@ msgstr "偏好设置"
 msgid "Prepare a conservative patch that improves clarity without changing the story of my career."
 msgstr "准备一份保守的修改方案，在不改变我职业经历叙述的前提下提升清晰度。"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Preparing CV..."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Preparing your resume for printing..."
 msgstr "准备打印简历……"
@@ -4258,6 +4428,10 @@ msgstr "主颜色"
 msgid "Print or export the form to a flat PDF before sending it."
 msgstr "在发送之前，把表单打印或导出为扁平化的 PDF。"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Professional summary"
+msgstr ""
+
 #: src/dialogs/resume/sections/skill.tsx
 msgid "Proficiency"
 msgstr "熟练度"
@@ -4267,6 +4441,10 @@ msgstr "熟练度"
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Profile"
 msgstr "个人资料"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Profile saved."
+msgstr ""
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -4423,6 +4601,10 @@ msgstr "正在读取第 {0} 页，共 {1} 页…"
 msgid "Reading the posting…"
 msgstr "正在读取招聘信息…"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Ready"
+msgstr ""
+
 #: src/features/resume/stylesheet/status.tsx
 msgid "Ready to activate"
 msgstr "准备激活"
@@ -4439,6 +4621,18 @@ msgstr "准备激活并发出警告"
 #: src/features/cover-letters/editor.tsx
 msgid "Recipient"
 msgstr "收件人"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommendations could not be generated."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "recommended"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommended"
+msgstr ""
 
 #: src/components/level/combobox.tsx
 msgid "Rectangle"
@@ -4465,6 +4659,10 @@ msgstr "推荐人"
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Referred by…, things to emphasize, etc."
 msgstr "推荐人…、需要强调的内容等"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Regenerate tailored content"
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Register New Device"
@@ -4498,6 +4696,10 @@ msgstr "移除联系人"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Remove custom field"
 msgstr "移除自定义字段"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Remove favorite"
+msgstr ""
 
 #: src/features/applications/components/file-attachment-field.tsx
 msgid "Remove file"
@@ -4599,6 +4801,7 @@ msgid "Resources"
 msgstr "资源"
 
 #: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Restore"
 msgstr "恢复"
 
@@ -4611,6 +4814,7 @@ msgid "Restore this version?"
 msgstr "恢复此版本？"
 
 #: src/features/applications/components/application-form-sheet.tsx
+#: src/features/command-palette/pages/navigation.tsx
 #: src/features/resume/export/download-dialog.tsx
 #: src/routes/agent/-components/resume-pane.tsx
 #: src/routes/agent/$threadId.tsx
@@ -4653,8 +4857,6 @@ msgstr "面向不同职业和口味的简历模板。挑一款适合你的。"
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
 #: src/routes/_home/-sections/statistics.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Resumes"
 msgstr "简历"
 
@@ -4664,9 +4866,17 @@ msgstr "简历"
 msgid "Retry"
 msgstr "重试"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Retry AI recommendations"
+msgstr ""
+
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review edits"
 msgstr "审核编辑"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Review the AI wording before opening the CV editor. Your edits are saved as final text and preserved when AI content is regenerated."
+msgstr ""
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review the resume against a job description, and ask me before changing anything you're unsure about."
@@ -4752,6 +4962,7 @@ msgstr "薪资范围"
 #. Passkey rename prompt confirm action in authentication settings
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Save"
 msgstr "节省"
 
@@ -4762,6 +4973,10 @@ msgstr "保存和测试提供商"
 #: src/features/ats-checker/messages.ts
 msgid "Save an unprotected copy, with no password and no permissions restrictions."
 msgstr "保存一份不受保护的副本，不设密码，也不设权限限制。"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Save and analyze"
+msgstr ""
 
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Save changes"
@@ -4817,6 +5032,10 @@ msgstr "已保存"
 msgid "Saving is taking longer than expected. Your changes are still open."
 msgstr "保存用时比预期更长。你的更改仍然保留。"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Saving..."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Saving…"
 msgstr "正在保存…"
@@ -4858,6 +5077,10 @@ msgstr "搜索求职信"
 msgid "Search cover letters..."
 msgstr "搜索求职信…"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Search CVs..."
+msgstr ""
+
 #. Accessible label for icon picker search input
 #. Placeholder text in icon picker search input
 #: src/components/input/icon-picker.tsx
@@ -4867,10 +5090,6 @@ msgstr "搜索图标"
 #: src/features/command-palette/pages/resumes.tsx
 msgid "Search for…"
 msgstr "搜索…"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Search resumes..."
-msgstr "搜索简历……"
 
 #: src/components/ui/combobox.tsx
 msgid "Search..."
@@ -4924,6 +5143,10 @@ msgstr "选择一个会话"
 msgid "Select all"
 msgstr "全选"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Select all recommended"
+msgstr ""
+
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Select an agent model"
 msgstr "选择代理模型"
@@ -4937,8 +5160,13 @@ msgid "Select..."
 msgstr "选择..."
 
 #: src/features/applications/components/table-view.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "selected"
 msgstr "已选择"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Selecting..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Self-Host with Docker"
@@ -5554,6 +5782,14 @@ msgstr "定制我的简历"
 msgid "Tailor this resume to a product manager job description, and emphasize roadmap ownership, stakeholder communication, and measurable launch outcomes."
 msgstr "按照产品经理的职位描述定制这份简历，并突出路线图的主导权、与相关方的沟通，以及可衡量的上线成果。"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content could not be generated."
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Tailoring failed."
 msgstr "定制失败。"
@@ -5662,6 +5898,10 @@ msgstr "将您引导至此的应用发出了无效的授权请求。"
 msgid "The checks above are mechanical. This asks a language model what a reader would think of your bullets, and suggests rewrites. It produces no score."
 msgstr "以上检查都是机械化的规则判断。这项功能会询问语言模型，看一个读者会如何看待你的要点，并提出改写建议。它不会给出分数。"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The CV could not be opened in the editor."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "The deep check could not finish. Please try again."
 msgstr "深度检查未能完成。请重试。"
@@ -5670,6 +5910,10 @@ msgstr "深度检查未能完成。请重试。"
 #: src/dialogs/resume/import.tsx
 msgid "The imported file could not be parsed into a valid resume."
 msgstr "导入的文件无法解析为有效简历。"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The job offer could not be analyzed."
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "The order the text is stored in disagrees badly with the order it reads in."
@@ -5766,6 +6010,10 @@ msgstr "没有个人简介段落。"
 #: src/features/ats-checker/messages.ts
 msgid "There was not enough information to run this check."
 msgstr "信息不足，无法运行此项检查。"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "These are required or preferred job requirements for which CVMate found no direct evidence in your Master Profile."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "These checks run as you type and never leave your browser. They test whether software can read your resume, not how well it is written."
@@ -6046,8 +6294,6 @@ msgstr "会话已归档。"
 msgid "Thread deleted."
 msgstr "会话已删除。"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 #: src/routes/agent/$threadId.tsx
 msgid "Threads"
@@ -6135,6 +6381,14 @@ msgstr "跟踪你的简历被查看和下载的次数"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Translations"
 msgstr "翻译"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash is empty"
+msgstr ""
 
 #: src/components/layout/error-screen.tsx
 msgid "Try again"
@@ -6629,6 +6883,7 @@ msgstr "网络搜索"
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Website"
 msgstr "网站"
 
@@ -6847,6 +7102,10 @@ msgstr "您的电子邮件地址未在提供商处验证。"
 msgid "Your file stays here"
 msgstr "你的文件留在本地"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Your final text could not be saved."
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Your headings look the same as your body text."
 msgstr "你的标题看起来和正文一模一样。"
@@ -6867,6 +7126,14 @@ msgstr "你的线路排得很紧。"
 #: src/features/ats-checker/messages.ts
 msgid "Your margins are very narrow."
 msgstr "你的页边距非常窄。"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile has not been created yet. Saving these details will create it automatically."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile is the permanent source of facts used by CVMate when creating tailored resumes."
+msgstr ""
 
 #: src/libs/resume/ats.ts
 msgid "Your page margins are very narrow."
@@ -6973,4 +7240,3 @@ msgstr "缩小"
 #: src/libs/locale.ts
 msgid "Zulu"
 msgstr "祖鲁语"
-

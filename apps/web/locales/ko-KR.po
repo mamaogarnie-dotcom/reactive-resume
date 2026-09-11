@@ -390,7 +390,6 @@ msgid "Add another layer of protection to your account."
 msgstr "계정에 보호 단계를 하나 더 추가합니다."
 
 #: src/features/applications/components/application-form-sheet.tsx
-#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Add application"
 msgstr "지원 추가"
@@ -402,6 +401,10 @@ msgstr "역할이 해당 지역에 맞춰질 수 있도록 최소한 도시와 �
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Add contact"
 msgstr "연락처 추가"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Add favorite"
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "Add figures where you have them: volumes, percentages, timeframes, team sizes."
@@ -480,18 +483,9 @@ msgstr "아프리칸스어"
 msgid "Against the job description"
 msgstr "채용 공고 기준"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Agent"
-msgstr "대리인"
-
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Agent ready"
 msgstr "에이전트 준비 완료"
-
-#: src/routes/dashboard/-components/sidebar.tsx
-msgid "Agents"
-msgstr "자치령 대표"
 
 #: src/dialogs/resume/import.tsx
 msgid "AI"
@@ -533,9 +527,21 @@ msgstr "ENCRYPTION_SECRET이 설정되기 전까지는 AI 제공업체를 사용
 msgid "AI providers require REDIS_URL and ENCRYPTION_SECRET to be configured."
 msgstr "AI 제공업체는 REDIS_URL 및 ENCRYPTION_SECRET이 구성되어 있어야 합니다."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations are suggestions only. You decide what is included in the final CV."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations could not be generated. You can still select content manually."
+msgstr ""
+
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "알바니아어"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "All"
+msgstr ""
 
 #: src/features/applications/components/export-applications-sheet.tsx
 msgid "All applications (including archived)"
@@ -577,6 +583,26 @@ msgstr "예기치 않은 오류로 인해 페이지 로딩이 중단되었습니
 #: src/dialogs/resume/import.tsx
 msgid "An unknown error occurred while importing your resume."
 msgstr "이력서를 가져오는 동안 알 수 없는 오류가 발생했습니다."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed, but no structured requirements were extracted."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyze another offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzed job offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzing..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "And many more..."
@@ -669,9 +695,6 @@ msgstr "애플리케이션 통계"
 msgid "Application updated."
 msgstr "지원이 업데이트되었습니다."
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Applications"
 msgstr "지원"
@@ -774,10 +797,12 @@ msgstr "이력서에 대해 궁금한 점이 있으면 무엇이든 물어보세
 msgid "Aspect Ratio"
 msgstr "가로세로 비율"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/libs/resume/section.tsx
 msgid "ATS Check"
 msgstr "ATS 검사"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/_home/-sections/features.tsx
 #: src/routes/_home/ats-checker.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
@@ -1017,6 +1042,10 @@ msgstr "언어를…로 변경하세요"
 msgid "Change the colors, fonts, and design to suit you."
 msgstr "색상, 글꼴, 디자인을 원하는 대로 바꿀 수 있습니다."
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Change the filter or update one of your CVs."
+msgstr ""
+
 #: src/features/command-palette/pages/preferences/index.tsx
 msgid "Change theme to…"
 msgstr "테마를…로 변경하세요"
@@ -1114,6 +1143,10 @@ msgstr "저장된 커버레터 선택"
 msgid "Choose an application"
 msgstr "지원 내역 선택"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Choose CV content"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
 msgstr "PDF, DOCX, Markdown 또는 JSON 형식 중에서 선택하세요. 가능한 경우 이력서와 자기소개서를 별도로 내보낼 수 있습니다."
@@ -1181,10 +1214,6 @@ msgstr "명령 팔레트 - {currentPage}"
 #: src/routes/_home/-sections/footer.tsx
 msgid "Community"
 msgstr "커뮤니티"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Compact"
-msgstr "컴팩트"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/features/applications/components/application-form-sheet.tsx
@@ -1282,6 +1311,10 @@ msgstr "내용이 격자 형태로 배치되어 있습니다."
 #: src/features/auth/pages/register.tsx
 msgid "Continue"
 msgstr "계속"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Continue to tailored content"
+msgstr ""
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -1407,6 +1440,10 @@ msgstr "선택한 이력서를 불러오지 못했습니다."
 msgid "Could not load this cover letter."
 msgstr "이 커버레터를 불러오지 못했습니다."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not load your Master Profile."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not prepare your resume for printing. Please try again."
 msgstr "이력서를 인쇄용으로 준비하지 못했습니다. 다시 시도하세요."
@@ -1424,6 +1461,10 @@ msgstr "이 패치를 복원할 수 없습니다."
 msgid "Could not save the cover letter. Please try again."
 msgstr "커버레터를 저장하지 못했습니다. 다시 시도해 주세요."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not save your profile."
+msgstr ""
+
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Could not set up two-factor authentication."
 msgstr "2단계 인증을 설정하지 못했습니다."
@@ -1432,6 +1473,10 @@ msgstr "2단계 인증을 설정하지 못했습니다."
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Could not sort these items; they stayed at the end: {0}."
 msgstr "이 항목들을 정렬하지 못해 맨 뒤에 남겨 두었습니다: {0}."
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Could not update this CV."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Could not verify provider connection."
@@ -1510,7 +1555,6 @@ msgstr "자기소개서"
 msgid "Cover letter draft"
 msgstr "커버레터 초안"
 
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/cover-letters.tsx
 msgid "Cover Letters"
 msgstr "커버레터"
@@ -1534,13 +1578,16 @@ msgstr "커버레터"
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/features/cover-letters/library.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Create"
 msgstr "생성"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Create a copy tuned to this job"
 msgstr "이 공고에 맞춘 사본 만들기"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Create a CV build from your Master Profile and let AI recommend only facts already stored there."
+msgstr ""
 
 #: src/features/auth/pages/register.tsx
 msgid "Create a new account"
@@ -1600,7 +1647,6 @@ msgid "Create a new reference"
 msgstr "새 추천인 만들기"
 
 #: src/dialogs/resume/index.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
@@ -1622,6 +1668,10 @@ msgstr "새 봉사 경험 만들기"
 msgid "Create a Sample Resume"
 msgstr "샘플 이력서 만들기"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create a tailored CV from a job offer to see it here."
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Create as many resumes as you want."
 msgstr "원하는 만큼 이력서를 만들 수 있습니다."
@@ -1629,6 +1679,14 @@ msgstr "원하는 만큼 이력서를 만들 수 있습니다."
 #: src/features/cover-letters/library.tsx
 msgid "Create cover letter"
 msgstr "커버레터 만들기"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/create.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create CV"
+msgstr ""
 
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Create from scratch"
@@ -1709,6 +1767,11 @@ msgstr "사용자 지정 섹션"
 #: src/libs/resume/section.tsx
 msgid "Custom Styles"
 msgstr "사용자 지정 스타일"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "CV"
+msgstr ""
 
 #: src/libs/locale.ts
 msgid "Czech"
@@ -1932,6 +1995,7 @@ msgid "Discord"
 msgstr "디스코드"
 
 #: src/features/applications/components/application-ai-copilot.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Dismiss"
 msgstr "해고하다"
 
@@ -2000,6 +2064,10 @@ msgstr "PDF 다운로드"
 msgid "Downloads"
 msgstr "다운로드"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Draft"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Draft a cover letter"
 msgstr "커버레터 초안 작성"
@@ -2011,6 +2079,10 @@ msgstr "후속 메시지 초안 작성"
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Drafting failed."
 msgstr "초안 작성에 실패했습니다."
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Drafts"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Drag and drop sections here to move them between columns"
@@ -2127,6 +2199,10 @@ msgstr "메모 수정"
 msgid "Editable in Word, Google Docs, and Pages."
 msgstr "Word, Google Docs, Pages에서 편집할 수 있습니다."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Edited"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/index.tsx
 msgid "Editing is disabled until you unlock it."
 msgstr "편집 기능은 잠금 해제하기 전까지 비활성화되어 있습니다."
@@ -2142,6 +2218,7 @@ msgid "Education"
 msgstr "학력"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Email"
 msgstr "이메일"
 
@@ -2272,6 +2349,10 @@ msgstr "전체 화면 종료"
 #: src/libs/resume/section.tsx
 msgid "Experience"
 msgstr "경력"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Experience fact"
+msgstr ""
 
 #: src/dialogs/api-key/create.tsx
 msgid "Expires in"
@@ -2500,6 +2581,14 @@ msgstr "코드를 인증하지 못했습니다. 다시 시도해 주세요."
 msgid "Fatal error"
 msgstr "치명적 오류"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorite"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorites"
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Features"
 msgstr "기능"
@@ -2535,6 +2624,10 @@ msgstr "핀란드어"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Fireworks"
 msgstr "불꽃"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "First name"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Fit"
@@ -2644,6 +2737,10 @@ msgstr "전체 화면"
 msgid "Fullscreen Editor"
 msgstr "전체 화면 편집기"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Gaps"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Gaps:"
 msgstr "부족한 점:"
@@ -2651,6 +2748,10 @@ msgstr "부족한 점:"
 #: src/dialogs/resume/index.tsx
 msgid "Generate a random name"
 msgstr "무작위 이름 생성"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Generating tailored content..."
+msgstr ""
 
 #: src/features/resume/export/use-resume-export.ts
 #: src/routes/agent/-components/resume-pane.tsx
@@ -2723,10 +2824,6 @@ msgstr "성적"
 #: src/libs/locale.ts
 msgid "Greek"
 msgstr "그리스어"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Grid"
-msgstr "그리드"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Groq"
@@ -2899,7 +2996,6 @@ msgid "Images cover most of the page."
 msgstr "이미지가 페이지의 대부분을 차지하고 있습니다."
 
 #: src/dialogs/resume/import.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Import"
 msgstr "가져오기"
 
@@ -3051,10 +3147,6 @@ msgstr "기울임"
 msgid "Japanese"
 msgstr "일본어"
 
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Job"
-msgstr "직업"
-
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Job description"
 msgstr "직무 설명"
@@ -3063,6 +3155,10 @@ msgstr "직무 설명"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "Job description (optional)"
 msgstr "채용 공고 (선택 사항)"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Job offer"
+msgstr ""
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Job posting"
@@ -3075,10 +3171,6 @@ msgstr "채용 공고 링크"
 #: src/features/applications/components/insights-view.tsx
 msgid "Job search pipeline"
 msgstr "구직 파이프라인"
-
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Jobs"
-msgstr "일자리"
 
 #. Example full name placeholder on profile settings form
 #. Example full name placeholder on registration form
@@ -3201,7 +3293,12 @@ msgstr "언어"
 msgid "Last downloaded on {0}"
 msgstr "마지막 다운로드: {0}"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Last name"
+msgstr ""
+
 #: src/routes/dashboard/applications/index.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Last updated"
 msgstr "마지막 업데이트"
 
@@ -3325,6 +3422,7 @@ msgstr "연결된 Reactive Resume"
 #: src/features/auth/components/social-auth.tsx
 #: src/features/settings/authentication/components/hooks.tsx
 #: src/routes/_home/-sections/footer.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
@@ -3335,10 +3433,6 @@ msgstr "LinkedIn, 추천…"
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Linking your {providerName} account..."
 msgstr "{providerName} 계정을 연결하는 중입니다..."
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "List"
-msgstr "목록"
 
 #: src/features/ats-checker/messages.ts
 msgid "List the tools and technologies you use. Recruiters search skills more than any other field."
@@ -3352,13 +3446,13 @@ msgstr "리투아니아어"
 msgid "Loading AI providers. Please try again in a moment."
 msgstr "AI 제공업체를 불러오는 중입니다. 잠시 후 다시 시도해 주세요."
 
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Loading applications…"
-msgstr "애플리케이션 로딩 중…"
-
 #: src/features/auth/pages/consent.tsx
 msgid "Loading connection request..."
 msgstr "연결 요청을 불러오는 중…"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Loading profile..."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-provider-picker.tsx
 #: src/features/settings/integrations/components/ai-section.tsx
@@ -3370,10 +3464,13 @@ msgstr "공급자 로딩 중…"
 msgid "Loading resumes…"
 msgstr "이력서 로딩 중…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Loading threads…"
 msgstr "스레드 로딩 중…"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Loading your CVs…"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/version-history.tsx
 msgid "Loading…"
@@ -3386,6 +3483,7 @@ msgstr "… 로딩 중"
 #: src/features/applications/components/table-view.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Location"
 msgstr "위치"
 
@@ -3459,13 +3557,39 @@ msgstr "여백(가로)"
 msgid "Margin (Vertical)"
 msgstr "여백(세로)"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark draft"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark ready"
+msgstr ""
+
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Mark rejected"
 msgstr "거절됨으로 표시"
 
+#: src/features/command-palette/pages/navigation.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match Master Profile"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Match scoring failed."
 msgstr "적합도 점수화에 실패했습니다."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match your Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Matching profile..."
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-results.tsx
 msgid "Medium impact"
@@ -3532,6 +3656,10 @@ msgstr "단계 이동"
 msgid "Move to"
 msgstr "이동"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Move to trash"
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "이메일과 전화번호를 첫 페이지 상단으로 옮기세요."
@@ -3548,6 +3676,13 @@ msgstr "다국어 지원"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Must start with https://"
 msgstr "https:// 으로 시작해야 합니다."
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "My CV"
+msgstr ""
 
 #. Label for full name input on registration form
 #: src/dialogs/api-key/create.tsx
@@ -3596,9 +3731,8 @@ msgid "New account sign-ups are currently disabled on this server."
 msgstr "이 서버에서는 현재 새 계정 가입이 비활성화되어 있습니다."
 
 #: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Application"
-msgstr "새로운 신청서"
+msgid "New CV"
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "New features land regularly, so check back now and then."
@@ -3627,14 +3761,8 @@ msgstr "새 섹션"
 msgid "New tag…"
 msgstr "새 태그…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "New thread"
-msgstr "새 스레드"
-
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Thread"
 msgstr "새 스레드"
 
 #: src/features/cover-letters/library.tsx
@@ -3682,6 +3810,10 @@ msgstr "일반적인 섹션 제목을 찾을 수 없습니다."
 msgid "No cover letters found. Create one or import an existing letter."
 msgstr "커버레터가 없습니다. 새로 만들거나 기존 편지를 가져오세요."
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "No CVs in this view"
+msgstr ""
+
 #. Error shown when AI import endpoint returns no parsed resume data
 #: src/dialogs/resume/import.tsx
 msgid "No data was returned from the AI provider."
@@ -3706,6 +3838,10 @@ msgstr "직함과 회사명이 함께 있는 줄을 찾을 수 없습니다."
 #: src/routes/_home/ats-checker.tsx
 msgid "No one-page rule, and no treating a font or a career gap as a fault."
 msgstr "한 페이지 규칙을 강요하지 않으며, 글꼴이나 경력 공백을 결함으로 취급하지 않습니다."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "No open gaps detected."
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "No passkeys registered yet."
@@ -3876,6 +4012,7 @@ msgstr "처음 몇 페이지만 점검했습니다."
 #. Resume card dropdown action to open the resume editor
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Open"
 msgstr "열기"
 
@@ -3899,6 +4036,10 @@ msgstr "초점 모드 열기"
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Open in builder"
 msgstr "빌더에서 열기"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Open in CV editor"
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Open Integrations Settings"
@@ -3945,6 +4086,10 @@ msgstr "선택적으로, 채용 공고의 어떤 용어가 이미 포함되어 �
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "Options for {title}"
 msgstr "{title}에 대한 옵션"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Or attach a file"
+msgstr ""
 
 #: src/features/auth/components/social-auth.tsx
 msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) instead of email and password"
@@ -4055,13 +4200,25 @@ msgstr "비밀번호가 일치하지 않습니다."
 msgid "Paste a posting to see which of its terms already appear in your resume."
 msgstr "공고를 붙여넣으면 이력서에 이미 포함된 용어를 확인할 수 있습니다."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste job offer"
+msgstr ""
+
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source, Tags, Contact Name, Contact Email and Contact Phone."
 msgstr "행을 붙여넣거나 .csv 파일을 업로드하세요. 회사, 직무, 단계, 단계 날짜, 급여, 출처, 태그, 연락처 이름, 연락처 이메일, 연락처 전화 같은 열을 매핑합니다."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the complete job offer here..."
+msgstr ""
+
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Paste the full job description here…"
 msgstr "전체 직무 설명을 여기에 붙여넣으세요…"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the job offer or attach a PDF/image. CVMate will analyze it before building your tailored CV."
+msgstr ""
 
 #: src/features/ats-checker/tool.tsx
 msgid "Paste the posting to see which of its terms already appear in your resume."
@@ -4099,6 +4256,10 @@ msgstr "패치가 되돌려졌습니다."
 msgid "PDF snapshot attached to the application."
 msgstr "PDF 스냅샷을 지원 내역에 첨부했습니다."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "PDF, JPEG, PNG, WebP or GIF, up to 10 MB."
+msgstr ""
+
 #: src/features/cover-letters/editor-dialog.tsx
 msgid "PDFs already attached to applications will remain available."
 msgstr "이미 지원 내역에 첨부된 PDF는 계속 사용할 수 있습니다."
@@ -4118,9 +4279,14 @@ msgstr "당황"
 msgid "Persian"
 msgstr "페르시아어"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Personal details"
+msgstr ""
+
 #: src/dialogs/resume/sections/reference.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Phone"
 msgstr "전화"
 
@@ -4213,6 +4379,10 @@ msgstr "환경 설정"
 msgid "Prepare a conservative patch that improves clarity without changing the story of my career."
 msgstr "제 경력의 흐름은 바꾸지 않으면서 명확성을 높이는 보수적인 수정안을 준비해 주세요."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Preparing CV..."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Preparing your resume for printing..."
 msgstr "인쇄용 이력서 준비..."
@@ -4258,6 +4428,10 @@ msgstr "기본 색상"
 msgid "Print or export the form to a flat PDF before sending it."
 msgstr "보내기 전에 양식을 일반 PDF로 인쇄하거나 내보내세요."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Professional summary"
+msgstr ""
+
 #: src/dialogs/resume/sections/skill.tsx
 msgid "Proficiency"
 msgstr "숙련도"
@@ -4267,6 +4441,10 @@ msgstr "숙련도"
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Profile"
 msgstr "프로필"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Profile saved."
+msgstr ""
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -4423,6 +4601,10 @@ msgstr "{0}페이지 중 {1}페이지 읽는 중…"
 msgid "Reading the posting…"
 msgstr "공고를 읽는 중…"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Ready"
+msgstr ""
+
 #: src/features/resume/stylesheet/status.tsx
 msgid "Ready to activate"
 msgstr "활성화 준비 완료"
@@ -4439,6 +4621,18 @@ msgstr "경고 메시지와 함께 활성화할 준비가 되었습니다."
 #: src/features/cover-letters/editor.tsx
 msgid "Recipient"
 msgstr "수신인"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommendations could not be generated."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "recommended"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommended"
+msgstr ""
 
 #: src/components/level/combobox.tsx
 msgid "Rectangle"
@@ -4465,6 +4659,10 @@ msgstr "추천인"
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Referred by…, things to emphasize, etc."
 msgstr "추천인…, 강조할 내용 등"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Regenerate tailored content"
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Register New Device"
@@ -4498,6 +4696,10 @@ msgstr "연락처 제거"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Remove custom field"
 msgstr "사용자 정의 필드 제거"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Remove favorite"
+msgstr ""
 
 #: src/features/applications/components/file-attachment-field.tsx
 msgid "Remove file"
@@ -4599,6 +4801,7 @@ msgid "Resources"
 msgstr "리소스"
 
 #: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Restore"
 msgstr "복원하다"
 
@@ -4611,6 +4814,7 @@ msgid "Restore this version?"
 msgstr "이 버전으로 복원하시겠습니까?"
 
 #: src/features/applications/components/application-form-sheet.tsx
+#: src/features/command-palette/pages/navigation.tsx
 #: src/features/resume/export/download-dialog.tsx
 #: src/routes/agent/-components/resume-pane.tsx
 #: src/routes/agent/$threadId.tsx
@@ -4653,8 +4857,6 @@ msgstr "여러 직종과 취향에 맞춘 이력서 템플릿입니다. 마음�
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
 #: src/routes/_home/-sections/statistics.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Resumes"
 msgstr "이력서"
 
@@ -4664,9 +4866,17 @@ msgstr "이력서"
 msgid "Retry"
 msgstr "다시 해 보다"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Retry AI recommendations"
+msgstr ""
+
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review edits"
 msgstr "편집 검토"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Review the AI wording before opening the CV editor. Your edits are saved as final text and preserved when AI content is regenerated."
+msgstr ""
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review the resume against a job description, and ask me before changing anything you're unsure about."
@@ -4752,6 +4962,7 @@ msgstr "급여 범위"
 #. Passkey rename prompt confirm action in authentication settings
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Save"
 msgstr "저장"
 
@@ -4762,6 +4973,10 @@ msgstr "저장 및 테스트 제공업체"
 #: src/features/ats-checker/messages.ts
 msgid "Save an unprotected copy, with no password and no permissions restrictions."
 msgstr "비밀번호와 권한 제한이 없는 보호되지 않은 사본으로 저장하세요."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Save and analyze"
+msgstr ""
 
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Save changes"
@@ -4817,6 +5032,10 @@ msgstr "저장됨"
 msgid "Saving is taking longer than expected. Your changes are still open."
 msgstr "저장이 예상보다 오래 걸리고 있습니다. 변경 사항은 그대로 남아 있습니다."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Saving..."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Saving…"
 msgstr "저장 중…"
@@ -4858,6 +5077,10 @@ msgstr "커버레터 검색"
 msgid "Search cover letters..."
 msgstr "커버레터 검색…"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Search CVs..."
+msgstr ""
+
 #. Accessible label for icon picker search input
 #. Placeholder text in icon picker search input
 #: src/components/input/icon-picker.tsx
@@ -4867,10 +5090,6 @@ msgstr "아이콘 검색"
 #: src/features/command-palette/pages/resumes.tsx
 msgid "Search for…"
 msgstr "…을 검색하세요"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Search resumes..."
-msgstr "이력서를 검색하세요..."
 
 #: src/components/ui/combobox.tsx
 msgid "Search..."
@@ -4924,6 +5143,10 @@ msgstr "스레드를 선택하세요"
 msgid "Select all"
 msgstr "모두 선택"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Select all recommended"
+msgstr ""
+
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Select an agent model"
 msgstr "에이전트 모델을 선택하세요"
@@ -4937,8 +5160,13 @@ msgid "Select..."
 msgstr "선택..."
 
 #: src/features/applications/components/table-view.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "selected"
 msgstr "선택됨"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Selecting..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Self-Host with Docker"
@@ -5554,6 +5782,14 @@ msgstr "내 이력서 맞춤 조정"
 msgid "Tailor this resume to a product manager job description, and emphasize roadmap ownership, stakeholder communication, and measurable launch outcomes."
 msgstr "이 이력서를 프로덕트 매니저 채용 공고에 맞게 다듬고, 로드맵 주도, 이해관계자 커뮤니케이션, 측정 가능한 출시 성과를 강조해 주세요."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content could not be generated."
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Tailoring failed."
 msgstr "맞춤 조정에 실패했습니다."
@@ -5662,6 +5898,10 @@ msgstr "회원님을 여기로 보낸 애플리케이션이 잘못된 인증 요
 msgid "The checks above are mechanical. This asks a language model what a reader would think of your bullets, and suggests rewrites. It produces no score."
 msgstr "위의 점검은 기계적인 검사입니다. 이 기능은 언어 모델에게 독자가 항목들을 어떻게 볼지 물어보고 수정안을 제안합니다. 점수를 산출하지는 않습니다."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The CV could not be opened in the editor."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "The deep check could not finish. Please try again."
 msgstr "심층 점검을 완료하지 못했습니다. 다시 시도해 주세요."
@@ -5670,6 +5910,10 @@ msgstr "심층 점검을 완료하지 못했습니다. 다시 시도해 주세�
 #: src/dialogs/resume/import.tsx
 msgid "The imported file could not be parsed into a valid resume."
 msgstr "가져온 파일을 유효한 이력서로 구문 분석할 수 없습니다."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The job offer could not be analyzed."
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "The order the text is stored in disagrees badly with the order it reads in."
@@ -5766,6 +6010,10 @@ msgstr "요약 문단이 없습니다."
 #: src/features/ats-checker/messages.ts
 msgid "There was not enough information to run this check."
 msgstr "이 점검을 실행할 충분한 정보가 없었습니다."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "These are required or preferred job requirements for which CVMate found no direct evidence in your Master Profile."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "These checks run as you type and never leave your browser. They test whether software can read your resume, not how well it is written."
@@ -6046,8 +6294,6 @@ msgstr "스레드가 보관되었습니다."
 msgid "Thread deleted."
 msgstr "스레드가 삭제되었습니다."
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 #: src/routes/agent/$threadId.tsx
 msgid "Threads"
@@ -6135,6 +6381,14 @@ msgstr "이력서 조회 수와 다운로드 수 추적"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Translations"
 msgstr "번역"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash is empty"
+msgstr ""
 
 #: src/components/layout/error-screen.tsx
 msgid "Try again"
@@ -6629,6 +6883,7 @@ msgstr "웹 검색"
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Website"
 msgstr "웹사이트"
 
@@ -6847,6 +7102,10 @@ msgstr "회원님의 이메일 주소가 공급자에서 확인되지 않았습�
 msgid "Your file stays here"
 msgstr "파일은 여기에만 유지됩니다"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Your final text could not be saved."
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Your headings look the same as your body text."
 msgstr "제목이 본문 텍스트와 동일하게 보입니다."
@@ -6867,6 +7126,14 @@ msgstr "귀하의 라인은 매우 촘촘하게 포장되어 있습니다."
 #: src/features/ats-checker/messages.ts
 msgid "Your margins are very narrow."
 msgstr "여백이 매우 좁습니다."
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile has not been created yet. Saving these details will create it automatically."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile is the permanent source of facts used by CVMate when creating tailored resumes."
+msgstr ""
 
 #: src/libs/resume/ats.ts
 msgid "Your page margins are very narrow."
@@ -6973,4 +7240,3 @@ msgstr "축소"
 #: src/libs/locale.ts
 msgid "Zulu"
 msgstr "줄루어"
-

@@ -390,7 +390,6 @@ msgid "Add another layer of protection to your account."
 msgstr "अपने खाते पर सुरक्षा की एक और परत जोड़ें।"
 
 #: src/features/applications/components/application-form-sheet.tsx
-#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Add application"
 msgstr "आवेदन जोड़ें"
@@ -402,6 +401,10 @@ msgstr "कम से कम एक शहर और देश जोड़े�
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Add contact"
 msgstr "संपर्क जोड़ें"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Add favorite"
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "Add figures where you have them: volumes, percentages, timeframes, team sizes."
@@ -480,18 +483,9 @@ msgstr "अफ्रीकान्स"
 msgid "Against the job description"
 msgstr "नौकरी विवरण के मुक़ाबले"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Agent"
-msgstr "प्रतिनिधि"
-
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Agent ready"
 msgstr "एजेंट तैयार"
-
-#: src/routes/dashboard/-components/sidebar.tsx
-msgid "Agents"
-msgstr "एजेंटों"
 
 #: src/dialogs/resume/import.tsx
 msgid "AI"
@@ -533,9 +527,21 @@ msgstr "ENCRYPTION_SECRET कॉन्फ़िगर होने तक AI प
 msgid "AI providers require REDIS_URL and ENCRYPTION_SECRET to be configured."
 msgstr "एआई प्रदाताओं को REDIS_URL और ENCRYPTION_SECRET को कॉन्फ़िगर करने की आवश्यकता होती है।"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations are suggestions only. You decide what is included in the final CV."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI recommendations could not be generated. You can still select content manually."
+msgstr ""
+
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "अल्बानियाई"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "All"
+msgstr ""
 
 #: src/features/applications/components/export-applications-sheet.tsx
 msgid "All applications (including archived)"
@@ -577,6 +583,26 @@ msgstr "एक अप्रत्याशित त्रुटि के क�
 #: src/dialogs/resume/import.tsx
 msgid "An unknown error occurred while importing your resume."
 msgstr "आपका रेज़्यूमे इम्पोर्ट करते समय कोई अज्ञात त्रुटि हुई।"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analysis completed, but no structured requirements were extracted."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyze another offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzed job offer"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyzing..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "And many more..."
@@ -669,9 +695,6 @@ msgstr "आवेदन आँकड़े"
 msgid "Application updated."
 msgstr "आवेदन अपडेट किया गया।"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Applications"
 msgstr "आवेदन"
@@ -774,10 +797,12 @@ msgstr "इस रिज्यूमे के बारे में कुछ 
 msgid "Aspect Ratio"
 msgstr "आकार अनुपात"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/libs/resume/section.tsx
 msgid "ATS Check"
 msgstr "एटीएस जांच"
 
+#: src/features/command-palette/pages/navigation.tsx
 #: src/routes/_home/-sections/features.tsx
 #: src/routes/_home/ats-checker.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
@@ -1017,6 +1042,10 @@ msgstr "भाषा बदलें…"
 msgid "Change the colors, fonts, and design to suit you."
 msgstr "रंग, फ़ॉन्ट और डिज़ाइन अपनी पसंद के अनुसार बदलें।"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Change the filter or update one of your CVs."
+msgstr ""
+
 #: src/features/command-palette/pages/preferences/index.tsx
 msgid "Change theme to…"
 msgstr "थीम को… में बदलें"
@@ -1114,6 +1143,10 @@ msgstr "एक सहेजा गया कवर लेटर चुनें"
 msgid "Choose an application"
 msgstr "एक एप्लिकेशन चुनें"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Choose CV content"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
 msgstr "आप PDF, DOCX, Markdown या JSON फॉर्मेट चुन सकते हैं। उपलब्ध होने पर अपना रिज्यूमे और कवर लेटर अलग-अलग एक्सपोर्ट करें।"
@@ -1181,10 +1214,6 @@ msgstr "कमांड पैलेट - {currentPage}"
 #: src/routes/_home/-sections/footer.tsx
 msgid "Community"
 msgstr "समुदाय"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Compact"
-msgstr "संक्षिप्त"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/features/applications/components/application-form-sheet.tsx
@@ -1282,6 +1311,10 @@ msgstr "सामग्री ग्रिड में व्यवस्थि
 #: src/features/auth/pages/register.tsx
 msgid "Continue"
 msgstr "जारी रखें"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Continue to tailored content"
+msgstr ""
 
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -1407,6 +1440,10 @@ msgstr "चयनित रिज़्यूमे लोड नहीं ह�
 msgid "Could not load this cover letter."
 msgstr "इस कवर लेटर को लोड नहीं किया जा सका।"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not load your Master Profile."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not prepare your resume for printing. Please try again."
 msgstr "आपका रेज़्यूमे प्रिंट करने के लिए तैयार नहीं किया जा सका। कृपया फिर से प्रयास करें।"
@@ -1424,6 +1461,10 @@ msgstr "इस पैच को पुनर्स्थापित नही�
 msgid "Could not save the cover letter. Please try again."
 msgstr "कवर लेटर सहेज नहीं जा सका। कृपया फिर से प्रयास करें।"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Could not save your profile."
+msgstr ""
+
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Could not set up two-factor authentication."
 msgstr "दो कारक प्रमाणीकरण सेट नहीं किया जा सका।"
@@ -1432,6 +1473,10 @@ msgstr "दो कारक प्रमाणीकरण सेट नही�
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Could not sort these items; they stayed at the end: {0}."
 msgstr "इन आइटम्स को क्रमबद्ध नहीं किया जा सका; वे अंत में ही रहे: {0}"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Could not update this CV."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Could not verify provider connection."
@@ -1510,7 +1555,6 @@ msgstr "कवर लेटर"
 msgid "Cover letter draft"
 msgstr "कवर लेटर ड्राफ़्ट"
 
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/cover-letters.tsx
 msgid "Cover Letters"
 msgstr "प्रस्ताव पत्र"
@@ -1534,13 +1578,16 @@ msgstr "प्रस्ताव पत्र"
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/features/cover-letters/library.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Create"
 msgstr "बनाएँ"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Create a copy tuned to this job"
 msgstr "इस नौकरी के लिए अनुकूलित कॉपी बनाएँ"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Create a CV build from your Master Profile and let AI recommend only facts already stored there."
+msgstr ""
 
 #: src/features/auth/pages/register.tsx
 msgid "Create a new account"
@@ -1600,7 +1647,6 @@ msgid "Create a new reference"
 msgstr "नई रेफ़रेंस बनाएँ"
 
 #: src/dialogs/resume/index.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
@@ -1622,6 +1668,10 @@ msgstr "नया स्वयंसेवी अनुभव बनाएँ"
 msgid "Create a Sample Resume"
 msgstr "नमूना रेज़्यूमे बनाएँ"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create a tailored CV from a job offer to see it here."
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Create as many resumes as you want."
 msgstr "जितने चाहें उतने रेज़्यूमे बनाएँ।"
@@ -1629,6 +1679,14 @@ msgstr "जितने चाहें उतने रेज़्यूमे
 #: src/features/cover-letters/library.tsx
 msgid "Create cover letter"
 msgstr "कवर लेटर बनाएँ"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/create.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Create CV"
+msgstr ""
 
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Create from scratch"
@@ -1709,6 +1767,11 @@ msgstr "कस्टम अनुभाग"
 #: src/libs/resume/section.tsx
 msgid "Custom Styles"
 msgstr "कस्टम शैलियाँ"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "CV"
+msgstr ""
 
 #: src/libs/locale.ts
 msgid "Czech"
@@ -1932,6 +1995,7 @@ msgid "Discord"
 msgstr "डिस्कॉर्ड"
 
 #: src/features/applications/components/application-ai-copilot.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Dismiss"
 msgstr "नकार देना"
 
@@ -2000,6 +2064,10 @@ msgstr "PDF डाउनलोड करें"
 msgid "Downloads"
 msgstr "डाउनलोड"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Draft"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Draft a cover letter"
 msgstr "कवर लेटर ड्राफ़्ट करें"
@@ -2011,6 +2079,10 @@ msgstr "फ़ॉलो-अप ड्राफ़्ट करें"
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Drafting failed."
 msgstr "ड्राफ़्ट बनाना विफल रहा।"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Drafts"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Drag and drop sections here to move them between columns"
@@ -2127,6 +2199,10 @@ msgstr "नोट संपादित करें"
 msgid "Editable in Word, Google Docs, and Pages."
 msgstr "Word, Google Docs और Pages में संपादन योग्य।"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Edited"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/left/index.tsx
 msgid "Editing is disabled until you unlock it."
 msgstr "जब तक आप इसे अनलॉक नहीं करते, संपादन अक्षम रहेगा।"
@@ -2142,6 +2218,7 @@ msgid "Education"
 msgstr "शिक्षा"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Email"
 msgstr "ई‑मेल"
 
@@ -2272,6 +2349,10 @@ msgstr "पूर्ण स्क्रीन से बाहर निकल�
 #: src/libs/resume/section.tsx
 msgid "Experience"
 msgstr "अनुभव"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Experience fact"
+msgstr ""
 
 #: src/dialogs/api-key/create.tsx
 msgid "Expires in"
@@ -2500,6 +2581,14 @@ msgstr "आपके कोड का सत्यापन विफल हो 
 msgid "Fatal error"
 msgstr "गंभीर त्रुटि"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorite"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Favorites"
+msgstr ""
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Features"
 msgstr "विशेषताएँ"
@@ -2535,6 +2624,10 @@ msgstr "फिनिश"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Fireworks"
 msgstr "आतिशबाजी"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "First name"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Fit"
@@ -2644,6 +2737,10 @@ msgstr "पूर्ण स्क्रीन"
 msgid "Fullscreen Editor"
 msgstr "पूर्ण स्क्रीन संपादक"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Gaps"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Gaps:"
 msgstr "कमियाँ:"
@@ -2651,6 +2748,10 @@ msgstr "कमियाँ:"
 #: src/dialogs/resume/index.tsx
 msgid "Generate a random name"
 msgstr "कोई रैंडम नाम बनाएँ"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Generating tailored content..."
+msgstr ""
 
 #: src/features/resume/export/use-resume-export.ts
 #: src/routes/agent/-components/resume-pane.tsx
@@ -2723,10 +2824,6 @@ msgstr "ग्रेड"
 #: src/libs/locale.ts
 msgid "Greek"
 msgstr "ग्रीक"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Grid"
-msgstr "ग्रिड"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Groq"
@@ -2899,7 +2996,6 @@ msgid "Images cover most of the page."
 msgstr "इमेज पेज के अधिकांश हिस्से को घेरती हैं।"
 
 #: src/dialogs/resume/import.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Import"
 msgstr "आयात"
 
@@ -3051,10 +3147,6 @@ msgstr "इटैलिक"
 msgid "Japanese"
 msgstr "जापानी"
 
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Job"
-msgstr "काम"
-
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Job description"
 msgstr "नौकरी विवरण"
@@ -3063,6 +3155,10 @@ msgstr "नौकरी विवरण"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "Job description (optional)"
 msgstr "नौकरी विवरण (वैकल्पिक)"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Job offer"
+msgstr ""
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Job posting"
@@ -3075,10 +3171,6 @@ msgstr "नौकरी पोस्टिंग लिंक"
 #: src/features/applications/components/insights-view.tsx
 msgid "Job search pipeline"
 msgstr "नौकरी खोज पाइपलाइन"
-
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Jobs"
-msgstr "नौकरियाँ"
 
 #. Example full name placeholder on profile settings form
 #. Example full name placeholder on registration form
@@ -3201,7 +3293,12 @@ msgstr "भाषाएँ"
 msgid "Last downloaded on {0}"
 msgstr "आखिरी बार {0} को डाउनलोड किया गया"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Last name"
+msgstr ""
+
 #: src/routes/dashboard/applications/index.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Last updated"
 msgstr "अंतिम अपडेट"
 
@@ -3325,6 +3422,7 @@ msgstr "Reactive Resume लिंक किया गया"
 #: src/features/auth/components/social-auth.tsx
 #: src/features/settings/authentication/components/hooks.tsx
 #: src/routes/_home/-sections/footer.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "LinkedIn"
 msgstr "लिंक्डइन"
 
@@ -3335,10 +3433,6 @@ msgstr "LinkedIn, रेफ़रल…"
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Linking your {providerName} account..."
 msgstr "आपका {providerName} खाता जोड़ा जा रहा है..."
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "List"
-msgstr "सूची"
 
 #: src/features/ats-checker/messages.ts
 msgid "List the tools and technologies you use. Recruiters search skills more than any other field."
@@ -3352,13 +3446,13 @@ msgstr "लिथुआनियाई"
 msgid "Loading AI providers. Please try again in a moment."
 msgstr "एआई प्रदाताओं को लोड किया जा रहा है। कृपया कुछ देर बाद पुनः प्रयास करें।"
 
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Loading applications…"
-msgstr "एप्लिकेशन लोड हो रहे हैं…"
-
 #: src/features/auth/pages/consent.tsx
 msgid "Loading connection request..."
 msgstr "कनेक्शन अनुरोध लोड हो रहा है..."
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Loading profile..."
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-provider-picker.tsx
 #: src/features/settings/integrations/components/ai-section.tsx
@@ -3370,10 +3464,13 @@ msgstr "प्रदाता लोड हो रहे हैं…"
 msgid "Loading resumes…"
 msgstr "रेज़्यूमे लोड हो रहे हैं…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Loading threads…"
 msgstr "थ्रेड लोड हो रहे हैं…"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Loading your CVs…"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/version-history.tsx
 msgid "Loading…"
@@ -3386,6 +3483,7 @@ msgstr "लोडिंग…"
 #: src/features/applications/components/table-view.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Location"
 msgstr "स्थान"
 
@@ -3459,13 +3557,39 @@ msgstr "मार्जिन (क्षैतिज)"
 msgid "Margin (Vertical)"
 msgstr "मार्जिन (ऊर्ध्वाधर)"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark draft"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Mark ready"
+msgstr ""
+
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Mark rejected"
 msgstr "अस्वीकृत के रूप में चिह्नित करें"
 
+#: src/features/command-palette/pages/navigation.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match Master Profile"
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Match scoring failed."
 msgstr "मैच स्कोरिंग विफल रही।"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Match your Master Profile"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Matching profile..."
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-results.tsx
 msgid "Medium impact"
@@ -3532,6 +3656,10 @@ msgstr "चरण बदलें"
 msgid "Move to"
 msgstr "स्थानांतरित करें"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Move to trash"
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "अपना ईमेल और फ़ोन नंबर पहले पेज के ऊपर ले जाएँ।"
@@ -3548,6 +3676,13 @@ msgstr "बहुभाषी"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Must start with https://"
 msgstr "https:// से शुरू करना अनिवार्य है।"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/resumes/index.tsx
+msgid "My CV"
+msgstr ""
 
 #. Label for full name input on registration form
 #: src/dialogs/api-key/create.tsx
@@ -3596,9 +3731,8 @@ msgid "New account sign-ups are currently disabled on this server."
 msgstr "इस सर्वर पर नए खाते बनाना फ़िलहाल बंद है।"
 
 #: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Application"
-msgstr "नए आवेदन"
+msgid "New CV"
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "New features land regularly, so check back now and then."
@@ -3627,14 +3761,8 @@ msgstr "नया अनुभाग"
 msgid "New tag…"
 msgstr "नया टैग…"
 
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "New thread"
-msgstr "नया थ्रेड"
-
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Thread"
 msgstr "नया थ्रेड"
 
 #: src/features/cover-letters/library.tsx
@@ -3682,6 +3810,10 @@ msgstr "कोई पारंपरिक सेक्शन शीर्षक
 msgid "No cover letters found. Create one or import an existing letter."
 msgstr "कोई कवर लेटर नहीं मिला. एक बनाएं या मौजूदा पत्र आयात करें।"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "No CVs in this view"
+msgstr ""
+
 #. Error shown when AI import endpoint returns no parsed resume data
 #: src/dialogs/resume/import.tsx
 msgid "No data was returned from the AI provider."
@@ -3706,6 +3838,10 @@ msgstr "कोई पंक्ति नौकरी के शीर्षक �
 #: src/routes/_home/ats-checker.tsx
 msgid "No one-page rule, and no treating a font or a career gap as a fault."
 msgstr "एक-पेज का कोई नियम नहीं, और फ़ॉन्ट या करियर गैप को कोई गलती नहीं माना जाता।"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "No open gaps detected."
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "No passkeys registered yet."
@@ -3876,6 +4012,7 @@ msgstr "केवल पहले पेज जांचे गए।"
 #. Resume card dropdown action to open the resume editor
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Open"
 msgstr "खोलें"
 
@@ -3899,6 +4036,10 @@ msgstr "फोकस मोड खोलें"
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Open in builder"
 msgstr "बिल्डर में खोलें"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Open in CV editor"
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Open Integrations Settings"
@@ -3945,6 +4086,10 @@ msgstr "वैकल्पिक रूप से, नौकरी पोस्�
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "Options for {title}"
 msgstr "{title} के लिए विकल्प"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Or attach a file"
+msgstr ""
 
 #: src/features/auth/components/social-auth.tsx
 msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) instead of email and password"
@@ -4055,13 +4200,25 @@ msgstr "पासवर्ड मेल नहीं खाते।"
 msgid "Paste a posting to see which of its terms already appear in your resume."
 msgstr "यह देखने के लिए कि इसके कौन से शब्द आपके बायोडाटा में पहले से मौजूद हैं, एक पोस्टिंग पेस्ट करें।"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste job offer"
+msgstr ""
+
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source, Tags, Contact Name, Contact Email and Contact Phone."
 msgstr "पंक्तियाँ चिपकाएँ या .csv अपलोड करें। हम कंपनी, भूमिका, चरण, चरण तिथि, वेतन, स्रोत, टैग, संपर्क नाम, संपर्क ईमेल और संपर्क फोन जैसे कॉलम मैप करते हैं।"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the complete job offer here..."
+msgstr ""
+
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Paste the full job description here…"
 msgstr "पूरा नौकरी विवरण यहाँ पेस्ट करें…"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Paste the job offer or attach a PDF/image. CVMate will analyze it before building your tailored CV."
+msgstr ""
 
 #: src/features/ats-checker/tool.tsx
 msgid "Paste the posting to see which of its terms already appear in your resume."
@@ -4099,6 +4256,10 @@ msgstr "पैच को वापस ले लिया गया।"
 msgid "PDF snapshot attached to the application."
 msgstr "एप्लिकेशन के साथ पीडीएफ स्नैपशॉट संलग्न है।"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "PDF, JPEG, PNG, WebP or GIF, up to 10 MB."
+msgstr ""
+
 #: src/features/cover-letters/editor-dialog.tsx
 msgid "PDFs already attached to applications will remain available."
 msgstr "आवेदनों के साथ पहले से संलग्न पीडीएफ उपलब्ध रहेंगे।"
@@ -4118,9 +4279,14 @@ msgstr "विकलता"
 msgid "Persian"
 msgstr "फ़ारसी"
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Personal details"
+msgstr ""
+
 #: src/dialogs/resume/sections/reference.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Phone"
 msgstr "फ़ोन"
 
@@ -4213,6 +4379,10 @@ msgstr "प्राथमिकताएँ"
 msgid "Prepare a conservative patch that improves clarity without changing the story of my career."
 msgstr "एक संभला हुआ पैच तैयार करें जो स्पष्टता बढ़ाए, पर मेरे करियर की कहानी न बदले।"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Preparing CV..."
+msgstr ""
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Preparing your resume for printing..."
 msgstr "अपने रिज्यूमे को प्रिंटिंग के लिए तैयार करना..."
@@ -4258,6 +4428,10 @@ msgstr "प्राथमिक रंग"
 msgid "Print or export the form to a flat PDF before sending it."
 msgstr "भेजने से पहले फ़ॉर्म को प्रिंट करें या फ़्लैट PDF के रूप में एक्सपोर्ट करें।"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Professional summary"
+msgstr ""
+
 #: src/dialogs/resume/sections/skill.tsx
 msgid "Proficiency"
 msgstr "दक्षता"
@@ -4267,6 +4441,10 @@ msgstr "दक्षता"
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Profile"
 msgstr "प्रोफ़ाइल"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Profile saved."
+msgstr ""
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -4423,6 +4601,10 @@ msgstr "पेज {0} की {1} में से रीडिंग हो र�
 msgid "Reading the posting…"
 msgstr "पोस्टिंग पढ़ी जा रही है…"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Ready"
+msgstr ""
+
 #: src/features/resume/stylesheet/status.tsx
 msgid "Ready to activate"
 msgstr "सक्रिय करने के लिए तैयार"
@@ -4439,6 +4621,18 @@ msgstr "चेतावनी सहित सक्रिय करने क�
 #: src/features/cover-letters/editor.tsx
 msgid "Recipient"
 msgstr "प्राप्तकर्ता"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommendations could not be generated."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "recommended"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Recommended"
+msgstr ""
 
 #: src/components/level/combobox.tsx
 msgid "Rectangle"
@@ -4465,6 +4659,10 @@ msgstr "रेफ़रेंस"
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Referred by…, things to emphasize, etc."
 msgstr "किसके द्वारा रेफ़र किया गया…, ज़ोर देने योग्य बातें आदि।"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Regenerate tailored content"
+msgstr ""
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Register New Device"
@@ -4498,6 +4696,10 @@ msgstr "संपर्क हटाएँ"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Remove custom field"
 msgstr "कस्टम फ़ील्ड हटाएं"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Remove favorite"
+msgstr ""
 
 #: src/features/applications/components/file-attachment-field.tsx
 msgid "Remove file"
@@ -4599,6 +4801,7 @@ msgid "Resources"
 msgstr "संसाधन"
 
 #: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Restore"
 msgstr "पुनर्स्थापित करना"
 
@@ -4611,6 +4814,7 @@ msgid "Restore this version?"
 msgstr "क्या इस संस्करण को पुनर्स्थापित किया जा सकता है?"
 
 #: src/features/applications/components/application-form-sheet.tsx
+#: src/features/command-palette/pages/navigation.tsx
 #: src/features/resume/export/download-dialog.tsx
 #: src/routes/agent/-components/resume-pane.tsx
 #: src/routes/agent/$threadId.tsx
@@ -4653,8 +4857,6 @@ msgstr "अलग-अलग पेशों और पसंद के लिए
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
 #: src/routes/_home/-sections/statistics.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/resumes/index.tsx
 msgid "Resumes"
 msgstr "रेज़्यूमे"
 
@@ -4664,9 +4866,17 @@ msgstr "रेज़्यूमे"
 msgid "Retry"
 msgstr "पुन: प्रयास करें"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Retry AI recommendations"
+msgstr ""
+
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review edits"
 msgstr "संपादनों की समीक्षा करें"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Review the AI wording before opening the CV editor. Your edits are saved as final text and preserved when AI content is regenerated."
+msgstr ""
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Review the resume against a job description, and ask me before changing anything you're unsure about."
@@ -4752,6 +4962,7 @@ msgstr "वेतन सीमा"
 #. Passkey rename prompt confirm action in authentication settings
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Save"
 msgstr "बचाएँ"
 
@@ -4762,6 +4973,10 @@ msgstr "प्रदाता को सहेजें और परीक्�
 #: src/features/ats-checker/messages.ts
 msgid "Save an unprotected copy, with no password and no permissions restrictions."
 msgstr "बिना पासवर्ड और बिना अनुमति प्रतिबंधों के एक असुरक्षित प्रति सहेजें।"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Save and analyze"
+msgstr ""
 
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Save changes"
@@ -4817,6 +5032,10 @@ msgstr "सहेजा गया"
 msgid "Saving is taking longer than expected. Your changes are still open."
 msgstr "बचत में अपेक्षा से अधिक समय लग रहा है. आपके परिवर्तन अभी भी खुले हैं."
 
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Saving..."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Saving…"
 msgstr "बचत…"
@@ -4858,6 +5077,10 @@ msgstr "कवर लेटर खोजें"
 msgid "Search cover letters..."
 msgstr "कवर लेटर खोजें..."
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Search CVs..."
+msgstr ""
+
 #. Accessible label for icon picker search input
 #. Placeholder text in icon picker search input
 #: src/components/input/icon-picker.tsx
@@ -4867,10 +5090,6 @@ msgstr "किसी आइकॉन के लिए खोजें"
 #: src/features/command-palette/pages/resumes.tsx
 msgid "Search for…"
 msgstr "… खोजें"
-
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Search resumes..."
-msgstr "रिज्यूमे खोजें..."
 
 #: src/components/ui/combobox.tsx
 msgid "Search..."
@@ -4924,6 +5143,10 @@ msgstr "एक थ्रेड चुनें"
 msgid "Select all"
 msgstr "सभी चुनें"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Select all recommended"
+msgstr ""
+
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Select an agent model"
 msgstr "एक एजेंट मॉडल का चयन करें"
@@ -4937,8 +5160,13 @@ msgid "Select..."
 msgstr "चुनें..."
 
 #: src/features/applications/components/table-view.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "selected"
 msgstr "चुना गया"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Selecting..."
+msgstr ""
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Self-Host with Docker"
@@ -5554,6 +5782,14 @@ msgstr "मेरा रेज़्यूमे अनुकूलित कर
 msgid "Tailor this resume to a product manager job description, and emphasize roadmap ownership, stakeholder communication, and measurable launch outcomes."
 msgstr "इस रेज़्यूमे को किसी प्रोडक्ट मैनेजर के नौकरी विवरण के हिसाब से ढालें, और रोडमैप की ज़िम्मेदारी, हितधारकों से संवाद तथा मापे जा सकने वाले लॉन्च परिणामों पर ज़ोर दें।"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content"
+msgstr ""
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Tailored CV content could not be generated."
+msgstr ""
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Tailoring failed."
 msgstr "अनुकूलन विफल रहा।"
@@ -5662,6 +5898,10 @@ msgstr "जिस ऐप्लिकेशन ने आपको यहाँ �
 msgid "The checks above are mechanical. This asks a language model what a reader would think of your bullets, and suggests rewrites. It produces no score."
 msgstr "ऊपर दी गई जांचें यांत्रिक हैं। यह एक भाषा मॉडल से पूछता है कि कोई पाठक आपके बुलेट के बारे में क्या सोचेगा, और दोबारा लिखने के सुझाव देता है। यह कोई स्कोर नहीं देता।"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The CV could not be opened in the editor."
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "The deep check could not finish. Please try again."
 msgstr "गहन जांच पूरी नहीं हो सकी। कृपया फिर कोशिश करें।"
@@ -5670,6 +5910,10 @@ msgstr "गहन जांच पूरी नहीं हो सकी। क
 #: src/dialogs/resume/import.tsx
 msgid "The imported file could not be parsed into a valid resume."
 msgstr "आयातित फ़ाइल को एक मान्य रिज़्यूमे में पार्स नहीं किया जा सका।"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The job offer could not be analyzed."
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "The order the text is stored in disagrees badly with the order it reads in."
@@ -5766,6 +6010,10 @@ msgstr "कोई सारांश पैराग्राफ नहीं �
 #: src/features/ats-checker/messages.ts
 msgid "There was not enough information to run this check."
 msgstr "यह जांच चलाने के लिए पर्याप्त जानकारी नहीं थी।"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "These are required or preferred job requirements for which CVMate found no direct evidence in your Master Profile."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "These checks run as you type and never leave your browser. They test whether software can read your resume, not how well it is written."
@@ -6046,8 +6294,6 @@ msgstr "थ्रेड को आर्काइव कर दिया गय�
 msgid "Thread deleted."
 msgstr "थ्रेड डिलीट कर दिया गया।"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
 #: src/routes/agent/$threadId.tsx
 msgid "Threads"
@@ -6135,6 +6381,14 @@ msgstr "अपने रेज़्यूमे के दृश्य और �
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Translations"
 msgstr "अनुवाद"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash"
+msgstr ""
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Trash is empty"
+msgstr ""
 
 #: src/components/layout/error-screen.tsx
 msgid "Try again"
@@ -6629,6 +6883,7 @@ msgstr "वेब खोज"
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/profile.tsx
 msgid "Website"
 msgstr "वेबसाइट"
 
@@ -6847,6 +7102,10 @@ msgstr "आपका ईमेल पता प्रदाता के पा�
 msgid "Your file stays here"
 msgstr "आपकी फ़ाइल यहीं रहती है"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Your final text could not be saved."
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Your headings look the same as your body text."
 msgstr "आपके शीर्षक आपके मुख्य टेक्स्ट जैसे ही दिखते हैं।"
@@ -6867,6 +7126,14 @@ msgstr "आपकी पंक्तियाँ बहुत कसकर भ�
 #: src/features/ats-checker/messages.ts
 msgid "Your margins are very narrow."
 msgstr "आपके मार्जिन बहुत संकीर्ण हैं।"
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile has not been created yet. Saving these details will create it automatically."
+msgstr ""
+
+#: src/routes/dashboard/cvmate/profile.tsx
+msgid "Your Master Profile is the permanent source of facts used by CVMate when creating tailored resumes."
+msgstr ""
 
 #: src/libs/resume/ats.ts
 msgid "Your page margins are very narrow."
@@ -6973,4 +7240,3 @@ msgstr "ज़ूम आउट"
 #: src/libs/locale.ts
 msgid "Zulu"
 msgstr "ज़ुलु"
-
