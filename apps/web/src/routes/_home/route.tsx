@@ -1,15 +1,11 @@
 import { Trans } from "@lingui/react/macro";
-import { createFileRoute, Outlet, useMatch } from "@tanstack/react-router";
-import { Header } from "./-sections/header";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_home")({
 	component: RouteComponent,
 });
 
 function RouteComponent() {
-	const rootMatch = useMatch({ from: "/_home/", shouldThrow: false });
-	const rootMode = rootMatch?.loaderData?.root.status;
-	const showMarketingHeader = !rootMode || rootMode === "disabled";
 	return (
 		<>
 			<a
@@ -19,7 +15,6 @@ function RouteComponent() {
 				<Trans>Skip to main content</Trans>
 			</a>
 
-			{showMarketingHeader && <Header />}
 			<Outlet />
 		</>
 	);

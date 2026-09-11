@@ -1,14 +1,16 @@
 import { Trans } from "@lingui/react/macro";
-import { HouseIcon, MagnifyingGlassIcon, WarningIcon } from "@phosphor-icons/react";
+import { HouseIcon, MagnifyingGlassIcon, ReadCvLogoIcon, WarningIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { Alert, AlertDescription, AlertTitle } from "@reactive-resume/ui/components/alert";
-import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
 import { buttonVariants } from "@reactive-resume/ui/components/button";
 
 export function NotFoundScreen() {
 	return (
 		<div className="mx-auto flex h-svh max-w-md flex-col items-center justify-center gap-y-4">
-			<BrandIcon variant="logo" className="size-12" />
+			<div className="flex items-center gap-2">
+				<ReadCvLogoIcon className="size-10" />
+				<span className="font-semibold text-xl tracking-tight">CVMate</span>
+			</div>
 
 			<Alert>
 				<WarningIcon />

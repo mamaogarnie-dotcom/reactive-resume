@@ -1,30 +1,30 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="pl" class="dark">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#09090B" />
-		<meta name="application-name" content="Reactive Resume" />
+		<meta name="application-name" content="CVMate" />
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-title" content="Reactive Resume" />
+		<meta name="apple-mobile-web-app-title" content="CVMate" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<!-- Keep under ~120 characters so Google's mobile SERP snippet is not truncated at 3 lines. -->
-		<meta name="description" content="Free, open-source resume builder. Create, update, and share a professional resume in minutes — no ads, no paywall.">
+		<meta name="description" content="Twórz profesjonalne CV dopasowane do konkretnej oferty pracy na podstawie swojego profilu zawodowego.">
 
 		<link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="128x128" />
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="256x256 any" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" type="image/png" sizes="180x180 any" />
 		<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials" />
 
-		<title>Reactive Resume — A free and open-source resume builder</title>
+		<title>CVMate — CV dopasowane do oferty pracy</title>
 	</head>
 	<body>
 		<!-- Keep #app empty: main.tsx only mounts React when rootElement has no children. -->
 		<div id="app"></div>
 		<!-- Branded first paint; hidden once React populates #app (higher-specificity rule below). -->
 		<div id="initial-loader">
-			<img src="/icon/dark.svg" width="48" height="48" alt="Reactive Resume" />
+			<div class="initial-loader__brand" aria-label="CVMate">CVMate</div>
 			<div class="initial-loader__spinner"></div>
 			<span class="initial-loader__sr-only">Loading</span>
 		</div>
@@ -41,7 +41,13 @@
 				background: #09090b;
 			}
 			#app:not(:empty) ~ #initial-loader { display: none; }
-			.initial-loader__spinner {
+.initial-loader__brand {
+font-size: 20px;
+font-weight: 600;
+letter-spacing: -0.025em;
+color: #fafafa;
+}
+.initial-loader__spinner {
 				width: 24px;
 				height: 24px;
 				border: 2px solid rgba(250, 250, 250, 0.2);

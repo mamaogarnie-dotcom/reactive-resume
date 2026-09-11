@@ -8,9 +8,8 @@ import { Spotlight } from "@/components/animation/spotlight";
 import { AiReviewCard } from "@/features/ats-checker/ai-review/ai-review-card";
 import { LockedAiCard } from "@/features/ats-checker/ai-review/locked-card";
 import { ParsePreview } from "@/features/ats-checker/parse-preview";
-import { Footer } from "./-sections/footer";
 
-const PAGE_TITLE = "ATS Checker - Reactive Resume";
+const PAGE_TITLE = "ATS Checker - CVMate";
 const PAGE_DESCRIPTION =
 	"Check whether software can read your resume PDF. Runs entirely in your browser, so your file is never uploaded.";
 
@@ -50,9 +49,7 @@ function RouteComponent() {
 	const { session } = Route.useRouteContext();
 
 	return (
-		// The marketing header is `fixed` and 65px tall. The homepage clears it with a full-height
-		// hero; this page has to make the room itself or its first row sits underneath.
-		<main id="main-content" className="relative pt-20 lg:pt-24">
+		<main id="main-content" className="relative py-8 lg:py-12">
 			<div className="container mx-auto px-4 sm:px-6 lg:px-12">
 				<div className="border-border border-x">
 					<Header />
@@ -76,8 +73,6 @@ function RouteComponent() {
 							<HonestyPanel />
 						</aside>
 					</div>
-
-					<Footer />
 				</div>
 			</div>
 		</main>

@@ -1,11 +1,10 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { CircleNotchIcon, DownloadSimpleIcon } from "@phosphor-icons/react";
+import { CircleNotchIcon, DownloadSimpleIcon, ReadCvLogoIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
 import { Button } from "@reactive-resume/ui/components/button";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { useResumeExport } from "@/features/resume/export/use-resume-export";
@@ -74,7 +73,7 @@ export function PublicResumePage({ resume, username, slug, flags, isRoot = false
 							href={isRoot ? "/dashboard" : "/"}
 							className="flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground"
 						>
-							<BrandIcon variant="icon" className="size-5" />
+							<ReadCvLogoIcon className="size-5" aria-hidden="true" />
 							<Trans>Build your own resume</Trans>
 						</a>
 					</footer>
