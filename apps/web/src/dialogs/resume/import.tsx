@@ -312,11 +312,8 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 					<DownloadSimpleIcon />
 					<Trans>Import an existing resume</Trans>
 				</DialogTitle>
-				<DialogDescription>
-					<Trans>
-						Continue where you left off by importing a resume you built in Reactive Resume or another resume builder.
-						Supported formats are PDF, Microsoft Word, and JSON files from Reactive Resume or JSON Resume.
-					</Trans>
+				<DialogDescription className="sr-only">
+					<Trans>Import an existing resume</Trans>
 				</DialogDescription>
 			</DialogHeader>
 

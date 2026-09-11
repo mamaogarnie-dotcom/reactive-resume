@@ -1,10 +1,9 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { BookOpenIcon, KeyIcon, LinkSimpleIcon, PlusIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import { KeyIcon, PlusIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, m } from "motion/react";
 import { Button } from "@reactive-resume/ui/components/button";
-import { Separator } from "@reactive-resume/ui/components/separator";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { useDialogStore } from "@/dialogs/store";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -73,38 +72,6 @@ export function ApiKeysSettingsPage() {
 			transition={{ duration: 0.25, ease: "easeOut" }}
 			className="grid max-w-xl gap-6 will-change-[transform,opacity]"
 		>
-			<div className="flex items-start gap-4 rounded-md border bg-popover p-6">
-				<div className="rounded-md bg-primary/10 p-2.5">
-					<BookOpenIcon className="text-primary" size={24} />
-				</div>
-
-				<div className="flex-1 space-y-2">
-					<h3 className="font-semibold">
-						<Trans>How do I use the API?</Trans>
-					</h3>
-
-					<p className="text-muted-foreground leading-relaxed">
-						<Trans>
-							The API documentation shows how to connect Reactive Resume to your own applications. It covers the
-							endpoints, the request format, and authentication.
-						</Trans>
-					</p>
-
-					<Button
-						variant="link"
-						nativeButton={false}
-						render={
-							<a href="https://docs.rxresu.me/api-reference" target="_blank" rel="noopener noreferrer">
-								<LinkSimpleIcon />
-								<Trans>API Reference</Trans>
-							</a>
-						}
-					/>
-				</div>
-			</div>
-
-			<Separator />
-
 			<div>
 				<Button
 					variant="outline"

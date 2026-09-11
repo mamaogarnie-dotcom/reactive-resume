@@ -85,11 +85,8 @@ const resolutionError: SemanticCssDiagnostic = {
 
 const guideName = /read the applying custom styles guide.*opens in new tab/i;
 
-const expectGuideLink = (root: HTMLElement) => {
-	const link = within(root).getByRole("link", { name: guideName });
-	expect(link).toHaveAttribute("href", "https://docs.rxresu.me/applying-custom-styles");
-	expect(link).toHaveAttribute("target", "_blank");
-	expect(link).toHaveAttribute("rel", "noopener noreferrer");
+const expectNoUpstreamGuideLink = (root: HTMLElement) => {
+	expect(within(root).queryByRole("link", { name: guideName })).not.toBeInTheDocument();
 };
 
 beforeAll(() => {
@@ -338,7 +335,7 @@ describe("StylesheetEditorShell", () => {
 			</I18nProvider>,
 		);
 
-		expectGuideLink(container);
+		expectNoUpstreamGuideLink(container);
 	});
 
 	it("has no apply or save action for an already-semantic stylesheet", async () => {
@@ -478,7 +475,7 @@ describe("StylesheetEditorShell", () => {
 		expect(within(sheet).getByRole("button", { name: "Activate Semantic CSS" })).toBeInTheDocument();
 		expect(within(sheet).getByRole("toolbar", { name: "Stylesheet editor" })).toBeInTheDocument();
 		await within(sheet).findByText("Ready to activate");
-		expectGuideLink(sheet);
+		expectNoUpstreamGuideLink(sheet);
 		expect(document.querySelectorAll(".cm-editor")).toHaveLength(1);
 		media.mobile = false;
 	});

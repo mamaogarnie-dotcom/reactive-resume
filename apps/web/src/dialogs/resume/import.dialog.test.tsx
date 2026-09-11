@@ -199,7 +199,7 @@ describe("ImportResumeDialog — Set up a provider", () => {
 		expect(await screen.findByText("Leave to set up an AI provider?")).toBeInTheDocument();
 		expect(routerNavigate).not.toHaveBeenCalled();
 		expect(navigate).not.toHaveBeenCalled();
-		expect(screen.getByText("Import an existing resume")).toBeInTheDocument();
+		expect(screen.getByRole("heading", { name: "Import an existing resume", hidden: true })).toBeInTheDocument();
 	});
 
 	it("stays put and keeps the selected file when the user cancels", async () => {

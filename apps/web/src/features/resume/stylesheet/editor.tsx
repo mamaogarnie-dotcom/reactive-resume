@@ -18,7 +18,6 @@ import {
 } from "@codemirror/view";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { BookOpenIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { convertLegacyStyleRules } from "@reactive-resume/pdf/semantic-legacy";
@@ -543,25 +542,6 @@ function StylesheetEditorShell({ readOnly = false }: StylesheetEditorShellProps)
 				}}
 				onFocusToggle={toggleFocus}
 			/>
-
-			<p className="flex items-center gap-1.5 text-muted-foreground text-xs">
-				<BookOpenIcon aria-hidden="true" className="shrink-0" />
-				<span>
-					<Trans>Not sure what to write?</Trans>{" "}
-					<a
-						className="text-primary underline underline-offset-4"
-						href="https://docs.rxresu.me/applying-custom-styles"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						<Trans>Read the Applying Custom Styles guide.</Trans>
-						<span className="sr-only">
-							{" "}
-							(<Trans>opens in new tab</Trans>)
-						</span>
-					</a>
-				</span>
-			</p>
 
 			<div className={focusOpen ? (isMobile ? "h-[55svh]" : "h-[calc(100svh-14rem)]") : "h-72"}>{editor}</div>
 
