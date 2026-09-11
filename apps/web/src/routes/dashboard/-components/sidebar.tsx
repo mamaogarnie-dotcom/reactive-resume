@@ -14,9 +14,7 @@ import {
 	UserGearIcon,
 } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
-import { AnimatePresence, m } from "motion/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@reactive-resume/ui/components/avatar";
-import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
 import { Kbd } from "@reactive-resume/ui/components/kbd";
 import {
 	Sidebar,
@@ -31,10 +29,8 @@ import {
 	SidebarMenuItem,
 	SidebarRail,
 	SidebarSeparator,
-	useSidebarState,
 } from "@reactive-resume/ui/components/sidebar";
 import { getInitials } from "@reactive-resume/utils/string";
-import { Copyright } from "@/components/ui/copyright";
 import { useCommandPaletteStore } from "@/features/command-palette/store";
 import { UserDropdownMenu } from "@/features/user/dropdown-menu";
 
@@ -149,7 +145,6 @@ function SidebarSearchButton() {
 
 export function DashboardSidebar() {
 	const { i18n } = useLingui();
-	const { state } = useSidebarState();
 
 	return (
 		<Sidebar variant="floating" collapsible="icon">
@@ -157,11 +152,13 @@ export function DashboardSidebar() {
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton
-							className="h-auto justify-center"
+							className="h-auto"
 							render={
-								<Link to="/">
-									<BrandIcon variant="icon" className="size-6" />
-									<h1 className="sr-only">Reactive Resume</h1>
+								<Link to="/dashboard/resumes" aria-label="CVMate">
+									<ReadCvLogoIcon className="size-6 shrink-0" />
+									<span className="font-semibold tracking-tight transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
+										CVMate
+									</span>
 								</Link>
 							}
 						/>
@@ -217,21 +214,6 @@ export function DashboardSidebar() {
 						</UserDropdownMenu>
 					</SidebarMenuItem>
 				</SidebarMenu>
-
-				<AnimatePresence>
-					{state === "expanded" && (
-						<m.div
-							key="copyright"
-							className="will-change-[transform,opacity]"
-							initial={{ y: 12, opacity: 0 }}
-							animate={{ y: 0, opacity: 1 }}
-							exit={{ y: 12, opacity: 0 }}
-							transition={{ duration: 0.2, ease: "easeOut" }}
-						>
-							<Copyright className="wrap-break-word shrink-0 whitespace-normal p-2" />
-						</m.div>
-					)}
-				</AnimatePresence>
 			</SidebarFooter>
 
 			<SidebarRail />
