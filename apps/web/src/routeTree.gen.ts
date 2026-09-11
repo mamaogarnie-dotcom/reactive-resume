@@ -35,6 +35,7 @@ import { Route as DashboardCoverLettersRouteImport } from "./routes/dashboard/co
 import { Route as TemplatesSplatRouteImport } from "./routes/templates/$";
 import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
 import { Route as DashboardApplicationsIndexRouteImport } from "./routes/dashboard/applications/index";
+import { Route as DashboardCvmateCreateRouteImport } from "./routes/dashboard/cvmate/create";
 import { Route as DashboardCvmateProfileRouteImport } from "./routes/dashboard/cvmate/profile";
 import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/resumes/index";
 import { Route as DashboardSettingsAccountRouteImport } from "./routes/dashboard/settings/account";
@@ -175,6 +176,11 @@ const DashboardApplicationsIndexRoute =
     path: "/applications/",
     getParentRoute: () => DashboardRouteRoute,
   } as any);
+const DashboardCvmateCreateRoute = DashboardCvmateCreateRouteImport.update({
+  id: "/cvmate/create",
+  path: "/cvmate/create",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
 const DashboardCvmateProfileRoute = DashboardCvmateProfileRouteImport.update({
   id: "/cvmate/profile",
   path: "/cvmate/profile",
@@ -253,6 +259,7 @@ export interface FileRoutesByFullPath {
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
+  "/dashboard/cvmate/create": typeof DashboardCvmateCreateRoute;
   "/dashboard/cvmate/profile": typeof DashboardCvmateProfileRoute;
   "/dashboard/settings/account": typeof DashboardSettingsAccountRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   "/auth": typeof AuthIndexRoute;
   "/dashboard": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
+  "/dashboard/cvmate/create": typeof DashboardCvmateCreateRoute;
   "/dashboard/cvmate/profile": typeof DashboardCvmateProfileRoute;
   "/dashboard/settings/account": typeof DashboardSettingsAccountRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
@@ -323,6 +331,7 @@ export interface FileRoutesById {
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
+  "/dashboard/cvmate/create": typeof DashboardCvmateCreateRoute;
   "/dashboard/cvmate/profile": typeof DashboardCvmateProfileRoute;
   "/dashboard/settings/account": typeof DashboardSettingsAccountRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
+    | "/dashboard/cvmate/create"
     | "/dashboard/cvmate/profile"
     | "/dashboard/settings/account"
     | "/dashboard/settings/api-keys"
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | "/auth"
     | "/dashboard"
     | "/dashboard/settings/integrations"
+    | "/dashboard/cvmate/create"
     | "/dashboard/cvmate/profile"
     | "/dashboard/settings/account"
     | "/dashboard/settings/api-keys"
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
+    | "/dashboard/cvmate/create"
     | "/dashboard/cvmate/profile"
     | "/dashboard/settings/account"
     | "/dashboard/settings/api-keys"
@@ -636,6 +648,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardApplicationsIndexRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    "/dashboard/cvmate/create": {
+      id: "/dashboard/cvmate/create";
+      path: "/cvmate/create";
+      fullPath: "/dashboard/cvmate/create";
+      preLoaderRoute: typeof DashboardCvmateCreateRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
     "/dashboard/cvmate/profile": {
       id: "/dashboard/cvmate/profile";
       path: "/cvmate/profile";
@@ -766,6 +785,7 @@ interface DashboardRouteRouteChildren {
   DashboardCoverLettersRoute: typeof DashboardCoverLettersRoute;
   DashboardIndexRoute: typeof DashboardIndexRoute;
   DashboardSettingsIntegrationsRouteRoute: typeof DashboardSettingsIntegrationsRouteRoute;
+  DashboardCvmateCreateRoute: typeof DashboardCvmateCreateRoute;
   DashboardCvmateProfileRoute: typeof DashboardCvmateProfileRoute;
   DashboardSettingsAccountRoute: typeof DashboardSettingsAccountRoute;
   DashboardSettingsApiKeysRoute: typeof DashboardSettingsApiKeysRoute;
@@ -782,6 +802,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardSettingsIntegrationsRouteRoute:
     DashboardSettingsIntegrationsRouteRoute,
+  DashboardCvmateCreateRoute: DashboardCvmateCreateRoute,
   DashboardCvmateProfileRoute: DashboardCvmateProfileRoute,
   DashboardSettingsAccountRoute: DashboardSettingsAccountRoute,
   DashboardSettingsApiKeysRoute: DashboardSettingsApiKeysRoute,
