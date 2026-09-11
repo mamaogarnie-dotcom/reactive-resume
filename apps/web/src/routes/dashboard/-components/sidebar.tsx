@@ -64,7 +64,7 @@ const appSidebarItems = [
 	},
 	{
 		icon: <ReadCvLogoIcon />,
-		label: msg`Resumes`,
+		label: msg`My CV`,
 		href: "/dashboard/resumes",
 	},
 	{

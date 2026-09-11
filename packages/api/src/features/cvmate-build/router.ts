@@ -1,4 +1,5 @@
 import { crudRouter } from "./crud";
+import { documentsRouter } from "./documents-route";
 import { recommendationsRouter } from "./recommendations-route";
 import { tailoredContentRouter } from "./tailored-content-route";
 
@@ -20,5 +21,7 @@ export const cvmateBuildRouter = {
 	deleteGap: crudRouter.deleteGap,
 	listGeneratedContent: crudRouter.listGeneratedContent,
 	updateGeneratedContentFinalText: crudRouter.updateGeneratedContentFinalText,
+	listDocuments: documentsRouter.list,
+	updateDocument: documentsRouter.update,
 	materialize: crudRouter.materialize,
 };
