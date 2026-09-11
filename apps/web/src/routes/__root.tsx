@@ -13,14 +13,13 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
-import { createRootRouteWithContext, HeadContent, Outlet, useRouterState } from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import { useEffect } from "react";
 import { Toaster } from "@reactive-resume/ui/components/toast";
 import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
 import { BreakpointIndicator } from "@/components/layout/breakpoint-indicator";
-import { DonationToast } from "@/components/ui/donation-toast";
 import { DialogManager } from "@/dialogs/manager";
 import { CommandPalette } from "@/features/command-palette";
 import { ThemeProvider } from "@/features/theme/provider";
@@ -40,12 +39,11 @@ type RouterContext = {
 	flags: FeatureFlags;
 };
 
-const appName = "Reactive Resume";
-const tagline = "A free and open-source resume builder";
+const appName = "CVMate";
+const tagline = "CV dopasowane do oferty pracy";
 const title = `${appName} — ${tagline}`;
-// Keep under ~120 characters so Google's mobile SERP snippet is not truncated at 3 lines.
 const description =
-	"Free, open-source resume builder. Create, update, and share your resume, with no ads and no paywall.";
+	"Twórz profesjonalne CV dopasowane do konkretnej oferty pracy na podstawie swojego profilu zawodowego.";
 const iconContextValue: IconProps = { size: 16, weight: "regular" };
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -69,10 +67,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 				{ name: "viewport", content: "width=device-width, initial-scale=1" },
 				// Meta Tags
 				{ name: "theme-color", content: "#09090B" },
-				{ name: "application-name", content: "Reactive Resume" },
+				{ name: "application-name", content: appName },
 				{ name: "mobile-web-app-capable", content: "yes" },
 				{ name: "apple-mobile-web-app-capable", content: "yes" },
-				{ name: "apple-mobile-web-app-title", content: "Reactive Resume" },
+				{ name: "apple-mobile-web-app-title", content: appName },
 				{ name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
 				// Twitter Tags — X only reads these as `name`, not `property`
 				{ name: "twitter:image", content: `${appUrl}/opengraph/banner.jpg` },
@@ -108,9 +106,6 @@ function RootComponent() {
 	const { theme, locale, queryClient } = Route.useRouteContext();
 	const dir = isRTL(locale) ? "rtl" : "ltr";
 
-	// Suppress the app-wide donation toast inside the builder so it doesn't cover the right-sidebar controls.
-	const isBuilder = useRouterState({ select: (s) => s.location.pathname.startsWith("/builder") });
-
 	useEffect(() => {
 		document.documentElement.lang = locale;
 		document.documentElement.dir = dir;
@@ -133,8 +128,6 @@ function RootComponent() {
 												<ConfirmDialogProvider>
 													<PromptDialogProvider>
 														<Outlet />
-
-														{!isBuilder && <DonationToast />}
 														<DialogManager />
 														<CommandPalette />
 														<Toaster />
