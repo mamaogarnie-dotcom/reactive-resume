@@ -142,7 +142,7 @@ const getAuthConfig = () => {
 	}
 
 	return betterAuth({
-		appName: "Reactive Resume",
+		appName: "CVMate",
 		baseURL: authBaseUrl,
 		secret: env.AUTH_SECRET,
 
@@ -294,7 +294,7 @@ const getAuthConfig = () => {
 			admin(),
 			passkey(),
 			genericOAuth({ config: authConfigs }),
-			twoFactor({ issuer: "Reactive Resume" }),
+			twoFactor({ issuer: "CVMate" }),
 			apiKey({
 				enableSessionForAPIKeys: true,
 				rateLimit: {

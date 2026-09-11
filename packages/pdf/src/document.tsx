@@ -79,7 +79,7 @@ export const ResumeDocument = ({
 				<Document
 					pageMode="useNone"
 					creationDate={creationDate}
-					producer="Reactive Resume"
+					producer="CVMate"
 					title={resumeData.basics.name}
 					author={resumeData.basics.name}
 					creator={resumeData.basics.name}
