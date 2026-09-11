@@ -49,8 +49,6 @@ const iconContextValue: IconProps = { size: 16, weight: "regular" };
 export const Route = createRootRouteWithContext<RouterContext>()({
 	component: RootComponent,
 	head: () => {
-		const appUrl = typeof window !== "undefined" ? window.location.origin : "https://rxresu.me";
-
 		return {
 			links: [
 				// Icons
@@ -73,18 +71,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 				{ name: "apple-mobile-web-app-title", content: appName },
 				{ name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
 				// Twitter Tags — X only reads these as `name`, not `property`
-				{ name: "twitter:image", content: `${appUrl}/opengraph/banner.jpg` },
 				{ name: "twitter:card", content: "summary_large_image" },
-				{ name: "twitter:url", content: appUrl },
 				{ name: "twitter:title", content: title },
 				{ name: "twitter:description", content: description },
 				// OpenGraph Tags
 				{ property: "og:type", content: "website" },
-				{ property: "og:image", content: `${appUrl}/opengraph/banner.jpg` },
 				{ property: "og:site_name", content: appName },
 				{ property: "og:title", content: title },
 				{ property: "og:description", content: description },
-				{ property: "og:url", content: appUrl },
 			],
 		};
 	},

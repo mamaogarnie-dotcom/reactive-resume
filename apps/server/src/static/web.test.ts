@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	env: { APP_URL: "https://rxresu.me", ROOT_RESUME_ID: undefined as string | undefined },
+	env: { APP_URL: "https://app.example.com", ROOT_RESUME_ID: undefined as string | undefined },
 	serveStatic: vi.fn((_options?: unknown) => vi.fn()),
 	getPublicResumeSocialMeta: vi.fn(),
 }));
@@ -50,40 +50,20 @@ describe("web app fallback classification", () => {
 		mocks.getPublicResumeSocialMeta.mockResolvedValue(null);
 	});
 
-	it("serves the shell for the root app route without noindex", async () => {
-		const response = await handleWebApp(new Request("https://example.com/"));
-
-		expect(response.status).toBe(200);
-		expect(response.headers.get("Content-Type")).toBe("text/html; charset=UTF-8");
-		expect(response.headers.get("X-Robots-Tag")).toBeNull();
-		expect(await response.text()).toBe("<html>app</html>");
-	});
-
-	it("injects canonical metadata and structured data into tracking-parameter root requests only", async () => {
-		vi.mocked(fs.readFile).mockResolvedValue(`
-			<!doctype html>
-			<html>
-				<head>
-					<title>Reactive Resume — A free and open-source resume builder</title>
-					<meta
-						name="description"
-						content="Reactive Resume is a free and open-source resume builder that makes it easy to create, update, and share your resume."
-					>
-				</head>
-				<body><div id="app"></div></body>
-			</html>
-		`);
+	it("serves the root app entry as noindex without injecting marketing SEO", async () => {
+		vi.mocked(fs.readFile).mockResolvedValue(
+			'<html><head><title>CVMate</title><meta name="description" content="CVMate app."></head><body></body></html>',
+		);
 
 		const response = await handleWebApp(new Request("http://server.internal/?utm_source=search"));
 		const html = await response.text();
 
-		expect(html).toContain('<link rel="canonical" href="https://rxresu.me/">');
-		expect(html).toContain('<link rel="preload" href="/videos/timelapse-v1.webp" as="image" fetchpriority="high">');
-		expect(html).toContain('<meta property="og:url" content="https://rxresu.me/">');
-		expect(html).toContain('<meta property="og:image" content="https://rxresu.me/opengraph/banner.jpg">');
-		expect(html).toContain('id="reactive-resume-structured-data"');
-		expect(html).toContain('"@type":["SoftwareApplication","WebApplication"]');
-		expect(html).toContain('"url":"https://rxresu.me/"');
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Type")).toBe("text/html; charset=UTF-8");
+		expect(response.headers.get("X-Robots-Tag")).toBe("noindex, follow");
+		expect(html).toContain("<title>CVMate</title>");
+		expect(html).not.toContain('rel="canonical"');
+		expect(html).not.toContain("application/ld+json");
 		expect(html).not.toContain("utm_source");
 
 		const dashboardResponse = await handleWebApp(new Request("https://example.com/dashboard"));
@@ -91,7 +71,7 @@ describe("web app fallback classification", () => {
 	});
 
 	describe("the ATS checker page", () => {
-		const shell = `<html><head><title>Reactive Resume — A free and open-source resume builder</title><meta name="description" content="Marketing copy."></head><body></body></html>`;
+		const shell = `<html><head><title>CVMate — A free and open-source resume builder</title><meta name="description" content="Marketing copy."></head><body></body></html>`;
 
 		it("serves an indexable shell rather than a 404", async () => {
 			vi.mocked(fs.readFile).mockResolvedValue(shell);
@@ -108,10 +88,10 @@ describe("web app fallback classification", () => {
 
 			const html = await (await handleWebApp(new Request("https://example.com/ats-checker"))).text();
 
-			expect(html).toContain("<title>ATS Checker - Reactive Resume</title>");
-			expect(html).toContain('<link rel="canonical" href="https://rxresu.me/ats-checker">');
-			expect(html).toContain('<meta property="og:url" content="https://rxresu.me/ats-checker">');
-			expect(html).toContain('<meta property="og:image" content="https://rxresu.me/opengraph/ats-checker.png">');
+			expect(html).toContain("<title>ATS Checker - CVMate</title>");
+			expect(html).toContain('<link rel="canonical" href="https://app.example.com/ats-checker">');
+			expect(html).toContain('<meta property="og:url" content="https://app.example.com/ats-checker">');
+			expect(html).toContain('<meta property="og:image" content="https://app.example.com/opengraph/ats-checker.png">');
 			expect(html).toContain('id="ats-checker-structured-data"');
 			expect(html).not.toContain("Marketing copy.");
 		});
@@ -132,7 +112,7 @@ describe("web app fallback classification", () => {
 	});
 
 	describe("public resume social cards", () => {
-		const shell = `<html><head><title>Reactive Resume — A free and open-source resume builder</title><meta name="description" content="Marketing copy."></head><body></body></html>`;
+		const shell = `<html><head><title>CVMate — A free and open-source resume builder</title><meta name="description" content="Marketing copy."></head><body></body></html>`;
 
 		it("injects resume-specific social metadata and replaces the shell title", async () => {
 			vi.mocked(fs.readFile).mockResolvedValue(shell);
@@ -146,15 +126,15 @@ describe("web app fallback classification", () => {
 			const html = await (await handleWebApp(new Request("https://example.com/jane/resume"))).text();
 
 			expect(mocks.getPublicResumeSocialMeta).toHaveBeenCalledWith({ username: "jane", slug: "resume" });
-			expect(html).toContain("<title>Jane Doe - Reactive Resume</title>");
+			expect(html).toContain("<title>Jane Doe - CVMate</title>");
 			expect(html).toContain('<meta name="description" content="Builds resilient distributed systems.">');
 			expect(html).not.toContain("Marketing copy.");
-			expect(html).toContain('<link rel="canonical" href="https://rxresu.me/jane/resume">');
+			expect(html).toContain('<link rel="canonical" href="https://app.example.com/jane/resume">');
 			expect(html).toContain('<meta property="og:type" content="profile">');
 			expect(html).toContain('<meta property="og:title" content="Jane Doe — Staff Engineer">');
-			expect(html).toContain('<meta property="og:image" content="https://rxresu.me/opengraph/banner.jpg">');
+			expect(html).toContain('<meta property="og:image" content="https://app.example.com/opengraph/banner.jpg">');
 			expect(html).toContain('<meta name="twitter:card" content="summary_large_image">');
-			expect(html).toContain('<meta name="twitter:image" content="https://rxresu.me/opengraph/banner.jpg">');
+			expect(html).toContain('<meta name="twitter:image" content="https://app.example.com/opengraph/banner.jpg">');
 		});
 
 		it("escapes user-authored values so resume content cannot break out of the attribute", async () => {
@@ -310,7 +290,7 @@ describe("configured root shell", () => {
 				}),
 			)
 		).text();
-		expect(html).toContain('<link rel="canonical" href="https://rxresu.me/" data-root-resume-shell>');
+		expect(html).toContain('<link rel="canonical" href="https://app.example.com/" data-root-resume-shell>');
 		expect(html).toContain('<meta name="robots" content="noindex, follow" data-root-resume-shell>');
 		expect(html).not.toMatch(/private-or-missing-id|attacker|evil|Marketing|application\/ld\+json|timelapse/);
 	});

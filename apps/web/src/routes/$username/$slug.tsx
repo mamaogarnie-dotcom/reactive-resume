@@ -29,7 +29,15 @@ export const Route = createFileRoute("/$username/$slug")({
 
 		const social = getResumeSocialMeta(resume.data, resume.name || "Resume");
 
-		const base = getCanonicalRootUrl(typeof window === "undefined" ? undefined : window.location.origin);
+		const origin = typeof window === "undefined" ? null : window.location.origin;
+
+		if (!origin) {
+			return {
+				meta: [{ title: `${social.name} - CVMate` }, createNoindexFollowMeta()],
+			};
+		}
+
+		const base = getCanonicalRootUrl(origin);
 		const canonicalUrl = `${base}${params.username}/${params.slug}`;
 		const imageUrl = `${base}opengraph/banner.jpg`;
 

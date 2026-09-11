@@ -1,19 +1,10 @@
 import { describe, expect, it } from "vitest";
-import {
-	createNoindexFollowMeta,
-	createRootStructuredDataScript,
-	getCanonicalRootUrl,
-	getRootStructuredData,
-} from "./seo";
+import { createNoindexFollowMeta, createResumeSocialMeta, getCanonicalRootUrl } from "./seo";
 
 describe("getCanonicalRootUrl", () => {
-	it("uses the production root when no origin is available", () => {
-		expect(getCanonicalRootUrl()).toBe("https://rxresu.me/");
-	});
-
-	it("normalizes an app origin to the root URL", () => {
+	it("normalizes an explicit app origin to the root URL", () => {
 		expect(getCanonicalRootUrl("http://localhost:3000")).toBe("http://localhost:3000/");
-		expect(getCanonicalRootUrl("https://rxresu.me/")).toBe("https://rxresu.me/");
+		expect(getCanonicalRootUrl("https://app.example.com/path?query=1#hash")).toBe("https://app.example.com/");
 	});
 });
 
@@ -23,53 +14,22 @@ describe("createNoindexFollowMeta", () => {
 	});
 });
 
-describe("createRootStructuredDataScript", () => {
-	it("serializes JSON-LD using the structured data script id", () => {
-		const script = createRootStructuredDataScript("https://rxresu.me/");
-
-		expect(script.id).toBe("reactive-resume-structured-data");
-		expect(script.type).toBe("application/ld+json");
-		expect(JSON.parse(script.children)).toMatchObject({ "@context": "https://schema.org" });
-	});
-
-	it("escapes script-breaking sequences in JSON-LD children", () => {
-		const script = createRootStructuredDataScript("https://rxresu.me/</script><!---->\u2028\u2029");
-
-		expect(script.children).not.toContain("</script");
-		expect(script.children).not.toContain("<!--");
-		expect(script.children).not.toContain("\u2028");
-		expect(script.children).not.toContain("\u2029");
-		expect(script.children).toContain("\\u003C/script");
-		expect(script.children).toContain("\\u003C!--");
-		expect(script.children).toContain("\\u2028");
-		expect(script.children).toContain("\\u2029");
-	});
-});
-
-describe("getRootStructuredData", () => {
-	it("describes only conservative visible product facts", () => {
-		const schemas = getRootStructuredData("https://rxresu.me/");
-
-		expect(schemas).toHaveLength(4);
-		expect(schemas[0]).toMatchObject({
-			"@type": "WebSite",
-			name: "Reactive Resume",
-			url: "https://rxresu.me/",
+describe("createResumeSocialMeta", () => {
+	it("builds social metadata from explicit URLs", () => {
+		const meta = createResumeSocialMeta({
+			canonicalUrl: "https://app.example.com/jane/resume",
+			title: "Jane Doe — Staff Engineer",
+			description: "Builds resilient distributed systems.",
+			imageUrl: "https://app.example.com/opengraph/banner.jpg",
 		});
-		expect(schemas[1]).toMatchObject({
-			"@type": ["SoftwareApplication", "WebApplication"],
-			name: "Reactive Resume",
-			applicationCategory: "BusinessApplication",
-			operatingSystem: "Web",
-			offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+
+		expect(meta).toContainEqual({
+			property: "og:url",
+			content: "https://app.example.com/jane/resume",
 		});
-		expect(schemas[3]).toMatchObject({
-			"@type": "FAQPage",
-			mainEntity: expect.arrayContaining([
-				expect.objectContaining({
-					name: "Is Reactive Resume really free?",
-				}),
-			]),
+		expect(meta).toContainEqual({
+			name: "twitter:image",
+			content: "https://app.example.com/opengraph/banner.jpg",
 		});
 	});
 });

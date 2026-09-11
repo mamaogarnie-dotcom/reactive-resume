@@ -9,7 +9,7 @@ vi.mock("@reactive-resume/env/server", () => ({
 const { handleLlms, handleRobots, handleSitemap } = await import("./seo");
 
 describe("SEO static endpoints", () => {
-	it("generates robots.txt from the normalized app URL", async () => {
+	it("generates robots.txt from the configured app URL", async () => {
 		const response = handleRobots();
 		const text = await response.text();
 
@@ -22,41 +22,35 @@ describe("SEO static endpoints", () => {
 		expect(text).toContain("Disallow: /mcp");
 		expect(text).toContain("Disallow: /.well-known");
 		expect(text).toContain("Sitemap: https://app.example.com/sitemap.xml");
-		expect(text).toContain("Sitemap: https://docs.rxresu.me/sitemap.xml");
-		expect(text).not.toMatch(/GPTBot|ClaudeBot|PerplexityBot|CCBot|ChatGPT-User/);
+		expect(text).not.toContain("rxresu.me");
 	});
 
-	it("generates an app-domain-only sitemap", async () => {
+	it("generates a sitemap containing only the indexable ATS checker", async () => {
 		const response = handleSitemap();
 		const text = await response.text();
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("Content-Type")).toBe("application/xml; charset=UTF-8");
-		expect(text).toContain("<loc>https://app.example.com/</loc>");
 		expect(text).toContain("<loc>https://app.example.com/ats-checker</loc>");
-		expect(text).not.toContain("docs.rxresu.me");
+		expect(text).not.toContain("<loc>https://app.example.com/</loc>");
 		expect(text).not.toContain("/auth");
 		expect(text).not.toContain("/dashboard");
 		expect(text).not.toContain("/builder");
 		expect(text).not.toContain("/templates");
-		expect(text).not.toContain("/schema.json");
+		expect(text).not.toContain("rxresu.me");
 	});
 
-	it("generates a lightweight llms.txt product index", async () => {
+	it("generates a CVMate llms.txt product index", async () => {
 		const response = handleLlms();
 		const text = await response.text();
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("Content-Type")).toBe("text/plain; charset=UTF-8");
-		expect(text).toContain("# Reactive Resume");
+		expect(text).toContain("# CVMate");
 		expect(text).toContain("- Product: https://app.example.com");
-		expect(text).toContain("- Documentation: https://docs.rxresu.me");
-		expect(text).toContain("- Documentation sitemap: https://docs.rxresu.me/sitemap.xml");
-		expect(text).toContain("- Documentation llms.txt: https://docs.rxresu.me/llms.txt");
-		expect(text).toContain("- API documentation: https://docs.rxresu.me/api-reference");
-		expect(text).toContain("- Resume schema: https://app.example.com/schema.json");
-		expect(text).toContain("- MCP documentation: https://docs.rxresu.me/guides/using-the-mcp-server");
-		expect(text).toContain("- OpenAPI specification: https://app.example.com/api/openapi/spec.json");
+		expect(text).toContain("- ATS Checker: https://app.example.com/ats-checker");
+		expect(text).not.toContain("Reactive Resume");
+		expect(text).not.toContain("rxresu.me");
 	});
 
 	it("returns headers without a body for HEAD responses", async () => {

@@ -1,7 +1,5 @@
 import { env } from "@reactive-resume/env/server";
 
-const DOCS_URL = "https://docs.rxresu.me";
-
 type StaticSeoOptions = {
 	head?: boolean;
 };
@@ -27,7 +25,6 @@ export function handleRobots(options?: StaticSeoOptions) {
 		"Disallow: /.well-known",
 		"",
 		`Sitemap: ${baseUrl}/sitemap.xml`,
-		`Sitemap: ${DOCS_URL}/sitemap.xml`,
 		"",
 	].join("\n");
 
@@ -39,9 +36,6 @@ export function handleSitemap(options?: StaticSeoOptions) {
 	const body = [
 		'<?xml version="1.0" encoding="UTF-8"?>',
 		'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-		"  <url>",
-		`    <loc>${baseUrl}/</loc>`,
-		"  </url>",
 		"  <url>",
 		`    <loc>${baseUrl}/ats-checker</loc>`,
 		"  </url>",
@@ -57,20 +51,14 @@ export function handleSitemap(options?: StaticSeoOptions) {
 export function handleLlms(options?: StaticSeoOptions) {
 	const baseUrl = appUrl();
 	const body = [
-		"# Reactive Resume",
+		"# CVMate",
 		"",
-		"Reactive Resume is an open-source resume builder for creating, managing, and exporting resumes.",
+		"CVMate helps users build job-tailored resumes from a reusable career profile and check resume readability with ATS tools.",
 		"",
 		"## Links",
 		"",
 		`- Product: ${baseUrl}`,
-		`- Documentation: ${DOCS_URL}`,
-		`- Documentation sitemap: ${DOCS_URL}/sitemap.xml`,
-		`- Documentation llms.txt: ${DOCS_URL}/llms.txt`,
-		`- API documentation: ${DOCS_URL}/api-reference`,
-		`- Resume schema: ${baseUrl}/schema.json`,
-		`- MCP documentation: ${DOCS_URL}/guides/using-the-mcp-server`,
-		`- OpenAPI specification: ${baseUrl}/api/openapi/spec.json`,
+		`- ATS Checker: ${baseUrl}/ats-checker`,
 		"",
 	].join("\n");
 

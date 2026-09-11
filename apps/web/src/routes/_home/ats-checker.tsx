@@ -21,7 +21,13 @@ const AtsCheckerTool = lazy(() =>
 export const Route = createFileRoute("/_home/ats-checker")({
 	component: RouteComponent,
 	head: () => {
-		const origin = typeof window === "undefined" ? "https://rxresu.me" : window.location.origin;
+		if (typeof window === "undefined") {
+			return {
+				meta: [{ title: PAGE_TITLE }, { name: "description", content: PAGE_DESCRIPTION }],
+			};
+		}
+
+		const origin = window.location.origin;
 		const canonicalUrl = new URL("/ats-checker", origin).toString();
 		const imageUrl = new URL("/opengraph/ats-checker.png", origin).toString();
 
