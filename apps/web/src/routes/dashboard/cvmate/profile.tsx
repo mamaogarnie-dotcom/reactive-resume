@@ -10,6 +10,7 @@ import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { orpc } from "@/libs/orpc/client";
 import { DashboardHeader } from "../-components/header";
+import { WorkExperienceSection } from "./-components/work-experience";
 
 export const Route = createFileRoute("/dashboard/cvmate/profile")({
 	component: RouteComponent,
@@ -265,6 +266,10 @@ function RouteComponent() {
 						</Button>
 					</div>
 				</form>
+
+				<Separator />
+
+				<WorkExperienceSection />
 			</div>
 		</div>
 	);
