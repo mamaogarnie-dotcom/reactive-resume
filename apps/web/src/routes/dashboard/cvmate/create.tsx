@@ -19,6 +19,9 @@ const textareaClassName =
 const fileClassName =
 	"block w-full rounded-md border bg-background px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm disabled:cursor-not-allowed disabled:opacity-50";
 
+const generatedTextareaClassName =
+	"min-h-28 w-full resize-y rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50";
+
 type RequirementCategory =
 	| "required"
 	| "preferred"
@@ -29,6 +32,9 @@ type SelectionItem = Awaited<
 	ReturnType<typeof orpc.cvmateBuild.listSelectionItems.call>
 >[number];
 type Gap = Awaited<ReturnType<typeof orpc.cvmateBuild.listGaps.call>>[number];
+type GeneratedContent = Awaited<
+	ReturnType<typeof orpc.cvmateBuild.listGeneratedContent.call>
+>[number];
 
 const categoryTitle: Record<RequirementCategory, string> = {
 	required: "Most important requirements",
@@ -50,6 +56,9 @@ function RouteComponent() {
 	const [buildId, setBuildId] = useState<string | null>(null);
 	const [selectionItems, setSelectionItems] = useState<SelectionItem[]>([]);
 	const [gaps, setGaps] = useState<Gap[]>([]);
+	const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>(
+		[],
+	);
 
 	const analyzeOffer = useMutation({
 		mutationFn: async () => {
@@ -164,6 +173,7 @@ function RouteComponent() {
 			setSelectionItems((items) =>
 				items.map((item) => updates.get(item.id) ?? item),
 			);
+			setGeneratedContent([]);
 		},
 	});
 
@@ -188,6 +198,7 @@ function RouteComponent() {
 			setSelectionItems((items) =>
 				items.map((item) => updates.get(item.id) ?? item),
 			);
+			setGeneratedContent([]);
 		},
 	});
 
@@ -198,6 +209,46 @@ function RouteComponent() {
 			setGaps((items) =>
 				items.map((item) => (item.id === updated.id ? updated : item)),
 			);
+		},
+	});
+
+	const generateTailoredContent = useMutation({
+		mutationFn: async () => {
+			if (!buildId)
+				throw new Error(
+					"Create the CV build before generating tailored content.",
+				);
+
+			const result = await orpc.cvmateBuild.generateTailoredContent.call({
+				id: buildId,
+			});
+
+			return result.generatedContent;
+		},
+		onSuccess: (items) => {
+			setGeneratedContent(items);
+		},
+	});
+
+	const saveGeneratedContent = useMutation({
+		mutationFn: (input: { id: string; finalText: string | null }) =>
+			orpc.cvmateBuild.updateGeneratedContentFinalText.call(input),
+		onSuccess: (updated) => {
+			setGeneratedContent((items) =>
+				items.map((item) => (item.id === updated.id ? updated : item)),
+			);
+		},
+	});
+
+	const materializeCv = useMutation({
+		mutationFn: async () => {
+			if (!buildId)
+				throw new Error("Create the CV build before opening the editor.");
+
+			return orpc.cvmateBuild.materialize.call({ id: buildId });
+		},
+		onSuccess: (result) => {
+			window.location.assign(`/builder/${result.resumeId}`);
 		},
 	});
 
@@ -241,6 +292,19 @@ function RouteComponent() {
 		(item) => item.recommended,
 	).length;
 	const openGaps = gaps.filter((gap) => gap.status === "open");
+	const selectedIds = new Set(
+		selectionItems.filter((item) => item.selected).map((item) => item.id),
+	);
+	const visibleGeneratedContent = generatedContent.filter(
+		(item) =>
+			item.kind === "professional_summary" ||
+			(item.kind === "experience_fact" &&
+				item.selectionItemId !== null &&
+				selectedIds.has(item.selectionItemId)),
+	);
+	const hasTailoredContent = visibleGeneratedContent.some(
+		(item) => item.kind === "professional_summary",
+	);
 
 	const canAnalyze = rawText.trim().length > 0 || asset !== null;
 	const selectionPending =
@@ -252,11 +316,15 @@ function RouteComponent() {
 		setBuildId(null);
 		setSelectionItems([]);
 		setGaps([]);
+		setGeneratedContent([]);
 		analyzeOffer.reset();
 		recommendContent.reset();
 		updateSelection.reset();
 		selectRecommended.reset();
 		dismissGap.reset();
+		generateTailoredContent.reset();
+		saveGeneratedContent.reset();
+		materializeCv.reset();
 	};
 
 	const renderSelectionItem = (item: SelectionItem, nested = false) => (
@@ -395,7 +463,7 @@ function RouteComponent() {
 									<p className="text-muted-foreground text-sm">
 										{[analyzeOffer.data.companyName, analyzeOffer.data.location]
 											.filter(Boolean)
-											.join(" · ") || t`Analysis completed`}
+											.join(" Â· ") || t`Analysis completed`}
 									</p>
 								</div>
 								<Button type="button" variant="outline" onClick={reset}>
@@ -595,7 +663,7 @@ function RouteComponent() {
 													<div className="space-y-1">
 														<p className="text-sm">{gap.text}</p>
 														<p className="text-muted-foreground text-xs">
-															{gap.severity} · {gap.origin}
+															{gap.severity} Â· {gap.origin}
 														</p>
 													</div>
 													<Button
@@ -612,11 +680,144 @@ function RouteComponent() {
 									)}
 								</section>
 
-								<div className="flex justify-end">
-									<Button type="button" disabled={selectedCount === 0}>
-										<Trans>Continue to tailored content</Trans>
-									</Button>
+								<div className="space-y-3">
+									{generateTailoredContent.isError ? (
+										<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+											{generateTailoredContent.error instanceof Error
+												? generateTailoredContent.error.message
+												: t`Tailored CV content could not be generated.`}
+										</div>
+									) : null}
+
+									<div className="flex justify-end">
+										<Button
+											type="button"
+											disabled={
+												selectedCount === 0 || generateTailoredContent.isPending
+											}
+											onClick={() => generateTailoredContent.mutate()}
+										>
+											{generateTailoredContent.isPending ? (
+												<Trans>Generating tailored content...</Trans>
+											) : hasTailoredContent ? (
+												<Trans>Regenerate tailored content</Trans>
+											) : (
+												<Trans>Continue to tailored content</Trans>
+											)}
+										</Button>
+									</div>
 								</div>
+
+								{hasTailoredContent ? (
+									<section className="space-y-5 rounded-lg border p-5">
+										<div className="space-y-1">
+											<h3 className="font-medium">
+												<Trans>Tailored CV content</Trans>
+											</h3>
+											<p className="text-muted-foreground text-sm">
+												<Trans>
+													Review the AI wording before opening the CV editor.
+													Your edits are saved as final text and preserved when
+													AI content is regenerated.
+												</Trans>
+											</p>
+										</div>
+
+										<div className="space-y-4">
+											{visibleGeneratedContent.map((content) => {
+												const sourceItem = content.selectionItemId
+													? selectionItems.find(
+															(item) => item.id === content.selectionItemId,
+														)
+													: null;
+												const label =
+													content.kind === "professional_summary"
+														? t`Professional summary`
+														: sourceItem
+															? selectionLabel(sourceItem)
+															: t`Experience fact`;
+
+												return (
+													<div key={content.id} className="space-y-2">
+														<div className="flex flex-wrap items-center justify-between gap-2">
+															<label
+																className="font-medium text-sm"
+																htmlFor={`cvmate-generated-${content.id}`}
+															>
+																{label}
+															</label>
+															{content.finalText ? (
+																<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+																	<Trans>Edited</Trans>
+																</span>
+															) : null}
+														</div>
+														<textarea
+															id={`cvmate-generated-${content.id}`}
+															className={generatedTextareaClassName}
+															value={content.finalText ?? content.aiText ?? ""}
+															disabled={saveGeneratedContent.isPending}
+															onChange={(event) => {
+																const value = event.target.value;
+																setGeneratedContent((items) =>
+																	items.map((item) =>
+																		item.id === content.id
+																			? { ...item, finalText: value }
+																			: item,
+																	),
+																);
+															}}
+															onBlur={(event) => {
+																const value = event.currentTarget.value.trim();
+																const aiValue = (content.aiText ?? "").trim();
+																saveGeneratedContent.mutate({
+																	id: content.id,
+																	finalText:
+																		value.length > 0 && value !== aiValue
+																			? value
+																			: null,
+																});
+															}}
+														/>
+													</div>
+												);
+											})}
+										</div>
+
+										{saveGeneratedContent.isError ? (
+											<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+												{saveGeneratedContent.error instanceof Error
+													? saveGeneratedContent.error.message
+													: t`Your final text could not be saved.`}
+											</div>
+										) : null}
+
+										{materializeCv.isError ? (
+											<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+												{materializeCv.error instanceof Error
+													? materializeCv.error.message
+													: t`The CV could not be opened in the editor.`}
+											</div>
+										) : null}
+
+										<div className="flex justify-end">
+											<Button
+												type="button"
+												disabled={
+													materializeCv.isPending ||
+													saveGeneratedContent.isPending
+												}
+												onClick={() => materializeCv.mutate()}
+											>
+												{materializeCv.isPending ? (
+													<Trans>Preparing CV...</Trans>
+												) : (
+													<Trans>Open in CV editor</Trans>
+												)}
+											</Button>
+										</div>
+									</section>
+								) : null}
 							</>
 						)}
 					</div>
