@@ -4,9 +4,6 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import {
 	BrainIcon,
-	BriefcaseIcon,
-	ChatCircleDotsIcon,
-	EnvelopeSimpleIcon,
 	GearSixIcon,
 	KeyIcon,
 	MagnifyingGlassIcon,
@@ -16,11 +13,9 @@ import {
 	UserCircleIcon,
 	UserGearIcon,
 } from "@phosphor-icons/react";
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-} from "@reactive-resume/ui/components/avatar";
+import { Link } from "@tanstack/react-router";
+import { AnimatePresence, m } from "motion/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@reactive-resume/ui/components/avatar";
 import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
 import { Kbd } from "@reactive-resume/ui/components/kbd";
 import {
@@ -39,8 +34,6 @@ import {
 	useSidebarState,
 } from "@reactive-resume/ui/components/sidebar";
 import { getInitials } from "@reactive-resume/utils/string";
-import { Link } from "@tanstack/react-router";
-import { AnimatePresence, m } from "motion/react";
 import { Copyright } from "@/components/ui/copyright";
 import { useCommandPaletteStore } from "@/features/command-palette/store";
 import { UserDropdownMenu } from "@/features/user/dropdown-menu";
@@ -66,21 +59,6 @@ const appSidebarItems = [
 		icon: <ReadCvLogoIcon />,
 		label: msg`My CV`,
 		href: "/dashboard/resumes",
-	},
-	{
-		icon: <BriefcaseIcon />,
-		label: msg`Applications`,
-		href: "/dashboard/applications",
-	},
-	{
-		icon: <EnvelopeSimpleIcon />,
-		label: msg`Cover Letters`,
-		href: "/dashboard/cover-letters",
-	},
-	{
-		icon: <ChatCircleDotsIcon />,
-		label: msg`Agents`,
-		href: "/agent",
 	},
 	{
 		icon: <SealCheckIcon />,
@@ -136,10 +114,7 @@ function SidebarItemList({ items }: SidebarItemListProps) {
 					<SidebarMenuButton
 						title={i18n.t(item.label)}
 						render={
-							<Link
-								to={item.href}
-								activeProps={{ className: "bg-sidebar-accent" }}
-							>
+							<Link to={item.href} activeProps={{ className: "bg-sidebar-accent" }}>
 								{item.icon}
 								<span className="shrink-0 transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
 									{i18n.t(item.label)}
@@ -161,18 +136,12 @@ function SidebarSearchButton() {
 
 	return (
 		<SidebarMenuItem>
-			<SidebarMenuButton
-				title={label}
-				tooltip={label}
-				onClick={() => setOpen(true)}
-			>
+			<SidebarMenuButton title={label} tooltip={label} onClick={() => setOpen(true)}>
 				<MagnifyingGlassIcon />
 				<span className="flex-1 text-start transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
 					{label}
 				</span>
-				<Kbd className="transition-opacity duration-200 ease-in-out group-data-[collapsible=icon]:opacity-0">
-					âŚK
-				</Kbd>
+				<Kbd className="transition-opacity duration-200 ease-in-out group-data-[collapsible=icon]:opacity-0">⌘K</Kbd>
 			</SidebarMenuButton>
 		</SidebarMenuItem>
 	);
@@ -241,9 +210,7 @@ export function DashboardSidebar() {
 
 									<div className="transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
 										<p className="font-medium">{session.user.name}</p>
-										<p className="text-muted-foreground text-xs">
-											{session.user.email}
-										</p>
+										<p className="text-muted-foreground text-xs">{session.user.email}</p>
 									</div>
 								</SidebarMenuButton>
 							)}

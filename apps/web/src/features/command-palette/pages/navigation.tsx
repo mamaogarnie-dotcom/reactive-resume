@@ -1,14 +1,13 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import {
-	BriefcaseIcon,
-	ChatCircleDotsIcon,
 	GearIcon,
 	HouseSimpleIcon,
 	KeyIcon,
 	OpenAiLogoIcon,
 	PlusIcon,
 	ReadCvLogoIcon,
+	SealCheckIcon,
 	ShieldCheckIcon,
 	UserCircleIcon,
 	UserGearIcon,
@@ -39,55 +38,41 @@ export function NavigationCommandGroup() {
 
 				<CommandItem
 					disabled={!session}
-					keywords={[t`Resumes`]}
+					keywords={[t`Master Profile`, t`Profile`]}
+					value="navigation.cvmate.profile"
+					onSelect={() => onNavigate("/dashboard/cvmate/profile")}
+				>
+					<UserCircleIcon />
+					<Trans>Master Profile</Trans>
+				</CommandItem>
+
+				<CommandItem
+					disabled={!session}
+					keywords={[t`Create CV`, t`New CV`, t`Resume`]}
+					value="navigation.cvmate.create"
+					onSelect={() => onNavigate("/dashboard/cvmate/create")}
+				>
+					<PlusIcon />
+					<Trans>Create CV</Trans>
+				</CommandItem>
+
+				<CommandItem
+					disabled={!session}
+					keywords={[t`My CV`, t`Resumes`, t`CV`]}
 					value="navigation.resumes"
 					onSelect={() => onNavigate("/dashboard/resumes")}
 				>
 					<ReadCvLogoIcon />
-					<Trans>Resumes</Trans>
+					<Trans>My CV</Trans>
 				</CommandItem>
 
 				<CommandItem
-					disabled={!session}
-					keywords={[t`Applications`, t`Jobs`]}
-					value="navigation.applications"
-					onSelect={() => onNavigate("/dashboard/applications")}
+					keywords={[t`ATS Checker`, t`ATS Check`]}
+					value="navigation.ats"
+					onSelect={() => onNavigate("/ats-checker")}
 				>
-					<BriefcaseIcon />
-					<Trans>Applications</Trans>
-				</CommandItem>
-
-				<CommandItem
-					disabled={!session}
-					keywords={[t`New Application`, t`Add application`, t`Job`]}
-					value="navigation.applications.new"
-					onSelect={async () => {
-						await navigate({ to: "/dashboard/applications", search: { create: true } });
-						reset();
-					}}
-				>
-					<PlusIcon />
-					<Trans>New Application</Trans>
-				</CommandItem>
-
-				<CommandItem
-					disabled={!session}
-					keywords={[t`Threads`, t`Agent`, t`Artificial Intelligence`]}
-					value="navigation.threads"
-					onSelect={() => onNavigate("/agent")}
-				>
-					<ChatCircleDotsIcon />
-					<Trans>Threads</Trans>
-				</CommandItem>
-
-				<CommandItem
-					disabled={!session}
-					keywords={[t`New Thread`, t`Agent`, t`Artificial Intelligence`]}
-					value="navigation.threads.new"
-					onSelect={() => onNavigate("/agent/new")}
-				>
-					<PlusIcon />
-					<Trans>New Thread</Trans>
+					<SealCheckIcon />
+					<Trans>ATS Checker</Trans>
 				</CommandItem>
 
 				<CommandItem
