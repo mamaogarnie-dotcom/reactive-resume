@@ -541,7 +541,7 @@ msgstr "Albański"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "All"
-msgstr ""
+msgstr "Wszystkie"
 
 #: src/features/applications/components/export-applications-sheet.tsx
 msgid "All applications (including archived)"
@@ -1670,7 +1670,7 @@ msgstr "Stwórz przykładowe CV"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Create a tailored CV from a job offer to see it here."
-msgstr ""
+msgstr "Utwórz CV dopasowane do oferty pracy, aby pojawiło się tutaj."
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Create as many resumes as you want."
@@ -1686,7 +1686,7 @@ msgstr "Utwórz list motywacyjny"
 #: src/routes/dashboard/cvmate/create.tsx
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Create CV"
-msgstr ""
+msgstr "Utwórz CV"
 
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Create from scratch"
@@ -2066,7 +2066,7 @@ msgstr "Pobrania"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Draft"
-msgstr ""
+msgstr "Wersja robocza"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Draft a cover letter"
@@ -2082,7 +2082,7 @@ msgstr "Projektowanie failed."
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Drafts"
-msgstr ""
+msgstr "Wersje robocze"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Drag and drop sections here to move them between columns"
@@ -2587,7 +2587,7 @@ msgstr ""
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Favorites"
-msgstr ""
+msgstr "Ulubione"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Features"
@@ -3573,7 +3573,7 @@ msgstr "Marek odrzucony"
 #: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Master Profile"
-msgstr ""
+msgstr "Profil główny"
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Match Master Profile"
@@ -3682,7 +3682,7 @@ msgstr "Proszę zacząć od https://"
 #: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/resumes/index.tsx
 msgid "My CV"
-msgstr ""
+msgstr "Moje CV"
 
 #. Label for full name input on registration form
 #: src/dialogs/api-key/create.tsx
@@ -3812,7 +3812,7 @@ msgstr "Nie znaleziono listów motywacyjnych. Utwórz list lub zaimportuj istnie
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "No CVs in this view"
-msgstr ""
+msgstr "Brak CV w tym widoku"
 
 #. Error shown when AI import endpoint returns no parsed resume data
 #: src/dialogs/resume/import.tsx
@@ -4603,7 +4603,7 @@ msgstr "Odczytywanie ogłoszenia…"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Ready"
-msgstr ""
+msgstr "Gotowe"
 
 #: src/features/resume/stylesheet/status.tsx
 msgid "Ready to activate"
@@ -5079,7 +5079,7 @@ msgstr "Wyszukaj listy motywacyjne..."
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Search CVs..."
-msgstr ""
+msgstr "Szukaj CV..."
 
 #. Accessible label for icon picker search input
 #. Placeholder text in icon picker search input
@@ -6384,7 +6384,7 @@ msgstr "Tłumaczenia"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Trash"
-msgstr ""
+msgstr "Kosz"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Trash is empty"

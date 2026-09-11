@@ -8,7 +8,7 @@ import { isRTL, localeSchema } from "@reactive-resume/utils/locale";
 export { isRTL };
 
 const storageKey = "locale";
-const defaultLocale: Locale = "en-US";
+const defaultLocale: Locale = "pl-PL";
 const messageLoaders = import.meta.glob<{ messages: Messages }>("../../locales/*.po");
 const relativeTimeDivisions: Array<{ amount: number; unit: Intl.RelativeTimeFormatUnit }> = [
 	{ amount: 31_536_000_000, unit: "year" },

@@ -45,12 +45,12 @@ describe("resolveLocale", () => {
 		expect(resolveLocale("fr-FR")).toBe("fr-FR");
 	});
 
-	it("returns en-US default for invalid locale", () => {
-		expect(resolveLocale("xx-YY")).toBe("en-US");
+	it("returns pl-PL default for invalid locale", () => {
+		expect(resolveLocale("xx-YY")).toBe("pl-PL");
 	});
 
-	it("returns en-US default for empty string", () => {
-		expect(resolveLocale("")).toBe("en-US");
+	it("returns pl-PL default for empty string", () => {
+		expect(resolveLocale("")).toBe("pl-PL");
 	});
 });
 
