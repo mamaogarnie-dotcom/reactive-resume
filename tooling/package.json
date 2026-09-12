@@ -17,6 +17,7 @@
 	},
 	"devDependencies": {
 		"@lingui/format-po": "^6.6.0",
+		"@reactive-resume/api": "workspace:*",
 		"@reactive-resume/config": "workspace:*",
 		"@reactive-resume/docx": "workspace:*",
 		"@reactive-resume/env": "workspace:*",

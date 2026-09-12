@@ -1447,6 +1447,9 @@ importers:
       '@lingui/format-po':
         specifier: ^6.6.0
         version: 6.6.0
+      '@reactive-resume/api':
+        specifier: workspace:*
+        version: link:../packages/api
       '@reactive-resume/config':
         specifier: workspace:*
         version: link:../packages/config
