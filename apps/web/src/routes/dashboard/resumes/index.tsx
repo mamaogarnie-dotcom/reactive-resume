@@ -1,35 +1,19 @@
 import { msg, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
-import {
-	MagnifyingGlassIcon,
-	PlusIcon,
-	ReadCvLogoIcon,
-} from "@phosphor-icons/react";
-import { Button } from "@reactive-resume/ui/components/button";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupInput,
-} from "@reactive-resume/ui/components/input-group";
-import { Label } from "@reactive-resume/ui/components/label";
-import { Separator } from "@reactive-resume/ui/components/separator";
-import {
-	Tabs,
-	TabsList,
-	TabsTrigger,
-} from "@reactive-resume/ui/components/tabs";
-import { toast } from "@reactive-resume/ui/components/toast";
+import { MagnifyingGlassIcon, PlusIcon, ReadCvLogoIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	createFileRoute,
-	Link,
-	stripSearchParams,
-	useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import z from "zod";
+import { Button } from "@reactive-resume/ui/components/button";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@reactive-resume/ui/components/input-group";
+import { Label } from "@reactive-resume/ui/components/label";
+import { Separator } from "@reactive-resume/ui/components/separator";
+import { Tabs, TabsList, TabsTrigger } from "@reactive-resume/ui/components/tabs";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { Combobox } from "@/components/ui/combobox";
+import { ResumeVersionHistory } from "@/features/resume/version-history";
 import { getOrpcErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { DashboardHeader } from "../-components/header";
@@ -71,17 +55,11 @@ function RouteComponent() {
 	const { data: resumes, isLoading: resumesLoading } = useQuery(
 		orpc.resume.list.queryOptions({ input: { tags, sort } }),
 	);
-	const { data: documents, isLoading: documentsLoading } = useQuery(
-		orpc.cvmateBuild.listDocuments.queryOptions(),
-	);
+	const { data: documents, isLoading: documentsLoading } = useQuery(orpc.cvmateBuild.listDocuments.queryOptions());
 
 	const updateDocumentMutation = useMutation({
-		mutationFn: (input: {
-			id: string;
-			status?: "draft" | "ready";
-			isFavorite?: boolean;
-			trashed?: boolean;
-		}) => orpc.cvmateBuild.updateDocument.call(input),
+		mutationFn: (input: { id: string; status?: "draft" | "ready"; isFavorite?: boolean; trashed?: boolean }) =>
+			orpc.cvmateBuild.updateDocument.call(input),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({
 				queryKey: orpc.cvmateBuild.listDocuments.queryKey(),
@@ -98,9 +76,7 @@ function RouteComponent() {
 	});
 
 	const rows = useMemo(() => {
-		const documentByResumeId = new Map(
-			(documents ?? []).map((document) => [document.resumeId, document]),
-		);
+		const documentByResumeId = new Map((documents ?? []).map((document) => [document.resumeId, document]));
 		const query = search.trim().toLowerCase();
 
 		return (resumes ?? [])
@@ -123,10 +99,7 @@ function RouteComponent() {
 				if (!matchesTab) return false;
 				if (!query) return true;
 
-				return (
-					resume.name.toLowerCase().includes(query) ||
-					resume.slug.toLowerCase().includes(query)
-				);
+				return resume.name.toLowerCase().includes(query) || resume.slug.toLowerCase().includes(query);
 			});
 	}, [documents, resumes, search, tab]);
 
@@ -134,17 +107,9 @@ function RouteComponent() {
 		const list = documents ?? [];
 		return {
 			all: list.filter((document) => document.trashedAt === null).length,
-			ready: list.filter(
-				(document) =>
-					document.trashedAt === null && document.status === "ready",
-			).length,
-			draft: list.filter(
-				(document) =>
-					document.trashedAt === null && document.status === "draft",
-			).length,
-			favorites: list.filter(
-				(document) => document.trashedAt === null && document.isFavorite,
-			).length,
+			ready: list.filter((document) => document.trashedAt === null && document.status === "ready").length,
+			draft: list.filter((document) => document.trashedAt === null && document.status === "draft").length,
+			favorites: list.filter((document) => document.trashedAt === null && document.isFavorite).length,
 			trash: list.filter((document) => document.trashedAt !== null).length,
 		};
 	}, [documents]);
@@ -171,11 +136,7 @@ function RouteComponent() {
 				icon={ReadCvLogoIcon}
 				title={t`My CV`}
 				actions={
-					<Button
-						size="sm"
-						nativeButton={false}
-						render={<Link to="/dashboard/cvmate/create" />}
-					>
+					<Button size="sm" nativeButton={false} render={<Link to="/dashboard/cvmate/create" />}>
 						<PlusIcon />
 						<Trans>Create CV</Trans>
 					</Button>
@@ -189,47 +150,26 @@ function RouteComponent() {
 					<TabsTrigger
 						value="all"
 						nativeButton={false}
-						render={
-							<Link
-								to="."
-								search={(previous: Search) => ({ ...previous, tab: "all" })}
-							/>
-						}
+						render={<Link to="." search={(previous: Search) => ({ ...previous, tab: "all" })} />}
 					>
 						<Trans>All</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">
-							{counts.all}
-						</span>
+						<span className="ms-1 text-muted-foreground text-xs">{counts.all}</span>
 					</TabsTrigger>
 					<TabsTrigger
 						value="ready"
 						nativeButton={false}
-						render={
-							<Link
-								to="."
-								search={(previous: Search) => ({ ...previous, tab: "ready" })}
-							/>
-						}
+						render={<Link to="." search={(previous: Search) => ({ ...previous, tab: "ready" })} />}
 					>
 						<Trans>Ready</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">
-							{counts.ready}
-						</span>
+						<span className="ms-1 text-muted-foreground text-xs">{counts.ready}</span>
 					</TabsTrigger>
 					<TabsTrigger
 						value="draft"
 						nativeButton={false}
-						render={
-							<Link
-								to="."
-								search={(previous: Search) => ({ ...previous, tab: "draft" })}
-							/>
-						}
+						render={<Link to="." search={(previous: Search) => ({ ...previous, tab: "draft" })} />}
 					>
 						<Trans>Drafts</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">
-							{counts.draft}
-						</span>
+						<span className="ms-1 text-muted-foreground text-xs">{counts.draft}</span>
 					</TabsTrigger>
 					<TabsTrigger
 						value="favorites"
@@ -245,24 +185,15 @@ function RouteComponent() {
 						}
 					>
 						<Trans>Favorites</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">
-							{counts.favorites}
-						</span>
+						<span className="ms-1 text-muted-foreground text-xs">{counts.favorites}</span>
 					</TabsTrigger>
 					<TabsTrigger
 						value="trash"
 						nativeButton={false}
-						render={
-							<Link
-								to="."
-								search={(previous: Search) => ({ ...previous, tab: "trash" })}
-							/>
-						}
+						render={<Link to="." search={(previous: Search) => ({ ...previous, tab: "trash" })} />}
 					>
 						<Trans>Trash</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">
-							{counts.trash}
-						</span>
+						<span className="ms-1 text-muted-foreground text-xs">{counts.trash}</span>
 					</TabsTrigger>
 				</TabsList>
 			</Tabs>
@@ -339,17 +270,11 @@ function RouteComponent() {
 			) : rows.length === 0 ? (
 				<div className="rounded-lg border border-dashed p-8 text-center">
 					<p className="font-medium">
-						{tab === "trash" ? (
-							<Trans>Trash is empty</Trans>
-						) : (
-							<Trans>No CVs in this view</Trans>
-						)}
+						{tab === "trash" ? <Trans>Trash is empty</Trans> : <Trans>No CVs in this view</Trans>}
 					</p>
 					<p className="mt-1 text-muted-foreground text-sm">
 						{tab === "all" ? (
-							<Trans>
-								Create a tailored CV from a job offer to see it here.
-							</Trans>
+							<Trans>Create a tailored CV from a job offer to see it here.</Trans>
 						) : (
 							<Trans>Change the filter or update one of your CVs.</Trans>
 						)}
@@ -377,11 +302,7 @@ function RouteComponent() {
 										</Link>
 
 										<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
-											{document.status === "ready" ? (
-												<Trans>Ready</Trans>
-											) : (
-												<Trans>Draft</Trans>
-											)}
+											{document.status === "ready" ? <Trans>Ready</Trans> : <Trans>Draft</Trans>}
 										</span>
 
 										{document.isFavorite ? (
@@ -428,12 +349,9 @@ function RouteComponent() {
 													})
 												}
 											>
-												{document.isFavorite ? (
-													<Trans>Remove favorite</Trans>
-												) : (
-													<Trans>Add favorite</Trans>
-												)}
+												{document.isFavorite ? <Trans>Remove favorite</Trans> : <Trans>Add favorite</Trans>}
 											</Button>
+											<ResumeVersionHistory resumeId={resume.id} trigger="label" />
 
 											<Button
 												size="sm"
@@ -442,16 +360,11 @@ function RouteComponent() {
 												onClick={() =>
 													updateDocumentMutation.mutate({
 														id: document.id,
-														status:
-															document.status === "ready" ? "draft" : "ready",
+														status: document.status === "ready" ? "draft" : "ready",
 													})
 												}
 											>
-												{document.status === "ready" ? (
-													<Trans>Mark draft</Trans>
-												) : (
-													<Trans>Mark ready</Trans>
-												)}
+												{document.status === "ready" ? <Trans>Mark draft</Trans> : <Trans>Mark ready</Trans>}
 											</Button>
 
 											<Button
@@ -474,12 +387,7 @@ function RouteComponent() {
 										size="sm"
 										disabled={isPending}
 										nativeButton={false}
-										render={
-											<Link
-												to="/builder/$resumeId"
-												params={{ resumeId: resume.id }}
-											/>
-										}
+										render={<Link to="/builder/$resumeId" params={{ resumeId: resume.id }} />}
 									>
 										<Trans>Open</Trans>
 									</Button>

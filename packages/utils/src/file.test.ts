@@ -28,6 +28,12 @@ describe("generateFilename", () => {
 	it("handles empty prefix", () => {
 		expect(generateFilename("", "pdf")).toBe(".pdf");
 	});
+
+	it("adds a readable collision-safe timestamp when export time is provided", () => {
+		const exportedAt = new Date(2026, 8, 12, 19, 28, 16, 123);
+
+		expect(generateFilename("My Resume", "pdf", exportedAt)).toBe("my-resume_2026-09-12_19-28-16-123.pdf");
+	});
 });
 
 describe("downloadWithAnchor", () => {

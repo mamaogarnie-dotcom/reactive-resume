@@ -56,7 +56,7 @@ export function useResumeExport(resume: ExportableResume | undefined, exportOpti
 	const onDownloadJSON = useCallback(() => {
 		if (!resume) return;
 		const blob = new Blob([JSON.stringify(resume.data, null, 2)], { type: "application/json" });
-		downloadWithAnchor(blob, generateFilename(getExportName(resume), "json"));
+		downloadWithAnchor(blob, generateFilename(getExportName(resume), "json", new Date()));
 	}, [resume]);
 
 	const onDownloadMarkdown = useCallback(
@@ -66,7 +66,7 @@ export function useResumeExport(resume: ExportableResume | undefined, exportOpti
 			const data = getResumeExportData(resume.data, target);
 			const resolveTitle = await createSectionTitleResolver(data);
 			const blob = new Blob([buildMarkdown(data, resolveTitle)], { type: "text/markdown" });
-			downloadWithAnchor(blob, generateFilename(getTargetExportName(resume, target), "md"));
+			downloadWithAnchor(blob, generateFilename(getTargetExportName(resume, target), "md", new Date()));
 		},
 		[resume],
 	);
@@ -79,7 +79,7 @@ export function useResumeExport(resume: ExportableResume | undefined, exportOpti
 				const data = getResumeExportData(resume.data, target);
 				const resolveTitle = await createSectionTitleResolver(data);
 				const blob = await buildDocx(data, resolveTitle);
-				downloadWithAnchor(blob, generateFilename(getTargetExportName(resume, target), "docx"));
+				downloadWithAnchor(blob, generateFilename(getTargetExportName(resume, target), "docx", new Date()));
 			} catch {
 				toast.add({ type: "error", description: t`Could not generate the DOCX. Please try again.` });
 			}
@@ -107,7 +107,7 @@ export function useResumeExport(resume: ExportableResume | undefined, exportOpti
 								? { includeCoverLetterHeader: downloadOptions?.includeCoverLetterHeader }
 								: undefined,
 						);
-				downloadWithAnchor(blob, generateFilename(getTargetExportName(resume, target), "pdf"));
+				downloadWithAnchor(blob, generateFilename(getTargetExportName(resume, target), "pdf", new Date()));
 				if (exportOptions.publicResumePdf) {
 					// Statistics are best effort and must not delay or fail a completed browser download.
 					void client.resume.statistics
