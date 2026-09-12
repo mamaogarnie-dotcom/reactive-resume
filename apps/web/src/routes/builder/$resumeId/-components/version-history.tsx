@@ -10,9 +10,6 @@ export function BuilderVersionHistory({ resumeId }: BuilderVersionHistoryProps) 
 	const replaceResumeFromServer = useResumeStore((state) => state.replaceResumeFromServer);
 
 	return (
-		<ResumeVersionHistory
-			resumeId={resumeId}
-			onRestored={(restored) => replaceResumeFromServer(restored as Resume)}
-		/>
+		<ResumeVersionHistory resumeId={resumeId} onRestored={(restored) => replaceResumeFromServer(restored as Resume)} />
 	);
 }

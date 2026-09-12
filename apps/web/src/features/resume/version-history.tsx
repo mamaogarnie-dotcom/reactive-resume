@@ -49,7 +49,7 @@ export function ResumeVersionHistory({ resumeId, onRestored, trigger = "icon" }:
 		if (!confirmed) return;
 
 		try {
-			const restored = (await restoreVersion({ resumeId, versionId })) as Resume;
+			const restored = await restoreVersion({ resumeId, versionId });
 			onRestored?.(restored);
 			queryClient.setQueryData(orpc.resume.getById.queryOptions({ input: { id: resumeId } }).queryKey, restored);
 			void queryClient.invalidateQueries({
