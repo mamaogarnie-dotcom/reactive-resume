@@ -77,6 +77,8 @@ jobs:
         run: pnpm build
 
       - name: Run E2E Tests
+        env:
+          FLAG_ALLOW_UNSAFE_AI_BASE_URL: "true"
         run: pnpm exec playwright test
 
       - name: Upload Playwright Report
