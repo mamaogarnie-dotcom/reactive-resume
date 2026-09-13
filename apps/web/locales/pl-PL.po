@@ -1586,7 +1586,7 @@ msgid "Create a copy tuned to this job"
 msgstr "Utwórz kopię dostosowaną do tego zadania"
 
 #: src/routes/dashboard/cvmate/create.tsx
-msgid "Create a CV build from your Master Profile and let AI recommend only facts already stored there."
+msgid "Create a CV from your Master Profile and let AI recommend only information already stored there."
 msgstr "Utwórz CV na podstawie swojego profilu. AI zaproponuje wyłącznie informacje, które już w nim masz."
 
 #: src/features/auth/pages/register.tsx
@@ -4217,7 +4217,7 @@ msgid "Paste the full job description here…"
 msgstr "Wklej tutaj pełny opis stanowiska…"
 
 #: src/routes/dashboard/cvmate/create.tsx
-msgid "Paste the job offer or attach a PDF/image. CVMate will analyze it before building your tailored CV."
+msgid "Paste the job offer or attach a PDF/image. 1story will analyze it before building your tailored CV."
 msgstr "Wklej treść oferty pracy lub załącz plik PDF albo obraz. 1story przeanalizuje ją przed utworzeniem dopasowanego CV."
 
 #: src/features/ats-checker/tool.tsx
@@ -6012,7 +6012,7 @@ msgid "There was not enough information to run this check."
 msgstr "Za mało informacji, aby przeprowadzić tę kontrolę."
 
 #: src/routes/dashboard/cvmate/create.tsx
-msgid "These are required or preferred job requirements for which CVMate found no direct evidence in your Master Profile."
+msgid "These are required or preferred job requirements for which 1story found no direct evidence in your Master Profile."
 msgstr "To wymagania obowiązkowe lub mile widziane, których nie udało się bezpośrednio potwierdzić informacjami z Twojego profilu."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
@@ -7454,3 +7454,90 @@ msgstr "Nie udało się zaktualizować doświadczenia."
 
 msgid "Could not delete employment."
 msgstr "Nie udało się usunąć doświadczenia."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyze the job offer before creating a CV."
+msgstr "Przeanalizuj ofertę pracy przed utworzeniem CV."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Your Master Profile does not contain any content that can be selected for this CV."
+msgstr "Twój profil nie zawiera żadnych informacji, które można wybrać do tego CV."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Start creating the CV before generating tailored content."
+msgstr "Najpierw rozpocznij tworzenie CV, zanim wygenerujesz dopasowaną treść."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Start creating the CV before opening the editor."
+msgstr "Najpierw rozpocznij tworzenie CV, zanim otworzysz edytor."
+
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Most important requirements"
+msgstr "Najważniejsze wymagania"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Nice to have"
+msgstr "Mile widziane"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Responsibilities"
+msgstr "Obowiązki"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Important keywords"
+msgstr "Najważniejsze słowa"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Employer priorities"
+msgstr "Priorytety pracodawcy"
+
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Critical"
+msgstr "Kluczowe"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Important"
+msgstr "Ważne"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Additional"
+msgstr "Dodatkowe"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Detected"
+msgstr "Wykryte"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Added by you"
+msgstr "Dodane przez Ciebie"
+
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Project"
+msgstr "Projekt"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Course"
+msgstr "Kurs"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Reference"
+msgstr "Referencja"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Profile information"
+msgstr "Informacja z profilu"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Clause"
+msgstr "Klauzula"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Profile photo"
+msgstr "Zdjęcie profilowe"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Custom section item"
+msgstr "Element sekcji własnej"
