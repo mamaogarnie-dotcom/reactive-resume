@@ -97,13 +97,13 @@ describe("resume password sharing", () => {
 		expect(screen.queryByRole("dialog")).toBeNull();
 	});
 
-	it("preserves values and reports a server failure for retry", async () => {
+	it("preserves values and hides server failure details for retry", async () => {
 		mocks.setPassword.mockRejectedValueOnce(
 			new ORPCError("INTERNAL_SERVER_ERROR", { message: "Could not save password" }),
 		);
 		const dialog = await openDialog();
 		await submit(dialog, "secret");
-		expect(dialog.getByRole("alert").textContent).toBe("Could not save password");
+		expect(dialog.getByRole("alert").textContent).toBe("Something went wrong. Please try again.");
 		expect((dialog.getByLabelText("Password", { exact: true }) as HTMLInputElement).value).toBe("secret");
 		expect(mocks.patchResume).not.toHaveBeenCalled();
 		await act(() => {

@@ -1,6 +1,5 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { ORPCError } from "@orpc/client";
 import { ClipboardIcon, LockSimpleIcon, LockSimpleOpenIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
@@ -14,6 +13,7 @@ import { useCurrentResume, usePatchResume } from "@/features/resume/builder/draf
 import { ResumePasswordDialog } from "@/features/resume/builder/password-dialog";
 import { useConfirm } from "@/hooks/use-confirm";
 import { authClient } from "@/libs/auth/client";
+import { getOrpcErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { SectionBase } from "../shared/section-base";
 
@@ -44,7 +44,7 @@ export function SharingSectionBuilder() {
 					draft.isPublic = updated.isPublic;
 				});
 			} catch (error) {
-				const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
+				const message = getOrpcErrorMessage(error, { fallback: t`Something went wrong. Please try again.` });
 				toast.add({ type: "error", description: message });
 			}
 		},
@@ -59,7 +59,7 @@ export function SharingSectionBuilder() {
 					draft.showDownloadButtons = updated.showDownloadButtons;
 				});
 			} catch (error) {
-				const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
+				const message = getOrpcErrorMessage(error, { fallback: t`Something went wrong. Please try again.` });
 				toast.add({ type: "error", description: message });
 			}
 		},
@@ -96,7 +96,7 @@ export function SharingSectionBuilder() {
 			});
 			toast.add({ type: "success", description: t`Password protection has been disabled.`, id: toastId });
 		} catch (error) {
-			const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
+			const message = getOrpcErrorMessage(error, { fallback: t`Something went wrong. Please try again.` });
 			toast.add({ type: "error", description: message, id: toastId });
 		}
 	}, [confirm, patchResume, removePassword, resume.hasPassword, resume.id]);

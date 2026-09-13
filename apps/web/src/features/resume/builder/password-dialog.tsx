@@ -1,6 +1,5 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { ORPCError } from "@orpc/client";
 import { useId, useRef, useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@reactive-resume/ui/components/dialog";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Label } from "@reactive-resume/ui/components/label";
+import { getOrpcErrorMessage } from "@/libs/error-message";
 
 type ResumePasswordDialogProps = {
 	onSubmit: (password: string) => Promise<void>;
@@ -47,7 +47,7 @@ export function ResumePasswordDialog({ onSubmit, onClose }: ResumePasswordDialog
 			await onSubmit(password);
 			onClose();
 		} catch (error) {
-			setError(error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`);
+			setError(getOrpcErrorMessage(error, { fallback: t`Something went wrong. Please try again.` }));
 		} finally {
 			submitting.current = false;
 			setIsPending(false);
