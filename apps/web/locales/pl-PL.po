@@ -4143,7 +4143,7 @@ msgstr "Styl akapitu i nagłówka"
 #: src/features/auth/components/social-auth.tsx
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Passkey"
-msgstr "Passkey"
+msgstr "Klucz dostępu"
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Passkey deleted."
@@ -4155,7 +4155,7 @@ msgstr "Klucz dostępu został zarejestrowany."
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Passkeys"
-msgstr "Passkeys"
+msgstr "Klucze dostępu"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Passkeys & 2FA"
@@ -4666,7 +4666,7 @@ msgstr "Wygeneruj ponownie dopasowaną treść"
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Register New Device"
-msgstr "Zarejestrować nowe urządzenie"
+msgstr "Zarejestruj nowe urządzenie"
 
 #: src/features/cover-letters/editor-dialog.tsx
 msgid "Reload latest version"
