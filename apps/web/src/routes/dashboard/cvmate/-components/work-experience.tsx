@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -168,9 +170,13 @@ export function WorkExperienceSection() {
 	return (
 		<section className="space-y-4">
 			<div>
-				<h2 className="text-lg font-semibold">Work experience</h2>
+				<h2 className="text-lg font-semibold">
+					<Trans>Work experience</Trans>
+				</h2>
 				<p className="text-sm text-muted-foreground">
-					Add roles that can later be used to create tailored resumes.
+					<Trans>
+						Add roles that can later be used to create tailored resumes.
+					</Trans>
 				</p>
 			</div>
 
@@ -194,31 +200,31 @@ export function WorkExperienceSection() {
 				<div className="grid gap-3 md:grid-cols-2">
 					<input
 						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder="Company"
+						placeholder={t`Company`}
 						value={company}
 						onChange={(event) => setCompany(event.target.value)}
 					/>
 					<input
 						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder="Job title"
+						placeholder={t`Job title`}
 						value={jobTitle}
 						onChange={(event) => setJobTitle(event.target.value)}
 					/>
 					<input
 						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder="Location"
+						placeholder={t`Location`}
 						value={location}
 						onChange={(event) => setLocation(event.target.value)}
 					/>
 					<input
 						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder="Start date: YYYY, YYYY-MM or YYYY-MM-DD"
+						placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						value={startDate}
 						onChange={(event) => setStartDate(event.target.value)}
 					/>
 					<input
 						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder="End date: YYYY, YYYY-MM or YYYY-MM-DD"
+						placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						value={endDate}
 						disabled={isCurrent}
 						onChange={(event) => setEndDate(event.target.value)}
@@ -234,7 +240,7 @@ export function WorkExperienceSection() {
 							if (event.target.checked) setEndDate("");
 						}}
 					/>
-					I currently work here
+					<Trans>I currently work here</Trans>
 				</label>
 
 				<button
@@ -242,22 +248,30 @@ export function WorkExperienceSection() {
 					className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
 					disabled={!canCreate || createEmployment.isPending}
 				>
-					{createEmployment.isPending ? "Adding..." : "Add employment"}
+					{createEmployment.isPending ? (
+						<Trans>Adding...</Trans>
+					) : (
+						<Trans>Add employment</Trans>
+					)}
 				</button>
 			</form>
 
 			{createEmployment.isError ? (
-				<p className="text-sm text-destructive">Could not add employment.</p>
+				<p className="text-sm text-destructive">
+					<Trans>Could not add employment.</Trans>
+				</p>
 			) : null}
 
 			<div className="space-y-3">
 				{profileQuery.isLoading ? (
-					<p className="text-sm text-muted-foreground">Loading experience...</p>
+					<p className="text-sm text-muted-foreground">
+						<Trans>Loading experience...</Trans>
+					</p>
 				) : null}
 
 				{!profileQuery.isLoading && employments.length === 0 ? (
 					<p className="text-sm text-muted-foreground">
-						No work experience has been added yet.
+						<Trans>No work experience has been added yet.</Trans>
 					</p>
 				) : null}
 
@@ -268,31 +282,31 @@ export function WorkExperienceSection() {
 								<div className="grid gap-3 md:grid-cols-2">
 									<input
 										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder="Company"
+										placeholder={t`Company`}
 										value={editCompany}
 										onChange={(event) => setEditCompany(event.target.value)}
 									/>
 									<input
 										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder="Job title"
+										placeholder={t`Job title`}
 										value={editJobTitle}
 										onChange={(event) => setEditJobTitle(event.target.value)}
 									/>
 									<input
 										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder="Location"
+										placeholder={t`Location`}
 										value={editLocation}
 										onChange={(event) => setEditLocation(event.target.value)}
 									/>
 									<input
 										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder="Start date: YYYY, YYYY-MM or YYYY-MM-DD"
+										placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										value={editStartDate}
 										onChange={(event) => setEditStartDate(event.target.value)}
 									/>
 									<input
 										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder="End date: YYYY, YYYY-MM or YYYY-MM-DD"
+										placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										value={editEndDate}
 										disabled={editIsCurrent}
 										onChange={(event) => setEditEndDate(event.target.value)}
@@ -308,7 +322,7 @@ export function WorkExperienceSection() {
 											if (event.target.checked) setEditEndDate("");
 										}}
 									/>
-									I currently work here
+									<Trans>I currently work here</Trans>
 								</label>
 
 								<div className="flex gap-2">
@@ -330,7 +344,11 @@ export function WorkExperienceSection() {
 											})
 										}
 									>
-										{updateEmployment.isPending ? "Saving..." : "Save"}
+										{updateEmployment.isPending ? (
+											<Trans>Saving...</Trans>
+										) : (
+											<Trans>Save</Trans>
+										)}
 									</button>
 									<button
 										type="button"
@@ -338,7 +356,7 @@ export function WorkExperienceSection() {
 										disabled={updateEmployment.isPending}
 										onClick={() => setEditingId(null)}
 									>
-										Cancel
+										<Trans>Cancel</Trans>
 									</button>
 								</div>
 							</div>
@@ -346,7 +364,7 @@ export function WorkExperienceSection() {
 							<div className="flex items-start justify-between gap-4">
 								<div className="min-w-0 space-y-1">
 									<p className="font-medium">
-										{employment.jobTitle || employment.company || "Employment"}
+										{employment.jobTitle || employment.company || t`Employment`}
 									</p>
 									{employment.jobTitle && employment.company ? (
 										<p className="text-sm text-muted-foreground">
@@ -354,9 +372,9 @@ export function WorkExperienceSection() {
 										</p>
 									) : null}
 									<p className="text-sm text-muted-foreground">
-										{employment.startDate || "?"} Ä‚ËĂ˘â€šÂ¬Ă˘â‚¬Ĺ›{" "}
+										{employment.startDate || "?"} {" – "}
 										{employment.isCurrent
-											? "Present"
+											? t`Present`
 											: employment.endDate || "?"}
 									</p>
 									{employment.location ? (
@@ -380,7 +398,7 @@ export function WorkExperienceSection() {
 											setEditIsCurrent(employment.isCurrent);
 										}}
 									>
-										Edit
+										<Trans>Edit</Trans>
 									</button>
 									<button
 										type="button"
@@ -390,7 +408,7 @@ export function WorkExperienceSection() {
 											deleteEmployment.mutate({ id: employment.id })
 										}
 									>
-										Delete
+										<Trans>Delete</Trans>
 									</button>
 								</div>
 							</div>
@@ -433,9 +451,11 @@ export function WorkExperienceSection() {
 														})
 													}
 												>
-													{updateExperienceFact.isPending
-														? "Saving..."
-														: "Save"}
+													{updateExperienceFact.isPending ? (
+														<Trans>Saving...</Trans>
+													) : (
+														<Trans>Save</Trans>
+													)}
 												</button>
 												<button
 													type="button"
@@ -446,7 +466,7 @@ export function WorkExperienceSection() {
 														setEditFactText("");
 													}}
 												>
-													Cancel
+													<Trans>Cancel</Trans>
 												</button>
 											</div>
 										) : (
@@ -471,7 +491,7 @@ export function WorkExperienceSection() {
 														});
 													}}
 												>
-													Up
+													<Trans>Up</Trans>
 												</button>
 												<button
 													type="button"
@@ -493,7 +513,7 @@ export function WorkExperienceSection() {
 														});
 													}}
 												>
-													Down
+													<Trans>Down</Trans>
 												</button>
 												<button
 													type="button"
@@ -503,7 +523,7 @@ export function WorkExperienceSection() {
 														setEditFactText(fact.text);
 													}}
 												>
-													Edit
+													<Trans>Edit</Trans>
 												</button>
 												<button
 													type="button"
@@ -516,8 +536,7 @@ export function WorkExperienceSection() {
 														})
 													}
 												>
-													{" "}
-													Remove{" "}
+													<Trans>Remove</Trans>
 												</button>
 											</div>
 										)}
@@ -548,7 +567,7 @@ export function WorkExperienceSection() {
 						>
 							<input
 								className="h-9 min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 text-sm"
-								placeholder="Responsibility or achievement"
+								placeholder={t`Responsibility or achievement`}
 								value={factTextByEmployment[employment.id] ?? ""}
 								onChange={(event) =>
 									setFactTextByEmployment((current) => ({
@@ -566,9 +585,11 @@ export function WorkExperienceSection() {
 								}
 							>
 								{createAndLinkFact.isPending &&
-								createAndLinkFact.variables?.employmentId === employment.id
-									? "Adding..."
-									: "Add fact"}
+								createAndLinkFact.variables?.employmentId === employment.id ? (
+									<Trans>Adding...</Trans>
+								) : (
+									<Trans>Add fact</Trans>
+								)}
 							</button>
 						</form>
 					</div>
@@ -576,17 +597,17 @@ export function WorkExperienceSection() {
 
 				{createAndLinkFact.isError ? (
 					<p className="text-sm text-destructive">
-						Could not add the experience fact.
+						<Trans>Could not add the experience fact.</Trans>
 					</p>
 				) : null}
 				{updateEmployment.isError ? (
 					<p className="text-sm text-destructive">
-						Could not update employment.
+						<Trans>Could not update employment.</Trans>
 					</p>
 				) : null}
 				{deleteEmployment.isError ? (
 					<p className="text-sm text-destructive">
-						Could not delete employment.
+						<Trans>Could not delete employment.</Trans>
 					</p>
 				) : null}
 			</div>

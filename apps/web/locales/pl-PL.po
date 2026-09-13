@@ -7240,3 +7240,217 @@ msgstr "Pomniejsz"
 #: src/libs/locale.ts
 msgid "Zulu"
 msgstr "Zulu"
+
+
+msgid "Projects that may strengthen a tailored CV."
+msgstr "Projekty, które mogą wzmocnić dopasowane CV."
+
+msgid "Project name"
+msgstr "Nazwa projektu"
+
+msgid "Company / client"
+msgstr "Firma / klient"
+
+msgid "Start date"
+msgstr "Data rozpoczęcia"
+
+msgid "YYYY, YYYY-MM or YYYY-MM-DD"
+msgstr "YYYY, YYYY-MM lub YYYY-MM-DD"
+
+msgid "End date"
+msgstr "Data zakończenia"
+
+msgid "Schools, universities and other formal education."
+msgstr "Szkoły, uczelnie i inne formy edukacji formalnej."
+
+msgid "Institution"
+msgstr "Instytucja"
+
+msgid "Field of study"
+msgstr "Kierunek studiów"
+
+msgid "Specialization"
+msgstr "Specjalizacja"
+
+msgid "Courses"
+msgstr "Kursy"
+
+msgid "Courses and training completed during your career."
+msgstr "Kursy i szkolenia ukończone w trakcie kariery zawodowej."
+
+msgid "Course name"
+msgstr "Nazwa kursu"
+
+msgid "Organizer"
+msgstr "Organizator"
+
+msgid "Certificates, credentials and professional qualifications."
+msgstr "Certyfikaty, poświadczenia i kwalifikacje zawodowe."
+
+msgid "Certification"
+msgstr "Certyfikat"
+
+msgid "Issuing organization"
+msgstr "Organizacja wydająca"
+
+msgid "Issue date"
+msgstr "Data wydania"
+
+msgid "Expiry date"
+msgstr "Data ważności"
+
+msgid "Credential number"
+msgstr "Numer certyfikatu"
+
+msgid "Credential URL"
+msgstr "Adres URL certyfikatu"
+
+msgid "https://..."
+msgstr "https://..."
+
+msgid "Volunteer work"
+msgstr "Wolontariat"
+
+msgid "Volunteer roles that can be relevant to an application."
+msgstr "Doświadczenia wolontariackie, które mogą być istotne w rekrutacji."
+
+msgid "Role"
+msgstr "Rola"
+
+msgid "Languages and your level of proficiency."
+msgstr "Języki i poziom ich znajomości."
+
+msgid "Awards and distinctions worth keeping in your career profile."
+msgstr "Nagrody i wyróżnienia, które warto zachować w profilu zawodowym."
+
+msgid "Award"
+msgstr "Nagroda"
+
+msgid "Professional references and recommendations."
+msgstr "Referencje i rekomendacje zawodowe."
+
+msgid "Reference / person"
+msgstr "Referencja / osoba"
+
+msgid "Issuer / organization"
+msgstr "Wystawca / organizacja"
+
+msgid "Licenses"
+msgstr "Uprawnienia"
+
+msgid "Licenses, permits and other formal authorizations."
+msgstr "Uprawnienia, zezwolenia i inne formalne autoryzacje."
+
+msgid "License"
+msgstr "Uprawnienie"
+
+msgid "Add a skill"
+msgstr "Dodaj umiejętność"
+
+msgid "Software"
+msgstr "Oprogramowanie"
+
+msgid "Add software"
+msgstr "Dodaj oprogramowanie"
+
+msgid "Tools"
+msgstr "Narzędzia"
+
+msgid "Add a tool"
+msgstr "Dodaj narzędzie"
+
+msgid "Add an interest"
+msgstr "Dodaj zainteresowanie"
+
+msgid "Adding..."
+msgstr "Dodawanie..."
+
+msgid "Could not add this record."
+msgstr "Nie udało się dodać tego wpisu."
+
+msgid "Loading..."
+msgstr "Wczytywanie..."
+
+msgid "No records added yet."
+msgstr "Nie dodano jeszcze żadnych wpisów."
+
+msgid "Nothing added yet."
+msgstr "Nic jeszcze nie dodano."
+
+msgid "Current recruitment — Polish"
+msgstr "Aktualna rekrutacja — język polski"
+
+msgid "Current recruitment — English"
+msgstr "Aktualna rekrutacja — język angielski"
+
+msgid "Future recruitment — Polish"
+msgstr "Przyszłe rekrutacje — język polski"
+
+msgid "Future recruitment — English"
+msgstr "Przyszłe rekrutacje — język angielski"
+
+msgid "Recruitment clauses"
+msgstr "Klauzule rekrutacyjne"
+
+msgid "Store reusable consent clauses and switch them on only when needed."
+msgstr "Przechowuj klauzule zgody do wielokrotnego użycia i włączaj je tylko wtedy, gdy są potrzebne."
+
+msgid "Save clause"
+msgstr "Zapisz klauzulę"
+
+msgid "Work experience"
+msgstr "Doświadczenie zawodowe"
+
+msgid "Add roles that can later be used to create tailored resumes."
+msgstr "Dodaj stanowiska, które później można wykorzystać do tworzenia dopasowanych CV."
+
+msgid "Job title"
+msgstr "Stanowisko"
+
+msgid "Start date: YYYY, YYYY-MM or YYYY-MM-DD"
+msgstr "Data rozpoczęcia: YYYY, YYYY-MM lub YYYY-MM-DD"
+
+msgid "End date: YYYY, YYYY-MM or YYYY-MM-DD"
+msgstr "Data zakończenia: YYYY, YYYY-MM lub YYYY-MM-DD"
+
+msgid "I currently work here"
+msgstr "Obecnie tu pracuję"
+
+msgid "Add employment"
+msgstr "Dodaj doświadczenie"
+
+msgid "Could not add employment."
+msgstr "Nie udało się dodać doświadczenia."
+
+msgid "Loading experience..."
+msgstr "Wczytywanie doświadczenia..."
+
+msgid "No work experience has been added yet."
+msgstr "Nie dodano jeszcze doświadczenia zawodowego."
+
+msgid "Employment"
+msgstr "Zatrudnienie"
+
+msgid "Present"
+msgstr "Obecnie"
+
+msgid "Up"
+msgstr "W górę"
+
+msgid "Down"
+msgstr "W dół"
+
+msgid "Responsibility or achievement"
+msgstr "Obowiązek lub osiągnięcie"
+
+msgid "Add fact"
+msgstr "Dodaj informację"
+
+msgid "Could not add the experience fact."
+msgstr "Nie udało się dodać informacji o doświadczeniu."
+
+msgid "Could not update employment."
+msgstr "Nie udało się zaktualizować doświadczenia."
+
+msgid "Could not delete employment."
+msgstr "Nie udało się usunąć doświadczenia."

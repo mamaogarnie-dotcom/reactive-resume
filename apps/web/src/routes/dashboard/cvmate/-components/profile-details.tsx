@@ -1,3 +1,7 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
@@ -25,8 +29,8 @@ type GenericItem = Record<string, unknown> & { id: string; sortOrder: number };
 
 type FieldDefinition = {
 	key: string;
-	label: string;
-	placeholder?: string;
+	label: MessageDescriptor;
+	placeholder?: MessageDescriptor;
 	type?: "text" | "url";
 	multiline?: boolean;
 	wide?: boolean;
@@ -34,8 +38,8 @@ type FieldDefinition = {
 
 type DetailedDefinition = {
 	kind: DetailedKind;
-	title: string;
-	description: string;
+	title: MessageDescriptor;
+	description: MessageDescriptor;
 	fields: readonly FieldDefinition[];
 };
 
@@ -47,168 +51,211 @@ const textareaClassName =
 const detailedDefinitions: readonly DetailedDefinition[] = [
 	{
 		kind: "project",
-		title: "Projects",
-		description: "Projects that may strengthen a tailored CV.",
+		title: msg`Projects`,
+		description: msg`Projects that may strengthen a tailored CV.`,
 		fields: [
-			{ key: "name", label: "Name" },
-			{ key: "company", label: "Company / client" },
+			{ key: "name", label: msg`Project name` },
+			{ key: "company", label: msg`Company / client` },
 			{
 				key: "startDate",
-				label: "Start date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`Start date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
 			{
 				key: "endDate",
-				label: "End date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`End date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
-			{ key: "description", label: "Description", multiline: true, wide: true },
+			{
+				key: "description",
+				label: msg`Description`,
+				multiline: true,
+				wide: true,
+			},
 		],
 	},
 	{
 		kind: "education",
-		title: "Education",
-		description: "Schools, universities and other formal education.",
+		title: msg`Education`,
+		description: msg`Schools, universities and other formal education.`,
 		fields: [
-			{ key: "institution", label: "Institution" },
-			{ key: "fieldOfStudy", label: "Field of study" },
-			{ key: "specialization", label: "Specialization" },
-			{ key: "degree", label: "Degree" },
+			{ key: "institution", label: msg`Institution` },
+			{ key: "fieldOfStudy", label: msg`Field of study` },
+			{ key: "specialization", label: msg`Specialization` },
+			{ key: "degree", label: msg`Degree` },
 			{
 				key: "startDate",
-				label: "Start date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`Start date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
 			{
 				key: "endDate",
-				label: "End date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`End date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
-			{ key: "description", label: "Description", multiline: true, wide: true },
+			{
+				key: "description",
+				label: msg`Description`,
+				multiline: true,
+				wide: true,
+			},
 		],
 	},
 	{
 		kind: "course",
-		title: "Courses",
-		description: "Courses and training completed during your career.",
+		title: msg`Courses`,
+		description: msg`Courses and training completed during your career.`,
 		fields: [
-			{ key: "name", label: "Course name" },
-			{ key: "organizer", label: "Organizer" },
+			{ key: "name", label: msg`Course name` },
+			{ key: "organizer", label: msg`Organizer` },
 			{
 				key: "date",
-				label: "Date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`Date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
-			{ key: "description", label: "Description", multiline: true, wide: true },
+			{
+				key: "description",
+				label: msg`Description`,
+				multiline: true,
+				wide: true,
+			},
 		],
 	},
 	{
 		kind: "certification",
-		title: "Certifications",
-		description: "Certificates, credentials and professional qualifications.",
+		title: msg`Certifications`,
+		description: msg`Certificates, credentials and professional qualifications.`,
 		fields: [
-			{ key: "name", label: "Certification" },
-			{ key: "issuingOrganization", label: "Issuing organization" },
+			{ key: "name", label: msg`Certification` },
+			{ key: "issuingOrganization", label: msg`Issuing organization` },
 			{
 				key: "issueDate",
-				label: "Issue date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`Issue date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
 			{
 				key: "expiryDate",
-				label: "Expiry date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`Expiry date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
-			{ key: "credentialNumber", label: "Credential number" },
+			{ key: "credentialNumber", label: msg`Credential number` },
 			{
 				key: "credentialUrl",
-				label: "Credential URL",
+				label: msg`Credential URL`,
 				type: "url",
-				placeholder: "https://...",
+				placeholder: msg`https://...`,
 			},
-			{ key: "description", label: "Description", multiline: true, wide: true },
+			{
+				key: "description",
+				label: msg`Description`,
+				multiline: true,
+				wide: true,
+			},
 		],
 	},
 	{
 		kind: "volunteer",
-		title: "Volunteer work",
-		description: "Volunteer roles that can be relevant to an application.",
+		title: msg`Volunteer work`,
+		description: msg`Volunteer roles that can be relevant to an application.`,
 		fields: [
-			{ key: "organization", label: "Organization" },
-			{ key: "role", label: "Role" },
+			{ key: "organization", label: msg`Organization` },
+			{ key: "role", label: msg`Role` },
 			{
 				key: "date",
-				label: "Date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`Date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
-			{ key: "description", label: "Description", multiline: true, wide: true },
+			{
+				key: "description",
+				label: msg`Description`,
+				multiline: true,
+				wide: true,
+			},
 		],
 	},
 	{
 		kind: "language",
-		title: "Languages",
-		description: "Languages and your level of proficiency.",
+		title: msg`Languages`,
+		description: msg`Languages and your level of proficiency.`,
 		fields: [
-			{ key: "language", label: "Language" },
-			{ key: "level", label: "Level" },
+			{ key: "language", label: msg`Language` },
+			{ key: "level", label: msg`Level` },
 		],
 	},
 	{
 		kind: "award",
-		title: "Awards",
-		description:
-			"Awards and distinctions worth keeping in your career profile.",
+		title: msg`Awards`,
+		description: msg`Awards and distinctions worth keeping in your career profile.`,
 		fields: [
-			{ key: "name", label: "Award" },
-			{ key: "organizer", label: "Organizer" },
+			{ key: "name", label: msg`Award` },
+			{ key: "organizer", label: msg`Organizer` },
 			{
 				key: "date",
-				label: "Date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`Date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
-			{ key: "description", label: "Description", multiline: true, wide: true },
+			{
+				key: "description",
+				label: msg`Description`,
+				multiline: true,
+				wide: true,
+			},
 		],
 	},
 	{
 		kind: "reference",
-		title: "References",
-		description: "Professional references and recommendations.",
+		title: msg`References`,
+		description: msg`Professional references and recommendations.`,
 		fields: [
-			{ key: "name", label: "Reference / person" },
-			{ key: "issuer", label: "Issuer / organization" },
+			{ key: "name", label: msg`Reference / person` },
+			{ key: "issuer", label: msg`Issuer / organization` },
 			{
 				key: "date",
-				label: "Date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`Date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
-			{ key: "description", label: "Description", multiline: true, wide: true },
+			{
+				key: "description",
+				label: msg`Description`,
+				multiline: true,
+				wide: true,
+			},
 		],
 	},
 	{
 		kind: "license",
-		title: "Licenses",
-		description: "Licenses, permits and other formal authorizations.",
+		title: msg`Licenses`,
+		description: msg`Licenses, permits and other formal authorizations.`,
 		fields: [
-			{ key: "name", label: "License" },
+			{ key: "name", label: msg`License` },
 			{
 				key: "date",
-				label: "Date",
-				placeholder: "YYYY, YYYY-MM or YYYY-MM-DD",
+				label: msg`Date`,
+				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
 			},
-			{ key: "description", label: "Description", multiline: true, wide: true },
+			{
+				key: "description",
+				label: msg`Description`,
+				multiline: true,
+				wide: true,
+			},
 		],
 	},
 ];
 
 const listDefinitions: readonly {
 	kind: ListKind;
-	title: string;
-	placeholder: string;
+	title: MessageDescriptor;
+	placeholder: MessageDescriptor;
 }[] = [
-	{ kind: "competency", title: "Skills", placeholder: "Add a skill" },
-	{ kind: "software", title: "Software", placeholder: "Add software" },
-	{ kind: "tool", title: "Tools", placeholder: "Add a tool" },
-	{ kind: "interest", title: "Interests", placeholder: "Add an interest" },
+	{ kind: "competency", title: msg`Skills`, placeholder: msg`Add a skill` },
+	{ kind: "software", title: msg`Software`, placeholder: msg`Add software` },
+	{ kind: "tool", title: msg`Tools`, placeholder: msg`Add a tool` },
+	{
+		kind: "interest",
+		title: msg`Interests`,
+		placeholder: msg`Add an interest`,
+	},
 ];
 
 function nullable(value: string | undefined) {
@@ -464,6 +511,8 @@ function RecordFields({
 	disabled: boolean;
 	onChange: (key: string, value: string) => void;
 }) {
+	const { i18n } = useLingui();
+
 	return (
 		<div className="grid gap-3 md:grid-cols-2">
 			{fields.map((field) => (
@@ -471,11 +520,13 @@ function RecordFields({
 					key={field.key}
 					className={`space-y-1 text-sm ${field.wide ? "md:col-span-2" : ""}`}
 				>
-					<span className="font-medium">{field.label}</span>
+					<span className="font-medium">{i18n.t(field.label)}</span>
 					{field.multiline ? (
 						<textarea
 							className={textareaClassName}
-							placeholder={field.placeholder}
+							placeholder={
+								field.placeholder ? i18n.t(field.placeholder) : undefined
+							}
 							value={values[field.key] ?? ""}
 							disabled={disabled}
 							onChange={(event) => onChange(field.key, event.target.value)}
@@ -484,7 +535,9 @@ function RecordFields({
 						<input
 							className={inputClassName}
 							type={field.type ?? "text"}
-							placeholder={field.placeholder}
+							placeholder={
+								field.placeholder ? i18n.t(field.placeholder) : undefined
+							}
 							value={values[field.key] ?? ""}
 							disabled={disabled}
 							onChange={(event) => onChange(field.key, event.target.value)}
@@ -497,6 +550,7 @@ function RecordFields({
 }
 
 function DetailedSection({ definition }: { definition: DetailedDefinition }) {
+	const { i18n } = useLingui();
 	const profileQuery = useQuery(
 		orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
 	);
@@ -547,9 +601,9 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 	return (
 		<section className="space-y-4">
 			<div>
-				<h2 className="text-lg font-semibold">{definition.title}</h2>
+				<h2 className="text-lg font-semibold">{i18n.t(definition.title)}</h2>
 				<p className="text-sm text-muted-foreground">
-					{definition.description}
+					{i18n.t(definition.description)}
 				</p>
 			</div>
 
@@ -573,21 +627,29 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 					className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
 					disabled={!hasCreateContent || createMutation.isPending}
 				>
-					{createMutation.isPending
-						? "Adding..."
-						: `Add ${definition.title.toLowerCase()}`}
+					{createMutation.isPending ? (
+						<Trans>Adding...</Trans>
+					) : (
+						<Trans>Add</Trans>
+					)}
 				</button>
 				{createMutation.isError ? (
-					<p className="text-sm text-destructive">Could not add this record.</p>
+					<p className="text-sm text-destructive">
+						<Trans>Could not add this record.</Trans>
+					</p>
 				) : null}
 			</form>
 
 			<div className="space-y-2">
 				{profileQuery.isLoading ? (
-					<p className="text-sm text-muted-foreground">Loading...</p>
+					<p className="text-sm text-muted-foreground">
+						<Trans>Loading...</Trans>
+					</p>
 				) : null}
 				{!profileQuery.isLoading && items.length === 0 ? (
-					<p className="text-sm text-muted-foreground">No records added yet.</p>
+					<p className="text-sm text-muted-foreground">
+						<Trans>No records added yet.</Trans>
+					</p>
 				) : null}
 
 				{items.map((item) => (
@@ -612,7 +674,11 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										disabled={!hasEditContent || updateMutation.isPending}
 										onClick={() => updateMutation.mutate()}
 									>
-										{updateMutation.isPending ? "Saving..." : "Save"}
+										{updateMutation.isPending ? (
+											<Trans>Saving...</Trans>
+										) : (
+											<Trans>Save</Trans>
+										)}
 									</button>
 									<button
 										type="button"
@@ -620,7 +686,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										disabled={updateMutation.isPending}
 										onClick={() => setEditingId(null)}
 									>
-										Cancel
+										<Trans>Cancel</Trans>
 									</button>
 								</div>
 							</div>
@@ -634,7 +700,9 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 
 										return (
 											<p key={field.key}>
-												<span className="font-medium">{field.label}:</span>{" "}
+												<span className="font-medium">
+													{i18n.t(field.label)}:
+												</span>{" "}
 												<span className="whitespace-pre-wrap">{value}</span>
 											</p>
 										);
@@ -649,7 +717,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 											setEditForm(itemToValues(item, definition.fields));
 										}}
 									>
-										Edit
+										<Trans>Edit</Trans>
 									</button>
 									<button
 										type="button"
@@ -657,7 +725,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										disabled={deleteMutation.isPending}
 										onClick={() => deleteMutation.mutate(item.id)}
 									>
-										Delete
+										<Trans>Delete</Trans>
 									</button>
 								</div>
 							</div>
@@ -675,9 +743,10 @@ function ListSection({
 	placeholder,
 }: {
 	kind: ListKind;
-	title: string;
-	placeholder: string;
+	title: MessageDescriptor;
+	placeholder: MessageDescriptor;
 }) {
+	const { i18n } = useLingui();
 	const profileQuery = useQuery(
 		orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
 	);
@@ -714,7 +783,7 @@ function ListSection({
 
 	return (
 		<section className="space-y-3">
-			<h2 className="text-lg font-semibold">{title}</h2>
+			<h2 className="text-lg font-semibold">{i18n.t(title)}</h2>
 			<form
 				className="flex gap-2"
 				onSubmit={(event) => {
@@ -730,7 +799,7 @@ function ListSection({
 			>
 				<input
 					className={`${inputClassName} flex-1`}
-					placeholder={placeholder}
+					placeholder={i18n.t(placeholder)}
 					value={value}
 					disabled={createMutation.isPending}
 					onChange={(event) => setValue(event.target.value)}
@@ -740,7 +809,7 @@ function ListSection({
 					className="rounded-md border px-3 text-sm disabled:opacity-50"
 					disabled={!value.trim() || createMutation.isPending}
 				>
-					Add
+					<Trans>Add</Trans>
 				</button>
 			</form>
 
@@ -763,14 +832,14 @@ function ListSection({
 								onChange={(event) => setEditValue(event.target.value)}
 							/>
 							<button type="submit" className="rounded-md border px-2 text-sm">
-								Save
+								<Trans>Save</Trans>
 							</button>
 							<button
 								type="button"
 								className="rounded-md border px-2 text-sm"
 								onClick={() => setEditingId(null)}
 							>
-								Cancel
+								<Trans>Cancel</Trans>
 							</button>
 						</form>
 					) : (
@@ -787,7 +856,7 @@ function ListSection({
 									setEditValue(item.value);
 								}}
 							>
-								Edit
+								<Trans>Edit</Trans>
 							</button>
 							<button
 								type="button"
@@ -795,14 +864,16 @@ function ListSection({
 								disabled={deleteMutation.isPending}
 								onClick={() => deleteMutation.mutate({ id: item.id })}
 							>
-								Delete
+								<Trans>Delete</Trans>
 							</button>
 						</div>
 					),
 				)}
 			</div>
 			{!profileQuery.isLoading && items.length === 0 ? (
-				<p className="text-sm text-muted-foreground">Nothing added yet.</p>
+				<p className="text-sm text-muted-foreground">
+					<Trans>Nothing added yet.</Trans>
+				</p>
 			) : null}
 		</section>
 	);
@@ -815,31 +886,31 @@ const clauseDefinitions: readonly {
 	key: ClauseKey;
 	scope: "current" | "future";
 	language: "pl" | "en";
-	title: string;
+	title: MessageDescriptor;
 }[] = [
 	{
 		key: "current:pl",
 		scope: "current",
 		language: "pl",
-		title: "Current recruitment — Polish",
+		title: msg`Current recruitment — Polish`,
 	},
 	{
 		key: "current:en",
 		scope: "current",
 		language: "en",
-		title: "Current recruitment — English",
+		title: msg`Current recruitment — English`,
 	},
 	{
 		key: "future:pl",
 		scope: "future",
 		language: "pl",
-		title: "Future recruitment — Polish",
+		title: msg`Future recruitment — Polish`,
 	},
 	{
 		key: "future:en",
 		scope: "future",
 		language: "en",
-		title: "Future recruitment — English",
+		title: msg`Future recruitment — English`,
 	},
 ];
 
@@ -853,6 +924,7 @@ function emptyClauseDrafts(): Record<ClauseKey, ClauseDraft> {
 }
 
 function ClausesSection() {
+	const { i18n } = useLingui();
 	const profileQuery = useQuery(
 		orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
 	);
@@ -887,9 +959,13 @@ function ClausesSection() {
 	return (
 		<section className="space-y-4">
 			<div>
-				<h2 className="text-lg font-semibold">Recruitment clauses</h2>
+				<h2 className="text-lg font-semibold">
+					<Trans>Recruitment clauses</Trans>
+				</h2>
 				<p className="text-sm text-muted-foreground">
-					Store reusable consent clauses and switch them on only when needed.
+					<Trans>
+						Store reusable consent clauses and switch them on only when needed.
+					</Trans>
 				</p>
 			</div>
 
@@ -903,7 +979,9 @@ function ClausesSection() {
 							className="space-y-3 rounded-md border p-3"
 						>
 							<div className="flex items-center justify-between gap-3">
-								<p className="font-medium text-sm">{definition.title}</p>
+								<p className="font-medium text-sm">
+									{i18n.t(definition.title)}
+								</p>
 								<label className="flex items-center gap-2 text-sm">
 									<input
 										type="checkbox"
@@ -918,7 +996,7 @@ function ClausesSection() {
 											}))
 										}
 									/>
-									Enabled
+									<Trans>Enabled</Trans>
 								</label>
 							</div>
 							<textarea
@@ -940,7 +1018,11 @@ function ClausesSection() {
 								disabled={saveMutation.isPending}
 								onClick={() => saveMutation.mutate(definition)}
 							>
-								{saveMutation.isPending ? "Saving..." : "Save clause"}
+								{saveMutation.isPending ? (
+									<Trans>Saving...</Trans>
+								) : (
+									<Trans>Save clause</Trans>
+								)}
 							</button>
 						</div>
 					);
