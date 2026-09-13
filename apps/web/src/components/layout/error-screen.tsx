@@ -1,16 +1,25 @@
-import type { ErrorComponentProps } from "@tanstack/react-router";
 import { Trans } from "@lingui/react/macro";
-import { ArrowClockwiseIcon, HouseIcon, ReadCvLogoIcon, WarningIcon } from "@phosphor-icons/react";
-import { Link } from "@tanstack/react-router";
-import { Alert, AlertDescription, AlertTitle } from "@reactive-resume/ui/components/alert";
+import {
+	ArrowClockwiseIcon,
+	HouseIcon,
+	ReadCvLogoIcon,
+	WarningIcon,
+} from "@phosphor-icons/react";
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+} from "@reactive-resume/ui/components/alert";
 import { Button, buttonVariants } from "@reactive-resume/ui/components/button";
+import type { ErrorComponentProps } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 export function ErrorScreen({ reset }: ErrorComponentProps) {
 	return (
 		<div className="mx-auto flex h-svh max-w-md flex-col items-center justify-center gap-y-4">
 			<div className="flex items-center gap-2">
 				<ReadCvLogoIcon className="size-10" />
-				<span className="font-semibold text-xl tracking-tight">CVMate</span>
+				<span className="font-semibold text-xl tracking-tight">1story</span>
 			</div>
 
 			<Alert>
@@ -19,7 +28,10 @@ export function ErrorScreen({ reset }: ErrorComponentProps) {
 					<Trans>Something went wrong</Trans>
 				</AlertTitle>
 				<AlertDescription>
-					<Trans>An unexpected error stopped this page from loading. You can try again or head back.</Trans>
+					<Trans>
+						An unexpected error stopped this page from loading. You can try
+						again or head back.
+					</Trans>
 				</AlertDescription>
 			</Alert>
 
@@ -29,7 +41,10 @@ export function ErrorScreen({ reset }: ErrorComponentProps) {
 					<Trans>Try again</Trans>
 				</Button>
 
-				<Link to="/dashboard" className={buttonVariants({ variant: "secondary" })}>
+				<Link
+					to="/dashboard"
+					className={buttonVariants({ variant: "secondary" })}
+				>
 					<HouseIcon />
 					<Trans>Go to dashboard</Trans>
 				</Link>

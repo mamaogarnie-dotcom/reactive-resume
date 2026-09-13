@@ -13,8 +13,11 @@ import {
 	UserCircleIcon,
 	UserGearIcon,
 } from "@phosphor-icons/react";
-import { Link } from "@tanstack/react-router";
-import { Avatar, AvatarFallback, AvatarImage } from "@reactive-resume/ui/components/avatar";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@reactive-resume/ui/components/avatar";
 import { Kbd } from "@reactive-resume/ui/components/kbd";
 import {
 	Sidebar,
@@ -31,6 +34,7 @@ import {
 	SidebarSeparator,
 } from "@reactive-resume/ui/components/sidebar";
 import { getInitials } from "@reactive-resume/utils/string";
+import { Link } from "@tanstack/react-router";
 import { useCommandPaletteStore } from "@/features/command-palette/store";
 import { UserDropdownMenu } from "@/features/user/dropdown-menu";
 
@@ -110,7 +114,10 @@ function SidebarItemList({ items }: SidebarItemListProps) {
 					<SidebarMenuButton
 						title={i18n.t(item.label)}
 						render={
-							<Link to={item.href} activeProps={{ className: "bg-sidebar-accent" }}>
+							<Link
+								to={item.href}
+								activeProps={{ className: "bg-sidebar-accent" }}
+							>
 								{item.icon}
 								<span className="shrink-0 transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
 									{i18n.t(item.label)}
@@ -132,12 +139,18 @@ function SidebarSearchButton() {
 
 	return (
 		<SidebarMenuItem>
-			<SidebarMenuButton title={label} tooltip={label} onClick={() => setOpen(true)}>
+			<SidebarMenuButton
+				title={label}
+				tooltip={label}
+				onClick={() => setOpen(true)}
+			>
 				<MagnifyingGlassIcon />
 				<span className="flex-1 text-start transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
 					{label}
 				</span>
-				<Kbd className="transition-opacity duration-200 ease-in-out group-data-[collapsible=icon]:opacity-0">⌘K</Kbd>
+				<Kbd className="transition-opacity duration-200 ease-in-out group-data-[collapsible=icon]:opacity-0">
+					⌘K
+				</Kbd>
 			</SidebarMenuButton>
 		</SidebarMenuItem>
 	);
@@ -154,10 +167,10 @@ export function DashboardSidebar() {
 						<SidebarMenuButton
 							className="h-auto"
 							render={
-								<Link to="/dashboard/resumes" aria-label="CVMate">
+								<Link to="/dashboard/resumes" aria-label="1story">
 									<ReadCvLogoIcon className="size-6 shrink-0" />
 									<span className="font-semibold tracking-tight transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
-										CVMate
+										1story
 									</span>
 								</Link>
 							}
@@ -207,7 +220,9 @@ export function DashboardSidebar() {
 
 									<div className="transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
 										<p className="font-medium">{session.user.name}</p>
-										<p className="text-muted-foreground text-xs">{session.user.email}</p>
+										<p className="text-muted-foreground text-xs">
+											{session.user.email}
+										</p>
 									</div>
 								</SidebarMenuButton>
 							)}

@@ -1579,7 +1579,7 @@ msgstr "Listy motywacyjne"
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/features/cover-letters/library.tsx
 msgid "Create"
-msgstr "Stwórz"
+msgstr "Utwórz"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Create a copy tuned to this job"
@@ -2137,7 +2137,7 @@ msgstr "Wcześniejsze wersje zostają zachowane, a historia cofnięć konstrukto
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
 msgid "Edit"
-msgstr "Redagować"
+msgstr "Edytuj"
 
 #. placeholder {0}: letter.name
 #: src/features/cover-letters/library.tsx
@@ -2789,13 +2789,13 @@ msgstr "Wróć"
 
 #: src/components/layout/not-found-screen.tsx
 msgid "Go home"
-msgstr "Idź do domu"
+msgstr "Przejdź na stronę główną"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
-msgstr "Przejdź do pulpitu"
+msgstr "Przejdź do panelu"
 
 #. Accessible label for button navigating from builder to resumes dashboard
 #: src/routes/builder/$resumeId/-components/header.tsx
@@ -3767,7 +3767,7 @@ msgstr "Nowy wątek"
 
 #: src/features/cover-letters/library.tsx
 msgid "Next"
-msgstr "Następny"
+msgstr "Dalej"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "No ads and no trackers, so nothing gets in your way."

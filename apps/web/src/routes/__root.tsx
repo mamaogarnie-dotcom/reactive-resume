@@ -1,24 +1,26 @@
-import type { IconProps } from "@phosphor-icons/react";
-import type { FeatureFlags } from "@reactive-resume/api/features/flags";
-import type { AuthSession } from "@reactive-resume/auth/types";
-import type { Locale } from "@reactive-resume/utils/locale";
-import type { QueryClient } from "@tanstack/react-query";
-import type { orpc } from "@/libs/orpc/client";
-import type { Theme } from "@/libs/theme";
 import { DirectionProvider } from "@base-ui/react/direction-provider";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
+import type { IconProps } from "@phosphor-icons/react";
 import { IconContext } from "@phosphor-icons/react";
+import type { FeatureFlags } from "@reactive-resume/api/features/flags";
+import type { AuthSession } from "@reactive-resume/auth/types";
+import { Toaster } from "@reactive-resume/ui/components/toast";
+import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
+import type { Locale } from "@reactive-resume/utils/locale";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
+import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
-import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
+import {
+	createRootRouteWithContext,
+	HeadContent,
+	Outlet,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import { useEffect } from "react";
-import { Toaster } from "@reactive-resume/ui/components/toast";
-import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
 import { BreakpointIndicator } from "@/components/layout/breakpoint-indicator";
 import { DialogManager } from "@/dialogs/manager";
 import { CommandPalette } from "@/features/command-palette";
@@ -27,7 +29,9 @@ import { ConfirmDialogProvider } from "@/hooks/use-confirm";
 import { PromptDialogProvider } from "@/hooks/use-prompt";
 import { getSession } from "@/libs/auth/session";
 import { getLocale, isRTL, loadLocale } from "@/libs/locale";
+import type { orpc } from "@/libs/orpc/client";
 import { client } from "@/libs/orpc/client";
+import type { Theme } from "@/libs/theme";
 import { getTheme } from "@/libs/theme";
 
 type RouterContext = {
@@ -39,7 +43,7 @@ type RouterContext = {
 	flags: FeatureFlags;
 };
 
-const appName = "CVMate";
+const appName = "1story";
 const tagline = "CV dopasowane do oferty pracy";
 const title = `${appName} — ${tagline}`;
 const description =
@@ -52,11 +56,30 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 		return {
 			links: [
 				// Icons
-				{ rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "128x128" },
-				{ rel: "icon", href: "/favicon.svg", type: "image/svg+xml", sizes: "256x256 any" },
-				{ rel: "apple-touch-icon", href: "/apple-touch-icon-180x180.png", type: "image/png", sizes: "180x180 any" },
+				{
+					rel: "icon",
+					href: "/favicon.ico",
+					type: "image/x-icon",
+					sizes: "128x128",
+				},
+				{
+					rel: "icon",
+					href: "/favicon.svg",
+					type: "image/svg+xml",
+					sizes: "256x256 any",
+				},
+				{
+					rel: "apple-touch-icon",
+					href: "/apple-touch-icon-180x180.png",
+					type: "image/png",
+					sizes: "180x180 any",
+				},
 				// Manifest
-				{ rel: "manifest", href: "/manifest.webmanifest", crossOrigin: "use-credentials" },
+				{
+					rel: "manifest",
+					href: "/manifest.webmanifest",
+					crossOrigin: "use-credentials",
+				},
 			],
 			meta: [
 				{ title },
@@ -69,7 +92,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 				{ name: "mobile-web-app-capable", content: "yes" },
 				{ name: "apple-mobile-web-app-capable", content: "yes" },
 				{ name: "apple-mobile-web-app-title", content: appName },
-				{ name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+				{
+					name: "apple-mobile-web-app-status-bar-style",
+					content: "black-translucent",
+				},
 				// Twitter Tags — X only reads these as `name`, not `property`
 				{ name: "twitter:card", content: "summary_large_image" },
 				{ name: "twitter:title", content: title },
