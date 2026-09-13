@@ -36,11 +36,11 @@ export const documentsRouter = {
 		.route({
 			method: "GET",
 			path: "/cvmate/documents",
-			tags: ["CVMate Documents"],
+			tags: ["1story Documents"],
 			operationId: "listCvmateDocuments",
-			summary: "List CVMate CV documents",
+			summary: "List 1story CV documents",
 			description:
-				"Lists the authenticated user's materialized CVMate CV documents, including draft/ready, favorite and trash metadata.",
+				"Lists the authenticated user's materialized 1story CV documents, including draft/ready, favorite and trash metadata.",
 		})
 		.input(z.object({}).optional().default({}))
 		.output(z.array(documentSummarySchema))
@@ -52,9 +52,9 @@ export const documentsRouter = {
 		.route({
 			method: "POST",
 			path: "/cvmate/documents/{id}",
-			tags: ["CVMate Documents"],
+			tags: ["1story Documents"],
 			operationId: "updateCvmateDocument",
-			summary: "Update a CVMate CV document",
+			summary: "Update a 1story CV document",
 			description:
 				"Updates document status, favorite state, or soft-trash state for the authenticated owner.",
 		})

@@ -51,9 +51,9 @@ export function handleSitemap(options?: StaticSeoOptions) {
 export function handleLlms(options?: StaticSeoOptions) {
 	const baseUrl = appUrl();
 	const body = [
-		"# CVMate",
+		"# 1story",
 		"",
-		"CVMate helps users build job-tailored resumes from a reusable career profile and check resume readability with ATS tools.",
+		"1story helps users build job-tailored resumes from a reusable career profile and check resume readability with ATS tools.",
 		"",
 		"## Links",
 		"",

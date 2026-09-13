@@ -40,13 +40,13 @@ describe("SEO static endpoints", () => {
 		expect(text).not.toContain("rxresu.me");
 	});
 
-	it("generates a CVMate llms.txt product index", async () => {
+	it("generates a 1story llms.txt product index", async () => {
 		const response = handleLlms();
 		const text = await response.text();
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("Content-Type")).toBe("text/plain; charset=UTF-8");
-		expect(text).toContain("# CVMate");
+		expect(text).toContain("# 1story");
 		expect(text).toContain("- Product: https://app.example.com");
 		expect(text).toContain("- ATS Checker: https://app.example.com/ats-checker");
 		expect(text).not.toContain("Reactive Resume");

@@ -64,7 +64,7 @@ updatedAt: new Date("2026-09-08T10:00:00.000Z"),
 const project = {
 id: "project-1",
 masterProfileId: "profile-1",
-name: "CVMate",
+name: "1story",
 company: null,
 startDate: null,
 endDate: null,
@@ -398,14 +398,14 @@ dbMock.insert.mockReturnValue({ values });
 
 const result = await cvmateProfileService.createProject({
 userId: "user-1",
-name: "CVMate",
+name: "1story",
 description: "Commercial CV builder",
 });
 
 expect(values).toHaveBeenCalledWith(
 expect.objectContaining({
 masterProfileId: "profile-1",
-name: "CVMate",
+name: "1story",
 description: "Commercial CV builder",
 }),
 );

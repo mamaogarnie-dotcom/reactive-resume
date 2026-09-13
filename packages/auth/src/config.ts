@@ -1,19 +1,8 @@
-import type { GenericOAuthConfig, GenericOAuthUserInfo } from "better-auth/plugins";
-import type { JWTPayload } from "jose";
 import { apiKey } from "@better-auth/api-key";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { dash } from "@better-auth/infra";
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { passkey } from "@better-auth/passkey";
-import { compare, hash } from "bcrypt";
-import { APIError, betterAuth } from "better-auth";
-import { createAuthMiddleware } from "better-auth/api";
-import { verifyBearerToken } from "better-auth/oauth2";
-import { admin, jwt } from "better-auth/plugins";
-import { genericOAuth } from "better-auth/plugins/generic-oauth";
-import { twoFactor } from "better-auth/plugins/two-factor";
-import { username } from "better-auth/plugins/username";
-import { createElement } from "react";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { ResetPasswordEmail, VerifyEmail, VerifyEmailChange } from "@reactive-resume/email/templates/auth";
@@ -22,6 +11,17 @@ import { env } from "@reactive-resume/env/server";
 import { rateLimitConfig, TRUSTED_IP_HEADERS } from "@reactive-resume/utils/rate-limit";
 import { generateId, toUsername } from "@reactive-resume/utils/string";
 import { isAllowedOAuthRedirectUri } from "@reactive-resume/utils/url-security.node";
+import { compare, hash } from "bcrypt";
+import { APIError, betterAuth } from "better-auth";
+import { createAuthMiddleware } from "better-auth/api";
+import { verifyBearerToken } from "better-auth/oauth2";
+import type { GenericOAuthConfig, GenericOAuthUserInfo } from "better-auth/plugins";
+import { admin, jwt } from "better-auth/plugins";
+import { genericOAuth } from "better-auth/plugins/generic-oauth";
+import { twoFactor } from "better-auth/plugins/two-factor";
+import { username } from "better-auth/plugins/username";
+import type { JWTPayload } from "jose";
+import { createElement } from "react";
 import { createGithubProfileMapper, createProfileMapper } from "./oauth-profile";
 import { getTrustedOrigins } from "./trusted-origins";
 
@@ -142,7 +142,7 @@ const getAuthConfig = () => {
 	}
 
 	return betterAuth({
-		appName: "CVMate",
+		appName: "1story",
 		baseURL: authBaseUrl,
 		secret: env.AUTH_SECRET,
 
@@ -294,7 +294,7 @@ const getAuthConfig = () => {
 			admin(),
 			passkey(),
 			genericOAuth({ config: authConfigs }),
-			twoFactor({ issuer: "CVMate" }),
+			twoFactor({ issuer: "1story" }),
 			apiKey({
 				enableSessionForAPIKeys: true,
 				rateLimit: {

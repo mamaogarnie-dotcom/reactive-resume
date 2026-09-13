@@ -67,7 +67,7 @@ const BASE_SECURITY_HEADERS = {
 		"default-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
 };
 
-const ATS_CHECKER_TITLE = "ATS Checker - CVMate";
+const ATS_CHECKER_TITLE = "ATS Checker - 1story";
 // Keep under ~120 characters so Google's mobile SERP snippet is not truncated at 3 lines.
 const ATS_CHECKER_DESCRIPTION =
 	"Check whether software can read your resume PDF. Runs entirely in your browser, so your file is never uploaded.";
@@ -83,13 +83,13 @@ function createAtsCheckerSeoMarkup(origin: string) {
 		description: ATS_CHECKER_DESCRIPTION,
 		applicationCategory: "BusinessApplication",
 		operatingSystem: "Web",
-		isPartOf: { "@type": "WebSite", name: "CVMate", url: `${origin}/` },
+		isPartOf: { "@type": "WebSite", name: "1story", url: `${origin}/` },
 	};
 
 	return `
 		<link rel="canonical" href="${canonicalUrl}">
 		<meta property="og:type" content="website">
-		<meta property="og:site_name" content="CVMate">
+		<meta property="og:site_name" content="1story">
 		<meta property="og:title" content="${ATS_CHECKER_TITLE}">
 		<meta property="og:description" content="${ATS_CHECKER_DESCRIPTION}">
 		<meta property="og:url" content="${canonicalUrl}">
@@ -124,7 +124,7 @@ async function createPublicResumeSeoMarkup(pathname: string, origin: string) {
 
 	const canonicalUrl = `${origin}/${username}/${slug}`;
 	const imageUrl = `${origin}/opengraph/banner.jpg`;
-	const pageTitle = escapeAttribute(`${meta.name} - CVMate`);
+	const pageTitle = escapeAttribute(`${meta.name} - 1story`);
 	const title = escapeAttribute(meta.title);
 	const description = escapeAttribute(meta.description);
 
@@ -134,7 +134,7 @@ async function createPublicResumeSeoMarkup(pathname: string, origin: string) {
 		markup: `
 		<link rel="canonical" href="${canonicalUrl}">
 		<meta property="og:type" content="profile">
-		<meta property="og:site_name" content="CVMate">
+		<meta property="og:site_name" content="1story">
 		<meta property="og:title" content="${title}">
 		<meta property="og:description" content="${description}">
 		<meta property="og:url" content="${canonicalUrl}">
@@ -220,7 +220,7 @@ export async function handleWebApp(request: Request) {
 		// Root configuration never discloses a target in the HTML shell. The public API
 		// gates data and browser metadata; shell requests must not count extra views.
 		const shell = html
-			.replace(/<title>[^<]*<\/title>/, "<title>CVMate</title>")
+			.replace(/<title>[^<]*<\/title>/, "<title>1story</title>")
 			.replace(/<meta\s+name="description"[^>]*>/, '<meta name="description" content="">');
 		const markup = `<link rel="canonical" href="${escapeAttribute(canonicalUrl)}" data-root-resume-shell><meta name="robots" content="noindex, follow" data-root-resume-shell>`;
 		return new Response(shell.replace("</head>", `${markup}</head>`), { headers });

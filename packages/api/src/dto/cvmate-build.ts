@@ -1,6 +1,6 @@
+import * as schema from "@reactive-resume/db/schema";
 import { createSelectSchema } from "drizzle-zod";
 import z from "zod";
-import * as schema from "@reactive-resume/db/schema";
 
 const cvmateBuildStepSchema = z.enum([
 	"offer",
@@ -203,7 +203,7 @@ export const cvmateBuildDto = {
 
 	create: {
 		input: createBuildSchema,
-		output: z.string().describe("The ID of the created CVMate CV build."),
+		output: z.string().describe("The ID of the created 1story CV build."),
 	},
 
 	update: {

@@ -11,12 +11,12 @@ export const analysisRouter = {
 		.route({
 			method: "POST",
 			path: "/cvmate/job-offers/{id}/analyze",
-			tags: ["CVMate Job Offers"],
+			tags: ["1story Job Offers"],
 			operationId: "analyzeCvmateJobOffer",
-			summary: "Analyze CVMate job offer",
+			summary: "Analyze 1story job offer",
 			description:
 				"Analyzes pasted job-offer text and uploaded PDF/image assets using the user's configured AI provider. Extracted requirements replace only previous AI-generated requirements; manually edited requirements are preserved. Requires authentication.",
-			successDescription: "The analyzed CVMate job offer.",
+			successDescription: "The analyzed 1story job offer.",
 		})
 		.input(
 			z.object({

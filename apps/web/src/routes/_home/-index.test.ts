@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@tanstack/react-router", () => ({
 	ClientOnly: () => null,
@@ -56,7 +56,7 @@ describe("home root mode", () => {
 		await expect(runLoader(root)).resolves.toEqual({ root });
 	});
 
-	it("uses CVMate branding and server canonical root for public metadata", async () => {
+	it("uses 1story branding and server canonical root for public metadata", async () => {
 		const head = await Route.options.head?.({
 			loaderData: {
 				root: {
@@ -76,7 +76,7 @@ describe("home root mode", () => {
 		expect(head?.meta).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
-					title: expect.stringContaining("CVMate"),
+					title: expect.stringContaining("1story"),
 				}),
 			]),
 		);
@@ -87,7 +87,7 @@ describe("home root mode", () => {
 			loaderData: { root: { status: "unavailable", canonicalUrl: "https://configured.example/" } },
 		} as never);
 
-		expect(head?.meta).toContainEqual({ title: "CVMate" });
+		expect(head?.meta).toContainEqual({ title: "1story" });
 		expect(head?.meta).toContainEqual({ name: "robots", content: "noindex, follow" });
 	});
 });

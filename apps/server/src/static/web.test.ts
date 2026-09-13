@@ -52,7 +52,7 @@ describe("web app fallback classification", () => {
 
 	it("serves the root app entry as noindex without injecting marketing SEO", async () => {
 		vi.mocked(fs.readFile).mockResolvedValue(
-			'<html><head><title>CVMate</title><meta name="description" content="CVMate app."></head><body></body></html>',
+			'<html><head><title>1story</title><meta name="description" content="1story app."></head><body></body></html>',
 		);
 
 		const response = await handleWebApp(new Request("http://server.internal/?utm_source=search"));
@@ -61,7 +61,7 @@ describe("web app fallback classification", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get("Content-Type")).toBe("text/html; charset=UTF-8");
 		expect(response.headers.get("X-Robots-Tag")).toBe("noindex, follow");
-		expect(html).toContain("<title>CVMate</title>");
+		expect(html).toContain("<title>1story</title>");
 		expect(html).not.toContain('rel="canonical"');
 		expect(html).not.toContain("application/ld+json");
 		expect(html).not.toContain("utm_source");
@@ -71,7 +71,7 @@ describe("web app fallback classification", () => {
 	});
 
 	describe("the ATS checker page", () => {
-		const shell = `<html><head><title>CVMate — A free and open-source resume builder</title><meta name="description" content="Marketing copy."></head><body></body></html>`;
+		const shell = `<html><head><title>1story — A free and open-source resume builder</title><meta name="description" content="Marketing copy."></head><body></body></html>`;
 
 		it("serves an indexable shell rather than a 404", async () => {
 			vi.mocked(fs.readFile).mockResolvedValue(shell);
@@ -88,7 +88,7 @@ describe("web app fallback classification", () => {
 
 			const html = await (await handleWebApp(new Request("https://example.com/ats-checker"))).text();
 
-			expect(html).toContain("<title>ATS Checker - CVMate</title>");
+			expect(html).toContain("<title>ATS Checker - 1story</title>");
 			expect(html).toContain('<link rel="canonical" href="https://app.example.com/ats-checker">');
 			expect(html).toContain('<meta property="og:url" content="https://app.example.com/ats-checker">');
 			expect(html).toContain('<meta property="og:image" content="https://app.example.com/opengraph/ats-checker.png">');
@@ -112,7 +112,7 @@ describe("web app fallback classification", () => {
 	});
 
 	describe("public resume social cards", () => {
-		const shell = `<html><head><title>CVMate — A free and open-source resume builder</title><meta name="description" content="Marketing copy."></head><body></body></html>`;
+		const shell = `<html><head><title>1story — A free and open-source resume builder</title><meta name="description" content="Marketing copy."></head><body></body></html>`;
 
 		it("injects resume-specific social metadata and replaces the shell title", async () => {
 			vi.mocked(fs.readFile).mockResolvedValue(shell);
@@ -126,7 +126,7 @@ describe("web app fallback classification", () => {
 			const html = await (await handleWebApp(new Request("https://example.com/jane/resume"))).text();
 
 			expect(mocks.getPublicResumeSocialMeta).toHaveBeenCalledWith({ username: "jane", slug: "resume" });
-			expect(html).toContain("<title>Jane Doe - CVMate</title>");
+			expect(html).toContain("<title>Jane Doe - 1story</title>");
 			expect(html).toContain('<meta name="description" content="Builds resilient distributed systems.">');
 			expect(html).not.toContain("Marketing copy.");
 			expect(html).toContain('<link rel="canonical" href="https://app.example.com/jane/resume">');

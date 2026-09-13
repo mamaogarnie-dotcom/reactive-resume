@@ -1,8 +1,8 @@
-import type { SendMailOptions, Transporter } from "nodemailer";
-import type { ReactElement } from "react";
-import nodemailer from "nodemailer";
-import { render } from "react-email";
 import { env } from "@reactive-resume/env/server";
+import type { SendMailOptions, Transporter } from "nodemailer";
+import nodemailer from "nodemailer";
+import type { ReactElement } from "react";
+import { render } from "react-email";
 
 type SendEmailOptions = {
 	to: string | string[];
@@ -31,7 +31,7 @@ const getTransport = () => {
 
 export const sendEmail = async (options: SendEmailOptions) => {
 	const transport = getTransport();
-	const from = options.from ?? env.SMTP_FROM ?? "CVMate <noreply@localhost>";
+	const from = options.from ?? env.SMTP_FROM ?? "1story <noreply@localhost>";
 	const payload: SendMailOptions = {
 		to: options.to,
 		from,

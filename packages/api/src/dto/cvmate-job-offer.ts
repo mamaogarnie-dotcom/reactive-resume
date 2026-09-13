@@ -1,6 +1,6 @@
+import * as schema from "@reactive-resume/db/schema";
 import { createSelectSchema } from "drizzle-zod";
 import z from "zod";
-import * as schema from "@reactive-resume/db/schema";
 
 const MAX_JOB_OFFER_ASSET_BYTES = 10 * 1024 * 1024;
 
@@ -134,7 +134,7 @@ export const cvmateJobOfferDto = {
 
 	create: {
 		input: jobOfferEditableSchema,
-		output: z.string().describe("The ID of the created CVMate job offer."),
+		output: z.string().describe("The ID of the created 1story job offer."),
 	},
 
 	update: {

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createRouterClient, ORPCError } from "@orpc/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authMocks = vi.hoisted(() => ({
 	getSession: vi.fn(),
@@ -113,8 +113,8 @@ beforeEach(() => {
 	authMocks.verifyOAuthToken.mockResolvedValue(null);
 });
 
-describe("CVMate API cross-user isolation", () => {
-	it("rejects CVMate resource access before service execution when the request is unauthenticated", async () => {
+describe("1story API cross-user isolation", () => {
+	it("rejects 1story resource access before service execution when the request is unauthenticated", async () => {
 		authMocks.getSession.mockResolvedValueOnce(null);
 
 		await expect(jobOfferClient.getById({ id: "offer-victim" })).rejects.toMatchObject({

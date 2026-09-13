@@ -1,8 +1,8 @@
 import { ORPCError } from "@orpc/client";
-import { and, desc, eq } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { defaultLocale, isLocale } from "@reactive-resume/utils/locale";
+import { and, desc, eq } from "drizzle-orm";
 import { cvmateProfileService } from "../cvmate-profile/service";
 import { resumeService } from "../resume/service";
 import { createResumeDataFromCvmate } from "./resume-adapter";
@@ -18,7 +18,7 @@ function resumeName(jobOfferSnapshot: Record<string, unknown> | null): string {
 	const companyName = snapshotText(jobOfferSnapshot, "companyName");
 
 	if (roleTitle && companyName) return `${roleTitle} - ${companyName}`;
-	return roleTitle || companyName || "CVMate CV";
+	return roleTitle || companyName || "1story CV";
 }
 
 export const cvmateBuildMaterializeService = {
@@ -110,7 +110,7 @@ export const cvmateBuildMaterializeService = {
 
 		if (!document) {
 			throw new ORPCError("INTERNAL_SERVER_ERROR", {
-				message: "Failed to create the CVMate document.",
+				message: "Failed to create the 1story document.",
 			});
 		}
 

@@ -15,9 +15,9 @@ export const tailoredContentRouter = {
 		.route({
 			method: "POST",
 			path: "/cvmate/builds/{id}/tailored-content",
-			tags: ["CVMate CV Builds"],
+			tags: ["1story CV Builds"],
 			operationId: "generateCvmateBuildTailoredContent",
-			summary: "Generate tailored CVMate CV text",
+			summary: "Generate tailored 1story CV text",
 			description:
 				"Uses only the selected frozen candidate snapshots and frozen analyzed job offer to generate a professional summary and wording for selected experience facts. Existing user finalText overrides are preserved. Requires authentication.",
 			successDescription: "Generated or refreshed tailored CV content.",

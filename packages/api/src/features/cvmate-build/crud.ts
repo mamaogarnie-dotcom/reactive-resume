@@ -10,11 +10,11 @@ export const crudRouter = {
 		.route({
 			method: "GET",
 			path: "/cvmate/builds",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "listCvmateCvBuilds",
 			summary: "List CV builds",
 			description:
-				"Returns CVMate CV builds belonging to the authenticated user, ordered by most recently updated. Requires authentication.",
+				"Returns 1story CV builds belonging to the authenticated user, ordered by most recently updated. Requires authentication.",
 			successDescription: "The authenticated user's CV builds.",
 		})
 		.input(cvmateBuildDto.list.input)
@@ -29,10 +29,10 @@ export const crudRouter = {
 		.route({
 			method: "GET",
 			path: "/cvmate/builds/{id}",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "getCvmateCvBuild",
 			summary: "Get CV build",
-			description: "Returns a CVMate CV build belonging to the authenticated user. Requires authentication.",
+			description: "Returns a 1story CV build belonging to the authenticated user. Requires authentication.",
 			successDescription: "The requested CV build.",
 		})
 		.input(cvmateBuildDto.getById.input)
@@ -48,11 +48,11 @@ export const crudRouter = {
 		.route({
 			method: "POST",
 			path: "/cvmate/builds",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "createCvmateCvBuild",
 			summary: "Create CV build",
 			description:
-				"Starts a new CVMate CV build for the authenticated user's Master Profile. An optional owned job offer can be linked and snapshotted at creation time. Requires authentication.",
+				"Starts a new 1story CV build for the authenticated user's Master Profile. An optional owned job offer can be linked and snapshotted at creation time. Requires authentication.",
 			successDescription: "The ID of the created CV build.",
 		})
 		.input(cvmateBuildDto.create.input)
@@ -69,11 +69,11 @@ export const crudRouter = {
 		.route({
 			method: "PUT",
 			path: "/cvmate/builds/{id}",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "updateCvmateCvBuild",
 			summary: "Update CV build",
 			description:
-				"Updates an owned CVMate CV build. Changing the linked job offer refreshes its stored snapshot. The completed step and completed status must be set together. Requires authentication.",
+				"Updates an owned 1story CV build. Changing the linked job offer refreshes its stored snapshot. The completed step and completed status must be set together. Requires authentication.",
 			successDescription: "The updated CV build.",
 		})
 		.input(cvmateBuildDto.update.input)
@@ -90,11 +90,11 @@ export const crudRouter = {
 		.route({
 			method: "DELETE",
 			path: "/cvmate/builds/{id}",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "deleteCvmateCvBuild",
 			summary: "Delete CV build",
 			description:
-				"Deletes a CVMate CV build belonging to the authenticated user. Related build data is removed according to database cascade rules. Requires authentication.",
+				"Deletes a 1story CV build belonging to the authenticated user. Related build data is removed according to database cascade rules. Requires authentication.",
 			successDescription: "The CV build was deleted.",
 		})
 		.input(cvmateBuildDto.delete.input)
@@ -111,7 +111,7 @@ export const crudRouter = {
 		.route({
 			method: "GET",
 			path: "/cvmate/builds/{cvBuildId}/selection-items",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "listCvmateCvSelectionItems",
 			summary: "List CV selection items",
 			description:
@@ -131,7 +131,7 @@ export const crudRouter = {
 		.route({
 			method: "POST",
 			path: "/cvmate/builds/{cvBuildId}/selection-items",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "createCvmateCvSelectionItem",
 			summary: "Create CV selection item",
 			description:
@@ -152,7 +152,7 @@ export const crudRouter = {
 		.route({
 			method: "PUT",
 			path: "/cvmate/selection-items/{id}",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "updateCvmateCvSelectionItem",
 			summary: "Update CV selection item",
 			description:
@@ -173,7 +173,7 @@ export const crudRouter = {
 		.route({
 			method: "DELETE",
 			path: "/cvmate/selection-items/{id}",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "deleteCvmateCvSelectionItem",
 			summary: "Delete CV selection item",
 			description:
@@ -193,7 +193,7 @@ export const crudRouter = {
 		.route({
 			method: "GET",
 			path: "/cvmate/builds/{cvBuildId}/gaps",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "listCvmateCvGaps",
 			summary: "List CV gaps",
 			description:
@@ -213,7 +213,7 @@ export const crudRouter = {
 		.route({
 			method: "POST",
 			path: "/cvmate/builds/{cvBuildId}/gaps",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "createCvmateCvGap",
 			summary: "Create CV gap",
 			description:
@@ -234,7 +234,7 @@ export const crudRouter = {
 		.route({
 			method: "PUT",
 			path: "/cvmate/gaps/{id}",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "updateCvmateCvGap",
 			summary: "Update CV gap",
 			description:
@@ -255,7 +255,7 @@ export const crudRouter = {
 		.route({
 			method: "DELETE",
 			path: "/cvmate/gaps/{id}",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "deleteCvmateCvGap",
 			summary: "Delete CV gap",
 			description: "Deletes a CV gap belonging to an authenticated user's CV build. Requires authentication.",
@@ -274,7 +274,7 @@ export const crudRouter = {
 		.route({
 			method: "GET",
 			path: "/cvmate/builds/{cvBuildId}/generated-content",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "listCvmateCvGeneratedContent",
 			summary: "List CV generated content",
 			description:
@@ -294,7 +294,7 @@ export const crudRouter = {
 		.route({
 			method: "PUT",
 			path: "/cvmate/generated-content/{id}/final-text",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "updateCvmateCvGeneratedContentFinalText",
 			summary: "Update generated content final text",
 			description:
@@ -315,12 +315,12 @@ export const crudRouter = {
 		.route({
 			method: "POST",
 			path: "/cvmate/builds/{id}/materialize",
-			tags: ["CVMate CV Build"],
+			tags: ["1story CV Build"],
 			operationId: "materializeCvmateCvBuild",
 			summary: "Materialize CV build",
 			description:
-				"Creates a Reactive Resume from an owned CVMate build, or updates the existing materialized resume for that build. Requires authentication.",
-			successDescription: "The materialized CVMate document and Reactive Resume identifiers.",
+				"Creates a Reactive Resume from an owned 1story build, or updates the existing materialized resume for that build. Requires authentication.",
+			successDescription: "The materialized 1story document and Reactive Resume identifiers.",
 		})
 		.input(cvmateBuildMaterializeDto.materialize.input)
 		.use(resumeMutationRateLimit)

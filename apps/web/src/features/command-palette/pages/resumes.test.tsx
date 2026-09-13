@@ -1,12 +1,12 @@
 // @vitest-environment happy-dom
 
+import { i18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
+import { Command, CommandList } from "@reactive-resume/ui/components/command";
+import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { i18n } from "@lingui/core";
-import { I18nProvider } from "@lingui/react";
-import { useQuery } from "@tanstack/react-query";
-import { Command, CommandList } from "@reactive-resume/ui/components/command";
 import { useCommandPaletteStore } from "../store";
 
 const mocks = vi.hoisted(() => ({
@@ -160,7 +160,7 @@ describe("ResumesCommandGroup", () => {
 		expect(screen.queryByText("Finance Resume")).not.toBeInTheDocument();
 	});
 
-	it("routes CV creation through the CVMate flow", () => {
+	it("routes CV creation through the 1story flow", () => {
 		useCommandPaletteStore.setState({ pages: ["resumes"] });
 		mockResumeQuery();
 
@@ -204,7 +204,7 @@ describe("NavigationCommandGroup", () => {
 			</I18nProvider>,
 		);
 
-	it("shows the V1 CVMate navigation surface", () => {
+	it("shows the V1 1story navigation surface", () => {
 		renderNavigation();
 
 		expect(screen.getByText("Master Profile")).toBeInTheDocument();
@@ -218,7 +218,7 @@ describe("NavigationCommandGroup", () => {
 		expect(screen.queryByText("New Thread")).not.toBeInTheDocument();
 	});
 
-	it("navigates through the CVMate creation and ATS entry points", () => {
+	it("navigates through the 1story creation and ATS entry points", () => {
 		renderNavigation();
 
 		fireEvent.click(screen.getByText("Create CV"));

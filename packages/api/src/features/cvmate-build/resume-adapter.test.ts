@@ -104,11 +104,11 @@ describe("createResumeDataFromCvmate", () => {
 					parentSelectionItemId: null,
 					sourceType: "project",
 					sourceId: "project-1",
-					sourceTextSnapshot: "CVMate",
+					sourceTextSnapshot: "1story",
 					sourceDataSnapshot: {
 						id: "project-1",
 						masterProfileId: "profile-1",
-						name: "CVMate",
+						name: "1story",
 						company: "Bioarbor",
 						startDate: "2026",
 						endDate: "2026",
@@ -133,7 +133,7 @@ describe("createResumeDataFromCvmate", () => {
 			{
 				id: "selection-project-1",
 				hidden: false,
-				name: "CVMate",
+				name: "1story",
 				period: "2026 - 2026",
 				website: {
 					url: "",
@@ -268,7 +268,7 @@ describe("createResumeDataFromCvmate", () => {
 						name: "Best Project",
 						organizer: "Industry Association",
 						date: "2025",
-						description: "Awarded for CVMate",
+						description: "Awarded for 1story",
 					},
 				},
 				{
@@ -359,7 +359,7 @@ describe("createResumeDataFromCvmate", () => {
 				title: "Best Project",
 				awarder: "Industry Association",
 				date: "2025",
-				description: "<p>Awarded for CVMate</p>",
+				description: "<p>Awarded for 1story</p>",
 			}),
 		]);
 

@@ -139,7 +139,7 @@ beforeEach(() => {
 });
 
 describe("cvmateBuildMaterializeService.materialize", () => {
-	it("creates a Reactive Resume and CVMate document on first materialization", async () => {
+	it("creates a Reactive Resume and 1story document on first materialization", async () => {
 		mockDocumentSelect([]);
 
 		const document = {

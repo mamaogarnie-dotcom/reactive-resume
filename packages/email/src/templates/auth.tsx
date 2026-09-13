@@ -19,7 +19,7 @@ import {
 // ponytail: server dev consumes this source through tsx, which emits React.createElement here.
 void React;
 
-const appName = "CVMate";
+const appName = "1story";
 
 interface AuthEmailLayoutProps {
 	preview: string;

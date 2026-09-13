@@ -16,9 +16,9 @@ export const recommendationsRouter = {
 		.route({
 			method: "POST",
 			path: "/cvmate/builds/{id}/recommendations",
-			tags: ["CVMate CV Builds"],
+			tags: ["1story CV Builds"],
 			operationId: "generateCvmateBuildRecommendations",
-			summary: "Generate CVMate content recommendations",
+			summary: "Generate 1story content recommendations",
 			description:
 				"Uses the frozen job-offer snapshot and frozen candidate selection snapshots to recommend existing CV content and detect unsupported required or preferred job requirements. AI cannot create candidate facts and the user's selected flags are not changed. Requires authentication.",
 			successDescription: "Updated selection recommendations and CV gaps.",
