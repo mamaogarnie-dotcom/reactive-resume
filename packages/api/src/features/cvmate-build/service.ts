@@ -1,3 +1,5 @@
+import { ORPCError } from "@orpc/client";
+import { db } from "@reactive-resume/db/client";
 import type {
 	CvmateBuildStatus,
 	CvmateBuildStep,
@@ -5,11 +7,13 @@ import type {
 	CvmateRequirementPriority,
 	CvmateSelectionSourceType,
 } from "@reactive-resume/db/schema";
-import { ORPCError } from "@orpc/client";
-import { and, asc, desc, eq } from "drizzle-orm";
-import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
+import {
+resolveRecruitmentClauseContent,
+resolveRecruitmentClauseLanguage,
+} from "@reactive-resume/utils/recruitment-clause";
 import { generateId } from "@reactive-resume/utils/string";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { cvmateJobOfferService } from "../cvmate-job-offer/service";
 import { cvmateProfileService } from "../cvmate-profile/service";
 
@@ -299,6 +303,7 @@ function snapshotSelectionSource(
 profile: CurrentProfile,
 sourceType: CvmateSelectionSourceType,
 sourceId: string,
+targetLanguage: string | null,
 ) {
 const source = findSelectionSource(profile, sourceType, sourceId);
 
@@ -308,9 +313,34 @@ message: "The selected Master Profile source does not exist.",
 });
 }
 
+let sourceTextSnapshot = getSelectionSourceText(sourceType, source);
 let sourceDataSnapshot: Record<string, unknown>;
 
-if (sourceType === "custom_section_item") {
+if (sourceType === "clause") {
+const sourceClause = source as CurrentProfile["clauses"][number];
+const language = resolveRecruitmentClauseLanguage(targetLanguage);
+const languageVariant = profile.clauses.find(
+(candidate) =>
+candidate.scope === sourceClause.scope &&
+candidate.language === language,
+);
+
+const content = resolveRecruitmentClauseContent(
+sourceClause.scope,
+language,
+languageVariant?.content ?? null,
+);
+
+sourceTextSnapshot = content;
+sourceDataSnapshot = structuredClone({
+...sourceClause,
+...(languageVariant ?? {}),
+scope: sourceClause.scope,
+language,
+isEnabled: true,
+content,
+});
+} else if (sourceType === "custom_section_item") {
 const customItem =
 source as CurrentProfile["customSectionItems"][number];
 const section = profile.sections.find(
@@ -331,21 +361,18 @@ sourceDataSnapshot = structuredClone({
 section,
 });
 } else {
-sourceDataSnapshot = structuredClone(source) as Record<
-string,
-unknown
->;
+sourceDataSnapshot = structuredClone(source) as Record<string, unknown>;
 }
 
 return {
-sourceTextSnapshot: getSelectionSourceText(sourceType, source),
+sourceTextSnapshot,
 sourceDataSnapshot,
 };
 }
-
 function buildInitialSelectionItems(
 profile: CurrentProfile,
 cvBuildId: string,
+targetLanguage: string | null,
 ) {
 const rows: Array<{
 id: string;
@@ -365,11 +392,13 @@ const add = (
 sourceType: CvmateSelectionSourceType,
 sourceId: string,
 parentSelectionItemId: string | null = null,
+selected = false,
 ) => {
 const snapshot = snapshotSelectionSource(
 profile,
 sourceType,
 sourceId,
+targetLanguage,
 );
 const id = generateId();
 
@@ -381,7 +410,7 @@ sourceType,
 sourceId,
 sourceTextSnapshot: snapshot.sourceTextSnapshot,
 sourceDataSnapshot: snapshot.sourceDataSnapshot,
-selected: false,
+selected,
 sortOrder,
 });
 
@@ -440,7 +469,41 @@ for (const item of profile.references) add("reference", item.id);
 for (const item of profile.licenses) add("license", item.id);
 for (const item of profile.listItems)
 add("profile_list_item", item.id);
-for (const item of profile.clauses) add("clause", item.id);
+
+const enabledClauseScopes = [
+...new Set(
+profile.clauses
+.filter((item) => item.isEnabled)
+.map((item) => item.scope),
+),
+];
+
+if (enabledClauseScopes.length > 1) {
+throw new ORPCError("BAD_REQUEST", {
+message:
+"The Master Profile contains more than one enabled recruitment clause.",
+});
+}
+
+const enabledClauseScope = enabledClauseScopes[0];
+
+if (enabledClauseScope) {
+const selectedClause = profile.clauses.find(
+(item) =>
+item.scope === enabledClauseScope &&
+item.isEnabled,
+);
+
+if (!selectedClause) {
+throw new ORPCError("BAD_REQUEST", {
+message:
+"The enabled recruitment clause could not be resolved.",
+});
+}
+
+add("clause", selectedClause.id, null, true);
+}
+
 for (const item of profile.photos) add("profile_photo", item.id);
 for (const item of profile.customSectionItems)
 add("custom_section_item", item.id);
@@ -458,6 +521,7 @@ const snapshot = snapshotSelectionSource(
 profile,
 sourceType,
 sourceId,
+build.targetLanguage,
 );
 
 return {
@@ -574,7 +638,7 @@ jobOfferId === null
 ? null
 : await getJobOfferSnapshot(jobOfferId, input.userId);
 
-const selectionItems = buildInitialSelectionItems(profile, id);
+const selectionItems = buildInitialSelectionItems(profile, id, input.targetLanguage ?? null);
 
 await db.transaction(async (tx) => {
 await tx.insert(schema.cvmateCvBuild).values({

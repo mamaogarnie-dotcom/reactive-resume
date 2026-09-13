@@ -7805,3 +7805,30 @@ msgstr "Kod musi składać się z 6 cyfr."
 #: LANG-10 targeted localization
 msgid "Template not found"
 msgstr "Nie znaleziono szablonu"
+
+msgid "Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV language."
+msgstr "Wybierz jedną klauzulę rekrutacyjną. 1story automatycznie użyje wersji polskiej lub angielskiej zgodnie z językiem CV."
+
+msgid "Do not add a recruitment clause"
+msgstr "Nie dodawaj klauzuli rekrutacyjnej"
+
+msgid "Current recruitment only"
+msgstr "Tylko aktualna rekrutacja"
+
+msgid "Current and future recruitment processes"
+msgstr "Aktualna i przyszłe rekrutacje"
+
+msgid "Polish version"
+msgstr "Wersja polska"
+
+msgid "English version"
+msgstr "Wersja angielska"
+
+msgid "1story default"
+msgstr "Domyślna treść 1story"
+
+msgid "Custom text"
+msgstr "Własna treść"
+
+msgid "Restore default"
+msgstr "Przywróć domyślną"

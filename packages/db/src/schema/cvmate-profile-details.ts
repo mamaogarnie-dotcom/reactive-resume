@@ -1,10 +1,10 @@
+import { generateId } from "@reactive-resume/utils/string";
 import { sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import * as pg from "drizzle-orm/pg-core";
-import { generateId } from "@reactive-resume/utils/string";
 import { cvmateMasterProfile, cvmateProfileSection } from "./cvmate-profile";
 
-export type CvmateClauseScope = "current" | "future";
+export type CvmateClauseScope = "current" | "current_and_future";
 export type CvmateClauseLanguage = "pl" | "en";
 
 const hasText = (value: AnyPgColumn) => sql`coalesce(btrim(${value}), '') <> ''`;

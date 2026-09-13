@@ -1,6 +1,6 @@
+import * as schema from "@reactive-resume/db/schema";
 import { createSelectSchema } from "drizzle-zod";
 import z from "zod";
-import * as schema from "@reactive-resume/db/schema";
 
 const trimmedNullableString = z.string().trim().nullable();
 const nonBlankString = z.string().trim().min(1);
@@ -59,7 +59,7 @@ const profileSectionKindSchema = z.enum([
 ]);
 
 const profileListItemKindSchema = z.enum(["competency", "software", "tool", "interest"]);
-const clauseScopeSchema = z.enum(["current", "future"]);
+const clauseScopeSchema = z.enum(["current", "current_and_future"]);
 const clauseLanguageSchema = z.enum(["pl", "en"]);
 
 const masterProfileSchema = createSelectSchema(schema.cvmateMasterProfile, {
@@ -1015,8 +1015,8 @@ partialDateSchema as cvmatePartialDateSchema,
 profileListItemKindSchema as cvmateProfileListItemKindSchema,
 profileListItemSchema as cvmateProfileListItemSchema,
 profilePhotoSchema as cvmateProfilePhotoSchema,
-profileSectionSchema as cvmateProfileSectionSchema,
 profileSectionKindSchema as cvmateProfileSectionKindSchema,
+profileSectionSchema as cvmateProfileSectionSchema,
 projectSchema as cvmateProjectSchema,
 referenceSchema as cvmateReferenceSchema,
 volunteerSchema as cvmateVolunteerSchema,

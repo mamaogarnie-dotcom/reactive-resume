@@ -1,8 +1,8 @@
 import { ORPCError } from "@orpc/client";
-import { and, asc, eq, inArray } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { generateId } from "@reactive-resume/utils/string";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import sharp from "sharp";
 import {
 getStorageService,
@@ -125,7 +125,7 @@ date?: string | null | undefined;
 description?: string | null | undefined;
 sortOrder?: number | undefined;
 };
-type ClauseScope = "current" | "future";
+type ClauseScope = "current" | "current_and_future";
 type ClauseLanguage = "pl" | "en";
 
 type ClauseFields = {

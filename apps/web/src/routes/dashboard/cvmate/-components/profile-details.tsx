@@ -2,10 +2,14 @@ import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
+import {
+getDefaultRecruitmentClause,
+type RecruitmentClauseLanguage,
+type RecruitmentClauseScope,
+} from "@reactive-resume/utils/recruitment-clause";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
-
 import { orpc } from "@/libs/orpc/client";
 
 type ProfileAggregate = NonNullable<
@@ -879,159 +883,295 @@ function ListSection({
 	);
 }
 
-type ClauseKey = "current:pl" | "current:en" | "future:pl" | "future:en";
-type ClauseDraft = { enabled: boolean; content: string };
+type ClauseScope = RecruitmentClauseScope;
+type ClauseLanguage = RecruitmentClauseLanguage;
+type ClauseKey = `${ClauseScope}:${ClauseLanguage}`;
 
-const clauseDefinitions: readonly {
-	key: ClauseKey;
-	scope: "current" | "future";
-	language: "pl" | "en";
-	title: MessageDescriptor;
+type ClauseDraft = {
+content: string;
+isDefault: boolean;
+};
+
+const clauseScopeDefinitions: readonly {
+scope: ClauseScope;
+title: MessageDescriptor;
 }[] = [
-	{
-		key: "current:pl",
-		scope: "current",
-		language: "pl",
-		title: msg`Current recruitment — Polish`,
-	},
-	{
-		key: "current:en",
-		scope: "current",
-		language: "en",
-		title: msg`Current recruitment — English`,
-	},
-	{
-		key: "future:pl",
-		scope: "future",
-		language: "pl",
-		title: msg`Future recruitment — Polish`,
-	},
-	{
-		key: "future:en",
-		scope: "future",
-		language: "en",
-		title: msg`Future recruitment — English`,
-	},
+{
+scope: "current",
+title: msg`Current recruitment only`,
+},
+{
+scope: "current_and_future",
+title: msg`Current and future recruitment processes`,
+},
 ];
 
+const clauseLanguageDefinitions: readonly {
+language: ClauseLanguage;
+title: MessageDescriptor;
+}[] = [
+{
+language: "pl",
+title: msg`Polish version`,
+},
+{
+language: "en",
+title: msg`English version`,
+},
+];
+
+function clauseKey(scope: ClauseScope, language: ClauseLanguage): ClauseKey {
+return `${scope}:${language}`;
+}
+
 function emptyClauseDrafts(): Record<ClauseKey, ClauseDraft> {
-	return {
-		"current:pl": { enabled: false, content: "" },
-		"current:en": { enabled: false, content: "" },
-		"future:pl": { enabled: false, content: "" },
-		"future:en": { enabled: false, content: "" },
-	};
+return {
+"current:pl": {
+content: getDefaultRecruitmentClause("current", "pl"),
+isDefault: true,
+},
+"current:en": {
+content: getDefaultRecruitmentClause("current", "en"),
+isDefault: true,
+},
+"current_and_future:pl": {
+content: getDefaultRecruitmentClause("current_and_future", "pl"),
+isDefault: true,
+},
+"current_and_future:en": {
+content: getDefaultRecruitmentClause("current_and_future", "en"),
+isDefault: true,
+},
+};
 }
 
 function ClausesSection() {
-	const { i18n } = useLingui();
-	const profileQuery = useQuery(
-		orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
-	);
-	const [drafts, setDrafts] =
-		useState<Record<ClauseKey, ClauseDraft>>(emptyClauseDrafts);
+const { i18n } = useLingui();
+const profileQuery = useQuery(
+orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
+);
+const [drafts, setDrafts] =
+useState<Record<ClauseKey, ClauseDraft>>(emptyClauseDrafts);
 
-	useEffect(() => {
-		const next = emptyClauseDrafts();
+useEffect(() => {
+const next = emptyClauseDrafts();
 
-		for (const clause of profileQuery.data?.clauses ?? []) {
-			const key = `${clause.scope}:${clause.language}` as ClauseKey;
-			next[key] = {
-				enabled: clause.isEnabled,
-				content: clause.content ?? "",
-			};
-		}
-
-		setDrafts(next);
-	}, [profileQuery.data?.clauses]);
-
-	const saveMutation = useMutation({
-		mutationFn: (definition: (typeof clauseDefinitions)[number]) =>
-			orpc.cvmateProfile.upsertClause.call({
-				scope: definition.scope,
-				language: definition.language,
-				isEnabled: drafts[definition.key].enabled,
-				content: nullable(drafts[definition.key].content),
-			}),
-		onSuccess: () => void profileQuery.refetch(),
-	});
-
-	return (
-		<section className="space-y-4">
-			<div>
-				<h2 className="text-lg font-semibold">
-					<Trans>Recruitment clauses</Trans>
-				</h2>
-				<p className="text-sm text-muted-foreground">
-					<Trans>
-						Store reusable consent clauses and switch them on only when needed.
-					</Trans>
-				</p>
-			</div>
-
-			<div className="grid gap-3 lg:grid-cols-2">
-				{clauseDefinitions.map((definition) => {
-					const draft = drafts[definition.key];
-
-					return (
-						<div
-							key={definition.key}
-							className="space-y-3 rounded-md border p-3"
-						>
-							<div className="flex items-center justify-between gap-3">
-								<p className="font-medium text-sm">
-									{i18n.t(definition.title)}
-								</p>
-								<label className="flex items-center gap-2 text-sm">
-									<input
-										type="checkbox"
-										checked={draft.enabled}
-										onChange={(event) =>
-											setDrafts((current) => ({
-												...current,
-												[definition.key]: {
-													...current[definition.key],
-													enabled: event.target.checked,
-												},
-											}))
-										}
-									/>
-									<Trans>Enabled</Trans>
-								</label>
-							</div>
-							<textarea
-								className={textareaClassName}
-								value={draft.content}
-								onChange={(event) =>
-									setDrafts((current) => ({
-										...current,
-										[definition.key]: {
-											...current[definition.key],
-											content: event.target.value,
-										},
-									}))
-								}
-							/>
-							<button
-								type="button"
-								className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
-								disabled={saveMutation.isPending}
-								onClick={() => saveMutation.mutate(definition)}
-							>
-								{saveMutation.isPending ? (
-									<Trans>Saving...</Trans>
-								) : (
-									<Trans>Save clause</Trans>
-								)}
-							</button>
-						</div>
-					);
-				})}
-			</div>
-		</section>
-	);
+for (const clause of profileQuery.data?.clauses ?? []) {
+const key = clauseKey(clause.scope, clause.language);
+next[key] = {
+content:
+clause.content ??
+getDefaultRecruitmentClause(clause.scope, clause.language),
+isDefault: clause.content === null,
+};
 }
 
+setDrafts(next);
+}, [profileQuery.data?.clauses]);
+
+const selectedScope =
+clauseScopeDefinitions.find((definition) =>
+(profileQuery.data?.clauses ?? []).some(
+(clause) =>
+clause.scope === definition.scope && clause.isEnabled,
+),
+)?.scope ?? null;
+
+const selectionMutation = useMutation({
+mutationFn: async (nextScope: ClauseScope | null) => {
+const allScopes = clauseScopeDefinitions.map(
+(definition) => definition.scope,
+);
+
+const orderedScopes =
+nextScope === null
+? allScopes
+: [
+...allScopes.filter((scope) => scope !== nextScope),
+nextScope,
+];
+
+for (const scope of orderedScopes) {
+for (const definition of clauseLanguageDefinitions) {
+await orpc.cvmateProfile.upsertClause.call({
+scope,
+language: definition.language,
+isEnabled: nextScope === scope,
+});
+}
+}
+},
+onSuccess: () => void profileQuery.refetch(),
+});
+
+const saveMutation = useMutation({
+mutationFn: ({
+scope,
+language,
+}: {
+scope: ClauseScope;
+language: ClauseLanguage;
+}) => {
+const draft = drafts[clauseKey(scope, language)];
+
+return orpc.cvmateProfile.upsertClause.call({
+scope,
+language,
+isEnabled: selectedScope === scope,
+content: draft.isDefault ? null : draft.content.trim() || null,
+});
+},
+onSuccess: () => void profileQuery.refetch(),
+});
+
+const restoreMutation = useMutation({
+mutationFn: ({
+scope,
+language,
+}: {
+scope: ClauseScope;
+language: ClauseLanguage;
+}) =>
+orpc.cvmateProfile.upsertClause.call({
+scope,
+language,
+isEnabled: selectedScope === scope,
+content: null,
+}),
+onSuccess: () => void profileQuery.refetch(),
+});
+
+const mutationPending =
+selectionMutation.isPending ||
+saveMutation.isPending ||
+restoreMutation.isPending;
+
+return (
+<section className="space-y-4">
+<div>
+<h2 className="text-lg font-semibold">
+<Trans>Recruitment clauses</Trans>
+</h2>
+<p className="text-sm text-muted-foreground">
+<Trans>
+Choose one recruitment clause. 1story will automatically use the
+Polish or English version based on the CV language.
+</Trans>
+</p>
+</div>
+
+<div className="space-y-2 rounded-md border p-3">
+<label className="flex items-center gap-2 text-sm">
+<input
+type="radio"
+name="recruitment-clause-scope"
+checked={selectedScope === null}
+disabled={mutationPending}
+onChange={() => selectionMutation.mutate(null)}
+/>
+<Trans>Do not add a recruitment clause</Trans>
+</label>
+</div>
+
+<div className="space-y-4">
+{clauseScopeDefinitions.map((scopeDefinition) => (
+<div
+key={scopeDefinition.scope}
+className="space-y-4 rounded-md border p-4"
+>
+<label className="flex items-center gap-2 font-medium text-sm">
+<input
+type="radio"
+name="recruitment-clause-scope"
+checked={selectedScope === scopeDefinition.scope}
+disabled={mutationPending}
+onChange={() =>
+selectionMutation.mutate(scopeDefinition.scope)
+}
+/>
+{i18n.t(scopeDefinition.title)}
+</label>
+
+<div className="grid gap-4 lg:grid-cols-2">
+{clauseLanguageDefinitions.map((languageDefinition) => {
+const key = clauseKey(
+scopeDefinition.scope,
+languageDefinition.language,
+);
+const draft = drafts[key];
+
+return (
+<div key={key} className="space-y-3">
+<div className="flex items-center justify-between gap-3">
+<p className="font-medium text-sm">
+{i18n.t(languageDefinition.title)}
+</p>
+<p className="text-muted-foreground text-xs">
+{draft.isDefault ? (
+<Trans>1story default</Trans>
+) : (
+<Trans>Custom text</Trans>
+)}
+</p>
+</div>
+
+<textarea
+className={textareaClassName}
+value={draft.content}
+onChange={(event) =>
+setDrafts((current) => ({
+...current,
+[key]: {
+content: event.target.value,
+isDefault: false,
+},
+}))
+}
+/>
+
+<div className="flex flex-wrap gap-2">
+<button
+type="button"
+className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+disabled={mutationPending}
+onClick={() =>
+saveMutation.mutate({
+scope: scopeDefinition.scope,
+language: languageDefinition.language,
+})
+}
+>
+{saveMutation.isPending ? (
+<Trans>Saving...</Trans>
+) : (
+<Trans>Save clause</Trans>
+)}
+</button>
+
+<button
+type="button"
+className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+disabled={mutationPending || draft.isDefault}
+onClick={() =>
+restoreMutation.mutate({
+scope: scopeDefinition.scope,
+language: languageDefinition.language,
+})
+}
+>
+<Trans>Restore default</Trans>
+</button>
+</div>
+</div>
+);
+})}
+</div>
+</div>
+))}
+</div>
+</section>
+);
+}
 export function ProfileDetailsSection() {
 	return (
 		<div className="space-y-8">
