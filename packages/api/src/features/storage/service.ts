@@ -10,6 +10,7 @@ import {
 import sharp from "sharp";
 import { env } from "@reactive-resume/env/server";
 import { getLocalDataDirectory } from "@reactive-resume/utils/monorepo.node";
+import { generateId } from "@reactive-resume/utils/string";
 
 interface StorageWriteInput {
 	key: string;
@@ -53,7 +54,17 @@ const CONTENT_TYPE_MAP: Record<string, string> = {
 
 const DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
-const IMAGE_MIME_TYPES = ["image/gif", "image/png", "image/jpeg", "image/webp"];
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+const IMAGE_MIME_TYPES = new Set(["image/gif", "image/png", "image/jpeg", "image/webp"]);
+const PUBLIC_UPLOAD_MIME_TYPES = new Set([...IMAGE_MIME_TYPES, "application/pdf"]);
+
+const IMAGE_FORMAT_TO_MIME: Record<string, string> = {
+	jpeg: "image/jpeg",
+	png: "image/png",
+	webp: "image/webp",
+	gif: "image/gif",
+};
 
 const EXTENSION_BY_CONTENT_TYPE: Record<string, string> = {
 	"image/jpeg": "jpeg",
@@ -63,13 +74,11 @@ const EXTENSION_BY_CONTENT_TYPE: Record<string, string> = {
 	"application/pdf": "pdf",
 };
 
-// Derive the stored key's extension from the content type so the static handler serves each
-// file correctly instead of mislabeling it. Images normally arrive as JPEG (sharp), but with
-// FLAG_DISABLE_IMAGE_PROCESSING they keep their original type — hence all image types are
-// mapped, not just JPEG. Non-image uploads (e.g. a cover-letter PDF) get their real extension.
+// Derive the stored key's extension from the validated content type. Keys use a random ID
+// instead of a timestamp so concurrent uploads cannot overwrite one another.
 function buildFileKey(userId: string, contentType: string): string {
 	const extension = EXTENSION_BY_CONTENT_TYPE[contentType] ?? "bin";
-	return `uploads/${userId}/pictures/${Date.now()}.${extension}`;
+	return normalizeStorageKey(`uploads/${userId}/pictures/${generateId()}.${extension}`);
 }
 
 export function buildPublicUrl(path: string): string {
@@ -84,7 +93,47 @@ export function inferContentType(filename: string): string {
 }
 
 export function isImageFile(mimeType: string): boolean {
-	return IMAGE_MIME_TYPES.includes(mimeType);
+	return IMAGE_MIME_TYPES.has(mimeType);
+}
+
+export function isAllowedPublicUpload(mimeType: string): boolean {
+	return PUBLIC_UPLOAD_MIME_TYPES.has(mimeType);
+}
+
+export function normalizeStorageKey(key: string): string {
+	const normalizedKey = key.trim().replace(/^[/\\]+/, "");
+	const segments = normalizedKey.split(/[/\\]+/).filter(Boolean);
+
+	if (segments.length === 0 || segments.some((segment) => segment === "." || segment === "..")) {
+		throw new Error("Invalid storage key");
+	}
+
+	return segments.join("/");
+}
+
+export function hasPdfSignature(data: Uint8Array): boolean {
+	return (
+		data.length >= 5 && data[0] === 0x25 && data[1] === 0x50 && data[2] === 0x44 && data[3] === 0x46 && data[4] === 0x2d
+	);
+}
+
+export async function inspectImageUpload(data: Uint8Array, declaredMimeType: string) {
+	if (!isImageFile(declaredMimeType)) {
+		throw new Error("Unsupported image media type");
+	}
+
+	const metadata = await sharp(data).metadata();
+	const actualMimeType = metadata.format ? IMAGE_FORMAT_TO_MIME[metadata.format] : undefined;
+
+	if (!actualMimeType || actualMimeType !== declaredMimeType) {
+		throw new Error("Image content does not match its declared media type");
+	}
+
+	return {
+		width: metadata.width ?? null,
+		height: metadata.height ?? null,
+		mediaType: actualMimeType,
+	};
 }
 
 interface ProcessedImage {
@@ -93,16 +142,21 @@ interface ProcessedImage {
 }
 
 export async function processImageForUpload(file: File): Promise<ProcessedImage> {
-	const fileBuffer = await file.arrayBuffer();
+	if (file.size > MAX_UPLOAD_BYTES) {
+		throw new Error("File size must be less than 10MB");
+	}
+
+	const data = new Uint8Array(await file.arrayBuffer());
+	await inspectImageUpload(data, file.type);
 
 	if (env.FLAG_DISABLE_IMAGE_PROCESSING) {
 		return {
-			data: new Uint8Array(fileBuffer),
+			data,
 			contentType: file.type,
 		};
 	}
 
-	const processedBuffer = await sharp(fileBuffer)
+	const processedBuffer = await sharp(data)
 		.resize(800, 800, { fit: "inside", withoutEnlargement: true })
 		.jpeg({ quality: 80 })
 		.toBuffer();
@@ -212,14 +266,8 @@ class LocalStorageService implements StorageService {
 	}
 
 	private resolvePath(key: string): string {
-		const normalizedKey = key.replace(/^\/*/, "");
-		const segments = normalizedKey
-			.split(/[/\\]+/)
-			.filter((segment) => segment.length > 0 && segment !== "." && segment !== "..");
-
-		if (segments.length === 0) throw new Error("Invalid storage key");
-
-		return join(this.rootDirectory, ...segments);
+		const normalizedKey = normalizeStorageKey(key);
+		return join(this.rootDirectory, ...normalizedKey.split("/"));
 	}
 }
 
@@ -344,7 +392,19 @@ interface UploadFileResult {
 }
 
 export async function uploadFile(input: UploadFileInput): Promise<UploadFileResult> {
+	if (input.data.byteLength > MAX_UPLOAD_BYTES) {
+		throw new Error("File size must be less than 10MB");
+	}
+
+	if (!isAllowedPublicUpload(input.contentType)) {
+		throw new Error("Unsupported public upload media type");
+	}
+
 	const key = buildFileKey(input.userId, input.contentType);
 	await getStorageService().write({ key, data: input.data, contentType: input.contentType });
 	return { key, url: buildPublicUrl(key) };
 }
+
+export const __testables = {
+	buildFileKey,
+};

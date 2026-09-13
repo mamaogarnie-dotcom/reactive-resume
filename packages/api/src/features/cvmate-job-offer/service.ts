@@ -1,11 +1,16 @@
-import sharp from "sharp";
 import type { CvmateJobRequirementCategory, CvmateRequirementPriority } from "@reactive-resume/db/schema";
 import { ORPCError } from "@orpc/client";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { generateId } from "@reactive-resume/utils/string";
-import { getStorageService, uploadFile } from "../storage/service";
+import {
+	getStorageService,
+	hasPdfSignature,
+	inspectImageUpload,
+	MAX_UPLOAD_BYTES,
+	uploadFile,
+} from "../storage/service";
 
 const ALLOWED_ASSET_MEDIA_TYPES = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp", "image/gif"]);
 
@@ -99,9 +104,7 @@ export const cvmateJobOfferService = {
 		return rows.map(stripUserId);
 	},
 
-	getById: async (input: { id: string; userId: string }) => {
-		return getOfferDetail(input.id, input.userId);
-	},
+	getById: (input: { id: string; userId: string }) => getOfferDetail(input.id, input.userId),
 
 	create: async (input: JobOfferEditableFields & { userId: string }) => {
 		const { userId, ...fields } = input;
@@ -174,6 +177,10 @@ export const cvmateJobOfferService = {
 			});
 		}
 
+		if (input.file.size > MAX_UPLOAD_BYTES) {
+			throw new ORPCError("BAD_REQUEST", { message: "File size must be less than 10MB." });
+		}
+
 		const data = new Uint8Array(await input.file.arrayBuffer());
 		const mediaType = input.file.type;
 
@@ -182,12 +189,16 @@ export const cvmateJobOfferService = {
 
 		if (mediaType.startsWith("image/")) {
 			try {
-				const metadata = await sharp(data).metadata();
-				width = metadata.width ?? null;
-				height = metadata.height ?? null;
+				const metadata = await inspectImageUpload(data, mediaType);
+				width = metadata.width;
+				height = metadata.height;
 			} catch {
-				throw new ORPCError("BAD_REQUEST", { message: "The uploaded image is invalid or corrupted." });
+				throw new ORPCError("BAD_REQUEST", {
+					message: "The uploaded image is invalid, corrupted, or does not match its declared type.",
+				});
 			}
+		} else if (!hasPdfSignature(data)) {
+			throw new ORPCError("BAD_REQUEST", { message: "The uploaded PDF is invalid or corrupted." });
 		}
 
 		const uploaded = await uploadFile({

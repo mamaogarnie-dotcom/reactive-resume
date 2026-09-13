@@ -13,6 +13,15 @@ const envMock = vi.hoisted(() => ({
 }));
 
 vi.mock("@reactive-resume/env/server", () => ({ env: envMock }));
+
+const sharpMetadataMock = vi.hoisted(() =>
+	vi.fn(async () => ({
+		width: 100,
+		height: 100,
+		format: "png",
+	})),
+);
+
 // sharp is exercised by processImageForUpload; keep it out of the import graph entirely
 // because resolving it loads native bindings we can't rely on in CI.
 vi.mock("sharp", () => {
@@ -21,7 +30,7 @@ vi.mock("sharp", () => {
 		jpeg: () => chain,
 		rotate: () => chain,
 		toBuffer: async () => Buffer.from("processed"),
-		metadata: async () => ({ width: 100, height: 100 }),
+		metadata: sharpMetadataMock,
 	};
 	return { default: () => chain };
 });
@@ -33,9 +42,19 @@ vi.mock("@aws-sdk/client-s3", () => ({
 	ListObjectsV2Command: vi.fn(),
 }));
 
-const { buildPublicUrl, getStorageService, inferContentType, isImageFile, processImageForUpload } = await import(
-	"./service"
-);
+const {
+	MAX_UPLOAD_BYTES,
+	__testables,
+	buildPublicUrl,
+	getStorageService,
+	hasPdfSignature,
+	inferContentType,
+	inspectImageUpload,
+	isAllowedPublicUpload,
+	isImageFile,
+	normalizeStorageKey,
+	processImageForUpload,
+} = await import("./service");
 
 const makeFile = (bytes: Uint8Array, type = "image/png") =>
 	({
@@ -87,7 +106,7 @@ describe("inferContentType", () => {
 });
 
 describe("processImageForUpload", () => {
-	it("returns the file untouched when image processing is disabled", async () => {
+	it("returns a validated image untouched when image processing is disabled", async () => {
 		envMock.FLAG_DISABLE_IMAGE_PROCESSING = true;
 		const file = makeFile(new Uint8Array([1, 2, 3, 4]), "image/png");
 
@@ -97,23 +116,46 @@ describe("processImageForUpload", () => {
 		expect(Array.from(result.data)).toEqual([1, 2, 3, 4]);
 	});
 
-	it("re-encodes to JPEG via sharp when processing is enabled", async () => {
+	it("re-encodes a validated image to JPEG when processing is enabled", async () => {
 		envMock.FLAG_DISABLE_IMAGE_PROCESSING = false;
 		const file = makeFile(new Uint8Array([5, 6, 7, 8]), "image/png");
 
 		const result = await processImageForUpload(file);
 
 		expect(result.contentType).toBe("image/jpeg");
-		// Sharp mock returns "processed" — ensure we got something not equal to the input.
 		expect(result.data.length).toBeGreaterThan(0);
 		expect(Array.from(result.data)).not.toEqual([5, 6, 7, 8]);
+	});
+
+	it("rejects a declared image type that does not match decoded content", async () => {
+		sharpMetadataMock.mockResolvedValueOnce({
+			width: 100,
+			height: 100,
+			format: "jpeg",
+		});
+
+		await expect(inspectImageUpload(new Uint8Array([1, 2, 3]), "image/png")).rejects.toThrow(
+			"Image content does not match its declared media type",
+		);
+	});
+
+	it("rejects oversized images before reading their bytes", async () => {
+		const arrayBuffer = vi.fn(async () => new ArrayBuffer(0));
+		const file = {
+			arrayBuffer,
+			size: MAX_UPLOAD_BYTES + 1,
+			type: "image/png",
+		} as unknown as File;
+
+		await expect(processImageForUpload(file)).rejects.toThrow("File size must be less than 10MB");
+		expect(arrayBuffer).not.toHaveBeenCalled();
 	});
 });
 
 describe("isImageFile", () => {
 	it("returns true for supported image mime types", () => {
 		for (const type of ["image/gif", "image/png", "image/jpeg", "image/webp"]) {
-			expect(isImageFile(type), type).toBe(true);
+			expect(isImageFile(type)).toBe(true);
 		}
 	});
 
@@ -128,6 +170,43 @@ describe("isImageFile", () => {
 	});
 });
 
+describe("public upload validation", () => {
+	it("allows only the public image/PDF media types", () => {
+		for (const type of ["image/gif", "image/png", "image/jpeg", "image/webp", "application/pdf"]) {
+			expect(isAllowedPublicUpload(type)).toBe(true);
+		}
+
+		expect(isAllowedPublicUpload("image/svg+xml")).toBe(false);
+		expect(isAllowedPublicUpload("text/html")).toBe(false);
+		expect(isAllowedPublicUpload("application/javascript")).toBe(false);
+	});
+
+	it("requires a PDF magic signature", () => {
+		expect(hasPdfSignature(new TextEncoder().encode("%PDF-1.7\n"))).toBe(true);
+		expect(hasPdfSignature(new TextEncoder().encode("<html>%PDF-1.7</html>"))).toBe(false);
+	});
+});
+
+describe("storage keys", () => {
+	it("normalizes separators but rejects dot-segment traversal", () => {
+		expect(normalizeStorageKey("/uploads/user-1/pictures/photo.png")).toBe("uploads/user-1/pictures/photo.png");
+		expect(normalizeStorageKey("uploads\\user-1\\pictures\\photo.png")).toBe("uploads/user-1/pictures/photo.png");
+
+		expect(() => normalizeStorageKey("../secret.txt")).toThrow("Invalid storage key");
+		expect(() => normalizeStorageKey("uploads/user-1/../user-2/secret.txt")).toThrow("Invalid storage key");
+		expect(() => normalizeStorageKey("uploads\\user-1\\..\\user-2\\secret.txt")).toThrow("Invalid storage key");
+	});
+
+	it("generates distinct user-scoped keys instead of timestamp-only names", () => {
+		const first = __testables.buildFileKey("user-1", "image/png");
+		const second = __testables.buildFileKey("user-1", "image/png");
+
+		expect(first).toMatch(/^uploads\/user-1\/pictures\/.+\.png$/);
+		expect(second).toMatch(/^uploads\/user-1\/pictures\/.+\.png$/);
+		expect(second).not.toBe(first);
+	});
+});
+
 describe("LocalStorageService", () => {
 	it("rejects private writes instead of silently storing them on the local filesystem", async () => {
 		await expect(
@@ -138,5 +217,12 @@ describe("LocalStorageService", () => {
 				private: true,
 			}),
 		).rejects.toThrow("Private storage writes are not supported by the local filesystem backend.");
+	});
+
+	it("rejects traversal keys instead of silently rewriting them", async () => {
+		await expect(getStorageService().read("../outside.txt")).rejects.toThrow("Invalid storage key");
+		await expect(getStorageService().read("uploads\\user-1\\..\\user-2\\secret.txt")).rejects.toThrow(
+			"Invalid storage key",
+		);
 	});
 });

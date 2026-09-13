@@ -10,7 +10,8 @@ const dbMock = vi.hoisted(() => ({
 
 const uploadFileMock = vi.hoisted(() => vi.fn());
 const storageDeleteMock = vi.hoisted(() => vi.fn());
-const sharpMetadataMock = vi.hoisted(() => vi.fn());
+const inspectImageUploadMock = vi.hoisted(() => vi.fn());
+const hasPdfSignatureMock = vi.hoisted(() => vi.fn());
 const generateIdMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@reactive-resume/db/client", () => ({ db: dbMock }));
@@ -48,16 +49,13 @@ vi.mock("@reactive-resume/utils/string", () => ({
 }));
 
 vi.mock("../storage/service", () => ({
+	MAX_UPLOAD_BYTES: 10 * 1024 * 1024,
 	uploadFile: uploadFileMock,
+	inspectImageUpload: inspectImageUploadMock,
+	hasPdfSignature: hasPdfSignatureMock,
 	getStorageService: () => ({
 		delete: storageDeleteMock,
 	}),
-}));
-
-vi.mock("sharp", () => ({
-	default: vi.fn(() => ({
-		metadata: sharpMetadataMock,
-	})),
 }));
 
 const { cvmateJobOfferService } = await import("./service");
@@ -106,6 +104,7 @@ const requirement = {
 const createSelectChain = (rows: unknown[]) => {
 	const whereResult = {
 		orderBy: vi.fn(() => Promise.resolve(rows)),
+		// biome-ignore lint/suspicious/noThenProperty: Intentional thenable mock for Drizzle query behavior.
 		then: <TResult1 = unknown[], TResult2 = never>(
 			onfulfilled?: ((value: unknown[]) => TResult1 | PromiseLike<TResult1>) | null,
 			onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
@@ -167,7 +166,8 @@ beforeEach(() => {
 
 	uploadFileMock.mockReset();
 	storageDeleteMock.mockReset();
-	sharpMetadataMock.mockReset();
+	inspectImageUploadMock.mockReset();
+	hasPdfSignatureMock.mockReset();
 	generateIdMock.mockReset();
 
 	generateIdMock.mockReturnValue("generated-id");
@@ -178,11 +178,12 @@ beforeEach(() => {
 	});
 
 	storageDeleteMock.mockResolvedValue(true);
-
-	sharpMetadataMock.mockResolvedValue({
+	inspectImageUploadMock.mockResolvedValue({
 		width: 1200,
 		height: 2000,
+		mediaType: "image/png",
 	});
+	hasPdfSignatureMock.mockReturnValue(true);
 
 	setSelectResults([]);
 });
@@ -391,6 +392,75 @@ describe("cvmateJobOfferService.uploadAsset", () => {
 
 		const file = new File([new Uint8Array([1])], "offer.txt", {
 			type: "text/plain",
+		});
+
+		await expect(
+			cvmateJobOfferService.uploadAsset({
+				jobOfferId: "offer-1",
+				userId: "user-1",
+				file,
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(uploadFileMock).not.toHaveBeenCalled();
+		expect(dbMock.transaction).not.toHaveBeenCalled();
+	});
+
+	it("rejects oversized files even when the service is called directly", async () => {
+		setSelectResults([{ ...offer }]);
+
+		const arrayBuffer = vi.fn(async () => new ArrayBuffer(0));
+		const file = {
+			arrayBuffer,
+			name: "offer.pdf",
+			size: 10 * 1024 * 1024 + 1,
+			type: "application/pdf",
+		} as unknown as File;
+
+		await expect(
+			cvmateJobOfferService.uploadAsset({
+				jobOfferId: "offer-1",
+				userId: "user-1",
+				file,
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(arrayBuffer).not.toHaveBeenCalled();
+		expect(uploadFileMock).not.toHaveBeenCalled();
+	});
+
+	it("rejects a PDF whose bytes do not have a PDF signature", async () => {
+		setSelectResults([{ ...offer }]);
+		hasPdfSignatureMock.mockReturnValueOnce(false);
+
+		const file = new File([new TextEncoder().encode("<html>not a pdf</html>")], "offer.pdf", {
+			type: "application/pdf",
+		});
+
+		await expect(
+			cvmateJobOfferService.uploadAsset({
+				jobOfferId: "offer-1",
+				userId: "user-1",
+				file,
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(uploadFileMock).not.toHaveBeenCalled();
+		expect(dbMock.transaction).not.toHaveBeenCalled();
+	});
+
+	it("rejects image content that does not match the declared media type", async () => {
+		setSelectResults([{ ...offer }]);
+		inspectImageUploadMock.mockRejectedValueOnce(new Error("Image content does not match its declared media type"));
+
+		const file = new File([new Uint8Array([1, 2, 3])], "offer.png", {
+			type: "image/png",
 		});
 
 		await expect(

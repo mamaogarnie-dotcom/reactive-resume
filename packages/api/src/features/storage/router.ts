@@ -2,23 +2,27 @@ import { ORPCError } from "@orpc/server";
 import z from "zod";
 import { protectedProcedure } from "../../context";
 import { storageDeleteRateLimit, storageUploadRateLimit } from "../../middleware/rate-limit";
-import { getStorageService, isImageFile, processImageForUpload, uploadFile } from "./service";
+import {
+	getStorageService,
+	hasPdfSignature,
+	isAllowedPublicUpload,
+	isImageFile,
+	MAX_UPLOAD_BYTES,
+	normalizeStorageKey,
+	processImageForUpload,
+	uploadFile,
+} from "./service";
 
 const storageService = getStorageService();
 
-const fileSchema = z.file().max(10 * 1024 * 1024, "File size must be less than 10MB");
+const fileSchema = z
+	.file()
+	.max(MAX_UPLOAD_BYTES, "File size must be less than 10MB")
+	.refine((file) => isAllowedPublicUpload(file.type), "Files must be PDF, JPEG, PNG, WebP, or GIF.");
 
 const filenameSchema = z.object({
-	filename: z.string().min(1).describe("The path or filename of the file to delete."),
+	filename: z.string().trim().min(1).max(512).describe("The path or filename of the file to delete."),
 });
-
-function normalizeKey(input: string): string {
-	return input.trim().replace(/^\/+/, "").split("/").filter(Boolean).join("/");
-}
-
-function isUnsafeStorageKey(key: string): boolean {
-	return key.split("/").some((segment) => segment === "." || segment === "..");
-}
 
 export const storageRouter = {
 	uploadFile: protectedProcedure
@@ -27,7 +31,7 @@ export const storageRouter = {
 			operationId: "uploadFile",
 			summary: "Upload a file",
 			description:
-				"Uploads a file to storage. Images are automatically resized and converted to JPEG format. Maximum file size is 10MB. Requires authentication.",
+				"Uploads a PDF, JPEG, PNG, WebP, or GIF file to storage. Images are validated, resized, and converted to JPEG format. Maximum file size is 10MB. Requires authentication.",
 			successDescription: "The file was uploaded successfully.",
 		})
 		.input(fileSchema)
@@ -47,13 +51,25 @@ export const storageRouter = {
 			let contentType: string;
 
 			if (isImage) {
-				const processed = await processImageForUpload(file);
-				data = processed.data;
-				contentType = processed.contentType;
+				try {
+					const processed = await processImageForUpload(file);
+					data = processed.data;
+					contentType = processed.contentType;
+				} catch {
+					throw new ORPCError("BAD_REQUEST", {
+						message: "The uploaded image is invalid, corrupted, or does not match its declared type.",
+					});
+				}
 			} else {
 				const fileBuffer = await file.arrayBuffer();
 				data = new Uint8Array(fileBuffer);
 				contentType = originalMimeType;
+
+				if (contentType !== "application/pdf" || !hasPdfSignature(data)) {
+					throw new ORPCError("BAD_REQUEST", {
+						message: "The uploaded PDF is invalid or corrupted.",
+					});
+				}
 			}
 
 			const result = await uploadFile({ userId: context.user.id, data, contentType });
@@ -88,13 +104,26 @@ export const storageRouter = {
 			},
 		})
 		.handler(async ({ context, input }): Promise<void> => {
-			const requestedKey = normalizeKey(input.filename);
-			const key = requestedKey.startsWith("uploads/")
-				? requestedKey
-				: normalizeKey(`uploads/${context.user.id}/pictures/${requestedKey}`);
-			const userPrefix = `uploads/${context.user.id}/`;
+			let requestedKey: string;
 
-			if (isUnsafeStorageKey(key) || !key.startsWith(userPrefix)) {
+			try {
+				requestedKey = normalizeStorageKey(input.filename);
+			} catch {
+				throw new ORPCError("FORBIDDEN");
+			}
+
+			const userPrefix = `uploads/${context.user.id}/`;
+			let key: string;
+
+			try {
+				key = requestedKey.startsWith("uploads/")
+					? requestedKey
+					: normalizeStorageKey(`${userPrefix}pictures/${requestedKey}`);
+			} catch {
+				throw new ORPCError("FORBIDDEN");
+			}
+
+			if (!key.startsWith(userPrefix)) {
 				throw new ORPCError("FORBIDDEN");
 			}
 
