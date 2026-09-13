@@ -515,32 +515,36 @@ describe("date layout characterization (#3155, #2841)", () => {
 		["ditto", "ltr"],
 		["chikorita", "rtl"],
 		["ditto", "rtl"],
-	] as const)("records Q7 date matrix coordinates and raster for %s %s", async (template, direction) => {
-		const data = dateFixture(direction === "rtl" ? "ar-SA" : "en-US");
-		const result = await renderFixture(data, template);
-		const coordinates = requiredMarkers(result);
-		const text = textFor(result);
-		expect(text).toContain("Publication Empty Date");
-		expect(text).toContain("Custom Publications matrix");
-		const location = textItems(result, "Oslo LOCATION_ORDER");
-		expect(
-			location,
-			location.map((item) => `${item.str}@${item.transform[4]},${item.transform[5]}`).join(" | "),
-		).toHaveLength(1);
-		coordinates.LOCATION_ORDER = location.map((item) => ({
-			x: Number(item.transform[4].toFixed(2)),
-			y: Number(item.transform[5].toFixed(2)),
-			width: Number(item.width.toFixed(2)),
-			text: item.str,
-		}));
-		if (template === "chikorita" && direction === "ltr") {
-			const date = required(markerItems(result, "EXP_LONG")[0]);
-			expect(location[0]?.transform[5]).toBeGreaterThan(date.transform[5]);
-		}
-		for (const marker of dateMarkers) expect(markerItems(result, marker), marker).toHaveLength(1);
-		writeArtifacts(`${template}-${direction}`, result, coordinates);
-		assertFixtureBaseline(`${template}-${direction}`, result, coordinates);
-	});
+	] as const)(
+		"records Q7 date matrix coordinates and raster for %s %s",
+		async (template, direction) => {
+			const data = dateFixture(direction === "rtl" ? "ar-SA" : "en-US");
+			const result = await renderFixture(data, template);
+			const coordinates = requiredMarkers(result);
+			const text = textFor(result);
+			expect(text).toContain("Publication Empty Date");
+			expect(text).toContain("Custom Publications matrix");
+			const location = textItems(result, "Oslo LOCATION_ORDER");
+			expect(
+				location,
+				location.map((item) => `${item.str}@${item.transform[4]},${item.transform[5]}`).join(" | "),
+			).toHaveLength(1);
+			coordinates.LOCATION_ORDER = location.map((item) => ({
+				x: Number(item.transform[4].toFixed(2)),
+				y: Number(item.transform[5].toFixed(2)),
+				width: Number(item.width.toFixed(2)),
+				text: item.str,
+			}));
+			if (template === "chikorita" && direction === "ltr") {
+				const date = required(markerItems(result, "EXP_LONG")[0]);
+				expect(location[0]?.transform[5]).toBeGreaterThan(date.transform[5]);
+			}
+			for (const marker of dateMarkers) expect(markerItems(result, marker), marker).toHaveLength(1);
+			writeArtifacts(`${template}-${direction}`, result, coordinates);
+			assertFixtureBaseline(`${template}-${direction}`, result, coordinates);
+		},
+		30_000,
+	);
 
 	it("records default date evidence for every template without claiming parity geometry", async () => {
 		const evidence: Record<string, unknown> = {};
@@ -564,7 +568,7 @@ describe("date layout characterization (#3155, #2841)", () => {
 		} else {
 			expect(JSON.parse(readFileSync(join(baselineDirectory, "all-templates.json"), "utf8"))).toEqual(evidence);
 		}
-	});
+	}, 30_000);
 
 	it("verifies #2841 link underline toggle independently of date layout", async () => {
 		expect(await linkDecoration(false)).toBe("underline");

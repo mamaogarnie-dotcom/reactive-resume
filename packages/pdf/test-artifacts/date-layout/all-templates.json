@@ -4,8 +4,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"94a64232003bc0aa5cabbf2a8b2348dda09afea8b9b849c066f06a3448351451",
-			"dad92a02d4650191c0fa329efaecbb900e1da985a1928c4915b39471382ce0c6"
+			"c791e0d9cd5d788d3a1685b004b9aca77b0652e4c8cc91f7728797c8ae955f6b",
+			"16a5eacd261becf7027c8a45ec1a4a492bd64538330f21f4ff0a589ec8813111"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -151,8 +151,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"70a1993501f630837235ee0442264ba9351c95392fffeaa43c5deee80c7ad247",
-			"e9a016fad7cdb59cf09ec7c988261a222b1058bb512f3b176afdda9b25eebeef"
+			"ecc7afed18d756416c73f496d2da62aa8185569fa1a4c64a8cd1df58e2f98aa8",
+			"fde3a039e4300bdd7b143f3b9e9c15602915790162fa028611d97f7de4eb1947"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -298,8 +298,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"d40eb546a701a9a37fb4a97aaf5b7c7eafa726304e583f9d70ef70948b92e29e",
-			"244ed00fb13974f3c18bbed7cfafa217a2f7cb025113a612126d729d3799340d"
+			"3cfedfc2c94770399fa780275ecbe694be181915bd3fc10775da1aa1a1be7a6b",
+			"a82ffacef051c236f3c8657923065dce38d7463eb0970acdfd140086b2922066"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -445,8 +445,8 @@
 		"textItemCount": 88,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"e918144fb978bcc538d6edf9c10adce410b2693c83ca3dc36277285e3ca9e405",
-			"52c479c3e58efb87b3853df81300c3e3e4c9bb760e5e0203a6f99189c522eac4"
+			"74d18c870304d661657fe53023070d0391d3850387dd0a3cded903721128ac55",
+			"5da37d68553698a94a4588fe394259e30ca27b3ae0bd2d3332b9ec4cd96c662e"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -592,8 +592,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"20dcd5d72b3a9dae4fc9eacc235d14309ec108504bc4aa50a355e93f2ff51cd3",
-			"0d1c3194791fe018870e070f04b1e39b0cfd32fcaca090e7de1f9ec9233f2899"
+			"ba545dd0375d7b4fb5ad77cc1b7cac9ebce3711a4fbb7f51358e7e2effa76fa3",
+			"ddfca0cebe18169aa5243c8a867d1774f4d5dabb1f253e39cc62596824345233"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -739,8 +739,8 @@
 		"textItemCount": 88,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"5f0bde730468f4eb2642d861197e1fa400b4ac3d7f7392cb40de220e666ab19f",
-			"6bdec54da543be1f2099d5753746cd6dcb7560cc71f805a13325a7dac27ee893"
+			"decf0cb9395e2b1245b240f4bb8c9873215f1a4989b1a879c58efb78f032e368",
+			"d73efc7e174a8a063a6b57d5e41a88d3dc2ef0fe8ba123b53433859db9c83142"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -886,8 +886,8 @@
 		"textItemCount": 88,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"9fbcffc4e0c3cb8d160371f94a4dede9b84224a4d8009142913bd65aa45f08f4",
-			"9c5bd9f9b31e5d6ef1f73ef73e72a1dcc792651344734068ffb311ab9f77ba4d"
+			"ddc020e51ef2265b64c3cd3f7e8967d966b78c644f85e2faadd61908c47f1ae6",
+			"53b6782592b7e892892e7bd5762bd588a2371bad93734526c95f266e955c4497"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -1033,8 +1033,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"b93a725b79f200ab91a1914a96bd07c259f7b0060e3dd2c765c58021270b0986",
-			"58c0d98acb45cdfb8bdd7b75a74d07cbe17beea473f4f6b08e7052f7aff0b380"
+			"0b9768f0a5d53cf0cbe48ca059e7b1f8d193cf042608ab5daee2cfa43ca35ea9",
+			"7055524d9955a479f9c9df7157a8f33fc4fa9ffa1f4193b15689eafd03326c45"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -1180,8 +1180,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"56eea42ffab93d25e038b1fd411e708cc07c377f350a67cb55bcb6423d50ff49",
-			"68d02d2741097a226889dd396ebbc08c30d03554a667da7dbc08453def126470"
+			"233cae8b4a9275598a70fb49edcf65a4d3d0352fd2b92f3eb6454dd2ba33a259",
+			"a52c0db561135c1b6248898ef44df541c6c10eb6879f37678375c0f8f07ef880"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -1327,8 +1327,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"b68582f685ce63345cb57a64cd20d15cd8c4be76fc3313990d81ecd1dda4d668",
-			"7340fa42411c6033e8e9494094d3d108361d43c776c00350802f1f42d1354354"
+			"1dbb7c5c7e495faecd6b42f5da97e6ac92b02cdba4144a7d91b5deba74a0abce",
+			"9fb5ee9322f112a37d1611e5b9e418732a3cf203d9fd9f173ec73201af8c4428"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -1472,10 +1472,12 @@
 	"meowth": {
 		"pageCount": 2,
 		"textItemCount": 85,
-		"missingMarkers": ["EXP_NO_PERIOD"],
+		"missingMarkers": [
+			"EXP_NO_PERIOD"
+		],
 		"rasterSha256": [
-			"c2810a7899ebddb79df314102c149930fd440b9f41a5685cd201197dd117efb2",
-			"9393a6fa7b5d1a8881a7b5499ab5f8b4fb2b085e0197310e09c6b5e022553946"
+			"bb7bc27f75a0774daa1e75acd9c64a6aae4dfa87c63423ba308cc0491da78d5d",
+			"9ffa5c232bb729fcddf44e8ae503116f707812d31fbd812d861b2288a2ac85f9"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -1614,8 +1616,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"572629027ad7541108e91f20c4861b52a6a9a6cc319c0753c0794206cb7cbb11",
-			"6c653ccf5325ddb9aa048850a732a3f6fba3b76e37edd3a266b26272c7b543b3"
+			"9ac9577a07d820d0eb97afa0b44f06dcfc76e4afb25d2df8da2e239cdcdef31e",
+			"ddfca0cebe18169aa5243c8a867d1774f4d5dabb1f253e39cc62596824345233"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -1761,8 +1763,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"3e982b77e57fd1d9bf57e3acb2c9a3975ac73124311d599fd67a7260589919fb",
-			"7340fa42411c6033e8e9494094d3d108361d43c776c00350802f1f42d1354354"
+			"1f3d22200bd63152f17029af16d06d1a8b7ac9f9fe856809c5515aea50cde176",
+			"9fb5ee9322f112a37d1611e5b9e418732a3cf203d9fd9f173ec73201af8c4428"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -1908,8 +1910,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"e71b95a3b60166447788aae981a92dddf0b34d7f1d70bed788294f75492db6f6",
-			"59f28b8c74354e1f206f1f63088e168d9772fbf20e661bf8adeed3e544f4301b"
+			"1c05c2ef4a6176f4a3aecab4f2ddc904fc9fd643f0a44f3fd62171334e36a1cc",
+			"c0e6c21faff65518fc2fbec6616deb140687e771ad68c7d31ed9a650212bdb3e"
 		],
 		"coordinates": {
 			"EXP_LONG": [
@@ -2055,8 +2057,8 @@
 		"textItemCount": 87,
 		"missingMarkers": [],
 		"rasterSha256": [
-			"b5785640ab77cb1b69c085d8ab838efccb721315a3a25b8913b05e55a0ea3e58",
-			"cc10d4fa1ce380f546e0ed3deef45af526de957f0c026cff668f299b8626d989"
+			"dde5fd17a5fc4571b411b9c4d772b0646aabb1c093a7b314fbfb5df8746bf42a",
+			"31938b9a946069ff27c84d3f1090438689521409739b6995e9c37e6b8797cefd"
 		],
 		"coordinates": {
 			"EXP_LONG": [

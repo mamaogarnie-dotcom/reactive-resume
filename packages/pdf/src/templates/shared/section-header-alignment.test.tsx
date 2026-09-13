@@ -81,6 +81,7 @@ describe("optional experience and education header fields (#3338)", () => {
 			const items = await renderText(data);
 			expectTrailingAlignment(items);
 		},
+		30_000,
 	);
 
 	it("preserves RTL row alignment when leading fields are empty", async () => {

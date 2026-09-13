@@ -1,6 +1,6 @@
 # Plan 24 Step 1 — date layout characterization
 
-Generation revision: `58ee4eead7843105da20f8a177e7d250b24c3a87` (pre-remediation characterization merge).
+Original characterization generation revision: `58ee4eead7843105da20f8a177e7d250b24c3a87` (pre-remediation characterization merge).
 Comparison ref: `368858a56fc9c3152b540c39829908e2c3ea04c5` (`origin/main` at review).
 Branch: `codex/issue-3155-date-layout-characterization`.
 
@@ -39,3 +39,7 @@ These are observations of current disabled/default output, not proposed geometry
 **#2841:** Date/location ordering remains a separate layout concern. Existing `hideLinkUnderline` and level design/size controls are present and independently verified; no duplicate schema/UI/runtime controls were added. Historical Chikorita v4 pixel parity remains unverified because no reproducible v4 reference was available.
 
 **STOP — exact missing visual-geometry gate:** Q6 approves user-controlled per-section width and wrapping but does not specify width units, minimum/maximum bounds, or initial/default width geometry. Narrow-width behavior can be characterized, but implementation must wait for those numeric/geometry inputs; this step intentionally adds no date-column schema, UI, or renderer behavior.
+
+## CVMate Stage 11.1 baseline refresh
+
+Executable raster baselines were regenerated from `9d9fc7524471a9652935a8d3018b58fe19abd3d7` in the project Docker development image during Stage 11.1. Two isolated runs were byte-identical. Semantic JSON comparison changed only `rasterSha256`; coordinates, page counts, text-item counts, and missing-marker evidence remained unchanged.

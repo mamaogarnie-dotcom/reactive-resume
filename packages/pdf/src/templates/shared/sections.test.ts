@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { getTemplateMetrics } from "./metrics";
 import { getSectionHeadingTextStyle, getSkillsItemStyle } from "./sections";
 
-const source = readFileSync(fileURLToPath(new URL("./sections.tsx", import.meta.url)), "utf8");
+const source = readFileSync(fileURLToPath(new URL("./sections.tsx", import.meta.url)), "utf8").replace(/\r\n?/g, "\n");
 
 describe("ExperienceSection", () => {
 	it("does not hide the item position header when role progression is present", () => {

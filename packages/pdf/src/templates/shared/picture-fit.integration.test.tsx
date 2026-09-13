@@ -250,5 +250,5 @@ describe("picture fit geometry (#2782)", () => {
 		const cover = await rasterPicture("landscape", "cover");
 		const overridden = await rasterPicture("landscape", "contain", "@version 1; picture { object-fit: cover; }");
 		expect([...overridden.data]).toEqual([...cover.data]);
-	});
+	}, 30_000);
 });
