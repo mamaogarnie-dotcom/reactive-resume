@@ -1,8 +1,8 @@
-import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import type { RouterOutput } from "@/libs/orpc/client";
 import { ORPCError } from "@orpc/client";
-import { createFileRoute, lazyRouteComponent, notFound, redirect } from "@tanstack/react-router";
 import { getResumeSocialMeta } from "@reactive-resume/resume/social-meta";
+import type { ResumeData } from "@reactive-resume/schema/resume/data";
+import { createFileRoute, lazyRouteComponent, notFound, redirect } from "@tanstack/react-router";
+import type { RouterOutput } from "@/libs/orpc/client";
 import { orpc } from "@/libs/orpc/client";
 import { createNoindexFollowMeta, createResumeSocialMeta, getCanonicalRootUrl } from "@/libs/seo";
 
@@ -21,19 +21,19 @@ export const Route = createFileRoute("/$username/$slug")({
 	},
 	head: ({ loaderData, params }) => {
 		const resume = loaderData?.resume;
-		const name = resume ? resume.data.basics.name || resume.name || "Resume" : "CVMate";
+		const name = resume ? resume.data.basics.name || resume.name || "CV" : "CV";
 
 		if (!resume) {
-			return { meta: [{ title: `${name} - CVMate` }, createNoindexFollowMeta()] };
+			return { meta: [{ title: `${name} - 1story` }, createNoindexFollowMeta()] };
 		}
 
-		const social = getResumeSocialMeta(resume.data, resume.name || "Resume");
+		const social = getResumeSocialMeta(resume.data, resume.name || "CV");
 
 		const origin = typeof window === "undefined" ? null : window.location.origin;
 
 		if (!origin) {
 			return {
-				meta: [{ title: `${social.name} - CVMate` }, createNoindexFollowMeta()],
+				meta: [{ title: `${social.name} - 1story` }, createNoindexFollowMeta()],
 			};
 		}
 
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/$username/$slug")({
 
 		return {
 			meta: [
-				{ title: `${social.name} - CVMate` },
+				{ title: `${social.name} - 1story` },
 				createNoindexFollowMeta(),
 				...createResumeSocialMeta({
 					canonicalUrl,

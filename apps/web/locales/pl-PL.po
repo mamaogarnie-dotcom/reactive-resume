@@ -7797,3 +7797,11 @@ msgstr "Pobierz Markdown"
 #: src/features/resume/export/download-dialog.tsx
 msgid "Download JSON"
 msgstr "Pobierz JSON"
+
+#: LANG-10 targeted localization
+msgid "Code must be 6 digits"
+msgstr "Kod musi składać się z 6 cyfr."
+
+#: LANG-10 targeted localization
+msgid "Template not found"
+msgstr "Nie znaleziono szablonu"

@@ -1,14 +1,6 @@
-import type { DialogProps } from "../store";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { ArrowDownIcon, CopyIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
-import { useStore } from "@tanstack/react-form";
-import { useRouter } from "@tanstack/react-router";
-import { QRCodeSVG } from "qrcode.react";
-import { useState } from "react";
-import { match } from "ts-pattern";
-import { useToggle } from "usehooks-ts";
-import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
 	DialogContent,
@@ -20,10 +12,18 @@ import {
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
 import { Input } from "@reactive-resume/ui/components/input";
 import { toast } from "@reactive-resume/ui/components/toast";
+import { useStore } from "@tanstack/react-form";
+import { useRouter } from "@tanstack/react-router";
+import { QRCodeSVG } from "qrcode.react";
+import { useState } from "react";
+import { match } from "ts-pattern";
+import { useToggle } from "usehooks-ts";
+import z from "zod";
 import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { authClient } from "@/libs/auth/client";
 import { getReadableErrorMessage } from "@/libs/error-message";
 import { useAppForm } from "@/libs/tanstack-form";
+import type { DialogProps } from "../store";
 import { useDialogStore } from "../store";
 
 const enableFormSchema = z.object({
@@ -31,7 +31,7 @@ const enableFormSchema = z.object({
 });
 
 const verifyFormSchema = z.object({
-	code: z.string().length(6, "Code must be 6 digits"),
+	code: z.string().length(6, t`Code must be 6 digits`),
 });
 
 type TwoFactorSetupStep = "backup" | "enable" | "verify";
@@ -62,7 +62,7 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 
 			const { data, error } = await authClient.twoFactor.enable({
 				password: value.password,
-				issuer: "CVMate",
+				issuer: "1story",
 			});
 
 			if (error) {
@@ -168,7 +168,7 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement("a");
 		a.href = url;
-		a.download = "reactive-resume_backup-codes.txt";
+		a.download = "1story_backup-codes.txt";
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);

@@ -1,8 +1,9 @@
+import { Trans } from "@lingui/react/macro";
+import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
+import { templateSchema } from "@reactive-resume/schema/templates";
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 import { useIsClient } from "usehooks-ts";
-import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
-import { templateSchema } from "@reactive-resume/schema/templates";
 import { useLocalizedResumeDocument } from "@/features/resume/export/pdf-document";
 import { createNoindexFollowMeta } from "@/libs/seo";
 
@@ -13,7 +14,7 @@ const PDFViewer = lazy(async () => {
 
 export const Route = createFileRoute("/templates/$")({
 	component: TemplatePdfRoute,
-	errorComponent: () => <div>Template not found</div>,
+	errorComponent: () => <div><Trans>Template not found</Trans></div>,
 	head: () => ({
 		meta: [createNoindexFollowMeta()],
 	}),

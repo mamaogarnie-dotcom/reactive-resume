@@ -1,6 +1,6 @@
 import { ORPCError } from "@orpc/client";
-import { ClientOnly, createFileRoute, lazyRouteComponent, redirect } from "@tanstack/react-router";
 import { getResumeSocialMeta } from "@reactive-resume/resume/social-meta";
+import { ClientOnly, createFileRoute, lazyRouteComponent, redirect } from "@tanstack/react-router";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import { orpc } from "@/libs/orpc/client";
@@ -41,16 +41,16 @@ export const Route = createFileRoute("/_home/")({
 
 		if (root.status === "unavailable") {
 			return {
-				meta: [{ title: "CVMate" }, createNoindexFollowMeta()],
+				meta: [{ title: "1story" }, createNoindexFollowMeta()],
 				links: [{ rel: "canonical", href: canonicalUrl }],
 			};
 		}
 
-		const social = getResumeSocialMeta(root.resume.data, root.resume.name || "Resume");
+		const social = getResumeSocialMeta(root.resume.data, root.resume.name || "CV");
 
 		return {
 			meta: [
-				{ title: `${social.name} - CVMate` },
+				{ title: `${social.name} - 1story` },
 				createNoindexFollowMeta(),
 				...createResumeSocialMeta({
 					canonicalUrl,
