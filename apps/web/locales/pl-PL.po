@@ -3573,7 +3573,7 @@ msgstr "Marek odrzucony"
 #: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Master Profile"
-msgstr "Profil główny"
+msgstr "Profil zawodowy"
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Match Master Profile"
@@ -7429,7 +7429,7 @@ msgid "No work experience has been added yet."
 msgstr "Nie dodano jeszcze doświadczenia zawodowego."
 
 msgid "Employment"
-msgstr "Zatrudnienie"
+msgstr "Doświadczenie"
 
 msgid "Present"
 msgstr "Obecnie"
