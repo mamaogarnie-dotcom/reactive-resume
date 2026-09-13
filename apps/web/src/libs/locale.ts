@@ -1,16 +1,21 @@
 import type { MessageDescriptor, Messages } from "@lingui/core";
-import type { Locale } from "@reactive-resume/utils/locale";
 import { i18n } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
-import Cookies from "js-cookie";
+import type { Locale } from "@reactive-resume/utils/locale";
 import { isRTL, localeSchema } from "@reactive-resume/utils/locale";
+import Cookies from "js-cookie";
 
 export { isRTL };
 
 const storageKey = "locale";
-const defaultLocale: Locale = "pl-PL";
-const messageLoaders = import.meta.glob<{ messages: Messages }>("../../locales/*.po");
-const relativeTimeDivisions: Array<{ amount: number; unit: Intl.RelativeTimeFormatUnit }> = [
+const defaultLocale = "pl-PL" satisfies Locale;
+const messageLoaders = import.meta.glob<{ messages: Messages }>(
+	"../../locales/*.po",
+);
+const relativeTimeDivisions: Array<{
+	amount: number;
+	unit: Intl.RelativeTimeFormatUnit;
+}> = [
 	{ amount: 31_536_000_000, unit: "year" },
 	{ amount: 2_592_000_000, unit: "month" },
 	{ amount: 604_800_000, unit: "week" },
@@ -77,20 +82,61 @@ export const localeMap = {
 	"zu-ZA": msg`Zulu`,
 } satisfies Record<Locale, MessageDescriptor>;
 
+/**
+ * Languages supported by the 1story application interface.
+ *
+ * This is deliberately separate from localeMap:
+ * - appLocaleMap = UI language
+ * - localeMap = CV/document language
+ */
+export const appLocaleMap = {
+	"pl-PL": localeMap["pl-PL"],
+	"en-US": localeMap["en-US"],
+} as const;
+
+export const cvLocaleMap = {
+	"pl-PL": localeMap["pl-PL"],
+	"en-US": localeMap["en-US"],
+} as const;
+
+export type AppLocale = keyof typeof appLocaleMap;
+
 export function isLocale(locale: string): locale is Locale {
 	return localeSchema.safeParse(locale).success;
 }
 
+export function isAppLocale(locale: string): locale is AppLocale {
+	return Object.hasOwn(appLocaleMap, locale);
+}
+
+/**
+ * Generic locale resolver used by document/CV functionality.
+ * Do not restrict this to appLocaleMap.
+ */
 export const resolveLocale = (locale: string): Locale => {
 	return isLocale(locale) ? locale : defaultLocale;
 };
 
-export function formatRelativeTime(value: Date | string, formatter: Intl.RelativeTimeFormat, invalidFallback?: string) {
+/**
+ * Application-interface locale resolver.
+ */
+export const resolveAppLocale = (locale: string): AppLocale => {
+	return isAppLocale(locale) ? locale : defaultLocale;
+};
+
+export function formatRelativeTime(
+	value: Date | string,
+	formatter: Intl.RelativeTimeFormat,
+	invalidFallback?: string,
+) {
 	const date = value instanceof Date ? value : new Date(value);
 	const diffMs = date.getTime() - Date.now();
-	if (Number.isNaN(diffMs)) return invalidFallback ?? formatter.format(0, "second");
+	if (Number.isNaN(diffMs))
+		return invalidFallback ?? formatter.format(0, "second");
 
-	const division = relativeTimeDivisions.find((candidate) => Math.abs(diffMs) >= candidate.amount);
+	const division = relativeTimeDivisions.find(
+		(candidate) => Math.abs(diffMs) >= candidate.amount,
+	);
 
 	return division
 		? formatter.format(Math.round(diffMs / division.amount), division.unit)
@@ -99,7 +145,7 @@ export function formatRelativeTime(value: Date | string, formatter: Intl.Relativ
 
 export const getLocale = () => {
 	const locale = Cookies.get(storageKey);
-	if (!locale || !isLocale(locale)) return defaultLocale;
+	if (!locale || !isAppLocale(locale)) return defaultLocale;
 	return locale;
 };
 
@@ -112,6 +158,12 @@ const loadMessages = async (locale: Locale) => {
 	return messages;
 };
 
+/**
+ * Generic message loader.
+ *
+ * It intentionally accepts every document locale because CV section-title
+ * localization also uses this function.
+ */
 export const getLocaleMessages = async (locale: string) => {
 	const resolvedLocale = resolveLocale(locale);
 	let messages: Messages;
@@ -125,13 +177,18 @@ export const getLocaleMessages = async (locale: string) => {
 	}
 };
 
+/**
+ * Activates only a supported 1story UI locale.
+ */
 export const loadLocale = async (locale: string) => {
-	const { locale: resolvedLocale, messages } = await getLocaleMessages(locale);
+	const requestedAppLocale = resolveAppLocale(locale);
+	const { locale: resolvedLocale, messages } =
+		await getLocaleMessages(requestedAppLocale);
 	i18n.loadAndActivate({ locale: resolvedLocale, messages });
 };
 
 export const changeLocale = (value: string | null) => {
-	if (!value || !isLocale(value)) return;
+	if (!value || !isAppLocale(value)) return;
 	Cookies.set(storageKey, value);
 	window.location.reload();
 };

@@ -1,8 +1,12 @@
-import type z from "zod";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { pageSchema } from "@reactive-resume/schema/resume/data";
-import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
+import {
+	FormControl,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@reactive-resume/ui/components/form";
 import {
 	InputGroup,
 	InputGroupAddon,
@@ -10,9 +14,13 @@ import {
 	InputGroupText,
 } from "@reactive-resume/ui/components/input-group";
 import { Switch } from "@reactive-resume/ui/components/switch";
+import type z from "zod";
 import { Combobox } from "@/components/ui/combobox";
-import { getLocaleOptions } from "@/features/locale/locale-options";
-import { useResume, useUpdateResumeData } from "@/features/resume/builder/draft";
+import { getCvLocaleOptions } from "@/features/locale/locale-options";
+import {
+	useResume,
+	useUpdateResumeData,
+} from "@/features/resume/builder/draft";
 import { useSyncFormValues } from "@/hooks/use-sync-form-values";
 import { useAppForm } from "@/libs/tanstack-form";
 import { SectionBase } from "../shared/section-base";
@@ -32,7 +40,8 @@ type FormValues = z.infer<typeof formSchema>;
 const CLAMP_MIN = 0;
 const CLAMP_MAX = 100;
 
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number) =>
+	Math.min(Math.max(value, min), max);
 
 function PageSectionForm() {
 	const resume = useResume();
@@ -54,7 +63,10 @@ function PageSectionForm() {
 	});
 	useSyncFormValues(form, page);
 
-	const handleAutoSave = <K extends keyof FormValues>(name: K, value: FormValues[K]) => {
+	const handleAutoSave = <K extends keyof FormValues>(
+		name: K,
+		value: FormValues[K],
+	) => {
 		const next = { ...form.state.values, [name]: value };
 		// Keep last-saved numeric page fields when the form holds a transient empty/NaN value
 		for (const key of ["marginX", "marginY", "gapX", "gapY"] as const) {
@@ -64,16 +76,42 @@ function PageSectionForm() {
 	};
 
 	const pageNumberFields = [
-		{ name: "marginX" as const, label: <Trans>Margin (Horizontal)</Trans>, min: CLAMP_MIN, max: CLAMP_MAX },
-		{ name: "marginY" as const, label: <Trans>Margin (Vertical)</Trans>, min: CLAMP_MIN, max: CLAMP_MAX },
-		{ name: "gapX" as const, label: <Trans>Spacing (Horizontal)</Trans>, min: 0, max: undefined },
-		{ name: "gapY" as const, label: <Trans>Spacing (Vertical)</Trans>, min: 0, max: undefined },
+		{
+			name: "marginX" as const,
+			label: <Trans>Margin (Horizontal)</Trans>,
+			min: CLAMP_MIN,
+			max: CLAMP_MAX,
+		},
+		{
+			name: "marginY" as const,
+			label: <Trans>Margin (Vertical)</Trans>,
+			min: CLAMP_MIN,
+			max: CLAMP_MAX,
+		},
+		{
+			name: "gapX" as const,
+			label: <Trans>Spacing (Horizontal)</Trans>,
+			min: 0,
+			max: undefined,
+		},
+		{
+			name: "gapY" as const,
+			label: <Trans>Spacing (Vertical)</Trans>,
+			min: 0,
+			max: undefined,
+		},
 	];
 
 	const pageSwitchFields = [
-		{ name: "hideLinkUnderline" as const, label: <Trans>Hide Link Underline</Trans> },
+		{
+			name: "hideLinkUnderline" as const,
+			label: <Trans>Hide Link Underline</Trans>,
+		},
 		{ name: "hideIcons" as const, label: <Trans>Hide Icons</Trans> },
-		{ name: "hideSectionIcons" as const, label: <Trans>Hide Section Icons</Trans> },
+		{
+			name: "hideSectionIcons" as const,
+			label: <Trans>Hide Section Icons</Trans>,
+		},
 	];
 
 	return (
@@ -89,7 +127,9 @@ function PageSectionForm() {
 				{(field) => (
 					<FormItem
 						className="col-span-full"
-						hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}
+						hasError={
+							field.state.meta.isTouched && field.state.meta.errors.length > 0
+						}
 					>
 						<FormLabel>
 							<Trans>Language</Trans>
@@ -97,7 +137,7 @@ function PageSectionForm() {
 						<FormControl
 							render={
 								<Combobox
-									options={getLocaleOptions()}
+									options={getCvLocaleOptions()}
 									value={field.state.value}
 									onValueChange={(locale) => {
 										const value = (locale ?? "") as string;
@@ -116,10 +156,14 @@ function PageSectionForm() {
 				{(field) => (
 					<FormItem
 						className="col-span-full"
-						hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}
+						hasError={
+							field.state.meta.isTouched && field.state.meta.errors.length > 0
+						}
 					>
 						<FormLabel>
-							<Trans context="Page Format (A4, Letter, Free-form)">Format</Trans>
+							<Trans context="Page Format (A4, Letter, Free-form)">
+								Format
+							</Trans>
 						</FormLabel>
 						<FormControl
 							render={
@@ -146,14 +190,22 @@ function PageSectionForm() {
 			{pageNumberFields.map(({ name, label, min, max }) => (
 				<form.Field key={name} name={name}>
 					{(field) => (
-						<FormItem hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}>
+						<FormItem
+							hasError={
+								field.state.meta.isTouched && field.state.meta.errors.length > 0
+							}
+						>
 							<FormLabel>{label}</FormLabel>
 							<InputGroup>
 								<FormControl
 									render={
 										<InputGroupInput
 											name={field.name}
-											value={Number.isFinite(field.state.value) ? field.state.value : ""}
+											value={
+												Number.isFinite(field.state.value)
+													? field.state.value
+													: ""
+											}
 											min={min}
 											{...(max !== undefined ? { max } : {})}
 											step={1}
@@ -170,7 +222,10 @@ function PageSectionForm() {
 												const raw = Number(v);
 												if (!Number.isFinite(raw)) return;
 
-												const num = max !== undefined ? clamp(raw, min ?? 0, max) : Math.max(raw, min ?? 0);
+												const num =
+													max !== undefined
+														? clamp(raw, min ?? 0, max)
+														: Math.max(raw, min ?? 0);
 												field.handleChange(num);
 												handleAutoSave(name, num);
 											}}
@@ -192,7 +247,9 @@ function PageSectionForm() {
 					{(field) => (
 						<FormItem
 							className="col-span-full flex items-center gap-x-3 py-1"
-							hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}
+							hasError={
+								field.state.meta.isTouched && field.state.meta.errors.length > 0
+							}
 						>
 							<FormControl
 								render={

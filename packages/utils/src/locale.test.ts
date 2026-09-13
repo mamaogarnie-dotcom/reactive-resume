@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { defaultLocale, isLocale, isRTL } from "./locale";
+import {
+	cvLanguageToLocale,
+	defaultLocale,
+	isLocale,
+	isRTL,
+	resolveCvLanguage,
+	resolveCvLocale,
+} from "./locale";
 
 describe("defaultLocale", () => {
 	it("is en-US", () => {
@@ -7,6 +14,28 @@ describe("defaultLocale", () => {
 	});
 });
 
+describe("CV language V1", () => {
+	it("supports Polish and English only", () => {
+		expect(resolveCvLanguage("pl")).toBe("pl");
+		expect(resolveCvLanguage("pl-PL")).toBe("pl");
+		expect(resolveCvLanguage("en")).toBe("en");
+		expect(resolveCvLanguage("en-US")).toBe("en");
+	});
+
+	it("maps every non-Polish language to English in V1", () => {
+		expect(resolveCvLanguage("de-DE")).toBe("en");
+		expect(resolveCvLanguage("fr")).toBe("en");
+		expect(resolveCvLanguage("ja-JP")).toBe("en");
+		expect(resolveCvLanguage("unsupported")).toBe("en");
+		expect(resolveCvLanguage(null)).toBe("en");
+	});
+
+	it("maps CV languages to the only supported document locales", () => {
+		expect(cvLanguageToLocale("pl")).toBe("pl-PL");
+		expect(cvLanguageToLocale("en")).toBe("en-US");
+		expect(resolveCvLocale("de-DE")).toBe("en-US");
+	});
+});
 describe("isLocale", () => {
 	it("returns true for non-empty string", () => {
 		expect(isLocale("en-US")).toBe(true);

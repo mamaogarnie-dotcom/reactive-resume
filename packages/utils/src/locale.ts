@@ -61,6 +61,24 @@ export const localeSchema = z.enum([
 
 export type Locale = z.infer<typeof localeSchema>;
 
+export const cvLanguageSchema = z.enum(["pl", "en"]);
+export type CvLanguage = z.infer<typeof cvLanguageSchema>;
+
+export function resolveCvLanguage(
+	value: string | null | undefined,
+): CvLanguage {
+	const normalized = value?.trim().toLowerCase() ?? "";
+	return normalized === "pl" || normalized.startsWith("pl-") ? "pl" : "en";
+}
+
+export function cvLanguageToLocale(language: CvLanguage): Locale {
+	return language === "pl" ? "pl-PL" : "en-US";
+}
+
+export function resolveCvLocale(value: string | null | undefined): Locale {
+	return cvLanguageToLocale(resolveCvLanguage(value));
+}
+
 export const defaultLocale: Locale = "en-US";
 
 export function isLocale(value: unknown): value is Locale {
@@ -68,7 +86,12 @@ export function isLocale(value: unknown): value is Locale {
 }
 
 export function isCJKLocale(locale: Locale): boolean {
-	return locale === "zh-CN" || locale === "zh-TW" || locale === "ja-JP" || locale === "ko-KR";
+	return (
+		locale === "zh-CN" ||
+		locale === "zh-TW" ||
+		locale === "ja-JP" ||
+		locale === "ko-KR"
+	);
 }
 
 // A writing system that needs a dedicated fallback font in the PDF renderer,
@@ -78,12 +101,25 @@ export function isCJKLocale(locale: Locale): boolean {
 // of falling back to a Latin/Han-only font and producing tofu. "emoji" is
 // content-detected only (never locale-derived) and resolves to Noto Emoji so
 // pictographs and regional indicators render instead of mojibake (#3321).
-export type Script = "hangul" | "kana" | "han-traditional" | "han-simplified" | "arabic" | "hebrew" | "thai" | "emoji";
+export type Script =
+	| "hangul"
+	| "kana"
+	| "han-traditional"
+	| "han-simplified"
+	| "arabic"
+	| "hebrew"
+	| "thai"
+	| "emoji";
 
 // The CJK subset of `Script`. CJK needs extra per-character line breaking that
 // must NOT be applied to Arabic (cursive, joined letters) or Thai (combining
 // marks), so callers gate line-breaking on this rather than on `Script`.
-const cjkScripts: readonly Script[] = ["hangul", "kana", "han-traditional", "han-simplified"];
+const cjkScripts: readonly Script[] = [
+	"hangul",
+	"kana",
+	"han-traditional",
+	"han-simplified",
+];
 
 export function isCjkScript(script: Script): boolean {
 	return cjkScripts.includes(script);

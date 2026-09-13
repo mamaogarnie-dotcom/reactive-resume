@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/client";
 import type { AIProvider } from "@reactive-resume/ai/types";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
+import { resolveCvLanguage } from "@reactive-resume/utils/locale";
 import { generateId } from "@reactive-resume/utils/string";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
@@ -16,7 +17,13 @@ const MAX_EXPERIENCE_FACTS = 500;
 const requirementSnapshotSchema = z
 	.object({
 		id: z.string().trim().min(1),
-		category: z.enum(["required", "preferred", "responsibility", "keyword", "other"]),
+		category: z.enum([
+			"required",
+			"preferred",
+			"responsibility",
+			"keyword",
+			"other",
+		]),
 		priority: z.enum(["critical", "important", "additional"]),
 		sourceText: z.string().nullable().optional(),
 		text: z.string().trim().min(1),
@@ -53,8 +60,12 @@ type RunnableProvider = {
 	baseURL: string | null;
 };
 
-type SelectionItem = Awaited<ReturnType<typeof cvmateBuildService.listSelectionItems>>[number];
-type GeneratedContent = Awaited<ReturnType<typeof cvmateBuildService.listGeneratedContent>>[number];
+type SelectionItem = Awaited<
+	ReturnType<typeof cvmateBuildService.listSelectionItems>
+>[number];
+type GeneratedContent = Awaited<
+	ReturnType<typeof cvmateBuildService.listGeneratedContent>
+>[number];
 type TailoredOutput = z.infer<typeof cvmateBuildAiTailoredContentOutputSchema>;
 
 const SYSTEM_PROMPT = `
@@ -118,7 +129,8 @@ function parseJobOfferSnapshot(value: unknown) {
 
 	if (parsed.data.requirements.length === 0) {
 		throw new ORPCError("BAD_REQUEST", {
-			message: "The job offer must be analyzed before tailored CV content can be generated.",
+			message:
+				"The job offer must be analyzed before tailored CV content can be generated.",
 		});
 	}
 
@@ -175,24 +187,33 @@ function validateSelectedHierarchy(selectionItems: SelectionItem[]) {
 	for (const item of selectionItems) {
 		if (item.sourceType !== "experience_fact") continue;
 
-		const parent = item.parentSelectionItemId ? selectedById.get(item.parentSelectionItemId) : undefined;
+		const parent = item.parentSelectionItemId
+			? selectedById.get(item.parentSelectionItemId)
+			: undefined;
 
 		if (parent?.sourceType !== "employment") {
 			throw new ORPCError("BAD_REQUEST", {
-				message: "Every selected experience fact must belong to a selected employment.",
+				message:
+					"Every selected experience fact must belong to a selected employment.",
 			});
 		}
 	}
 }
 
-function validateOutput(output: TailoredOutput, selectionItems: SelectionItem[]) {
+function validateOutput(
+	output: TailoredOutput,
+	selectionItems: SelectionItem[],
+) {
 	const eligible = new Map(
-		selectionItems.filter((item) => item.sourceType === "experience_fact").map((item) => [item.id, item]),
+		selectionItems
+			.filter((item) => item.sourceType === "experience_fact")
+			.map((item) => [item.id, item]),
 	);
 
 	if (output.experienceFacts.length !== eligible.size) {
 		throw new ORPCError("BAD_REQUEST", {
-			message: "The AI must return exactly one rewrite for every selected experience fact.",
+			message:
+				"The AI must return exactly one rewrite for every selected experience fact.",
 		});
 	}
 
@@ -201,13 +222,15 @@ function validateOutput(output: TailoredOutput, selectionItems: SelectionItem[])
 	for (const item of output.experienceFacts) {
 		if (!eligible.has(item.selectionItemId)) {
 			throw new ORPCError("BAD_REQUEST", {
-				message: "The AI returned tailored text for an unknown or ineligible selection item.",
+				message:
+					"The AI returned tailored text for an unknown or ineligible selection item.",
 			});
 		}
 
 		if (seen.has(item.selectionItemId)) {
 			throw new ORPCError("BAD_REQUEST", {
-				message: "The AI returned duplicate tailored text for a selection item.",
+				message:
+					"The AI returned duplicate tailored text for a selection item.",
 			});
 		}
 
@@ -229,11 +252,14 @@ function latestExistingGeneratedContent(
 	selectionItemId: string | null,
 ) {
 	return items
-		.filter((item) => item.kind === kind && item.selectionItemId === selectionItemId)
+		.filter(
+			(item) => item.kind === kind && item.selectionItemId === selectionItemId,
+		)
 		.reduce<GeneratedContent | null>((latest, item) => {
 			if (!latest) return item;
 
-			const timeDifference = item.createdAt.getTime() - latest.createdAt.getTime();
+			const timeDifference =
+				item.createdAt.getTime() - latest.createdAt.getTime();
 
 			if (timeDifference > 0) return item;
 			if (timeDifference < 0) return latest;
@@ -242,7 +268,10 @@ function latestExistingGeneratedContent(
 		}, null);
 }
 
-async function resolveProvider(userId: string, aiProviderId?: string): Promise<RunnableProvider> {
+async function resolveProvider(
+	userId: string,
+	aiProviderId?: string,
+): Promise<RunnableProvider> {
 	const provider = aiProviderId
 		? await aiProvidersService.getRunnableById({
 				id: aiProviderId,
@@ -260,7 +289,11 @@ async function resolveProvider(userId: string, aiProviderId?: string): Promise<R
 }
 
 export const cvmateBuildTailoredContentService = {
-	generate: async (input: { id: string; userId: string; aiProviderId?: string }) => {
+	generate: async (input: {
+		id: string;
+		userId: string;
+		aiProviderId?: string;
+	}) => {
 		const build = await cvmateBuildService.getById({
 			id: input.id,
 			userId: input.userId,
@@ -283,7 +316,8 @@ export const cvmateBuildTailoredContentService = {
 
 		if (selectedItems.length === 0) {
 			throw new ORPCError("BAD_REQUEST", {
-				message: "Select at least one candidate item before generating tailored CV content.",
+				message:
+					"Select at least one candidate item before generating tailored CV content.",
 			});
 		}
 
@@ -305,7 +339,7 @@ export const cvmateBuildTailoredContentService = {
 				prompt: buildPrompt({
 					jobOffer,
 					selectionItems: selectedItems,
-					targetLanguage: build.targetLanguage,
+					targetLanguage: resolveCvLanguage(build.targetLanguage),
 				}),
 			},
 			cvmateBuildAiTailoredContentOutputSchema,
@@ -313,10 +347,12 @@ export const cvmateBuildTailoredContentService = {
 
 		validateOutput(output, selectedItems);
 
-		const experienceOutputById = new Map(output.experienceFacts.map((item) => [item.selectionItemId, item.text]));
+		const experienceOutputById = new Map(
+			output.experienceFacts.map((item) => [item.selectionItemId, item.text]),
+		);
 
 		const summarySnapshot = {
-			targetLanguage: build.targetLanguage,
+			targetLanguage: resolveCvLanguage(build.targetLanguage),
 			selectionItems: selectedItems.map((item) => ({
 				id: item.id,
 				parentSelectionItemId: item.parentSelectionItemId,
@@ -350,7 +386,8 @@ export const cvmateBuildTailoredContentService = {
 
 			if (!aiText) {
 				throw new ORPCError("BAD_REQUEST", {
-					message: "The AI omitted tailored text for a selected experience fact.",
+					message:
+						"The AI omitted tailored text for a selected experience fact.",
 				});
 			}
 
@@ -364,10 +401,16 @@ export const cvmateBuildTailoredContentService = {
 		}
 
 		await db.transaction(async (tx) => {
-			const inserts: Array<typeof schema.cvmateCvGeneratedContent.$inferInsert> = [];
+			const inserts: Array<
+				typeof schema.cvmateCvGeneratedContent.$inferInsert
+			> = [];
 
 			for (const target of targets) {
-				const existing = latestExistingGeneratedContent(existingGeneratedContent, target.kind, target.selectionItemId);
+				const existing = latestExistingGeneratedContent(
+					existingGeneratedContent,
+					target.kind,
+					target.selectionItemId,
+				);
 
 				if (existing) {
 					await tx

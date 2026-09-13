@@ -8,9 +8,10 @@ import type {
 	CvmateSelectionSourceType,
 } from "@reactive-resume/db/schema";
 import * as schema from "@reactive-resume/db/schema";
+import { resolveCvLanguage } from "@reactive-resume/utils/locale";
 import {
-resolveRecruitmentClauseContent,
-resolveRecruitmentClauseLanguage,
+	resolveRecruitmentClauseContent,
+	resolveRecruitmentClauseLanguage,
 } from "@reactive-resume/utils/recruitment-clause";
 import { generateId } from "@reactive-resume/utils/string";
 import { and, asc, desc, eq } from "drizzle-orm";
@@ -59,7 +60,9 @@ type GapUpdateFields = {
 	sortOrder?: number | undefined;
 };
 
-type CurrentProfile = NonNullable<Awaited<ReturnType<typeof cvmateProfileService.getCurrent>>>;
+type CurrentProfile = NonNullable<
+	Awaited<ReturnType<typeof cvmateProfileService.getCurrent>>
+>;
 
 const stripUserId = <T extends { userId: string }>(row: T) => {
 	const { userId: _userId, ...rest } = row;
@@ -70,7 +73,12 @@ async function requireOwnedBuild(id: string, userId: string) {
 	const [build] = await db
 		.select()
 		.from(schema.cvmateCvBuild)
-		.where(and(eq(schema.cvmateCvBuild.id, id), eq(schema.cvmateCvBuild.userId, userId)));
+		.where(
+			and(
+				eq(schema.cvmateCvBuild.id, id),
+				eq(schema.cvmateCvBuild.userId, userId),
+			),
+		);
 
 	if (!build) throw new ORPCError("NOT_FOUND");
 
@@ -91,7 +99,10 @@ async function requireOwnedSelectionItem(id: string, userId: string) {
 }
 
 async function requireOwnedGap(id: string, userId: string) {
-	const [gap] = await db.select().from(schema.cvmateCvGap).where(eq(schema.cvmateCvGap.id, id));
+	const [gap] = await db
+		.select()
+		.from(schema.cvmateCvGap)
+		.where(eq(schema.cvmateCvGap.id, id));
 
 	if (!gap) throw new ORPCError("NOT_FOUND");
 
@@ -112,7 +123,11 @@ async function requireOwnedGeneratedContent(id: string, userId: string) {
 
 	return generatedContent;
 }
-async function resolveGapResolutionSource(cvBuildId: string, sourceType: CvmateSelectionSourceType, sourceId: string) {
+async function resolveGapResolutionSource(
+	cvBuildId: string,
+	sourceType: CvmateSelectionSourceType,
+	sourceId: string,
+) {
 	const [selectionItem] = await db
 		.select()
 		.from(schema.cvmateCvSelectionItem)
@@ -127,7 +142,8 @@ async function resolveGapResolutionSource(cvBuildId: string, sourceType: CvmateS
 
 	if (!selectionItem) {
 		throw new ORPCError("BAD_REQUEST", {
-			message: "Gap resolution source must be a selected item in the same CV build.",
+			message:
+				"Gap resolution source must be a selected item in the same CV build.",
 		});
 	}
 
@@ -142,18 +158,25 @@ async function getJobOfferSnapshot(jobOfferId: string, userId: string) {
 	return structuredClone(offer) as Record<string, unknown>;
 }
 
-function validateCompletionState(currentStep: CvmateBuildStep, status: CvmateBuildStatus) {
+function validateCompletionState(
+	currentStep: CvmateBuildStep,
+	status: CvmateBuildStatus,
+) {
 	const stepCompleted = currentStep === "completed";
 	const statusCompleted = status === "completed";
 
 	if (stepCompleted !== statusCompleted) {
 		throw new ORPCError("BAD_REQUEST", {
-			message: 'CV build step "completed" and status "completed" must be set together.',
+			message:
+				'CV build step "completed" and status "completed" must be set together.',
 		});
 	}
 }
 
-async function getBuildProfile(build: Awaited<ReturnType<typeof requireOwnedBuild>>, userId: string) {
+async function getBuildProfile(
+	build: Awaited<ReturnType<typeof requireOwnedBuild>>,
+	userId: string,
+) {
 	if (!build.masterProfileId) {
 		throw new ORPCError("BAD_REQUEST", {
 			message: "The CV build Master Profile is no longer available.",
@@ -171,7 +194,11 @@ async function getBuildProfile(build: Awaited<ReturnType<typeof requireOwnedBuil
 	return profile;
 }
 
-function findSelectionSource(profile: CurrentProfile, sourceType: CvmateSelectionSourceType, sourceId: string) {
+function findSelectionSource(
+	profile: CurrentProfile,
+	sourceType: CvmateSelectionSourceType,
+	sourceId: string,
+) {
 	switch (sourceType) {
 		case "employment":
 			return profile.employments.find((item) => item.id === sourceId);
@@ -216,21 +243,29 @@ function firstText(...values: Array<string | null | undefined>) {
 	return null;
 }
 
-function getSelectionSourceText(sourceType: CvmateSelectionSourceType, source: ReturnType<typeof findSelectionSource>) {
+function getSelectionSourceText(
+	sourceType: CvmateSelectionSourceType,
+	source: ReturnType<typeof findSelectionSource>,
+) {
 	if (!source) return null;
 
 	switch (sourceType) {
 		case "employment": {
 			const value = source as CurrentProfile["employments"][number];
 			const parts = [value.jobTitle, value.company]
-				.filter((part): part is string => typeof part === "string" && part.trim().length > 0)
+				.filter(
+					(part): part is string =>
+						typeof part === "string" && part.trim().length > 0,
+				)
 				.map((part) => part.trim());
 
 			return parts.length > 0 ? parts.join(" — ") : null;
 		}
 
 		case "experience_fact":
-			return firstText((source as CurrentProfile["experienceFacts"][number]).text);
+			return firstText(
+				(source as CurrentProfile["experienceFacts"][number]).text,
+			);
 
 		case "project": {
 			const value = source as CurrentProfile["projects"][number];
@@ -239,7 +274,12 @@ function getSelectionSourceText(sourceType: CvmateSelectionSourceType, source: R
 
 		case "education": {
 			const value = source as CurrentProfile["education"][number];
-			return firstText(value.description, value.degree, value.fieldOfStudy, value.institution);
+			return firstText(
+				value.description,
+				value.degree,
+				value.fieldOfStudy,
+				value.institution,
+			);
 		}
 
 		case "course": {
@@ -249,7 +289,11 @@ function getSelectionSourceText(sourceType: CvmateSelectionSourceType, source: R
 
 		case "certification": {
 			const value = source as CurrentProfile["certifications"][number];
-			return firstText(value.description, value.name, value.issuingOrganization);
+			return firstText(
+				value.description,
+				value.name,
+				value.issuingOrganization,
+			);
 		}
 
 		case "volunteer": {
@@ -260,7 +304,10 @@ function getSelectionSourceText(sourceType: CvmateSelectionSourceType, source: R
 		case "language": {
 			const value = source as CurrentProfile["languages"][number];
 			const parts = [value.language, value.level]
-				.filter((part): part is string => typeof part === "string" && part.trim().length > 0)
+				.filter(
+					(part): part is string =>
+						typeof part === "string" && part.trim().length > 0,
+				)
 				.map((part) => part.trim());
 
 			return parts.length > 0 ? parts.join(" — ") : null;
@@ -300,238 +347,229 @@ function getSelectionSourceText(sourceType: CvmateSelectionSourceType, source: R
 }
 
 function snapshotSelectionSource(
-profile: CurrentProfile,
-sourceType: CvmateSelectionSourceType,
-sourceId: string,
-targetLanguage: string | null,
+	profile: CurrentProfile,
+	sourceType: CvmateSelectionSourceType,
+	sourceId: string,
+	targetLanguage: string | null,
 ) {
-const source = findSelectionSource(profile, sourceType, sourceId);
+	const source = findSelectionSource(profile, sourceType, sourceId);
 
-if (!source) {
-throw new ORPCError("NOT_FOUND", {
-message: "The selected Master Profile source does not exist.",
-});
-}
+	if (!source) {
+		throw new ORPCError("NOT_FOUND", {
+			message: "The selected Master Profile source does not exist.",
+		});
+	}
 
-let sourceTextSnapshot = getSelectionSourceText(sourceType, source);
-let sourceDataSnapshot: Record<string, unknown>;
+	let sourceTextSnapshot = getSelectionSourceText(sourceType, source);
+	let sourceDataSnapshot: Record<string, unknown>;
 
-if (sourceType === "clause") {
-const sourceClause = source as CurrentProfile["clauses"][number];
-const language = resolveRecruitmentClauseLanguage(targetLanguage);
-const languageVariant = profile.clauses.find(
-(candidate) =>
-candidate.scope === sourceClause.scope &&
-candidate.language === language,
-);
+	if (sourceType === "clause") {
+		const sourceClause = source as CurrentProfile["clauses"][number];
+		const language = resolveRecruitmentClauseLanguage(targetLanguage);
+		const languageVariant = profile.clauses.find(
+			(candidate) =>
+				candidate.scope === sourceClause.scope &&
+				candidate.language === language,
+		);
 
-const content = resolveRecruitmentClauseContent(
-sourceClause.scope,
-language,
-languageVariant?.content ?? null,
-);
+		const content = resolveRecruitmentClauseContent(
+			sourceClause.scope,
+			language,
+			languageVariant?.content ?? null,
+		);
 
-sourceTextSnapshot = content;
-sourceDataSnapshot = structuredClone({
-...sourceClause,
-...(languageVariant ?? {}),
-scope: sourceClause.scope,
-language,
-isEnabled: true,
-content,
-});
-} else if (sourceType === "custom_section_item") {
-const customItem =
-source as CurrentProfile["customSectionItems"][number];
-const section = profile.sections.find(
-(candidate) =>
-candidate.id === customItem.profileSectionId &&
-candidate.kind === "custom",
-);
+		sourceTextSnapshot = content;
+		sourceDataSnapshot = structuredClone({
+			...sourceClause,
+			...(languageVariant ?? {}),
+			scope: sourceClause.scope,
+			language,
+			isEnabled: true,
+			content,
+		});
+	} else if (sourceType === "custom_section_item") {
+		const customItem = source as CurrentProfile["customSectionItems"][number];
+		const section = profile.sections.find(
+			(candidate) =>
+				candidate.id === customItem.profileSectionId &&
+				candidate.kind === "custom",
+		);
 
-if (!section) {
-throw new ORPCError("BAD_REQUEST", {
-message:
-"The selected custom section is no longer available.",
-});
-}
+		if (!section) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "The selected custom section is no longer available.",
+			});
+		}
 
-sourceDataSnapshot = structuredClone({
-...customItem,
-section,
-});
-} else {
-sourceDataSnapshot = structuredClone(source) as Record<string, unknown>;
-}
+		sourceDataSnapshot = structuredClone({
+			...customItem,
+			section,
+		});
+	} else {
+		sourceDataSnapshot = structuredClone(source) as Record<string, unknown>;
+	}
 
-return {
-sourceTextSnapshot,
-sourceDataSnapshot,
-};
+	return {
+		sourceTextSnapshot,
+		sourceDataSnapshot,
+	};
 }
 function buildInitialSelectionItems(
-profile: CurrentProfile,
-cvBuildId: string,
-targetLanguage: string | null,
+	profile: CurrentProfile,
+	cvBuildId: string,
+	targetLanguage: string | null,
 ) {
-const rows: Array<{
-id: string;
-cvBuildId: string;
-parentSelectionItemId: string | null;
-sourceType: CvmateSelectionSourceType;
-sourceId: string;
-sourceTextSnapshot: string | null;
-sourceDataSnapshot: Record<string, unknown>;
-selected: boolean;
-sortOrder: number;
-}> = [];
+	const rows: Array<{
+		id: string;
+		cvBuildId: string;
+		parentSelectionItemId: string | null;
+		sourceType: CvmateSelectionSourceType;
+		sourceId: string;
+		sourceTextSnapshot: string | null;
+		sourceDataSnapshot: Record<string, unknown>;
+		selected: boolean;
+		sortOrder: number;
+	}> = [];
 
-let sortOrder = 0;
+	let sortOrder = 0;
 
-const add = (
-sourceType: CvmateSelectionSourceType,
-sourceId: string,
-parentSelectionItemId: string | null = null,
-selected = false,
-) => {
-const snapshot = snapshotSelectionSource(
-profile,
-sourceType,
-sourceId,
-targetLanguage,
-);
-const id = generateId();
+	const add = (
+		sourceType: CvmateSelectionSourceType,
+		sourceId: string,
+		parentSelectionItemId: string | null = null,
+		selected = false,
+	) => {
+		const snapshot = snapshotSelectionSource(
+			profile,
+			sourceType,
+			sourceId,
+			targetLanguage,
+		);
+		const id = generateId();
 
-rows.push({
-id,
-cvBuildId,
-parentSelectionItemId,
-sourceType,
-sourceId,
-sourceTextSnapshot: snapshot.sourceTextSnapshot,
-sourceDataSnapshot: snapshot.sourceDataSnapshot,
-selected,
-sortOrder,
-});
+		rows.push({
+			id,
+			cvBuildId,
+			parentSelectionItemId,
+			sourceType,
+			sourceId,
+			sourceTextSnapshot: snapshot.sourceTextSnapshot,
+			sourceDataSnapshot: snapshot.sourceDataSnapshot,
+			selected,
+			sortOrder,
+		});
 
-sortOrder += 1;
-return id;
-};
+		sortOrder += 1;
+		return id;
+	};
 
-const employmentSelectionIds = new Map<string, string>();
+	const employmentSelectionIds = new Map<string, string>();
 
-for (const employment of profile.employments) {
-employmentSelectionIds.set(
-employment.id,
-add("employment", employment.id),
-);
-}
+	for (const employment of profile.employments) {
+		employmentSelectionIds.set(employment.id, add("employment", employment.id));
+	}
 
-for (const link of profile.employmentFacts) {
-const parentSelectionItemId = employmentSelectionIds.get(
-link.employmentId,
-);
+	for (const link of profile.employmentFacts) {
+		const parentSelectionItemId = employmentSelectionIds.get(link.employmentId);
 
-if (!parentSelectionItemId) {
-throw new ORPCError("BAD_REQUEST", {
-message:
-"The Master Profile contains an experience fact linked to an unavailable employment.",
-});
-}
+		if (!parentSelectionItemId) {
+			throw new ORPCError("BAD_REQUEST", {
+				message:
+					"The Master Profile contains an experience fact linked to an unavailable employment.",
+			});
+		}
 
-const factExists = profile.experienceFacts.some(
-(fact) => fact.id === link.experienceFactId,
-);
+		const factExists = profile.experienceFacts.some(
+			(fact) => fact.id === link.experienceFactId,
+		);
 
-if (!factExists) {
-throw new ORPCError("BAD_REQUEST", {
-message:
-"The Master Profile contains an unavailable linked experience fact.",
-});
-}
+		if (!factExists) {
+			throw new ORPCError("BAD_REQUEST", {
+				message:
+					"The Master Profile contains an unavailable linked experience fact.",
+			});
+		}
 
-add(
-"experience_fact",
-link.experienceFactId,
-parentSelectionItemId,
-);
-}
+		add("experience_fact", link.experienceFactId, parentSelectionItemId);
+	}
 
-for (const item of profile.projects) add("project", item.id);
-for (const item of profile.education) add("education", item.id);
-for (const item of profile.courses) add("course", item.id);
-for (const item of profile.certifications)
-add("certification", item.id);
-for (const item of profile.volunteer) add("volunteer", item.id);
-for (const item of profile.languages) add("language", item.id);
-for (const item of profile.awards) add("award", item.id);
-for (const item of profile.references) add("reference", item.id);
-for (const item of profile.licenses) add("license", item.id);
-for (const item of profile.listItems)
-add("profile_list_item", item.id);
+	for (const item of profile.projects) add("project", item.id);
+	for (const item of profile.education) add("education", item.id);
+	for (const item of profile.courses) add("course", item.id);
+	for (const item of profile.certifications) add("certification", item.id);
+	for (const item of profile.volunteer) add("volunteer", item.id);
+	for (const item of profile.languages) add("language", item.id);
+	for (const item of profile.awards) add("award", item.id);
+	for (const item of profile.references) add("reference", item.id);
+	for (const item of profile.licenses) add("license", item.id);
+	for (const item of profile.listItems) add("profile_list_item", item.id);
 
-const enabledClauseScopes = [
-...new Set(
-profile.clauses
-.filter((item) => item.isEnabled)
-.map((item) => item.scope),
-),
-];
+	const enabledClauseScopes = [
+		...new Set(
+			profile.clauses
+				.filter((item) => item.isEnabled)
+				.map((item) => item.scope),
+		),
+	];
 
-if (enabledClauseScopes.length > 1) {
-throw new ORPCError("BAD_REQUEST", {
-message:
-"The Master Profile contains more than one enabled recruitment clause.",
-});
-}
+	if (enabledClauseScopes.length > 1) {
+		throw new ORPCError("BAD_REQUEST", {
+			message:
+				"The Master Profile contains more than one enabled recruitment clause.",
+		});
+	}
 
-const enabledClauseScope = enabledClauseScopes[0];
+	const enabledClauseScope = enabledClauseScopes[0];
 
-if (enabledClauseScope) {
-const selectedClause = profile.clauses.find(
-(item) =>
-item.scope === enabledClauseScope &&
-item.isEnabled,
-);
+	if (enabledClauseScope) {
+		const selectedClause = profile.clauses.find(
+			(item) => item.scope === enabledClauseScope && item.isEnabled,
+		);
 
-if (!selectedClause) {
-throw new ORPCError("BAD_REQUEST", {
-message:
-"The enabled recruitment clause could not be resolved.",
-});
-}
+		if (!selectedClause) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "The enabled recruitment clause could not be resolved.",
+			});
+		}
 
-add("clause", selectedClause.id, null, true);
-}
+		add("clause", selectedClause.id, null, true);
+	}
 
-for (const item of profile.photos) add("profile_photo", item.id);
-for (const item of profile.customSectionItems)
-add("custom_section_item", item.id);
+	for (const item of profile.photos) add("profile_photo", item.id);
+	for (const item of profile.customSectionItems)
+		add("custom_section_item", item.id);
 
-return rows;
+	return rows;
 }
 async function resolveSelectionSource(
-build: Awaited<ReturnType<typeof requireOwnedBuild>>,
-userId: string,
-sourceType: CvmateSelectionSourceType,
-sourceId: string,
+	build: Awaited<ReturnType<typeof requireOwnedBuild>>,
+	userId: string,
+	sourceType: CvmateSelectionSourceType,
+	sourceId: string,
 ) {
-const profile = await getBuildProfile(build, userId);
-const snapshot = snapshotSelectionSource(
-profile,
-sourceType,
-sourceId,
-build.targetLanguage,
-);
+	const profile = await getBuildProfile(build, userId);
+	const snapshot = snapshotSelectionSource(
+		profile,
+		sourceType,
+		sourceId,
+		build.targetLanguage,
+	);
 
-return {
-profile,
-...snapshot,
-};
+	return {
+		profile,
+		...snapshot,
+	};
 }
 
-async function requireParentSelectionItem(parentSelectionItemId: string, cvBuildId: string, userId: string) {
-	const { selectionItem } = await requireOwnedSelectionItem(parentSelectionItemId, userId);
+async function requireParentSelectionItem(
+	parentSelectionItemId: string,
+	cvBuildId: string,
+	userId: string,
+) {
+	const { selectionItem } = await requireOwnedSelectionItem(
+		parentSelectionItemId,
+		userId,
+	);
 
 	if (selectionItem.cvBuildId !== cvBuildId) {
 		throw new ORPCError("BAD_REQUEST", {
@@ -546,25 +584,36 @@ function validateEmploymentFactParent(
 	profile: CurrentProfile,
 	sourceType: CvmateSelectionSourceType,
 	sourceId: string,
-	parentSelectionItem: Awaited<ReturnType<typeof requireParentSelectionItem>> | null,
+	parentSelectionItem: Awaited<
+		ReturnType<typeof requireParentSelectionItem>
+	> | null,
 ) {
-	if (sourceType !== "experience_fact" || !parentSelectionItem || parentSelectionItem.sourceType !== "employment") {
+	if (
+		sourceType !== "experience_fact" ||
+		!parentSelectionItem ||
+		parentSelectionItem.sourceType !== "employment"
+	) {
 		return;
 	}
 
 	const linked = profile.employmentFacts.some(
-		(link) => link.employmentId === parentSelectionItem.sourceId && link.experienceFactId === sourceId,
+		(link) =>
+			link.employmentId === parentSelectionItem.sourceId &&
+			link.experienceFactId === sourceId,
 	);
 
 	if (!linked) {
 		throw new ORPCError("BAD_REQUEST", {
-			message: "The experience fact is not linked to the selected employment in the Master Profile.",
+			message:
+				"The experience fact is not linked to the selected employment in the Master Profile.",
 		});
 	}
 }
 
 async function validateSelectionParentUpdate(
-	selectionItem: Awaited<ReturnType<typeof requireOwnedSelectionItem>>["selectionItem"],
+	selectionItem: Awaited<
+		ReturnType<typeof requireOwnedSelectionItem>
+	>["selectionItem"],
 	parentSelectionItemId: string | null,
 	userId: string,
 ) {
@@ -576,7 +625,11 @@ async function validateSelectionParentUpdate(
 		});
 	}
 
-	let current = await requireParentSelectionItem(parentSelectionItemId, selectionItem.cvBuildId, userId);
+	let current = await requireParentSelectionItem(
+		parentSelectionItemId,
+		selectionItem.cvBuildId,
+		userId,
+	);
 
 	const visited = new Set<string>();
 
@@ -597,10 +650,18 @@ async function validateSelectionParentUpdate(
 
 		if (!current.parentSelectionItemId) break;
 
-		current = await requireParentSelectionItem(current.parentSelectionItemId, selectionItem.cvBuildId, userId);
+		current = await requireParentSelectionItem(
+			current.parentSelectionItemId,
+			selectionItem.cvBuildId,
+			userId,
+		);
 	}
 
-	return requireParentSelectionItem(parentSelectionItemId, selectionItem.cvBuildId, userId);
+	return requireParentSelectionItem(
+		parentSelectionItemId,
+		selectionItem.cvBuildId,
+		userId,
+	);
 }
 
 export const cvmateBuildService = {
@@ -619,47 +680,49 @@ export const cvmateBuildService = {
 		return stripUserId(build);
 	},
 
-create: async (input: BuildCreateFields & { userId: string }) => {
-const profile = await cvmateProfileService.getCurrent({
-userId: input.userId,
-});
+	create: async (input: BuildCreateFields & { userId: string }) => {
+		const profile = await cvmateProfileService.getCurrent({
+			userId: input.userId,
+		});
 
-if (!profile) {
-throw new ORPCError("BAD_REQUEST", {
-message:
-"Create a Master Profile before starting a CV build.",
-});
-}
+		if (!profile) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "Create a Master Profile before starting a CV build.",
+			});
+		}
 
-const id = generateId();
-const jobOfferId = input.jobOfferId ?? null;
-const jobOfferSnapshot =
-jobOfferId === null
-? null
-: await getJobOfferSnapshot(jobOfferId, input.userId);
+		const id = generateId();
+		const jobOfferId = input.jobOfferId ?? null;
+		const jobOfferSnapshot =
+			jobOfferId === null
+				? null
+				: await getJobOfferSnapshot(jobOfferId, input.userId);
 
-const selectionItems = buildInitialSelectionItems(profile, id, input.targetLanguage ?? null);
+		const targetLanguage = resolveCvLanguage(input.targetLanguage);
+		const selectionItems = buildInitialSelectionItems(
+			profile,
+			id,
+			targetLanguage,
+		);
 
-await db.transaction(async (tx) => {
-await tx.insert(schema.cvmateCvBuild).values({
-id,
-userId: input.userId,
-masterProfileId: profile.profile.id,
-jobOfferId,
-jobOfferSnapshot,
-targetLanguage: input.targetLanguage ?? null,
-designSettings: input.designSettings ?? null,
-});
+		await db.transaction(async (tx) => {
+			await tx.insert(schema.cvmateCvBuild).values({
+				id,
+				userId: input.userId,
+				masterProfileId: profile.profile.id,
+				jobOfferId,
+				jobOfferSnapshot,
+				targetLanguage,
+				designSettings: input.designSettings ?? null,
+			});
 
-if (selectionItems.length > 0) {
-await tx
-.insert(schema.cvmateCvSelectionItem)
-.values(selectionItems);
-}
-});
+			if (selectionItems.length > 0) {
+				await tx.insert(schema.cvmateCvSelectionItem).values(selectionItems);
+			}
+		});
 
-return id;
-},
+		return id;
+	},
 
 	update: async (
 		input: BuildUpdateFields & {
@@ -694,7 +757,9 @@ return id;
 		if (fields.jobOfferId !== undefined) {
 			updates.jobOfferId = fields.jobOfferId;
 			updates.jobOfferSnapshot =
-				fields.jobOfferId === null ? null : await getJobOfferSnapshot(fields.jobOfferId, userId);
+				fields.jobOfferId === null
+					? null
+					: await getJobOfferSnapshot(fields.jobOfferId, userId);
 		}
 
 		if (fields.currentStep !== undefined) {
@@ -706,7 +771,7 @@ return id;
 		}
 
 		if (fields.targetLanguage !== undefined) {
-			updates.targetLanguage = fields.targetLanguage;
+			updates.targetLanguage = resolveCvLanguage(fields.targetLanguage);
 		}
 
 		if (fields.designSettings !== undefined) {
@@ -722,7 +787,12 @@ return id;
 		const [updated] = await db
 			.update(schema.cvmateCvBuild)
 			.set(updates)
-			.where(and(eq(schema.cvmateCvBuild.id, id), eq(schema.cvmateCvBuild.userId, userId)))
+			.where(
+				and(
+					eq(schema.cvmateCvBuild.id, id),
+					eq(schema.cvmateCvBuild.userId, userId),
+				),
+			)
 			.returning();
 
 		if (!updated) throw new ORPCError("NOT_FOUND");
@@ -735,7 +805,12 @@ return id;
 
 		const rows = await db
 			.delete(schema.cvmateCvBuild)
-			.where(and(eq(schema.cvmateCvBuild.id, input.id), eq(schema.cvmateCvBuild.userId, input.userId)))
+			.where(
+				and(
+					eq(schema.cvmateCvBuild.id, input.id),
+					eq(schema.cvmateCvBuild.userId, input.userId),
+				),
+			)
 			.returning({ id: schema.cvmateCvBuild.id });
 
 		if (rows.length === 0) throw new ORPCError("NOT_FOUND");
@@ -748,7 +823,10 @@ return id;
 			.select()
 			.from(schema.cvmateCvSelectionItem)
 			.where(eq(schema.cvmateCvSelectionItem.cvBuildId, build.id))
-			.orderBy(asc(schema.cvmateCvSelectionItem.sortOrder), asc(schema.cvmateCvSelectionItem.createdAt));
+			.orderBy(
+				asc(schema.cvmateCvSelectionItem.sortOrder),
+				asc(schema.cvmateCvSelectionItem.createdAt),
+			);
 	},
 
 	createSelectionItem: async (
@@ -759,18 +837,28 @@ return id;
 	) => {
 		const build = await requireOwnedBuild(input.cvBuildId, input.userId);
 
-		const { profile, sourceTextSnapshot, sourceDataSnapshot } = await resolveSelectionSource(
-			build,
-			input.userId,
-			input.sourceType,
-			input.sourceId,
-		);
+		const { profile, sourceTextSnapshot, sourceDataSnapshot } =
+			await resolveSelectionSource(
+				build,
+				input.userId,
+				input.sourceType,
+				input.sourceId,
+			);
 
 		const parentSelectionItem = input.parentSelectionItemId
-			? await requireParentSelectionItem(input.parentSelectionItemId, build.id, input.userId)
+			? await requireParentSelectionItem(
+					input.parentSelectionItemId,
+					build.id,
+					input.userId,
+				)
 			: null;
 
-		validateEmploymentFactParent(profile, input.sourceType, input.sourceId, parentSelectionItem);
+		validateEmploymentFactParent(
+			profile,
+			input.sourceType,
+			input.sourceId,
+			parentSelectionItem,
+		);
 
 		const [selectionItem] = await db
 			.insert(schema.cvmateCvSelectionItem)
@@ -800,7 +888,10 @@ return id;
 			userId: string;
 		},
 	) => {
-		const { selectionItem, build } = await requireOwnedSelectionItem(input.id, input.userId);
+		const { selectionItem, build } = await requireOwnedSelectionItem(
+			input.id,
+			input.userId,
+		);
 
 		const { id, userId, ...fields } = input;
 
@@ -817,10 +908,18 @@ return id;
 				userId,
 			);
 
-			if (selectionItem.sourceType === "experience_fact" && parentSelectionItem?.sourceType === "employment") {
+			if (
+				selectionItem.sourceType === "experience_fact" &&
+				parentSelectionItem?.sourceType === "employment"
+			) {
 				const profile = await getBuildProfile(build, userId);
 
-				validateEmploymentFactParent(profile, selectionItem.sourceType, selectionItem.sourceId, parentSelectionItem);
+				validateEmploymentFactParent(
+					profile,
+					selectionItem.sourceType,
+					selectionItem.sourceId,
+					parentSelectionItem,
+				);
 			}
 		}
 
@@ -841,7 +940,10 @@ return id;
 	},
 
 	deleteSelectionItem: async (input: { id: string; userId: string }) => {
-		const { selectionItem } = await requireOwnedSelectionItem(input.id, input.userId);
+		const { selectionItem } = await requireOwnedSelectionItem(
+			input.id,
+			input.userId,
+		);
 
 		const rows = await db
 			.delete(schema.cvmateCvSelectionItem)
@@ -862,7 +964,10 @@ return id;
 			.select()
 			.from(schema.cvmateCvGap)
 			.where(eq(schema.cvmateCvGap.cvBuildId, build.id))
-			.orderBy(asc(schema.cvmateCvGap.sortOrder), asc(schema.cvmateCvGap.createdAt));
+			.orderBy(
+				asc(schema.cvmateCvGap.sortOrder),
+				asc(schema.cvmateCvGap.createdAt),
+			);
 	},
 
 	createGap: async (
@@ -932,7 +1037,8 @@ return id;
 		let nextStatus = fields.status ?? gap.status;
 
 		const resolutionSourceProvided =
-			fields.resolutionSourceType !== undefined || fields.resolutionSourceId !== undefined;
+			fields.resolutionSourceType !== undefined ||
+			fields.resolutionSourceId !== undefined;
 
 		if (resolutionSourceProvided) {
 			const sourceType = fields.resolutionSourceType;
@@ -942,14 +1048,22 @@ return id;
 				updates.resolutionSourceType = null;
 				updates.resolutionSourceId = null;
 				updates.resolutionTextSnapshot = null;
-			} else if (typeof sourceType === "string" && typeof sourceId === "string") {
+			} else if (
+				typeof sourceType === "string" &&
+				typeof sourceId === "string"
+			) {
 				if (fields.status !== undefined && fields.status !== "resolved") {
 					throw new ORPCError("BAD_REQUEST", {
-						message: "A gap with a resolution source must have resolved status.",
+						message:
+							"A gap with a resolution source must have resolved status.",
 					});
 				}
 
-				const resolutionTextSnapshot = await resolveGapResolutionSource(gap.cvBuildId, sourceType, sourceId);
+				const resolutionTextSnapshot = await resolveGapResolutionSource(
+					gap.cvBuildId,
+					sourceType,
+					sourceId,
+				);
 
 				updates.resolutionSourceType = sourceType;
 				updates.resolutionSourceId = sourceId;
@@ -961,7 +1075,8 @@ return id;
 				}
 			} else {
 				throw new ORPCError("BAD_REQUEST", {
-					message: "Resolution source type and ID must be provided together or cleared together.",
+					message:
+						"Resolution source type and ID must be provided together or cleared together.",
 				});
 			}
 		}
@@ -982,7 +1097,12 @@ return id;
 		const [updated] = await db
 			.update(schema.cvmateCvGap)
 			.set(updates)
-			.where(and(eq(schema.cvmateCvGap.id, id), eq(schema.cvmateCvGap.cvBuildId, gap.cvBuildId)))
+			.where(
+				and(
+					eq(schema.cvmateCvGap.id, id),
+					eq(schema.cvmateCvGap.cvBuildId, gap.cvBuildId),
+				),
+			)
 			.returning();
 
 		if (!updated) throw new ORPCError("NOT_FOUND");
@@ -995,12 +1115,20 @@ return id;
 
 		const rows = await db
 			.delete(schema.cvmateCvGap)
-			.where(and(eq(schema.cvmateCvGap.id, input.id), eq(schema.cvmateCvGap.cvBuildId, gap.cvBuildId)))
+			.where(
+				and(
+					eq(schema.cvmateCvGap.id, input.id),
+					eq(schema.cvmateCvGap.cvBuildId, gap.cvBuildId),
+				),
+			)
 			.returning({ id: schema.cvmateCvGap.id });
 
 		if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 	},
-	listGeneratedContent: async (input: { cvBuildId: string; userId: string }) => {
+	listGeneratedContent: async (input: {
+		cvBuildId: string;
+		userId: string;
+	}) => {
 		const build = await requireOwnedBuild(input.cvBuildId, input.userId);
 
 		return db
@@ -1010,8 +1138,15 @@ return id;
 			.orderBy(asc(schema.cvmateCvGeneratedContent.createdAt));
 	},
 
-	updateGeneratedContentFinalText: async (input: { id: string; userId: string; finalText: string | null }) => {
-		const generatedContent = await requireOwnedGeneratedContent(input.id, input.userId);
+	updateGeneratedContentFinalText: async (input: {
+		id: string;
+		userId: string;
+		finalText: string | null;
+	}) => {
+		const generatedContent = await requireOwnedGeneratedContent(
+			input.id,
+			input.userId,
+		);
 
 		const [updated] = await db
 			.update(schema.cvmateCvGeneratedContent)
@@ -1021,7 +1156,10 @@ return id;
 			.where(
 				and(
 					eq(schema.cvmateCvGeneratedContent.id, input.id),
-					eq(schema.cvmateCvGeneratedContent.cvBuildId, generatedContent.cvBuildId),
+					eq(
+						schema.cvmateCvGeneratedContent.cvBuildId,
+						generatedContent.cvBuildId,
+					),
 				),
 			)
 			.returning();

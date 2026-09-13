@@ -1,40 +1,42 @@
 // @vitest-environment happy-dom
 
-import { beforeAll, describe, expect, it } from "vitest";
 import { i18n } from "@lingui/core";
-import { localeMap } from "@/libs/locale";
-import { getLocaleOptions } from "./locale-options";
+import { beforeAll, describe, expect, it } from "vitest";
+import { appLocaleMap, cvLocaleMap, localeMap } from "@/libs/locale";
+import {
+	getAppLocaleOptions,
+	getCvLocaleOptions,
+	getLocaleOptions,
+} from "./locale-options";
 
 beforeAll(() => {
 	i18n.loadAndActivate({ locale: "en", messages: {} });
 });
 
 describe("getLocaleOptions", () => {
-	it("returns one option per entry in localeMap", () => {
-		const options = getLocaleOptions();
-		expect(options).toHaveLength(Object.keys(localeMap).length);
+	it("retains the full technical locale catalogue", () => {
+		expect(getLocaleOptions()).toHaveLength(Object.keys(localeMap).length);
+		expect(getLocaleOptions().map((option) => option.value)).toContain("de-DE");
 	});
+});
 
-	it("uses the locale code as the value", () => {
-		const options = getLocaleOptions();
-		const values = options.map((opt) => opt.value);
-		expect(values).toContain("en-US");
-		expect(values).toContain("de-DE");
+describe("getAppLocaleOptions", () => {
+	it("exposes only Polish and English for the 1story interface", () => {
+		const values = getAppLocaleOptions().map((option) => option.value);
+
+		expect(values).toEqual(Object.keys(appLocaleMap));
+		expect(values).toEqual(["pl-PL", "en-US"]);
+		expect(values).not.toContain("de-DE");
 	});
+});
 
-	it("makes each option searchable by translated name and ISO code", () => {
-		const options = getLocaleOptions();
-		const enUS = options.find((opt) => opt.value === "en-US");
-		expect(enUS?.label).toBeTruthy();
-		// Plain-text name for the collapsed trigger.
-		expect(typeof enUS?.textValue).toBe("string");
-		// Searchable by the ISO code and the translated name regardless of the active UI locale.
-		expect(enUS?.keywords).toContain("en-us");
-		expect(enUS?.keywords).toContain(enUS?.textValue);
-	});
+describe("getCvLocaleOptions", () => {
+	it("exposes only Polish and English for final CV documents", () => {
+		const values = getCvLocaleOptions().map((option) => option.value);
 
-	it("uses unique values for every option", () => {
-		const values = getLocaleOptions().map((opt) => opt.value);
-		expect(new Set(values).size).toBe(values.length);
+		expect(values).toEqual(Object.keys(cvLocaleMap));
+		expect(values).toEqual(["pl-PL", "en-US"]);
+		expect(values).not.toContain("de-DE");
+		expect(values).not.toContain("ja-JP");
 	});
 });

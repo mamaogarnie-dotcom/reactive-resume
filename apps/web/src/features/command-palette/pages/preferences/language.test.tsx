@@ -1,11 +1,11 @@
 // @vitest-environment happy-dom
 
-import { render, screen } from "@testing-library/react";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { Command } from "@reactive-resume/ui/components/command";
-import { localeMap } from "@/libs/locale";
+import { render, screen } from "@testing-library/react";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { appLocaleMap } from "@/libs/locale";
 import { useCommandPaletteStore } from "../../store";
 import { LanguageCommandPage } from "./language";
 
@@ -29,31 +29,30 @@ const renderPage = () =>
 describe("LanguageCommandPage", () => {
 	it("does NOT render when the page stack does not have 'language' on top", () => {
 		renderPage();
-		// localeMap codes shouldn't appear because BaseCommandGroup gating is off.
+
 		expect(screen.queryByText("en-US")).toBeNull();
+		expect(screen.queryByText("pl-PL")).toBeNull();
 	});
 
-	it("renders one CommandItem for every entry in localeMap when active", () => {
+	it("renders exactly the supported 1story interface locales when active", () => {
 		useCommandPaletteStore.setState({ pages: ["language"] });
 		renderPage();
 
-		const expectedCount = Object.keys(localeMap).length;
-		expect(expectedCount).toBeGreaterThan(0);
+		expect(Object.keys(appLocaleMap)).toEqual(["pl-PL", "en-US"]);
 
-		// Each locale value is rendered in the inline font-mono span.
-		for (const code of Object.keys(localeMap).slice(0, 5)) {
+		for (const code of Object.keys(appLocaleMap)) {
 			expect(screen.getByText(code)).toBeInTheDocument();
 		}
 	});
 
-	it("includes the documented set of locales (sample check)", () => {
+	it("does not render document-only locales", () => {
 		useCommandPaletteStore.setState({ pages: ["language"] });
 		renderPage();
-		// Spot-check a couple of common locales.
-		for (const code of ["en-US", "de-DE", "ja-JP"]) {
-			if (code in localeMap) {
-				expect(screen.getByText(code)).toBeInTheDocument();
-			}
-		}
+
+		expect(screen.getByText("pl-PL")).toBeInTheDocument();
+		expect(screen.getByText("en-US")).toBeInTheDocument();
+		expect(screen.queryByText("de-DE")).toBeNull();
+		expect(screen.queryByText("ja-JP")).toBeNull();
+		expect(screen.queryByText("lv-LV")).toBeNull();
 	});
 });

@@ -1,10 +1,8 @@
-import type { AuthSession } from "@reactive-resume/auth/types";
 import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { PaletteIcon, SignOutIcon, TranslateIcon } from "@phosphor-icons/react";
-import { useRouter } from "@tanstack/react-router";
-import { useIsClient } from "usehooks-ts";
+import type { AuthSession } from "@reactive-resume/auth/types";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -19,14 +17,20 @@ import {
 	DropdownMenuTrigger,
 } from "@reactive-resume/ui/components/dropdown-menu";
 import { toast } from "@reactive-resume/ui/components/toast";
+import { useRouter } from "@tanstack/react-router";
+import { useIsClient } from "usehooks-ts";
 import { useTheme } from "@/features/theme/provider";
 import { authClient } from "@/libs/auth/client";
 import { getReadableErrorMessage } from "@/libs/error-message";
-import { changeLocale, localeMap } from "@/libs/locale";
+import { appLocaleMap, changeLocale } from "@/libs/locale";
 import { isTheme } from "@/libs/theme";
 
 type Props = {
-	children: ({ session }: { session: AuthSession }) => React.ComponentProps<typeof DropdownMenuTrigger>["render"];
+	children: ({
+		session,
+	}: {
+		session: AuthSession;
+	}) => React.ComponentProps<typeof DropdownMenuTrigger>["render"];
 };
 
 export function UserDropdownMenu({ children }: Props) {
@@ -42,7 +46,10 @@ export function UserDropdownMenu({ children }: Props) {
 	};
 
 	const handleLogout = async () => {
-		const toastId = toast.add({ type: "loading", description: t`Signing out...` });
+		const toastId = toast.add({
+			type: "loading",
+			description: t`Signing out...`,
+		});
 
 		await authClient.signOut({
 			fetchOptions: {
@@ -72,18 +79,25 @@ export function UserDropdownMenu({ children }: Props) {
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger render={children({ session: session as AuthSession })} />
+			<DropdownMenuTrigger
+				render={children({ session: session as AuthSession })}
+			/>
 
 			<DropdownMenuContent align="start" side="top">
 				<DropdownMenuGroup>
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger>
 							<TranslateIcon />
-							<Trans comment="Menu item that opens language selection submenu">Language</Trans>
+							<Trans comment="Menu item that opens language selection submenu">
+								Language
+							</Trans>
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent className="max-h-[400px] overflow-y-auto">
-							<DropdownMenuRadioGroup value={i18n.locale} onValueChange={changeLocale}>
-								{Object.entries(localeMap).map(([value, label]) => (
+							<DropdownMenuRadioGroup
+								value={i18n.locale}
+								onValueChange={changeLocale}
+							>
+								{Object.entries(appLocaleMap).map(([value, label]) => (
 									<DropdownMenuRadioItem key={value} value={value}>
 										{i18n.t(label)}
 									</DropdownMenuRadioItem>
@@ -95,15 +109,24 @@ export function UserDropdownMenu({ children }: Props) {
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger>
 							<PaletteIcon />
-							<Trans comment="Menu item that opens appearance theme selection submenu">Theme</Trans>
+							<Trans comment="Menu item that opens appearance theme selection submenu">
+								Theme
+							</Trans>
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							<DropdownMenuRadioGroup value={theme} onValueChange={handleThemeChange}>
+							<DropdownMenuRadioGroup
+								value={theme}
+								onValueChange={handleThemeChange}
+							>
 								<DropdownMenuRadioItem value="light">
-									<Trans comment="Appearance theme option for light mode">Light</Trans>
+									<Trans comment="Appearance theme option for light mode">
+										Light
+									</Trans>
 								</DropdownMenuRadioItem>
 								<DropdownMenuRadioItem value="dark">
-									<Trans comment="Appearance theme option for dark mode">Dark</Trans>
+									<Trans comment="Appearance theme option for dark mode">
+										Dark
+									</Trans>
 								</DropdownMenuRadioItem>
 							</DropdownMenuRadioGroup>
 						</DropdownMenuSubContent>
@@ -114,7 +137,9 @@ export function UserDropdownMenu({ children }: Props) {
 
 				<DropdownMenuItem onClick={handleLogout}>
 					<SignOutIcon />
-					<Trans comment="User menu action to sign out of current account">Sign out</Trans>
+					<Trans comment="User menu action to sign out of current account">
+						Sign out
+					</Trans>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

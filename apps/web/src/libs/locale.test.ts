@@ -1,8 +1,13 @@
 // @vitest-environment happy-dom
 
-import { afterEach, describe, expect, it, vi } from "vitest";
 import Cookies from "js-cookie";
-import { changeLocale, formatRelativeTime, isLocale, resolveLocale } from "./locale";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+	changeLocale,
+	formatRelativeTime,
+	isLocale,
+	resolveLocale,
+} from "./locale";
 
 afterEach(() => {
 	vi.restoreAllMocks();
@@ -60,7 +65,9 @@ describe("formatRelativeTime", () => {
 		vi.setSystemTime(new Date("2026-01-02T12:00:00Z"));
 		const formatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
-		expect(formatRelativeTime("2026-01-02T10:00:00Z", formatter)).toBe("2 hours ago");
+		expect(formatRelativeTime("2026-01-02T10:00:00Z", formatter)).toBe(
+			"2 hours ago",
+		);
 		expect(formatRelativeTime("2026-01-02T11:59:45Z", formatter)).toBe("now");
 	});
 
@@ -73,11 +80,13 @@ describe("formatRelativeTime", () => {
 
 describe("changeLocale", () => {
 	it("persists a valid locale and reloads", () => {
-		const reload = vi.spyOn(window.location, "reload").mockImplementation(() => undefined);
+		const reload = vi
+			.spyOn(window.location, "reload")
+			.mockImplementation(() => undefined);
 
-		changeLocale("de-DE");
+		changeLocale("en-US");
 
-		expect(Cookies.get("locale")).toBe("de-DE");
+		expect(Cookies.get("locale")).toBe("en-US");
 		expect(reload).toHaveBeenCalledOnce();
 	});
 });

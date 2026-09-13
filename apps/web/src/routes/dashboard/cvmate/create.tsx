@@ -3,6 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import { FileTextIcon } from "@phosphor-icons/react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Separator } from "@reactive-resume/ui/components/separator";
+import { resolveCvLanguage } from "@reactive-resume/utils/locale";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
@@ -159,7 +160,7 @@ function RouteComponent() {
 			if (!id) {
 				id = await orpc.cvmateBuild.create.call({
 					jobOfferId: analyzeOffer.data.id,
-					targetLanguage: analyzeOffer.data.language,
+					targetLanguage: resolveCvLanguage(analyzeOffer.data.language),
 				});
 				setBuildId(id);
 			}
