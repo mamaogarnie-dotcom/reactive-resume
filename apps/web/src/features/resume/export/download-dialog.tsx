@@ -1,5 +1,4 @@
-import type { ResumeExportTarget } from "@reactive-resume/resume/export-sections";
-import type { ReactElement, ReactNode } from "react";
+import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import {
 	CircleNotchIcon,
@@ -11,7 +10,7 @@ import {
 	FileTextIcon,
 	MarkdownLogoIcon,
 } from "@phosphor-icons/react";
-import { useId, useState } from "react";
+import type { ResumeExportTarget } from "@reactive-resume/resume/export-sections";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
 	Dialog,
@@ -24,6 +23,8 @@ import {
 import { Switch } from "@reactive-resume/ui/components/switch";
 import { Tabs, TabsList, TabsTrigger } from "@reactive-resume/ui/components/tabs";
 import { cn } from "@reactive-resume/utils/style";
+import type { ReactElement, ReactNode } from "react";
+import { useId, useState } from "react";
 import { useResumeExport } from "./use-resume-export";
 
 type DownloadableResume = Parameters<typeof useResumeExport>[0];
@@ -137,7 +138,7 @@ export function ResumeDownloadDialog({ resume, trigger }: ResumeDownloadDialogPr
 						action={
 							<Button
 								size="sm"
-								aria-label="Download PDF"
+								aria-label={t`Download PDF`}
 								disabled={isExporting}
 								onClick={() => run(() => onDownloadPDF(activeScope, { includeCoverLetterHeader }))}
 							>
@@ -155,7 +156,7 @@ export function ResumeDownloadDialog({ resume, trigger }: ResumeDownloadDialogPr
 							<Button
 								size="sm"
 								variant="outline"
-								aria-label="Download DOCX"
+								aria-label={t`Download DOCX`}
 								disabled={isExporting}
 								onClick={() => run(() => onDownloadDOCX(activeScope))}
 							>
@@ -173,7 +174,7 @@ export function ResumeDownloadDialog({ resume, trigger }: ResumeDownloadDialogPr
 							<Button
 								size="sm"
 								variant="outline"
-								aria-label="Download Markdown"
+								aria-label={t`Download Markdown`}
 								disabled={isExporting}
 								onClick={() => run(() => onDownloadMarkdown(activeScope))}
 							>
@@ -192,7 +193,7 @@ export function ResumeDownloadDialog({ resume, trigger }: ResumeDownloadDialogPr
 							<Button
 								size="sm"
 								variant="outline"
-								aria-label="Download JSON"
+								aria-label={t`Download JSON`}
 								disabled={jsonDisabled}
 								onClick={() => run(onDownloadJSON)}
 							>

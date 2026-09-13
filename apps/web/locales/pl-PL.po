@@ -7785,3 +7785,15 @@ msgstr "Ładowanie edytora"
 #: src/features/resume/version-history.tsx
 msgid "Earlier versions are kept; restoring this snapshot does not delete the version history."
 msgstr "Wcześniejsze wersje są zachowywane; przywrócenie tego stanu nie usuwa historii wersji."
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Download DOCX"
+msgstr "Pobierz DOCX"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Download Markdown"
+msgstr "Pobierz Markdown"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Download JSON"
+msgstr "Pobierz JSON"
