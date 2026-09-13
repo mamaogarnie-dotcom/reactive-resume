@@ -1,13 +1,13 @@
-import type { FormEvent } from "react";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { UserCircleIcon } from "@phosphor-icons/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Label } from "@reactive-resume/ui/components/label";
 import { Separator } from "@reactive-resume/ui/components/separator";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { getOrpcErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { DashboardHeader } from "../-components/header";
@@ -47,7 +47,9 @@ function nullable(value: string) {
 }
 
 function RouteComponent() {
-	const profileQuery = useQuery(orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }));
+	const profileQuery = useQuery(
+		orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
+	);
 	const [form, setForm] = useState<BasicsForm>(EMPTY_FORM);
 
 	const updateBasics = useMutation(
@@ -108,7 +110,8 @@ function RouteComponent() {
 					</h2>
 					<p className="text-muted-foreground text-sm">
 						<Trans>
-							Your Master Profile is the permanent source of facts used by CVMate when creating tailored resumes.
+							Your Master Profile is the permanent source of facts used by
+							1story when creating tailored resumes.
 						</Trans>
 					</p>
 				</div>
@@ -125,10 +128,13 @@ function RouteComponent() {
 					</div>
 				) : null}
 
-				{!profileQuery.isLoading && !profileQuery.isError && profileQuery.data === null ? (
+				{!profileQuery.isLoading &&
+				!profileQuery.isError &&
+				profileQuery.data === null ? (
 					<div className="rounded-md border bg-muted/30 p-3 text-muted-foreground text-sm">
 						<Trans>
-							Your Master Profile has not been created yet. Saving these details will create it automatically.
+							Your Master Profile has not been created yet. Saving these details
+							will create it automatically.
 						</Trans>
 					</div>
 				) : null}
@@ -213,7 +219,9 @@ function RouteComponent() {
 								placeholder="https://linkedin.com/in/..."
 								value={form.linkedinUrl}
 								disabled={profileQuery.isLoading || updateBasics.isPending}
-								onChange={(event) => setField("linkedinUrl", event.target.value)}
+								onChange={(event) =>
+									setField("linkedinUrl", event.target.value)
+								}
 							/>
 						</div>
 
@@ -248,8 +256,15 @@ function RouteComponent() {
 					) : null}
 
 					<div className="flex justify-end">
-						<Button type="submit" disabled={profileQuery.isLoading || updateBasics.isPending}>
-							{updateBasics.isPending ? <Trans>Saving...</Trans> : <Trans>Save</Trans>}
+						<Button
+							type="submit"
+							disabled={profileQuery.isLoading || updateBasics.isPending}
+						>
+							{updateBasics.isPending ? (
+								<Trans>Saving...</Trans>
+							) : (
+								<Trans>Save</Trans>
+							)}
 						</Button>
 					</div>
 				</form>

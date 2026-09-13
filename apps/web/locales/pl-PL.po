@@ -7132,7 +7132,7 @@ msgid "Your Master Profile has not been created yet. Saving these details will c
 msgstr "Twój profil nie został jeszcze utworzony. Zapisanie tych danych utworzy go automatycznie."
 
 #: src/routes/dashboard/cvmate/profile.tsx
-msgid "Your Master Profile is the permanent source of facts used by CVMate when creating tailored resumes."
+msgid "Your Master Profile is the permanent source of facts used by 1story when creating tailored resumes."
 msgstr "Twój profil jest źródłem prawdziwych informacji o Twojej historii zawodowej, z których 1story tworzy dopasowane CV."
 
 #: src/libs/resume/ats.ts
