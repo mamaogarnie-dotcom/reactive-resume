@@ -5431,11 +5431,11 @@ msgstr "Jedna kolumna z paskiem bocznym i przejrzystą siatką; uniwersalny ukł
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column with an inline three-column entry header (position · organization · period); compact and ATS-friendly, well-suited for Asian resume conventions (CN/JP/KR)."
-msgstr "Jednokolumnowy z wbudowanym trzykolumnowym nagłówkiem (stanowisko - organizacja - kropka); kompaktowy i przyjazny dla ATS, dobrze dopasowany do azjatyckich konwencji CV (CN/JP/KR)."
+msgstr "Jedna kolumna z wbudowanym trzykolumnowym nagłówkiem wpisu (stanowisko · organizacja · okres); kompaktowy i przyjazny dla ATS, dobrze dopasowany do azjatyckich konwencji CV (CN/JP/KR)."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column with uppercase section headings and a primary-color top rule on every page; polished for executive, consulting, or startup resumes."
-msgstr "Jedna kolumna z nagłówkami sekcji pisanymi wielkimi literami i podstawową linią koloru górnego na każdej stronie; dopracowane pod kątem życiorysów kadry kierowniczej, konsultantów lub startupów."
+msgstr "Jedna kolumna z nagłówkami sekcji pisanymi wielkimi literami i linią w kolorze głównym u góry każdej strony; dopracowany układ dla CV kadry kierowniczej, konsultantów lub startupów."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column; polished and serious for senior or enterprise-level positions."
@@ -7541,3 +7541,247 @@ msgstr "Zdjęcie profilowe"
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Custom section item"
 msgstr "Element sekcji własnej"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Accent colors"
+msgstr "Kolory akcentowe"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Asian style"
+msgstr "Styl azjatycki"
+
+#: src/dialogs/resume/template/data.ts
+msgid "ATS friendly"
+msgstr "Przyjazny dla ATS"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Business analyst"
+msgstr "Analityk biznesowy"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Calm"
+msgstr "Spokojny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Clean"
+msgstr "Czysty"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Clean typography"
+msgstr "Czysta typografia"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Client-facing"
+msgstr "Kontakt z klientem"
+
+#: src/dialogs/resume/template/data.ts
+msgid "CN/JP/KR"
+msgstr "CN/JP/KR"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Compact"
+msgstr "Kompaktowy"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Consulting"
+msgstr "Doradztwo"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Content creator"
+msgstr "Twórca treści"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Corporate"
+msgstr "Korporacyjny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Creative"
+msgstr "Kreatywny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Dark sidebar"
+msgstr "Ciemny pasek boczny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Data science"
+msgstr "Data science"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Designer"
+msgstr "Projektant"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Developer"
+msgstr "Programista"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Earthy"
+msgstr "Naturalny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Editorial"
+msgstr "Redakcyjny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Efficient"
+msgstr "Efektywny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Enterprise"
+msgstr "Duże organizacje"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Entry level"
+msgstr "Poziom początkujący"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Executive"
+msgstr "Kadra kierownicza"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Finance"
+msgstr "Finanse"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Grid layout"
+msgstr "Układ siatkowy"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Healthcare"
+msgstr "Ochrona zdrowia"
+
+#: src/dialogs/resume/template/data.ts
+msgid "HR"
+msgstr "HR"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Inline header"
+msgstr "Nagłówek w jednej linii"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Internship"
+msgstr "Staż"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Junior"
+msgstr "Junior"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Legal"
+msgstr "Prawo"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Magenta accent"
+msgstr "Fuksjowy akcent"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Marketing"
+msgstr "Marketing"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Minimal"
+msgstr "Minimalistyczny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Modern"
+msgstr "Nowoczesny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Muted sidebar"
+msgstr "Stonowany pasek boczny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "No decoration"
+msgstr "Bez ozdobników"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Nonprofit"
+msgstr "Non-profit"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Operations"
+msgstr "Operacje"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Polished"
+msgstr "Dopracowany"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Professional"
+msgstr "Profesjonalny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Senior"
+msgstr "Senior"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Simple"
+msgstr "Prosty"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Single-column"
+msgstr "Jedna kolumna"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Soft accent"
+msgstr "Delikatny akcent"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Startup"
+msgstr "Startup"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Sustainability"
+msgstr "Zrównoważony rozwój"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Tech"
+msgstr "Technologia"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Technical"
+msgstr "Techniczny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Technical PM"
+msgstr "Techniczny PM"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Text-dense"
+msgstr "Zwarty tekst"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Traditional"
+msgstr "Tradycyjny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Two-column"
+msgstr "Dwie kolumny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Understated"
+msgstr "Stonowany"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Uppercase headings"
+msgstr "Nagłówki wielkimi literami"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Versatile"
+msgstr "Uniwersalny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Visual flair"
+msgstr "Wyrazisty wizualnie"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Whitespace"
+msgstr "Dużo pustej przestrzeni"
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/custom-styles.tsx
+msgid "Loading editor"
+msgstr "Ładowanie edytora"
+
+#: src/features/resume/version-history.tsx
+msgid "Earlier versions are kept; restoring this snapshot does not delete the version history."
+msgstr "Wcześniejsze wersje są zachowywane; przywrócenie tego stanu nie usuwa historii wersji."

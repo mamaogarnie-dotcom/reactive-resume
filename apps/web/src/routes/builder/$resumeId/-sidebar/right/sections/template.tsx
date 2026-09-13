@@ -35,7 +35,11 @@ function TemplateSectionForm() {
 				className="group/preview relative h-auto w-40 shrink-0 cursor-pointer p-0"
 			>
 				<div className="relative z-10 aspect-page size-full overflow-hidden rounded-md opacity-100 transition-opacity group-hover/preview:opacity-50">
-					<img src={metadata.imageUrl} alt={metadata.name} className="size-full object-cover" />
+					<img
+						src={metadata.imageUrl}
+						alt={metadata.name}
+						className="size-full object-cover"
+					/>
 				</div>
 
 				<div className="absolute inset-0 flex items-center justify-center">
@@ -45,14 +49,18 @@ function TemplateSectionForm() {
 
 			<div className="flex flex-1 flex-col gap-y-4 @md:pt-1 @md:pb-3">
 				<div className="space-y-1">
-					<h3 className="font-semibold text-2xl capitalize tracking-tight">{metadata.name}</h3>
-					<p className="text-muted-foreground text-sm">{i18n.t(metadata.description)}</p>
+					<h3 className="font-semibold text-2xl capitalize tracking-tight">
+						{metadata.name}
+					</h3>
+					<p className="text-muted-foreground text-sm">
+						{i18n.t(metadata.description)}
+					</p>
 				</div>
 
 				<div className="flex flex-wrap gap-2.5">
 					{metadata.tags.map((tag) => (
-						<Badge key={tag} variant="secondary">
-							{tag}
+						<Badge key={i18n.t(tag)} variant="secondary">
+							{i18n.t(tag)}
 						</Badge>
 					))}
 				</div>

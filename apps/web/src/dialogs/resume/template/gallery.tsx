@@ -1,20 +1,31 @@
-import type { Template } from "@reactive-resume/schema/templates";
-import type { DialogProps } from "@/dialogs/store";
-import type { TemplateMetadata } from "./data";
 import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { SlideshowIcon } from "@phosphor-icons/react";
+import type { Template } from "@reactive-resume/schema/templates";
 import { Badge } from "@reactive-resume/ui/components/badge";
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@reactive-resume/ui/components/dialog";
+import {
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@reactive-resume/ui/components/dialog";
 import { ScrollArea } from "@reactive-resume/ui/components/scroll-area";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { cn } from "@reactive-resume/utils/style";
 import { CometCard } from "@/components/animation/comet-card";
+import type { DialogProps } from "@/dialogs/store";
 import { useDialogStore } from "@/dialogs/store";
-import { useCurrentResume, useUpdateResumeData } from "@/features/resume/builder/draft";
+import {
+	useCurrentResume,
+	useUpdateResumeData,
+} from "@/features/resume/builder/draft";
+import type { TemplateMetadata } from "./data";
 import { templates } from "./data";
 
-export function TemplateGalleryDialog(_: DialogProps<"resume.template.gallery">) {
+export function TemplateGalleryDialog(
+	_: DialogProps<"resume.template.gallery">,
+) {
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 	const resume = useCurrentResume();
 	const selectedTemplate = resume.data.metadata.template;
@@ -54,7 +65,10 @@ export function TemplateGalleryDialog(_: DialogProps<"resume.template.gallery">)
 					<Trans>Template Gallery</Trans>
 				</DialogTitle>
 				<DialogDescription className="leading-relaxed">
-					<Trans>Resume templates for different professions and tastes. Pick the one that suits you.</Trans>
+					<Trans>
+						Resume templates for different professions and tastes. Pick the one
+						that suits you.
+					</Trans>
 				</DialogDescription>
 			</DialogHeader>
 
@@ -83,6 +97,7 @@ type TemplateCardProps = {
 };
 
 function TemplateCard({ id, metadata, isActive, onSelect }: TemplateCardProps) {
+	const { i18n } = useLingui();
 	return (
 		<CometCard translateDepth={3} rotateDepth={6} glareOpacity={0}>
 			<button
@@ -94,17 +109,24 @@ function TemplateCard({ id, metadata, isActive, onSelect }: TemplateCardProps) {
 					isActive && "ring-2 ring-ring ring-offset-4 ring-offset-background",
 				)}
 			>
-				<img src={metadata.imageUrl} alt={metadata.name} className="size-full object-cover" />
+				<img
+					src={metadata.imageUrl}
+					alt={metadata.name}
+					className="size-full object-cover"
+				/>
 			</button>
 
 			<div className="mt-1 flex items-center justify-center">
-				<span className="font-bold leading-loose tracking-tight">{metadata.name}</span>
+				<span className="font-bold leading-loose tracking-tight">
+					{metadata.name}
+				</span>
 			</div>
 
 			{metadata.tags.length > 0 && (
 				<div className="flex flex-wrap justify-center gap-1 px-1 pb-1">
 					{metadata.tags
-						.sort((a, b) => a.localeCompare(b))
+						.map((tag) => i18n.t(tag))
+						.sort((a, b) => a.localeCompare(b, i18n.locale))
 						.map((tag) => (
 							<Badge key={tag} variant="secondary" className="text-xs">
 								{tag}

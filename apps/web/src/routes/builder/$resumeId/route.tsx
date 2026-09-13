@@ -1,13 +1,17 @@
-import type { BuilderLayout } from "./-store/sidebar";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useMediaQuery } from "usehooks-ts";
-import { useBuilderResumeUpdateSubscription, useResumeCleanup, useResumeStore } from "@/features/resume/builder/draft";
+import {
+	useBuilderResumeUpdateSubscription,
+	useResumeCleanup,
+	useResumeStore,
+} from "@/features/resume/builder/draft";
 import { orpc } from "@/libs/orpc/client";
 import { createNoindexFollowMeta } from "@/libs/seo";
 import { DesktopBuilderShell } from "./-components/desktop-builder-shell";
 import { MobileBuilderShell } from "./-components/mobile-builder-shell";
+import type { BuilderLayout } from "./-store/sidebar";
 import { getBuilderLayout } from "./-store/sidebar";
 
 export const Route = createFileRoute("/builder/$resumeId")({
@@ -19,14 +23,16 @@ export const Route = createFileRoute("/builder/$resumeId")({
 	loader: async ({ params, context }) => {
 		const [layout, resume] = await Promise.all([
 			getBuilderLayout(),
-			context.queryClient.ensureQueryData(orpc.resume.getById.queryOptions({ input: { id: params.resumeId } })),
+			context.queryClient.ensureQueryData(
+				orpc.resume.getById.queryOptions({ input: { id: params.resumeId } }),
+			),
 		]);
 
 		return { layout, name: resume.name };
 	},
 	head: ({ loaderData }) => ({
 		meta: loaderData
-			? [{ title: `${loaderData.name} - CVMate` }, createNoindexFollowMeta()]
+			? [{ title: `${loaderData.name} - 1story` }, createNoindexFollowMeta()]
 			: [createNoindexFollowMeta()],
 	}),
 });
@@ -35,9 +41,13 @@ function RouteComponent() {
 	const { layout: initialLayout } = Route.useLoaderData();
 
 	const { resumeId } = Route.useParams();
-	const { data: resume } = useSuspenseQuery(orpc.resume.getById.queryOptions({ input: { id: resumeId } }));
+	const { data: resume } = useSuspenseQuery(
+		orpc.resume.getById.queryOptions({ input: { id: resumeId } }),
+	);
 	const initializeResumeStore = useResumeStore((state) => state.initialize);
-	const mergeResumeMetadata = useResumeStore((state) => state.mergeResumeMetadata);
+	const mergeResumeMetadata = useResumeStore(
+		(state) => state.mergeResumeMetadata,
+	);
 	const isReady = useResumeStore((state) => state.isReady);
 	const initializedResumeId = useResumeStore((state) => state.resumeId);
 	const isInitialized = isReady && initializedResumeId === resumeId;
@@ -71,9 +81,15 @@ function RouteComponent() {
 	return <BuilderLayoutShell initialLayout={initialLayout} />;
 }
 
-function BuilderLayoutShell({ initialLayout }: { initialLayout: BuilderLayout }) {
+function BuilderLayoutShell({
+	initialLayout,
+}: {
+	initialLayout: BuilderLayout;
+}) {
 	// Single breakpoint (below `md`) switches between the desktop resizable panels and the mobile tabbed shell.
-	const isMobile = useMediaQuery("(max-width: 767px)", { initializeWithValue: false });
+	const isMobile = useMediaQuery("(max-width: 767px)", {
+		initializeWithValue: false,
+	});
 
 	if (isMobile) return <MobileBuilderShell />;
 	return <DesktopBuilderShell initialLayout={initialLayout} />;
