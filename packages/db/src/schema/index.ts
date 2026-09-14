@@ -2,6 +2,7 @@ export * from "./agent";
 export * from "./applications";
 export * from "./auth";
 export * from "./cover-letter";
+export * from "./cvmate-ai-usage";
 export * from "./cvmate-build";
 export * from "./cvmate-document";
 export * from "./cvmate-job-offer";

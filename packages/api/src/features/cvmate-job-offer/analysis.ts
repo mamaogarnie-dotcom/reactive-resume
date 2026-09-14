@@ -1,24 +1,35 @@
-import type { AIProvider } from "@reactive-resume/ai/types";
-import type { ModelMessage } from "ai";
 import { ORPCError } from "@orpc/client";
-import { generateText } from "ai";
-import { and, eq } from "drizzle-orm";
-import z from "zod";
+import type { AIProvider } from "@reactive-resume/ai/types";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { generateId } from "@reactive-resume/utils/string";
-import { generateJson } from "../ai/generate-json";
+import type { ModelMessage } from "ai";
+import { generateText } from "ai";
+import { and, eq } from "drizzle-orm";
+import z from "zod";
+import { type AiTokenUsage, generateJson } from "../ai/generate-json";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
+import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
 import { getStorageService } from "../storage/service";
 import { cvmateJobOfferService } from "./service";
 
 const MAX_JOB_OFFER_TEXT_CHARS = 50_000;
 const MAX_REQUIREMENTS = 80;
 
-const requirementCategorySchema = z.enum(["required", "preferred", "responsibility", "keyword", "other"]);
+const requirementCategorySchema = z.enum([
+	"required",
+	"preferred",
+	"responsibility",
+	"keyword",
+	"other",
+]);
 
-const requirementPrioritySchema = z.enum(["critical", "important", "additional"]);
+const requirementPrioritySchema = z.enum([
+	"critical",
+	"important",
+	"additional",
+]);
 
 const nullableMetadataSchema = z.string().trim().min(1).max(300).nullable();
 
@@ -39,7 +50,9 @@ export const cvmateJobOfferAnalysisOutputSchema = z.object({
 		.max(MAX_REQUIREMENTS),
 });
 
-export type CvmateJobOfferAnalysisOutput = z.infer<typeof cvmateJobOfferAnalysisOutputSchema>;
+export type CvmateJobOfferAnalysisOutput = z.infer<
+	typeof cvmateJobOfferAnalysisOutputSchema
+>;
 
 type RunnableProvider = {
 	id: string;
@@ -55,6 +68,7 @@ type AnalyzeTextInput = {
 	apiKey: string;
 	baseURL?: string;
 	rawText: string;
+	onUsage?: (usage: AiTokenUsage) => void | Promise<void>;
 };
 
 type AnalysisAsset = {
@@ -70,6 +84,7 @@ type AnalyzeSourcesInput = {
 	baseURL?: string;
 	rawText: string | null;
 	assets: AnalysisAsset[];
+	onUsage?: (usage: AiTokenUsage) => void | Promise<void>;
 };
 
 type OfferDetail = Awaited<ReturnType<typeof cvmateJobOfferService.getById>>;
@@ -178,7 +193,9 @@ function parseAnalysisResponse(text: string): CvmateJobOfferAnalysisOutput {
 	}
 
 	try {
-		return cvmateJobOfferAnalysisOutputSchema.parse(JSON.parse(candidate.slice(start, end + 1)));
+		return cvmateJobOfferAnalysisOutputSchema.parse(
+			JSON.parse(candidate.slice(start, end + 1)),
+		);
 	} catch (error) {
 		throw new ORPCError("BAD_REQUEST", {
 			message: "The AI returned an improperly formatted job-offer analysis.",
@@ -187,7 +204,10 @@ function parseAnalysisResponse(text: string): CvmateJobOfferAnalysisOutput {
 	}
 }
 
-function buildSourceMessages(rawText: string, assets: AnalysisAsset[]): ModelMessage[] {
+function buildSourceMessages(
+	rawText: string,
+	assets: AnalysisAsset[],
+): ModelMessage[] {
 	const content: Array<
 		| { type: "text"; text: string }
 		| {
@@ -241,7 +261,9 @@ function buildSourceMessages(rawText: string, assets: AnalysisAsset[]): ModelMes
 	];
 }
 
-export function analyzeJobOfferText(input: AnalyzeTextInput): Promise<CvmateJobOfferAnalysisOutput> {
+export function analyzeJobOfferText(
+	input: AnalyzeTextInput,
+): Promise<CvmateJobOfferAnalysisOutput> {
 	const rawText = validateRawText(input.rawText);
 
 	const model = getModel({
@@ -258,10 +280,13 @@ export function analyzeJobOfferText(input: AnalyzeTextInput): Promise<CvmateJobO
 			prompt: buildPrompt(rawText),
 		},
 		cvmateJobOfferAnalysisOutputSchema,
+		input.onUsage ? { onUsage: input.onUsage } : {},
 	);
 }
 
-export async function analyzeJobOfferSources(input: AnalyzeSourcesInput): Promise<CvmateJobOfferAnalysisOutput> {
+export async function analyzeJobOfferSources(
+	input: AnalyzeSourcesInput,
+): Promise<CvmateJobOfferAnalysisOutput> {
 	const rawText = validateOptionalRawText(input.rawText);
 
 	if (!rawText && input.assets.length === 0) {
@@ -277,6 +302,7 @@ export async function analyzeJobOfferSources(input: AnalyzeSourcesInput): Promis
 			apiKey: input.apiKey,
 			baseURL: input.baseURL ?? "",
 			rawText,
+			...(input.onUsage ? { onUsage: input.onUsage } : {}),
 		});
 	}
 
@@ -293,6 +319,8 @@ export async function analyzeJobOfferSources(input: AnalyzeSourcesInput): Promis
 		messages: buildSourceMessages(rawText, input.assets),
 	});
 
+	await input.onUsage?.(result.usage);
+
 	return parseAnalysisResponse(result.text);
 }
 
@@ -304,7 +332,9 @@ function dedupeRequirements(
 	requirements: CvmateJobOfferAnalysisOutput["requirements"],
 	existingManualTexts: string[] = [],
 ) {
-	const seen = new Set(existingManualTexts.map((text) => normalizedRequirementKey(text)));
+	const seen = new Set(
+		existingManualTexts.map((text) => normalizedRequirementKey(text)),
+	);
 
 	return requirements.filter((requirement) => {
 		const key = normalizedRequirementKey(requirement.text);
@@ -316,7 +346,10 @@ function dedupeRequirements(
 	});
 }
 
-async function resolveProvider(userId: string, aiProviderId?: string): Promise<RunnableProvider> {
+async function resolveProvider(
+	userId: string,
+	aiProviderId?: string,
+): Promise<RunnableProvider> {
 	const provider = aiProviderId
 		? await aiProvidersService.getRunnableById({
 				id: aiProviderId,
@@ -362,11 +395,20 @@ async function markAnalysisFailed(offerId: string, userId: string) {
 			analysisStatus: "failed",
 			analyzedAt: null,
 		})
-		.where(and(eq(schema.cvmateJobOffer.id, offerId), eq(schema.cvmateJobOffer.userId, userId)))
+		.where(
+			and(
+				eq(schema.cvmateJobOffer.id, offerId),
+				eq(schema.cvmateJobOffer.userId, userId),
+			),
+		)
 		.catch(() => undefined);
 }
 
-async function analyzeOwnedOffer(input: { id: string; userId: string; aiProviderId?: string }) {
+async function analyzeOwnedOffer(input: {
+	id: string;
+	userId: string;
+	aiProviderId?: string;
+}) {
 	const offer = await cvmateJobOfferService.getById({
 		id: input.id,
 		userId: input.userId,
@@ -392,13 +434,26 @@ async function analyzeOwnedOffer(input: { id: string; userId: string; aiProvider
 			baseURL: provider.baseURL ?? "",
 			rawText,
 			assets,
+			onUsage: (usage) =>
+				cvmateAiUsageService.record({
+					userId: input.userId,
+					jobOfferId: offer.id,
+					aiProviderId: provider.id,
+					operation: "job_offer_analysis",
+					provider: provider.provider,
+					model: provider.model,
+					usage,
+				}),
 		});
 
 		const manualRequirementTexts = offer.requirements
 			.filter((requirement) => requirement.isUserEdited)
 			.map((requirement) => requirement.text);
 
-		const requirements = dedupeRequirements(analysis.requirements, manualRequirementTexts);
+		const requirements = dedupeRequirements(
+			analysis.requirements,
+			manualRequirementTexts,
+		);
 
 		const analyzedAt = new Date();
 
@@ -437,7 +492,12 @@ async function analyzeOwnedOffer(input: { id: string; userId: string; aiProvider
 					analysisStatus: "analyzed",
 					analyzedAt,
 				})
-				.where(and(eq(schema.cvmateJobOffer.id, offer.id), eq(schema.cvmateJobOffer.userId, input.userId)))
+				.where(
+					and(
+						eq(schema.cvmateJobOffer.id, offer.id),
+						eq(schema.cvmateJobOffer.userId, input.userId),
+					),
+				)
 				.returning({ id: schema.cvmateJobOffer.id });
 
 			if (!updated) throw new ORPCError("NOT_FOUND");

@@ -9,6 +9,7 @@ import z from "zod";
 import { generateJson } from "../ai/generate-json";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
+import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
 import { cvmateBuildService } from "./service";
 
 const PROMPT_VERSION = "cvmate-tailored-content-v1";
@@ -343,6 +344,19 @@ export const cvmateBuildTailoredContentService = {
 				}),
 			},
 			cvmateBuildAiTailoredContentOutputSchema,
+			{
+				onUsage: (usage) =>
+					cvmateAiUsageService.record({
+						userId: input.userId,
+						cvBuildId: build.id,
+						jobOfferId: build.jobOfferId,
+						aiProviderId: provider.id,
+						operation: "tailored_content",
+						provider: provider.provider,
+						model: provider.model,
+						usage,
+					}),
+			},
 		);
 
 		validateOutput(output, selectedItems);
