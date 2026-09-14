@@ -7,7 +7,6 @@ import { getLocale, loadLocale } from "./libs/locale";
 import { client, orpc } from "./libs/orpc/client";
 import { getQueryClient } from "./libs/query/client";
 import { getTheme } from "./libs/theme";
-import { routeTree } from "./routeTree.gen";
 
 export const getRouter = async () => {
 	const queryClient = getQueryClient();
@@ -20,6 +19,10 @@ export const getRouter = async () => {
 	]);
 
 	await loadLocale(locale);
+
+	// Route modules may execute Lingui translations at module scope.
+	// Import them only after the application locale has been activated.
+	const { routeTree } = await import("./routeTree.gen");
 
 	const router = createRouter({
 		routeTree,
