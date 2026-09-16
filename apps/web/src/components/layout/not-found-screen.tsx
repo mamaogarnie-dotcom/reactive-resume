@@ -1,8 +1,8 @@
+import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
 import { Trans } from "@lingui/react/macro";
 import {
 	HouseIcon,
 	MagnifyingGlassIcon,
-	ReadCvLogoIcon,
 	WarningIcon,
 } from "@phosphor-icons/react";
 import {
@@ -17,7 +17,7 @@ export function NotFoundScreen() {
 	return (
 		<div className="mx-auto flex h-svh max-w-md flex-col items-center justify-center gap-y-4">
 			<div className="flex items-center gap-2">
-				<ReadCvLogoIcon className="size-10" />
+				<BrandIcon variant="icon" className="size-10" alt="" aria-hidden="true" />
 				<span className="font-semibold text-xl tracking-tight">1story</span>
 			</div>
 

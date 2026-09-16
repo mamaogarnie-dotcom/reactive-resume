@@ -153,7 +153,7 @@ function SaveStatusIndicator() {
 
 	return (
 		<span
-			className="ms-1 flex shrink-0 items-center gap-x-1 text-muted-foreground text-xs"
+			className="ms-1 flex shrink-0 items-center gap-x-1 text-muted-foreground text-sm"
 			aria-live="polite"
 			role="status"
 		>

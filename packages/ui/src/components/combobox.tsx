@@ -102,7 +102,7 @@ function ComboboxContent({
 					data-slot="combobox-content"
 					data-chips={!!anchor}
 					className={cn(
-						"group/combobox-content relative max-h-(--available-height) w-fit min-w-[calc(var(--anchor-width)+--spacing(7))] max-w-(--available-width) origin-(--transform-origin) overflow-hidden rounded-lg bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 transition-[opacity,scale] duration-150 ease-(--ease-out-strong) before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl before:backdrop-saturate-150 data-[chips=true]:min-w-(--anchor-width) data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0 data-ending-style:duration-100 **:data-[slot$=-item]:data-highlighted:bg-foreground/10 *:data-[slot=input-group]:m-1 *:data-[slot=input-group]:mb-0 *:data-[slot=input-group]:h-9 *:data-[slot=input-group]:border-input/30 **:data-[slot$=-separator]:bg-foreground/5 *:data-[slot=input-group]:bg-input/30 **:data-[variant=destructive]:**:text-accent-foreground! **:data-[variant=destructive]:text-accent-foreground! *:data-[slot=input-group]:shadow-none **:data-[slot$=-trigger]:aria-expanded:bg-foreground/10! **:data-[slot$=-item]:focus:bg-foreground/10 **:data-[slot$=-trigger]:focus:bg-foreground/10 **:data-[variant=destructive]:focus:bg-foreground/10!",
+						"group/combobox-content relative max-h-(--available-height) w-fit min-w-[calc(var(--anchor-width)+--spacing(7))] max-w-(--available-width) origin-(--transform-origin) overflow-hidden rounded-card border border-border bg-popover text-popover-foreground shadow-sm transition-[opacity,scale] duration-150 ease-(--ease-out-strong) data-[chips=true]:min-w-(--anchor-width) data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0 data-ending-style:duration-100 **:data-[slot$=-item]:data-highlighted:bg-foreground/10 *:data-[slot=input-group]:m-1 *:data-[slot=input-group]:mb-0 *:data-[slot=input-group]:h-9 *:data-[slot=input-group]:border-control-border **:data-[slot$=-separator]:bg-foreground/5 *:data-[slot=input-group]:bg-background **:data-[variant=destructive]:**:text-accent-foreground! **:data-[variant=destructive]:text-accent-foreground! *:data-[slot=input-group]:shadow-none **:data-[slot$=-trigger]:aria-expanded:bg-foreground/10! **:data-[slot$=-item]:focus:bg-foreground/10 **:data-[slot$=-trigger]:focus:bg-foreground/10 **:data-[variant=destructive]:focus:bg-foreground/10!",
 						className,
 					)}
 					{...props}
@@ -194,7 +194,7 @@ function ComboboxChips({
 		<ComboboxPrimitive.Chips
 			data-slot="combobox-chips"
 			className={cn(
-				"flex min-h-9 flex-wrap items-center gap-1 rounded-lg border border-input bg-transparent bg-clip-padding px-2.5 py-1 text-sm transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-aria-invalid:border-destructive has-data-[slot=combobox-chip]:px-1 has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20",
+				"flex min-h-9 flex-wrap items-center gap-1 rounded-input border border-control-border bg-transparent bg-clip-padding px-2.5 py-1 text-base transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring has-aria-invalid:border-destructive has-data-[slot=combobox-chip]:px-1 has-aria-invalid:ring-2 has-aria-invalid:ring-destructive/20",
 				className,
 			)}
 			{...props}

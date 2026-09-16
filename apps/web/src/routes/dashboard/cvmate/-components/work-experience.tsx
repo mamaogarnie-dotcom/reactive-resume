@@ -1,5 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { Button } from "@reactive-resume/ui/components/button";
+import { Input } from "@reactive-resume/ui/components/input";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -79,6 +81,7 @@ export function WorkExperienceSection() {
 		}) => {
 			const fact = await orpc.cvmateProfile.createExperienceFact.call({
 				text: input.text,
+				kind: "responsibility",
 			});
 
 			try {
@@ -168,9 +171,12 @@ export function WorkExperienceSection() {
 	].some((value) => value.trim().length > 0);
 
 	return (
-		<section className="space-y-4">
+		<section
+aria-labelledby="master-profile-work-experience"
+className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+>
 			<div>
-				<h2 className="text-lg font-semibold">
+				<h2 id="master-profile-work-experience" className="text-xl font-semibold text-foreground">
 					<Trans>Work experience</Trans>
 				</h2>
 				<p className="text-sm text-muted-foreground">
@@ -181,10 +187,10 @@ export function WorkExperienceSection() {
 			</div>
 
 			<form
-				className="space-y-3"
+				className="space-y-4 rounded-card border border-border bg-muted p-4"
 				onSubmit={(event) => {
-					event.preventDefault();
-					if (!canCreate) return;
+				event.preventDefault();
+				if (!canCreate) return;
 
 					createEmployment.mutate({
 						company: company.trim() || null,
@@ -198,42 +204,42 @@ export function WorkExperienceSection() {
 				}}
 			>
 				<div className="grid gap-3 md:grid-cols-2">
-					<input
-						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder={t`Company`}
+					<Input
+						className="w-full"
+						aria-label={t`Company`} placeholder={t`Company`}
 						value={company}
 						onChange={(event) => setCompany(event.target.value)}
 					/>
-					<input
-						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder={t`Job title`}
+					<Input
+						className="w-full"
+						aria-label={t`Job title`} placeholder={t`Job title`}
 						value={jobTitle}
 						onChange={(event) => setJobTitle(event.target.value)}
 					/>
-					<input
-						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder={t`Location`}
+					<Input
+						className="w-full"
+						aria-label={t`Location`} placeholder={t`Location`}
 						value={location}
 						onChange={(event) => setLocation(event.target.value)}
 					/>
-					<input
-						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+					<Input
+						className="w-full"
+						aria-label={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`} placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						value={startDate}
 						onChange={(event) => setStartDate(event.target.value)}
 					/>
-					<input
-						className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-						placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+					<Input
+						className="w-full"
+						aria-label={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`} placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						value={endDate}
 						disabled={isCurrent}
 						onChange={(event) => setEndDate(event.target.value)}
 					/>
 				</div>
 
-				<label className="flex items-center gap-2 text-sm">
+				<label className="flex items-center gap-2 text-base">
 					<input
-						type="checkbox"
+						type="checkbox" className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 						checked={isCurrent}
 						onChange={(event) => {
 							setIsCurrent(event.target.checked);
@@ -243,9 +249,9 @@ export function WorkExperienceSection() {
 					<Trans>I currently work here</Trans>
 				</label>
 
-				<button
+				<Button
 					type="submit"
-					className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
+					className="w-fit"
 					disabled={!canCreate || createEmployment.isPending}
 				>
 					{createEmployment.isPending ? (
@@ -253,7 +259,7 @@ export function WorkExperienceSection() {
 					) : (
 						<Trans>Add employment</Trans>
 					)}
-				</button>
+				</Button>
 			</form>
 
 			{createEmployment.isError ? (
@@ -276,46 +282,46 @@ export function WorkExperienceSection() {
 				) : null}
 
 				{employments.map((employment) => (
-					<div key={employment.id} className="rounded-md border p-3">
+					<div key={employment.id} className="rounded-card border border-border bg-background p-4">
 						{editingId === employment.id ? (
 							<div className="space-y-3">
 								<div className="grid gap-3 md:grid-cols-2">
-									<input
-										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder={t`Company`}
+									<Input
+										className="w-full"
+										aria-label={t`Company`} placeholder={t`Company`}
 										value={editCompany}
 										onChange={(event) => setEditCompany(event.target.value)}
 									/>
-									<input
-										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder={t`Job title`}
+									<Input
+										className="w-full"
+										aria-label={t`Job title`} placeholder={t`Job title`}
 										value={editJobTitle}
 										onChange={(event) => setEditJobTitle(event.target.value)}
 									/>
-									<input
-										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder={t`Location`}
+									<Input
+										className="w-full"
+										aria-label={t`Location`} placeholder={t`Location`}
 										value={editLocation}
 										onChange={(event) => setEditLocation(event.target.value)}
 									/>
-									<input
-										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+									<Input
+										className="w-full"
+										aria-label={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`} placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										value={editStartDate}
 										onChange={(event) => setEditStartDate(event.target.value)}
 									/>
-									<input
-										className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-										placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+									<Input
+										className="w-full"
+										aria-label={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`} placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										value={editEndDate}
 										disabled={editIsCurrent}
 										onChange={(event) => setEditEndDate(event.target.value)}
 									/>
 								</div>
 
-								<label className="flex items-center gap-2 text-sm">
+								<label className="flex items-center gap-2 text-base">
 									<input
-										type="checkbox"
+										type="checkbox" className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 										checked={editIsCurrent}
 										onChange={(event) => {
 											setEditIsCurrent(event.target.checked);
@@ -325,10 +331,10 @@ export function WorkExperienceSection() {
 									<Trans>I currently work here</Trans>
 								</label>
 
-								<div className="flex gap-2">
-									<button
+								<div className="flex flex-wrap gap-2">
+									<Button
 										type="button"
-										className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+										variant="outline" size="sm"
 										disabled={!canUpdate || updateEmployment.isPending}
 										onClick={() =>
 											updateEmployment.mutate({
@@ -349,19 +355,19 @@ export function WorkExperienceSection() {
 										) : (
 											<Trans>Save</Trans>
 										)}
-									</button>
-									<button
+									</Button>
+									<Button
 										type="button"
-										className="rounded-md border px-3 py-1.5 text-sm"
+										variant="outline" size="sm"
 										disabled={updateEmployment.isPending}
 										onClick={() => setEditingId(null)}
 									>
 										<Trans>Cancel</Trans>
-									</button>
+									</Button>
 								</div>
 							</div>
 						) : (
-							<div className="flex items-start justify-between gap-4">
+							<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 								<div className="min-w-0 space-y-1">
 									<p className="font-medium">
 										{employment.jobTitle || employment.company || t`Employment`}
@@ -384,10 +390,10 @@ export function WorkExperienceSection() {
 									) : null}
 								</div>
 
-								<div className="flex shrink-0 gap-2">
-									<button
+								<div className="flex flex-wrap gap-2 sm:shrink-0">
+									<Button
 										type="button"
-										className="rounded-md border px-3 py-1.5 text-sm"
+										variant="outline" size="sm"
 										onClick={() => {
 											setEditingId(employment.id);
 											setEditCompany(employment.company ?? "");
@@ -399,17 +405,17 @@ export function WorkExperienceSection() {
 										}}
 									>
 										<Trans>Edit</Trans>
-									</button>
-									<button
+									</Button>
+									<Button
 										type="button"
-										className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+										variant="outline" size="sm"
 										disabled={deleteEmployment.isPending}
 										onClick={() =>
 											deleteEmployment.mutate({ id: employment.id })
 										}
 									>
 										<Trans>Delete</Trans>
-									</button>
+									</Button>
 								</div>
 							</div>
 						)}
@@ -426,20 +432,20 @@ export function WorkExperienceSection() {
 								return (
 									<div
 										key={link.experienceFactId}
-										className="mt-3 rounded-md bg-muted/40 px-3 py-2"
+										className="mt-3 rounded-input bg-muted px-3 py-2"
 									>
 										{editingFactId === fact.id ? (
-											<div className="flex gap-2">
-												<input
-													className="h-9 min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 text-sm"
-													value={editFactText}
+											<div className="flex flex-wrap gap-2">
+												<Input
+													className="min-w-0 flex-1"
+													aria-label={t`Responsibility`} value={editFactText}
 													onChange={(event) =>
 														setEditFactText(event.target.value)
 													}
 												/>
-												<button
+												<Button
 													type="button"
-													className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+													variant="outline" size="sm"
 													disabled={
 														!editFactText.trim() ||
 														updateExperienceFact.isPending
@@ -456,10 +462,10 @@ export function WorkExperienceSection() {
 													) : (
 														<Trans>Save</Trans>
 													)}
-												</button>
-												<button
+												</Button>
+												<Button
 													type="button"
-													className="rounded-md border px-3 py-1.5 text-sm"
+													variant="outline" size="sm"
 													disabled={updateExperienceFact.isPending}
 													onClick={() => {
 														setEditingFactId(null);
@@ -467,14 +473,14 @@ export function WorkExperienceSection() {
 													}}
 												>
 													<Trans>Cancel</Trans>
-												</button>
+												</Button>
 											</div>
 										) : (
-											<div className="flex items-start justify-between gap-3">
-												<p className="text-sm">{fact.text}</p>
-												<button
+											<div className="flex flex-wrap items-start gap-2">
+												<p className="min-w-0 flex-1 text-sm">{fact.text}</p>
+												<Button
 													type="button"
-													className="shrink-0 rounded-md border px-2 py-1 text-xs disabled:opacity-50"
+													variant="outline" size="sm" className="shrink-0"
 													disabled={
 														index === 0 || reorderEmploymentFact.isPending
 													}
@@ -492,10 +498,10 @@ export function WorkExperienceSection() {
 													}}
 												>
 													<Trans>Up</Trans>
-												</button>
-												<button
+												</Button>
+												<Button
 													type="button"
-													className="shrink-0 rounded-md border px-2 py-1 text-xs disabled:opacity-50"
+													variant="outline" size="sm" className="shrink-0"
 													disabled={
 														index === links.length - 1 ||
 														reorderEmploymentFact.isPending
@@ -514,20 +520,20 @@ export function WorkExperienceSection() {
 													}}
 												>
 													<Trans>Down</Trans>
-												</button>
-												<button
+												</Button>
+												<Button
 													type="button"
-													className="shrink-0 rounded-md border px-2 py-1 text-xs"
+													variant="outline" size="sm" className="shrink-0"
 													onClick={() => {
 														setEditingFactId(fact.id);
 														setEditFactText(fact.text);
 													}}
 												>
 													<Trans>Edit</Trans>
-												</button>
-												<button
+												</Button>
+												<Button
 													type="button"
-													className="shrink-0 rounded-md border px-2 py-1 text-xs disabled:opacity-50"
+													variant="outline" size="sm" className="shrink-0"
 													disabled={unlinkEmploymentFact.isPending}
 													onClick={() =>
 														unlinkEmploymentFact.mutate({
@@ -537,7 +543,7 @@ export function WorkExperienceSection() {
 													}
 												>
 													<Trans>Remove</Trans>
-												</button>
+												</Button>
 											</div>
 										)}
 									</div>
@@ -545,7 +551,7 @@ export function WorkExperienceSection() {
 							})}
 
 						<form
-							className="mt-3 flex gap-2 border-t pt-3"
+							className="mt-3 flex flex-col gap-2 border-t pt-3 sm:flex-row"
 							onSubmit={(event) => {
 								event.preventDefault();
 
@@ -565,9 +571,9 @@ export function WorkExperienceSection() {
 								});
 							}}
 						>
-							<input
-								className="h-9 min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 text-sm"
-								placeholder={t`Responsibility or achievement`}
+							<Input
+								className="min-w-0 flex-1"
+								aria-label={t`Responsibility`} placeholder={t`Responsibility`}
 								value={factTextByEmployment[employment.id] ?? ""}
 								onChange={(event) =>
 									setFactTextByEmployment((current) => ({
@@ -576,9 +582,9 @@ export function WorkExperienceSection() {
 									}))
 								}
 							/>
-							<button
+							<Button
 								type="submit"
-								className="shrink-0 rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+								variant="outline" size="sm" className="shrink-0"
 								disabled={
 									!(factTextByEmployment[employment.id] ?? "").trim() ||
 									createAndLinkFact.isPending
@@ -588,9 +594,9 @@ export function WorkExperienceSection() {
 								createAndLinkFact.variables?.employmentId === employment.id ? (
 									<Trans>Adding...</Trans>
 								) : (
-									<Trans>Add fact</Trans>
+									<Trans>Add responsibility</Trans>
 								)}
-							</button>
+							</Button>
 						</form>
 					</div>
 				))}

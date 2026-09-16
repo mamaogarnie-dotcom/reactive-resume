@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { PlusIcon, ReadCvLogoIcon } from "@phosphor-icons/react";
+import { PlusIcon, FileTextIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import { CommandLoading } from "cmdk";
@@ -55,7 +55,7 @@ export function ResumesCommandGroup() {
 					value="search.resumes"
 					onSelect={() => pushPage("resumes")}
 				>
-					<ReadCvLogoIcon />
+					<FileTextIcon />
 					<Trans>My CV</Trans>
 				</CommandItem>
 			</BaseCommandGroup>
@@ -79,7 +79,7 @@ export function ResumesCommandGroup() {
 								keywords={[resume.name, resume.slug]}
 								onSelect={() => onOpenResume(resume.id)}
 							>
-								<ReadCvLogoIcon />
+								<FileTextIcon />
 								{resume.name}
 
 								<CommandShortcut className="opacity-0 transition-opacity group-data-[selected=true]/command-item:opacity-100">

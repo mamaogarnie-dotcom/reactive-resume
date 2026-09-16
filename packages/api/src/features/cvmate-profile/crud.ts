@@ -126,6 +126,7 @@ successDescription: "The created experience fact.",
 cvmateProfileService.createExperienceFact({
 userId: context.user.id,
 text: input.text,
+kind: input.kind,
 }),
 ),
 
@@ -148,6 +149,7 @@ cvmateProfileService.updateExperienceFact({
 id: input.id,
 userId: context.user.id,
 text: input.text,
+kind: input.kind,
 }),
 ),
 

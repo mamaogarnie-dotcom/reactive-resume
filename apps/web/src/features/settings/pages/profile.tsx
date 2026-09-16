@@ -226,25 +226,25 @@ export function ProfileSettingsPage({ session }: Props) {
 						/>
 						<FormMessage errors={field.state.meta.errors} />
 						{session.user.emailVerified === true ? (
-							<p className="flex items-center gap-x-1.5 text-green-700 text-xs">
+							<p className="flex items-center gap-x-1.5 text-green-700 text-sm">
 								<CheckIcon />
 								<Trans>Verified</Trans>
 							</p>
 						) : smtpEnabled ? (
-							<p className="flex items-center gap-x-1.5 text-amber-600 text-xs">
+							<p className="flex items-center gap-x-1.5 text-amber-600 text-sm">
 								<WarningIcon className="size-3.5" />
 								<Trans>Unverified</Trans>
 								<span>|</span>
 								<Button
 									variant="link"
-									className="h-auto gap-x-1.5 p-0! text-inherit text-xs"
+									className="h-auto gap-x-1.5 p-0! text-inherit text-sm"
 									onClick={handleResendVerificationEmail}
 								>
 									<Trans>Resend verification email</Trans>
 								</Button>
 							</p>
 						) : (
-							<p className="text-muted-foreground text-xs">
+							<p className="text-muted-foreground text-sm">
 								<Trans>Email delivery isn't configured on this instance, so verification is disabled.</Trans>
 							</p>
 						)}

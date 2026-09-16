@@ -2,6 +2,9 @@ import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
+import { Button } from "@reactive-resume/ui/components/button";
+import { Input } from "@reactive-resume/ui/components/input";
+import { Textarea } from "@reactive-resume/ui/components/textarea";
 import {
 getDefaultRecruitmentClause,
 type RecruitmentClauseLanguage,
@@ -46,11 +49,6 @@ type DetailedDefinition = {
 	description: MessageDescriptor;
 	fields: readonly FieldDefinition[];
 };
-
-const inputClassName =
-	"h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm";
-const textareaClassName =
-	"min-h-20 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm";
 
 const detailedDefinitions: readonly DetailedDefinition[] = [
 	{
@@ -526,8 +524,9 @@ function RecordFields({
 				>
 					<span className="font-medium">{i18n.t(field.label)}</span>
 					{field.multiline ? (
-						<textarea
-							className={textareaClassName}
+						<Textarea
+							className="min-h-24 resize-y"
+							aria-label={i18n.t(field.label)}
 							placeholder={
 								field.placeholder ? i18n.t(field.placeholder) : undefined
 							}
@@ -536,8 +535,9 @@ function RecordFields({
 							onChange={(event) => onChange(field.key, event.target.value)}
 						/>
 					) : (
-						<input
-							className={inputClassName}
+						<Input
+							className="w-full"
+							aria-label={i18n.t(field.label)}
 							type={field.type ?? "text"}
 							placeholder={
 								field.placeholder ? i18n.t(field.placeholder) : undefined
@@ -603,16 +603,16 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 	);
 
 	return (
-		<section className="space-y-4">
+		<section aria-labelledby={`master-profile-${definition.kind}`} className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6">
 			<div>
-				<h2 className="text-lg font-semibold">{i18n.t(definition.title)}</h2>
+				<h2 id={`master-profile-${definition.kind}`} className="text-xl font-semibold text-foreground">{i18n.t(definition.title)}</h2>
 				<p className="text-sm text-muted-foreground">
 					{i18n.t(definition.description)}
 				</p>
 			</div>
 
 			<form
-				className="space-y-3 rounded-md border p-4"
+				className="space-y-4 rounded-card border border-border bg-muted p-4"
 				onSubmit={(event: FormEvent<HTMLFormElement>) => {
 					event.preventDefault();
 					if (hasCreateContent) createMutation.mutate();
@@ -626,9 +626,9 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 						setForm((current) => ({ ...current, [key]: value }))
 					}
 				/>
-				<button
+				<Button
 					type="submit"
-					className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
+					className="w-fit"
 					disabled={!hasCreateContent || createMutation.isPending}
 				>
 					{createMutation.isPending ? (
@@ -636,9 +636,9 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 					) : (
 						<Trans>Add</Trans>
 					)}
-				</button>
+				</Button>
 				{createMutation.isError ? (
-					<p className="text-sm text-destructive">
+					<p role="alert" className="rounded-input border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
 						<Trans>Could not add this record.</Trans>
 					</p>
 				) : null}
@@ -646,18 +646,18 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 
 			<div className="space-y-2">
 				{profileQuery.isLoading ? (
-					<p className="text-sm text-muted-foreground">
+					<p role="status" className="rounded-input border border-border bg-muted p-3 text-sm text-muted-foreground">
 						<Trans>Loading...</Trans>
 					</p>
 				) : null}
 				{!profileQuery.isLoading && items.length === 0 ? (
-					<p className="text-sm text-muted-foreground">
+					<p className="rounded-input border border-border bg-muted p-3 text-sm text-muted-foreground">
 						<Trans>No records added yet.</Trans>
 					</p>
 				) : null}
 
 				{items.map((item) => (
-					<div key={item.id} className="rounded-md border p-3">
+					<div key={item.id} className="rounded-card border border-border bg-background p-4">
 						{editingId === item.id ? (
 							<div className="space-y-3">
 								<RecordFields
@@ -671,10 +671,10 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										}))
 									}
 								/>
-								<div className="flex gap-2">
-									<button
+								<div className="flex flex-wrap gap-2">
+									<Button
 										type="button"
-										className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+										variant="outline" size="sm"
 										disabled={!hasEditContent || updateMutation.isPending}
 										onClick={() => updateMutation.mutate()}
 									>
@@ -683,19 +683,19 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										) : (
 											<Trans>Save</Trans>
 										)}
-									</button>
-									<button
+									</Button>
+									<Button
 										type="button"
-										className="rounded-md border px-3 py-1.5 text-sm"
+										variant="outline" size="sm"
 										disabled={updateMutation.isPending}
 										onClick={() => setEditingId(null)}
 									>
 										<Trans>Cancel</Trans>
-									</button>
+									</Button>
 								</div>
 							</div>
 						) : (
-							<div className="flex items-start justify-between gap-4">
+							<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 								<div className="min-w-0 space-y-1 text-sm">
 									{definition.fields.map((field) => {
 										const value = item[field.key];
@@ -712,25 +712,25 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										);
 									})}
 								</div>
-								<div className="flex shrink-0 gap-2">
-									<button
+								<div className="flex flex-wrap gap-2 sm:shrink-0">
+									<Button
 										type="button"
-										className="rounded-md border px-3 py-1.5 text-sm"
+										variant="outline" size="sm"
 										onClick={() => {
 											setEditingId(item.id);
 											setEditForm(itemToValues(item, definition.fields));
 										}}
 									>
 										<Trans>Edit</Trans>
-									</button>
-									<button
+									</Button>
+									<Button
 										type="button"
-										className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+										variant="outline" size="sm"
 										disabled={deleteMutation.isPending}
 										onClick={() => deleteMutation.mutate(item.id)}
 									>
 										<Trans>Delete</Trans>
-									</button>
+									</Button>
 								</div>
 							</div>
 						)}
@@ -786,10 +786,10 @@ function ListSection({
 	);
 
 	return (
-		<section className="space-y-3">
-			<h2 className="text-lg font-semibold">{i18n.t(title)}</h2>
+		<section aria-labelledby={`master-profile-${kind}`} className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6">
+			<h2 id={`master-profile-${kind}`} className="text-xl font-semibold text-foreground">{i18n.t(title)}</h2>
 			<form
-				className="flex gap-2"
+				className="flex flex-wrap gap-2"
 				onSubmit={(event) => {
 					event.preventDefault();
 					const trimmed = value.trim();
@@ -801,20 +801,20 @@ function ListSection({
 					});
 				}}
 			>
-				<input
-					className={`${inputClassName} flex-1`}
-					placeholder={i18n.t(placeholder)}
+				<Input
+					className="min-w-0 flex-1"
+					aria-label={i18n.t(placeholder)} placeholder={i18n.t(placeholder)}
 					value={value}
 					disabled={createMutation.isPending}
 					onChange={(event) => setValue(event.target.value)}
 				/>
-				<button
+				<Button
 					type="submit"
-					className="rounded-md border px-3 text-sm disabled:opacity-50"
+					className="shrink-0"
 					disabled={!value.trim() || createMutation.isPending}
 				>
 					<Trans>Add</Trans>
-				</button>
+				</Button>
 			</form>
 
 			<div className="flex flex-wrap gap-2">
@@ -822,7 +822,7 @@ function ListSection({
 					editingId === item.id ? (
 						<form
 							key={item.id}
-							className="flex gap-1"
+							className="flex flex-wrap gap-2"
 							onSubmit={(event) => {
 								event.preventDefault();
 								const trimmed = editValue.trim();
@@ -830,52 +830,52 @@ function ListSection({
 								updateMutation.mutate({ id: item.id, value: trimmed });
 							}}
 						>
-							<input
-								className={inputClassName}
-								value={editValue}
+							<Input
+								className="w-full"
+								aria-label={i18n.t(title)} value={editValue}
 								onChange={(event) => setEditValue(event.target.value)}
 							/>
-							<button type="submit" className="rounded-md border px-2 text-sm">
+							<Button type="submit" variant="outline" size="sm">
 								<Trans>Save</Trans>
-							</button>
-							<button
+							</Button>
+							<Button
 								type="button"
-								className="rounded-md border px-2 text-sm"
+								variant="outline" size="sm"
 								onClick={() => setEditingId(null)}
 							>
 								<Trans>Cancel</Trans>
-							</button>
+							</Button>
 						</form>
 					) : (
 						<div
 							key={item.id}
-							className="flex items-center gap-1 rounded-md border px-2 py-1 text-sm"
+							className="flex items-center gap-1 rounded-input border border-border bg-muted px-2 py-1 text-sm"
 						>
 							<span>{item.value}</span>
-							<button
+							<Button
 								type="button"
-								className="text-muted-foreground hover:text-foreground"
+								variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground"
 								onClick={() => {
 									setEditingId(item.id);
 									setEditValue(item.value);
 								}}
 							>
 								<Trans>Edit</Trans>
-							</button>
-							<button
+							</Button>
+							<Button
 								type="button"
-								className="text-muted-foreground hover:text-destructive"
+								variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive"
 								disabled={deleteMutation.isPending}
 								onClick={() => deleteMutation.mutate({ id: item.id })}
 							>
 								<Trans>Delete</Trans>
-							</button>
+							</Button>
 						</div>
 					),
 				)}
 			</div>
 			{!profileQuery.isLoading && items.length === 0 ? (
-				<p className="text-sm text-muted-foreground">
+				<p className="rounded-input border border-border bg-muted p-3 text-sm text-muted-foreground">
 					<Trans>Nothing added yet.</Trans>
 				</p>
 			) : null}
@@ -1047,9 +1047,9 @@ saveMutation.isPending ||
 restoreMutation.isPending;
 
 return (
-<section className="space-y-4">
+<section aria-labelledby="master-profile-recruitment-clauses" className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6">
 <div>
-<h2 className="text-lg font-semibold">
+<h2 id="master-profile-recruitment-clauses" className="text-xl font-semibold text-foreground">
 <Trans>Recruitment clauses</Trans>
 </h2>
 <p className="text-sm text-muted-foreground">
@@ -1060,10 +1060,11 @@ Polish or English version based on the CV language.
 </p>
 </div>
 
-<div className="space-y-2 rounded-md border p-3">
-<label className="flex items-center gap-2 text-sm">
+<div className="space-y-2 rounded-card border border-border bg-muted p-4">
+<label className="flex items-center gap-2 text-base">
 <input
 type="radio"
+className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 name="recruitment-clause-scope"
 checked={selectedScope === null}
 disabled={mutationPending}
@@ -1077,11 +1078,12 @@ onChange={() => selectionMutation.mutate(null)}
 {clauseScopeDefinitions.map((scopeDefinition) => (
 <div
 key={scopeDefinition.scope}
-className="space-y-4 rounded-md border p-4"
+className="space-y-4 rounded-card border border-border bg-background p-4"
 >
-<label className="flex items-center gap-2 font-medium text-sm">
+<label className="flex items-center gap-2 font-medium text-base">
 <input
 type="radio"
+className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 name="recruitment-clause-scope"
 checked={selectedScope === scopeDefinition.scope}
 disabled={mutationPending}
@@ -1106,7 +1108,7 @@ return (
 <p className="font-medium text-sm">
 {i18n.t(languageDefinition.title)}
 </p>
-<p className="text-muted-foreground text-xs">
+<p className="text-sm text-muted-foreground">
 {draft.isDefault ? (
 <Trans>1story default</Trans>
 ) : (
@@ -1115,8 +1117,9 @@ return (
 </p>
 </div>
 
-<textarea
-className={textareaClassName}
+<Textarea
+className="min-h-24 resize-y"
+aria-label={i18n.t(languageDefinition.title)}
 value={draft.content}
 onChange={(event) =>
 setDrafts((current) => ({
@@ -1130,9 +1133,9 @@ isDefault: false,
 />
 
 <div className="flex flex-wrap gap-2">
-<button
+<Button
 type="button"
-className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+variant="outline" size="sm"
 disabled={mutationPending}
 onClick={() =>
 saveMutation.mutate({
@@ -1146,11 +1149,11 @@ language: languageDefinition.language,
 ) : (
 <Trans>Save clause</Trans>
 )}
-</button>
+</Button>
 
-<button
+<Button
 type="button"
-className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+variant="outline" size="sm"
 disabled={mutationPending || draft.isDefault}
 onClick={() =>
 restoreMutation.mutate({
@@ -1160,7 +1163,7 @@ language: languageDefinition.language,
 }
 >
 <Trans>Restore default</Trans>
-</button>
+</Button>
 </div>
 </div>
 );
@@ -1182,13 +1185,13 @@ export function ProfileDetailsSection() {
 			</div>
 
 			{detailedDefinitions.map((definition) => (
-				<div key={definition.kind} className="space-y-6">
-					<div className="border-t" />
-					<DetailedSection definition={definition} />
-				</div>
+
+
+					<DetailedSection key={definition.kind} definition={definition} />
+
 			))}
 
-			<div className="border-t" />
+
 			<ClausesSection />
 		</div>
 	);

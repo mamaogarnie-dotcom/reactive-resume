@@ -40,6 +40,7 @@ const nullablePartialDateSchema = partialDateSchema.nullable();
 const profileSectionKindSchema = z.enum([
 "basics",
 "experience",
+"achievements",
 "skills",
 "education",
 "languages",
@@ -58,6 +59,7 @@ const profileSectionKindSchema = z.enum([
 "custom",
 ]);
 
+const experienceFactKindSchema = z.enum(["responsibility", "achievement", "unspecified"]);
 const profileListItemKindSchema = z.enum(["competency", "software", "tool", "interest"]);
 const clauseScopeSchema = z.enum(["current", "current_and_future"]);
 const clauseLanguageSchema = z.enum(["pl", "en"]);
@@ -105,6 +107,7 @@ const experienceFactSchema = createSelectSchema(schema.cvmateExperienceFact, {
 id: z.string(),
 masterProfileId: z.string(),
 text: nonBlankString,
+kind: experienceFactKindSchema,
 createdAt: z.date(),
 updatedAt: z.date(),
 });
@@ -663,16 +666,25 @@ output: z.void(),
 },
 
 createExperienceFact: {
-input: z.object({ text: experienceFactSchema.shape.text }),
-output: experienceFactSchema,
+	input: z.object({
+		text: experienceFactSchema.shape.text,
+		kind: experienceFactKindSchema.optional().default("unspecified"),
+	}),
+	output: experienceFactSchema,
 },
 
 updateExperienceFact: {
-input: z.object({
-id: z.string(),
-text: experienceFactSchema.shape.text,
-}),
-output: experienceFactSchema,
+	input: z
+		.object({
+			id: z.string(),
+			text: experienceFactSchema.shape.text.optional(),
+			kind: experienceFactKindSchema.optional(),
+		})
+		.refine(
+			(value) => value.text !== undefined || value.kind !== undefined,
+			"Provide at least one field to update.",
+		),
+	output: experienceFactSchema,
 },
 
 deleteExperienceFact: {
@@ -1008,6 +1020,7 @@ courseSchema as cvmateCourseSchema,
 customSectionItemSchema as cvmateCustomSectionItemSchema,
 educationSchema as cvmateEducationSchema,
 employmentSchema as cvmateEmploymentSchema,
+experienceFactKindSchema as cvmateExperienceFactKindSchema,
 experienceFactSchema as cvmateExperienceFactSchema,
 languageSchema as cvmateLanguageSchema,
 licenseSchema as cvmateLicenseSchema,

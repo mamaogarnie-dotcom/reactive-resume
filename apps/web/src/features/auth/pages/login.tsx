@@ -193,7 +193,7 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 										tabIndex={-1}
 										variant="link"
 										nativeButton={false}
-										className="h-auto p-0 text-xs leading-none"
+										className="h-auto p-0 text-sm leading-none"
 										render={
 											<Link to="/auth/forgot-password">
 												<Trans comment="Link label to password reset page from login form">Forgot Password?</Trans>

@@ -1,7 +1,7 @@
 import { msg, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
-import { MagnifyingGlassIcon, PlusIcon, ReadCvLogoIcon } from "@phosphor-icons/react";
+import { FileTextIcon, MagnifyingGlassIcon, PlusIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
@@ -133,7 +133,7 @@ function RouteComponent() {
 	return (
 		<div className="space-y-4">
 			<DashboardHeader
-				icon={ReadCvLogoIcon}
+				icon={FileTextIcon}
 				title={t`My CV`}
 				actions={
 					<Button size="sm" nativeButton={false} render={<Link to="/dashboard/cvmate/create" />}>
@@ -153,7 +153,7 @@ function RouteComponent() {
 						render={<Link to="." search={(previous: Search) => ({ ...previous, tab: "all" })} />}
 					>
 						<Trans>All</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">{counts.all}</span>
+						<span className="ms-1 text-muted-foreground text-sm">{counts.all}</span>
 					</TabsTrigger>
 					<TabsTrigger
 						value="ready"
@@ -161,7 +161,7 @@ function RouteComponent() {
 						render={<Link to="." search={(previous: Search) => ({ ...previous, tab: "ready" })} />}
 					>
 						<Trans>Ready</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">{counts.ready}</span>
+						<span className="ms-1 text-muted-foreground text-sm">{counts.ready}</span>
 					</TabsTrigger>
 					<TabsTrigger
 						value="draft"
@@ -169,7 +169,7 @@ function RouteComponent() {
 						render={<Link to="." search={(previous: Search) => ({ ...previous, tab: "draft" })} />}
 					>
 						<Trans>Drafts</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">{counts.draft}</span>
+						<span className="ms-1 text-muted-foreground text-sm">{counts.draft}</span>
 					</TabsTrigger>
 					<TabsTrigger
 						value="favorites"
@@ -185,7 +185,7 @@ function RouteComponent() {
 						}
 					>
 						<Trans>Favorites</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">{counts.favorites}</span>
+						<span className="ms-1 text-muted-foreground text-sm">{counts.favorites}</span>
 					</TabsTrigger>
 					<TabsTrigger
 						value="trash"
@@ -193,17 +193,17 @@ function RouteComponent() {
 						render={<Link to="." search={(previous: Search) => ({ ...previous, tab: "trash" })} />}
 					>
 						<Trans>Trash</Trans>
-						<span className="ms-1 text-muted-foreground text-xs">{counts.trash}</span>
+						<span className="ms-1 text-muted-foreground text-sm">{counts.trash}</span>
 					</TabsTrigger>
 				</TabsList>
 			</Tabs>
 
 			<div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
 				<div className="grid min-w-0 gap-1.5 sm:flex sm:items-center sm:gap-2">
-					<Label className="text-muted-foreground text-xs sm:text-sm">
+					<Label htmlFor="my-cvs-sort" className="text-muted-foreground text-sm">
 						<Trans>Sort by</Trans>
 					</Label>
-					<Combobox
+					<Combobox id="my-cvs-sort"
 						className="w-full sm:w-44"
 						value={sort}
 						options={sortOptions}
@@ -222,10 +222,10 @@ function RouteComponent() {
 
 				{tagOptions.length > 0 ? (
 					<div className="grid min-w-0 gap-1.5 sm:flex sm:items-center sm:gap-2">
-						<Label className="text-muted-foreground text-xs sm:text-sm">
+						<Label htmlFor="my-cvs-filter" className="text-muted-foreground text-sm">
 							<Trans>Filter by</Trans>
 						</Label>
-						<Combobox
+						<Combobox id="my-cvs-filter"
 							multiple
 							className="w-full sm:w-44"
 							value={tags}
@@ -264,11 +264,11 @@ function RouteComponent() {
 			</div>
 
 			{isLoading ? (
-				<div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+				<div className="rounded-xl border border-dashed bg-card p-8 text-center text-muted-foreground">
 					<Trans>Loading your CVs…</Trans>
 				</div>
 			) : rows.length === 0 ? (
-				<div className="rounded-lg border border-dashed p-8 text-center">
+				<div className="rounded-xl border border-dashed bg-card p-8 text-center">
 					<p className="font-medium">
 						{tab === "trash" ? <Trans>Trash is empty</Trans> : <Trans>No CVs in this view</Trans>}
 					</p>
@@ -289,7 +289,7 @@ function RouteComponent() {
 						return (
 							<div
 								key={document.id}
-								className="flex flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center"
+								className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-center"
 							>
 								<div className="min-w-0 flex-1">
 									<div className="flex flex-wrap items-center gap-2">
@@ -301,18 +301,18 @@ function RouteComponent() {
 											{resume.name}
 										</Link>
 
-										<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+										<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
 											{document.status === "ready" ? <Trans>Ready</Trans> : <Trans>Draft</Trans>}
 										</span>
 
 										{document.isFavorite ? (
-											<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+											<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
 												<Trans>Favorite</Trans>
 											</span>
 										) : null}
 									</div>
 
-									<p className="mt-1 text-muted-foreground text-xs">
+									<p className="mt-1 text-muted-foreground text-sm">
 										<Trans>Last updated</Trans>{" "}
 										{Intl.DateTimeFormat(i18n.locale, {
 											dateStyle: "medium",

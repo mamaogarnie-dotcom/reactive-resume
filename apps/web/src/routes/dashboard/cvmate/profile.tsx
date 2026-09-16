@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { UserCircleIcon } from "@phosphor-icons/react";
 import { Button } from "@reactive-resume/ui/components/button";
+import { Input } from "@reactive-resume/ui/components/input";
 import { Label } from "@reactive-resume/ui/components/label";
 import { Separator } from "@reactive-resume/ui/components/separator";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import { useEffect, useState } from "react";
 import { getOrpcErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { DashboardHeader } from "../-components/header";
+import { AchievementsSection } from "./-components/achievements";
 import { ProfileDetailsSection } from "./-components/profile-details";
 import { WorkExperienceSection } from "./-components/work-experience";
 
@@ -37,9 +39,6 @@ const EMPTY_FORM: BasicsForm = {
 	linkedinUrl: "",
 	websiteUrl: "",
 };
-
-const inputClassName =
-	"h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50";
 
 function nullable(value: string) {
 	const trimmed = value.trim();
@@ -103,9 +102,13 @@ function RouteComponent() {
 
 			<Separator />
 
-			<div className="mx-auto max-w-3xl space-y-6">
+			<div className="mx-auto max-w-5xl space-y-8">
+				<section
+					aria-labelledby="master-profile-personal-details"
+					className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+				>
 				<div className="space-y-1">
-					<h2 className="font-medium text-lg">
+					<h2 id="master-profile-personal-details" className="text-xl font-semibold text-foreground">
 						<Trans>Personal details</Trans>
 					</h2>
 					<p className="text-muted-foreground text-sm">
@@ -123,7 +126,7 @@ function RouteComponent() {
 				) : null}
 
 				{profileQuery.isError ? (
-					<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+					<div className="rounded-card border border-destructive/30 bg-destructive/10 p-3 text-destructive text-sm">
 						<Trans>Could not load your Master Profile.</Trans>
 					</div>
 				) : null}
@@ -131,7 +134,7 @@ function RouteComponent() {
 				{!profileQuery.isLoading &&
 				!profileQuery.isError &&
 				profileQuery.data === null ? (
-					<div className="rounded-md border bg-muted/30 p-3 text-muted-foreground text-sm">
+					<div className="rounded-card border border-border bg-muted p-3 text-muted-foreground text-sm">
 						<Trans>
 							Your Master Profile has not been created yet. Saving these details
 							will create it automatically.
@@ -145,9 +148,8 @@ function RouteComponent() {
 							<Label htmlFor="cvmate-first-name">
 								<Trans>First name</Trans>
 							</Label>
-							<input
+							<Input
 								id="cvmate-first-name"
-								className={inputClassName}
 								value={form.firstName}
 								disabled={profileQuery.isLoading || updateBasics.isPending}
 								onChange={(event) => setField("firstName", event.target.value)}
@@ -158,9 +160,8 @@ function RouteComponent() {
 							<Label htmlFor="cvmate-last-name">
 								<Trans>Last name</Trans>
 							</Label>
-							<input
+							<Input
 								id="cvmate-last-name"
-								className={inputClassName}
 								value={form.lastName}
 								disabled={profileQuery.isLoading || updateBasics.isPending}
 								onChange={(event) => setField("lastName", event.target.value)}
@@ -171,10 +172,9 @@ function RouteComponent() {
 							<Label htmlFor="cvmate-email">
 								<Trans>Email</Trans>
 							</Label>
-							<input
+							<Input
 								id="cvmate-email"
 								type="email"
-								className={inputClassName}
 								value={form.email}
 								disabled={profileQuery.isLoading || updateBasics.isPending}
 								onChange={(event) => setField("email", event.target.value)}
@@ -185,10 +185,9 @@ function RouteComponent() {
 							<Label htmlFor="cvmate-phone">
 								<Trans>Phone</Trans>
 							</Label>
-							<input
+							<Input
 								id="cvmate-phone"
 								type="tel"
-								className={inputClassName}
 								value={form.phone}
 								disabled={profileQuery.isLoading || updateBasics.isPending}
 								onChange={(event) => setField("phone", event.target.value)}
@@ -199,9 +198,8 @@ function RouteComponent() {
 							<Label htmlFor="cvmate-location">
 								<Trans>Location</Trans>
 							</Label>
-							<input
+							<Input
 								id="cvmate-location"
-								className={inputClassName}
 								value={form.location}
 								disabled={profileQuery.isLoading || updateBasics.isPending}
 								onChange={(event) => setField("location", event.target.value)}
@@ -212,10 +210,9 @@ function RouteComponent() {
 							<Label htmlFor="cvmate-linkedin">
 								<Trans>LinkedIn</Trans>
 							</Label>
-							<input
+							<Input
 								id="cvmate-linkedin"
 								type="url"
-								className={inputClassName}
 								placeholder="https://linkedin.com/in/..."
 								value={form.linkedinUrl}
 								disabled={profileQuery.isLoading || updateBasics.isPending}
@@ -229,10 +226,9 @@ function RouteComponent() {
 							<Label htmlFor="cvmate-website">
 								<Trans>Website</Trans>
 							</Label>
-							<input
+							<Input
 								id="cvmate-website"
 								type="url"
-								className={inputClassName}
 								placeholder="https://..."
 								value={form.websiteUrl}
 								disabled={profileQuery.isLoading || updateBasics.isPending}
@@ -242,7 +238,7 @@ function RouteComponent() {
 					</div>
 
 					{updateBasics.isError ? (
-						<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+						<div className="rounded-card border border-destructive/30 bg-destructive/10 p-3 text-destructive text-sm">
 							{getOrpcErrorMessage(updateBasics.error, {
 								fallback: t`Could not save your profile.`,
 							})}
@@ -268,10 +264,15 @@ function RouteComponent() {
 						</Button>
 					</div>
 				</form>
+				</section>
 
 				<Separator />
 
 				<WorkExperienceSection />
+
+				<Separator />
+
+				<AchievementsSection />
 
 				<Separator />
 

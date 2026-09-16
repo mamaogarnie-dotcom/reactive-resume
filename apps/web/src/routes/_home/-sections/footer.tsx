@@ -57,10 +57,9 @@ export function Footer() {
 			<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
 				{/* Brand Column */}
 				<div className="space-y-4 sm:col-span-2 lg:col-span-1">
-					<BrandIcon variant="logo" className="size-10" />
+					<BrandIcon variant="logo" className="h-12 w-auto" />
 
 					<div className="space-y-2">
-						<h2 className="font-semibold text-lg tracking-tight">Reactive Resume</h2>
 						<p className="max-w-xs text-muted-foreground text-sm leading-relaxed">
 							<Trans>
 								A free and open-source resume builder that makes it easy to create, update, and share your resume.

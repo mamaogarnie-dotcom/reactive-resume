@@ -15,7 +15,7 @@ export function DashboardHeader({ title, icon: IconComponent, className, actions
 		<div className={cn("relative flex items-center gap-x-2.5", className)}>
 			<SidebarTrigger className="absolute inset-s-0 md:hidden" />
 			<div className="flex flex-1 items-center justify-center gap-x-2.5 md:justify-start">
-				<IconComponent weight="light" className="size-5" />
+				<IconComponent weight="regular" className="size-5 text-primary" />
 				<h1 className="font-medium text-xl tracking-tight">{title}</h1>
 			</div>
 			{actions ? <div className="flex items-center gap-x-2">{actions}</div> : null}

@@ -7,7 +7,8 @@ import {
 	GearSixIcon,
 	KeyIcon,
 	MagnifyingGlassIcon,
-	ReadCvLogoIcon,
+	PlusIcon,
+	FileTextIcon,
 	SealCheckIcon,
 	ShieldCheckIcon,
 	UserCircleIcon,
@@ -18,6 +19,7 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@reactive-resume/ui/components/avatar";
+import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
 import { Kbd } from "@reactive-resume/ui/components/kbd";
 import {
 	Sidebar,
@@ -51,12 +53,12 @@ const appSidebarItems = [
 		href: "/dashboard/cvmate/profile",
 	},
 	{
-		icon: <ReadCvLogoIcon />,
+		icon: <PlusIcon />,
 		label: msg`Create CV`,
 		href: "/dashboard/cvmate/create",
 	},
 	{
-		icon: <ReadCvLogoIcon />,
+		icon: <FileTextIcon />,
 		label: msg`My CV`,
 		href: "/dashboard/resumes",
 	},
@@ -116,7 +118,8 @@ function SidebarItemList({ items }: SidebarItemListProps) {
 						render={
 							<Link
 								to={item.href}
-								activeProps={{ className: "bg-sidebar-accent" }}
+								className="[&_svg]:text-primary"
+								activeProps={{ className: "bg-sidebar-accent font-semibold text-sidebar-accent-foreground" }}
 							>
 								{item.icon}
 								<span className="shrink-0 transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
@@ -141,6 +144,7 @@ function SidebarSearchButton() {
 		<SidebarMenuItem>
 			<SidebarMenuButton
 				title={label}
+				className="[&_svg]:text-primary"
 				tooltip={label}
 				onClick={() => setOpen(true)}
 			>
@@ -165,14 +169,22 @@ export function DashboardSidebar() {
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton
-							className="h-auto"
+							className="h-auto min-h-12 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:p-1!"
 							render={
-								<Link to="/dashboard/resumes" aria-label="1story">
-									<ReadCvLogoIcon className="size-6 shrink-0" />
-									<span className="font-semibold tracking-tight transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
-										1story
-									</span>
-								</Link>
+								<Link to="/dashboard" aria-label="1story">
+<BrandIcon
+variant="logo"
+className="h-12 w-auto group-data-[collapsible=icon]:hidden"
+alt=""
+aria-hidden="true"
+/>
+<BrandIcon
+variant="icon"
+className="hidden size-8 group-data-[collapsible=icon]:block"
+alt=""
+aria-hidden="true"
+/>
+</Link>
 							}
 						/>
 					</SidebarMenuItem>
@@ -220,7 +232,7 @@ export function DashboardSidebar() {
 
 									<div className="transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
 										<p className="font-medium">{session.user.name}</p>
-										<p className="text-muted-foreground text-xs">
+										<p className="text-muted-foreground text-sm">
 											{session.user.email}
 										</p>
 									</div>

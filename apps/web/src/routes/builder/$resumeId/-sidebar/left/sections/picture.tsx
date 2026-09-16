@@ -660,7 +660,7 @@ function PictureSectionForm() {
 							<FormLabel className="mb-0">
 								<Trans>Zoom</Trans>
 							</FormLabel>
-							<span className="text-muted-foreground text-xs tabular-nums">{zoom.toFixed(1)}×</span>
+							<span className="text-muted-foreground text-sm tabular-nums">{zoom.toFixed(1)}×</span>
 						</div>
 						<div className="flex items-center gap-x-3">
 							<MagnifyingGlassMinusIcon className="size-4 shrink-0 text-muted-foreground" />

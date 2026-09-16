@@ -16,7 +16,7 @@ describe("LoadingScreen", () => {
 	it("uses the 1story brand in the initial HTML loader", () => {
 		const html = readFileSync("index.html", "utf8");
 
-		expect(html).toContain('<div class="initial-loader__brand" aria-label="1story">1story</div>');
+		expect(html).toContain('<img class="initial-loader__brand" src="/logo/light.svg" alt="1story" />');
 		expect(html).not.toContain('alt="Reactive Resume"');
 		expect(html).toContain('<span class="initial-loader__sr-only">Ładowanie</span>');
 	});

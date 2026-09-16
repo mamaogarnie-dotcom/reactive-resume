@@ -46,7 +46,7 @@ function FormatRow({ action, description, disabled, icon, title }: FormatRowProp
 	return (
 		<div
 			className={cn(
-				"flex items-center gap-3 rounded-lg border bg-background p-3 transition-opacity",
+				"flex items-center gap-3 rounded-xl border bg-card p-3 transition-opacity",
 				disabled && "opacity-45",
 			)}
 		>
@@ -55,7 +55,7 @@ function FormatRow({ action, description, disabled, icon, title }: FormatRowProp
 			</div>
 			<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 				<h3 className="font-medium text-sm">{title}</h3>
-				<p className="text-muted-foreground text-xs leading-normal">{description}</p>
+				<p className="text-muted-foreground text-sm leading-normal">{description}</p>
 			</div>
 			{action}
 		</div>
@@ -109,7 +109,7 @@ export function ResumeDownloadDialog({ resume, trigger }: ResumeDownloadDialogPr
 				{activeScope === "cover-letter" && (
 					<label
 						htmlFor={includeHeaderSwitchId}
-						className="flex cursor-pointer items-center gap-3 rounded-lg border bg-background p-3"
+						className="flex cursor-pointer items-center gap-3 rounded-xl border bg-card p-3"
 					>
 						<Switch
 							id={includeHeaderSwitchId}
@@ -121,7 +121,7 @@ export function ResumeDownloadDialog({ resume, trigger }: ResumeDownloadDialogPr
 							<span className="font-medium text-sm">
 								<Trans>Include resume header</Trans>
 							</span>
-							<span className="text-muted-foreground text-xs leading-normal">
+							<span className="text-muted-foreground text-sm leading-normal">
 								<Trans>Show the same first-page header on the cover letter.</Trans>
 							</span>
 						</span>

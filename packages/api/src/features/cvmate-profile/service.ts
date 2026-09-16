@@ -13,6 +13,7 @@ uploadFile,
 const DEFAULT_SECTION_KINDS = [
 "basics",
 "experience",
+"achievements",
 "skills",
 "education",
 "languages",
@@ -922,40 +923,59 @@ eq(schema.cvmateEmployment.masterProfileId, employment.masterProfileId),
 if (rows.length === 0) throw new ORPCError("NOT_FOUND");
 },
 
-createExperienceFact: async (input: { userId: string; text: string }) => {
-const profile = await ensureProfile(input.userId);
+createExperienceFact: async (input: {
+	userId: string;
+	text: string;
+	kind?: schema.CvmateExperienceFactKind | undefined;
+}) => {
+	const profile = await ensureProfile(input.userId);
 
-const [fact] = await db
-.insert(schema.cvmateExperienceFact)
-.values({
-id: generateId(),
-masterProfileId: profile.id,
-text: input.text,
-})
-.returning();
+	const [fact] = await db
+		.insert(schema.cvmateExperienceFact)
+		.values({
+			id: generateId(),
+			masterProfileId: profile.id,
+			text: input.text,
+			kind: input.kind ?? "unspecified",
+		})
+		.returning();
 
-if (!fact) throw new Error("CVMATE_EXPERIENCE_FACT_CREATE_FAILED");
+	if (!fact) throw new Error("CVMATE_EXPERIENCE_FACT_CREATE_FAILED");
 
-return fact;
+	return fact;
 },
 
-updateExperienceFact: async (input: { id: string; userId: string; text: string }) => {
-const { fact } = await requireOwnedExperienceFact(input.id, input.userId);
+updateExperienceFact: async (input: {
+	id: string;
+	userId: string;
+	text?: string | undefined;
+	kind?: schema.CvmateExperienceFactKind | undefined;
+}) => {
+	const { fact } = await requireOwnedExperienceFact(input.id, input.userId);
 
-const [updated] = await db
-.update(schema.cvmateExperienceFact)
-.set({ text: input.text })
-.where(
-and(
-eq(schema.cvmateExperienceFact.id, input.id),
-eq(schema.cvmateExperienceFact.masterProfileId, fact.masterProfileId),
-),
-)
-.returning();
+	const patch: Partial<typeof schema.cvmateExperienceFact.$inferInsert> = {};
 
-if (!updated) throw new ORPCError("NOT_FOUND");
+	if (input.text !== undefined) patch.text = input.text;
+	if (input.kind !== undefined) patch.kind = input.kind;
 
-return updated;
+	if (Object.keys(patch).length === 0) {
+		throw new ORPCError("BAD_REQUEST");
+	}
+
+	const [updated] = await db
+		.update(schema.cvmateExperienceFact)
+		.set(patch)
+		.where(
+			and(
+				eq(schema.cvmateExperienceFact.id, input.id),
+				eq(schema.cvmateExperienceFact.masterProfileId, fact.masterProfileId),
+			),
+		)
+		.returning();
+
+	if (!updated) throw new ORPCError("NOT_FOUND");
+
+	return updated;
 },
 
 deleteExperienceFact: async (input: { id: string; userId: string }) => {

@@ -42,7 +42,7 @@ function AlertDialogContent({
 				data-slot="alert-dialog-content"
 				data-size={size}
 				className={cn(
-					"group/alert-dialog-content data-open:fade-in-0 data-open:zoom-in-95 data-closed:fade-out-0 data-closed:zoom-out-95 fixed inset-s-1/2 top-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-popover-foreground outline-none ring-1 ring-foreground/10 duration-200 ease-(--ease-out-strong) data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-closed:animate-out data-open:animate-in data-closed:duration-150 data-[size=default]:sm:max-w-sm rtl:translate-x-1/2",
+					"group/alert-dialog-content data-open:fade-in-0 data-open:zoom-in-95 data-closed:fade-out-0 data-closed:zoom-out-95 fixed inset-s-1/2 top-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-4 rounded-modal bg-popover p-4 text-popover-foreground outline-none ring-1 ring-foreground/10 duration-200 ease-(--ease-out-strong) data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-closed:animate-out data-open:animate-in data-closed:duration-150 data-[size=default]:sm:max-w-sm rtl:translate-x-1/2",
 					className,
 				)}
 				{...props}
@@ -69,7 +69,7 @@ function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">)
 		<div
 			data-slot="alert-dialog-footer"
 			className={cn(
-				"-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 p-4 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end [form_&]:-mb-6",
+				"-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-modal border-t bg-muted/50 p-4 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end [form_&]:-mb-6",
 				className,
 			)}
 			{...props}
@@ -95,7 +95,7 @@ function AlertDialogTitle({ className, ...props }: React.ComponentProps<typeof A
 		<AlertDialogPrimitive.Title
 			data-slot="alert-dialog-title"
 			className={cn(
-				"font-heading font-medium text-base sm:group-data-[size=default]/alert-dialog-content:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2",
+				"font-medium text-base sm:group-data-[size=default]/alert-dialog-content:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2",
 				className,
 			)}
 			{...props}

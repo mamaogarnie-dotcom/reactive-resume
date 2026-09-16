@@ -3,39 +3,42 @@ import { describe, expect, it } from "vitest";
 import { BrandIcon } from "./brand-icon";
 
 describe("BrandIcon", () => {
-	it("renders two img elements (light + dark variants)", () => {
-		render(<BrandIcon />);
-		const imgs = screen.getAllByAltText("Reactive Resume");
-		expect(imgs).toHaveLength(2);
-	});
+it("renders one approved 1story asset in V1", () => {
+render(<BrandIcon />);
 
-	it("uses 'logo' as default variant", () => {
-		render(<BrandIcon />);
-		const imgs = screen.getAllByAltText("Reactive Resume");
-		expect(imgs.some((img) => img.getAttribute("src") === "/logo/dark.svg")).toBe(true);
-		expect(imgs.some((img) => img.getAttribute("src") === "/logo/light.svg")).toBe(true);
-	});
+expect(screen.getAllByRole("img")).toHaveLength(1);
+expect(screen.getByRole("img", { name: "1story" })).toBeInTheDocument();
+});
 
-	it("uses 'icon' variant when specified", () => {
-		render(<BrandIcon variant="icon" />);
-		const imgs = screen.getAllByAltText("Reactive Resume");
-		expect(imgs.some((img) => img.getAttribute("src") === "/icon/dark.svg")).toBe(true);
-		expect(imgs.some((img) => img.getAttribute("src") === "/icon/light.svg")).toBe(true);
-	});
+it("uses the primary wordmark by default", () => {
+render(<BrandIcon />);
 
-	it("merges custom className on both imgs", () => {
-		render(<BrandIcon className="my-custom" />);
-		const imgs = screen.getAllByAltText("Reactive Resume");
-		for (const img of imgs) {
-			expect(img).toHaveClass("my-custom");
-		}
-	});
+expect(screen.getByRole("img").getAttribute("src")).toBe("/logo/light.svg");
+expect(screen.getByRole("img")).toHaveClass("h-12");
+expect(screen.getByRole("img")).toHaveClass("w-auto");
+});
 
-	it("hides dark variant by default (light mode); dark mode reveals it via dark:block", () => {
-		render(<BrandIcon />);
-		const imgs = screen.getAllByAltText("Reactive Resume");
-		const darkImg = imgs.find((img) => img.getAttribute("src") === "/logo/dark.svg");
-		expect(darkImg).toHaveClass("hidden");
-		expect(darkImg).toHaveClass("dark:block");
-	});
+it("uses the approved symbol for the icon variant", () => {
+render(<BrandIcon variant="icon" />);
+
+expect(screen.getByRole("img").getAttribute("src")).toBe("/icon/light.svg");
+expect(screen.getByRole("img")).toHaveClass("size-10");
+});
+
+it("merges a custom className", () => {
+render(<BrandIcon className="my-custom" />);
+
+expect(screen.getByRole("img")).toHaveClass("my-custom");
+});
+
+it("allows decorative usage with an empty alt", () => {
+const { container } = render(
+<BrandIcon variant="icon" alt="" aria-hidden="true" />,
+);
+
+const image = container.querySelector("img");
+
+expect(image?.getAttribute("alt")).toBe("");
+expect(image?.getAttribute("aria-hidden")).toBe("true");
+});
 });

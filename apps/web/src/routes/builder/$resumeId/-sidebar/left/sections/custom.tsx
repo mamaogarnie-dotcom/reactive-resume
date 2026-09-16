@@ -164,7 +164,7 @@ function CustomSectionContainer({ section }: CustomSectionContainerProps) {
 	};
 
 	return (
-		<div id={`sidebar-${section.id}`} className="rounded-md border">
+		<div id={`sidebar-${section.id}`} className="rounded-xl border bg-card">
 			{/* Section Header */}
 			<div className="group flex select-none">
 				<button
@@ -179,7 +179,7 @@ function CustomSectionContainer({ section }: CustomSectionContainerProps) {
 						{getSectionTitle(section.type)}
 					</Badge>
 					<span className="line-clamp-1 text-wrap font-medium text-base">{section.title}</span>
-					<span className="text-muted-foreground text-xs">
+					<span className="text-muted-foreground text-sm">
 						<Plural value={section.items.length} one="# item" other="# items" />
 					</span>
 				</button>

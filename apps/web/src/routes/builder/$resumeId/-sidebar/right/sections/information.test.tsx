@@ -6,51 +6,64 @@ import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 
 type SectionBaseProps = {
-	children: React.ReactNode;
+children: React.ReactNode;
 };
 
 vi.mock("../shared/section-base", () => ({
-	SectionBase: ({ children }: SectionBaseProps) => <div>{children}</div>,
+SectionBase: ({ children }: SectionBaseProps) => <div>{children}</div>,
 }));
 
 const { InformationSectionBuilder } = await import("./information");
 
 beforeAll(() => {
-	i18n.loadAndActivate({ locale: "en", messages: {} });
+i18n.loadAndActivate({ locale: "en", messages: {} });
 });
 
 const renderInfo = () =>
-	render(
-		<I18nProvider i18n={i18n}>
-			<InformationSectionBuilder />
-		</I18nProvider>,
-	);
+render(
+<I18nProvider i18n={i18n}>
+<InformationSectionBuilder />
+</I18nProvider>,
+);
 
 describe("InformationSectionBuilder", () => {
-	it("renders the donation prompt and CTA", () => {
-		renderInfo();
-		expect(screen.getByText("Support the app by doing what you can!")).toBeInTheDocument();
-		expect(screen.getByText("Donate to Reactive Resume")).toBeInTheDocument();
-	});
+it("renders the 1story information heading", () => {
+renderInfo();
 
-	it("links to the OpenCollective donation page", () => {
-		renderInfo();
-		const donateLink = screen.getByText("Donate to Reactive Resume").closest("a");
-		expect(donateLink?.getAttribute("href")).toBe("http://opencollective.com/reactive-resume");
-	});
+expect(screen.getByText("About 1story")).toBeInTheDocument();
+});
 
-	it("includes external resource links (docs, source, bugs, translations, sponsors)", () => {
-		renderInfo();
-		const labels = ["Documentation", "Source Code", "Report a Bug", "Translations", "Sponsors"];
-		for (const label of labels) {
-			expect(screen.getByText(label).closest("a"), label).not.toBeNull();
-		}
-	});
+it("explains the tailored CV workflow", () => {
+renderInfo();
 
-	it("opens external links in a new tab", () => {
-		renderInfo();
-		const docs = screen.getByText("Documentation").closest("a") as HTMLAnchorElement;
-		expect(docs.getAttribute("target")).toBe("_blank");
-		expect(docs.getAttribute("rel")).toBe("noopener noreferrer");
-	});
+expect(
+screen.getByText(
+"1story helps you turn your career history into tailored CVs while keeping you in control of the final content.",
+),
+).toBeInTheDocument();
+
+expect(
+screen.getByText(
+"Use the builder to review, refine, preview, and export the CV created from your Master Profile.",
+),
+).toBeInTheDocument();
+});
+
+it("does not render legacy Reactive Resume support or donation copy", () => {
+renderInfo();
+
+expect(screen.queryByText("Support the app by doing what you can!")).not.toBeInTheDocument();
+expect(screen.queryByText("Donate to Reactive Resume")).not.toBeInTheDocument();
+expect(screen.queryByText("Documentation")).not.toBeInTheDocument();
+expect(screen.queryByText("Source Code")).not.toBeInTheDocument();
+expect(screen.queryByText("Report a Bug")).not.toBeInTheDocument();
+expect(screen.queryByText("Translations")).not.toBeInTheDocument();
+expect(screen.queryByText("Sponsors")).not.toBeInTheDocument();
+});
+
+it("does not expose legacy external support links", () => {
+renderInfo();
+
+expect(screen.queryAllByRole("link")).toHaveLength(0);
+});
 });

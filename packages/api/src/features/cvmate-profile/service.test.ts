@@ -61,6 +61,14 @@ createdAt: new Date("2026-09-08T10:00:00.000Z"),
 updatedAt: new Date("2026-09-08T10:00:00.000Z"),
 };
 
+const experienceFact = {
+id: "fact-1",
+masterProfileId: "profile-1",
+text: "Reduced processing time by 30%",
+kind: "unspecified" as const,
+createdAt: new Date("2026-09-08T10:00:00.000Z"),
+updatedAt: new Date("2026-09-08T10:00:00.000Z"),
+};
 const project = {
 id: "project-1",
 masterProfileId: "profile-1",
@@ -257,10 +265,11 @@ sortOrder: number;
 }[],
 ];
 
-expect(sections).toHaveLength(17);
+expect(sections).toHaveLength(18);
 expect(sections.map((section) => section.kind)).toEqual([
 "basics",
 "experience",
+"achievements",
 "skills",
 "education",
 "languages",
@@ -364,6 +373,82 @@ expect(result.jobTitle).toBe("Manager");
 });
 });
 
+describe("cvmateProfileService experience facts", () => {
+it("defaults a newly created reusable fact to unspecified", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdFact = { ...experienceFact };
+const returning = vi.fn(() => Promise.resolve([createdFact]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createExperienceFact({
+userId: "user-1",
+text: experienceFact.text,
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+text: experienceFact.text,
+kind: "unspecified",
+}),
+);
+expect(result).toEqual(createdFact);
+});
+
+it("persists an explicit achievement classification", async () => {
+setSelectResults([{ ...profile }]);
+
+const createdFact = {
+...experienceFact,
+kind: "achievement" as const,
+};
+
+const returning = vi.fn(() => Promise.resolve([createdFact]));
+const values = vi.fn(() => ({ returning }));
+
+dbMock.insert.mockReturnValue({ values });
+
+const result = await cvmateProfileService.createExperienceFact({
+userId: "user-1",
+text: experienceFact.text,
+kind: "achievement",
+});
+
+expect(values).toHaveBeenCalledWith(
+expect.objectContaining({
+masterProfileId: "profile-1",
+text: experienceFact.text,
+kind: "achievement",
+}),
+);
+expect(result.kind).toBe("achievement");
+});
+
+it("can classify an existing reusable fact without rewriting its text", async () => {
+setSelectResults([{ ...profile }], [{ ...experienceFact }]);
+
+const updatedFact = {
+...experienceFact,
+kind: "achievement" as const,
+};
+
+const { set } = mockUpdateReturning([updatedFact]);
+
+const result = await cvmateProfileService.updateExperienceFact({
+id: "fact-1",
+userId: "user-1",
+kind: "achievement",
+});
+
+expect(set).toHaveBeenCalledWith({
+kind: "achievement",
+});
+expect(result.kind).toBe("achievement");
+});
+});
 describe("cvmateProfileService employment facts", () => {
 it("does not link a fact when either record is outside the current profile", async () => {
 setSelectResults([{ ...profile }], [{ id: "employment-1" }], []);

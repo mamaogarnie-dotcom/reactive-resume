@@ -95,8 +95,8 @@ export function ApiKeysSettingsPage() {
 							<KeyIcon />
 
 							<div className="flex-1 space-y-1">
-								<p className="font-mono text-xs">{key.start}...</p>
-								<div className="text-muted-foreground text-xs">
+								<p className="font-mono text-sm">{key.start}...</p>
+								<div className="text-muted-foreground text-sm">
 									{key.expiresAt ? (
 										<Trans>Expires on {key.expiresAt.toLocaleDateString()}</Trans>
 									) : (
@@ -111,7 +111,7 @@ export function ApiKeysSettingsPage() {
 								whileTap={{ scale: 0.96 }}
 								transition={{ duration: 0.14, ease: "easeOut" }}
 							>
-								<Button size="icon" variant="ghost" onClick={() => onDelete(key.id)}>
+								<Button size="icon" variant="ghost" aria-label="Delete API key" onClick={() => onDelete(key.id)}>
 									<TrashSimpleIcon />
 								</Button>
 							</m.div>

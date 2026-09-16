@@ -18,7 +18,7 @@ export function SkillsSectionBuilder() {
 	};
 
 	return (
-		<SectionBase type="skills" className={cn("rounded-md border", section.items.length === 0 && "border-dashed")}>
+		<SectionBase type="skills" className={cn("rounded-xl border bg-card", section.items.length === 0 && "border-dashed")}>
 			<Reorder.Group axis="y" values={section.items} onReorder={handleReorder}>
 				<AnimatePresence initial={false} mode="popLayout">
 					{section.items.map((item) => (

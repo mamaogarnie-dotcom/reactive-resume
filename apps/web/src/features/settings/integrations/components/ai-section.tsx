@@ -273,7 +273,7 @@ function ProviderRow({ provider }: ProviderRowProps) {
 	};
 
 	return (
-		<div className="grid gap-4 rounded-md border bg-card p-4 md:grid-cols-[1fr_auto]">
+		<div className="grid gap-4 rounded-xl border bg-card p-4 md:grid-cols-[1fr_auto]">
 			<div className="min-w-0 space-y-2">
 				<div className="flex flex-wrap items-center gap-2">
 					<h3 className="truncate font-semibold">{provider.label}</h3>
@@ -488,7 +488,7 @@ function CreateProviderForm() {
 	};
 
 	return (
-		<div className="rounded-md border bg-card p-4">
+		<div className="rounded-xl border bg-card p-4">
 			<div className="mb-4 flex items-center gap-2">
 				<div className="grid size-8 place-items-center rounded-md bg-primary/10 text-primary">
 					<PlusIcon />
@@ -588,7 +588,7 @@ function CreateProviderForm() {
 			{result ? (
 				<div
 					className={cn(
-						"mt-4 flex items-start gap-2 rounded-md border p-3 text-sm",
+						"mt-4 flex items-start gap-2 rounded-xl border p-3 text-sm",
 						result.ok
 							? "border-emerald-300 bg-emerald-50 text-emerald-950 dark:bg-emerald-950/20 dark:text-emerald-200"
 							: "border-rose-300 bg-rose-50 text-rose-950 dark:bg-rose-950/20 dark:text-rose-200",
@@ -651,7 +651,7 @@ export function AISettingsSection() {
 			{error ? (
 				<div
 					className={cn(
-						"rounded-md border p-4 text-sm",
+						"rounded-xl border p-4 text-sm",
 						isConfigError
 							? "border-amber-300 bg-amber-50 text-amber-950 dark:bg-amber-950/20 dark:text-amber-200"
 							: "border-rose-300 bg-rose-50 text-rose-950 dark:bg-rose-950/20 dark:text-rose-200",
@@ -676,7 +676,7 @@ export function AISettingsSection() {
 				) : null}
 
 				{providers?.length === 0 ? (
-					<div className="rounded-md border border-dashed p-6 text-center text-muted-foreground text-sm">
+					<div className="rounded-xl border border-dashed bg-card p-6 text-center text-muted-foreground text-sm">
 						<Trans>Add and test a provider before starting an agent thread.</Trans>
 					</div>
 				) : null}

@@ -145,7 +145,7 @@ export function PasskeysSection() {
 							return (
 								<div
 									key={passkey.id}
-									className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/40 px-3 py-2"
+									className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-muted/40 px-3 py-2"
 								>
 									<p className="truncate font-medium text-sm">{passkey.name ?? t`Unnamed passkey`}</p>
 

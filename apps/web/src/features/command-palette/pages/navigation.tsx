@@ -6,7 +6,7 @@ import {
 	KeyIcon,
 	OpenAiLogoIcon,
 	PlusIcon,
-	ReadCvLogoIcon,
+	FileTextIcon,
 	SealCheckIcon,
 	ShieldCheckIcon,
 	UserCircleIcon,
@@ -62,7 +62,7 @@ export function NavigationCommandGroup() {
 					value="navigation.resumes"
 					onSelect={() => onNavigate("/dashboard/resumes")}
 				>
-					<ReadCvLogoIcon />
+					<FileTextIcon />
 					<Trans>My CV</Trans>
 				</CommandItem>
 

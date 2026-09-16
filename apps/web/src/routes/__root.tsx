@@ -60,13 +60,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 					rel: "icon",
 					href: "/favicon.ico",
 					type: "image/x-icon",
-					sizes: "128x128",
-				},
-				{
-					rel: "icon",
-					href: "/favicon.svg",
-					type: "image/svg+xml",
-					sizes: "256x256 any",
+					sizes: "16x16 32x32 48x48",
 				},
 				{
 					rel: "apple-touch-icon",
@@ -87,14 +81,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 				{ name: "description", content: description },
 				{ name: "viewport", content: "width=device-width, initial-scale=1" },
 				// Meta Tags
-				{ name: "theme-color", content: "#09090B" },
+				{ name: "theme-color", content: "#F5F8F2" },
 				{ name: "application-name", content: appName },
 				{ name: "mobile-web-app-capable", content: "yes" },
 				{ name: "apple-mobile-web-app-capable", content: "yes" },
 				{ name: "apple-mobile-web-app-title", content: appName },
 				{
 					name: "apple-mobile-web-app-status-bar-style",
-					content: "black-translucent",
+					content: "default",
 				},
 				// Twitter Tags — X only reads these as `name`, not `property`
 				{ name: "twitter:card", content: "summary_large_image" },

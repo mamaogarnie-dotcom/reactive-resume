@@ -1,52 +1,45 @@
 // @vitest-environment happy-dom
 
 import { fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { Command } from "@reactive-resume/ui/components/command";
 import { useCommandPaletteStore } from "../../store";
 
-vi.mock("@/features/theme/provider", () => ({
-	useTheme: () => ({ setTheme: vi.fn(), theme: "light", toggleTheme: vi.fn() }),
-}));
-
 const { PreferencesCommandGroup } = await import("./index");
 
 beforeAll(() => {
-	i18n.loadAndActivate({ locale: "en", messages: {} });
+i18n.loadAndActivate({ locale: "en", messages: {} });
 });
 
 afterEach(() => {
-	useCommandPaletteStore.setState({ open: false, search: "", pages: [] });
+useCommandPaletteStore.setState({ open: false, search: "", pages: [] });
 });
 
 const renderGroup = () =>
-	render(
-		<I18nProvider i18n={i18n}>
-			<Command>
-				<PreferencesCommandGroup />
-			</Command>
-		</I18nProvider>,
-	);
+render(
+<I18nProvider i18n={i18n}>
+<Command>
+<PreferencesCommandGroup />
+</Command>
+</I18nProvider>,
+);
 
 describe("PreferencesCommandGroup", () => {
-	it("renders 'Change theme to…' and 'Change language to…' at the root", () => {
-		renderGroup();
-		expect(screen.getByText("Change theme to…")).toBeInTheDocument();
-		expect(screen.getByText("Change language to…")).toBeInTheDocument();
-	});
+it("exposes language but not theme preferences in 1story V1", () => {
+renderGroup();
 
-	it("pushes 'theme' onto the page stack when the theme item is selected", () => {
-		renderGroup();
-		const item = screen.getByText("Change theme to…");
-		fireEvent.click(item);
-		expect(useCommandPaletteStore.getState().pages).toContain("theme");
-	});
+expect(screen.getByText("Change language to…")).toBeInTheDocument();
+expect(screen.queryByText("Change theme to…")).toBeNull();
+});
 
-	it("pushes 'language' onto the page stack when the language item is selected", () => {
-		renderGroup();
-		fireEvent.click(screen.getByText("Change language to…"));
-		expect(useCommandPaletteStore.getState().pages).toContain("language");
-	});
+it("pushes language onto the page stack", () => {
+renderGroup();
+
+fireEvent.click(screen.getByText("Change language to…"));
+
+expect(useCommandPaletteStore.getState().pages).toContain("language");
+expect(useCommandPaletteStore.getState().pages).not.toContain("theme");
+});
 });

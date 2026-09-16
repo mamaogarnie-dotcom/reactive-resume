@@ -33,14 +33,14 @@ function RouteComponent() {
 		<SidebarProvider open={sidebarState} onOpenChange={handleSidebarOpenChange}>
 			<a
 				href="#main-content"
-				className="sr-only rounded-md bg-popover px-4 py-2 text-sm ring-2 ring-ring focus:not-sr-only focus:absolute focus:inset-s-2 focus:top-2 focus:z-[100]"
+				className="sr-only rounded-input bg-popover px-4 py-2 text-sm ring-2 ring-ring focus:not-sr-only focus:absolute focus:inset-s-2 focus:top-2 focus:z-[100]"
 			>
 				<Trans>Skip to main content</Trans>
 			</a>
 
 			<DashboardSidebar />
 
-			<main id="main-content" className="@container flex-1 p-4 md:ps-2">
+			<main id="main-content" className="@container flex-1 bg-background p-4 md:p-6 md:ps-4">
 				<Outlet />
 			</main>
 		</SidebarProvider>

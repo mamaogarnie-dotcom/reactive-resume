@@ -276,7 +276,7 @@ export function SectionItem<T extends CustomSectionItem | SectionItemType>({
 				)}
 			>
 				<div className="line-clamp-1 font-medium">{title}</div>
-				{subtitle && <div className="line-clamp-1 text-muted-foreground text-xs">{subtitle}</div>}
+				{subtitle && <div className="line-clamp-1 text-muted-foreground text-sm">{subtitle}</div>}
 			</button>
 
 			<DropdownMenu>

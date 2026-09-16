@@ -120,14 +120,14 @@ export function SharingSectionBuilder() {
 						<Trans>Allow Public Access</Trans>
 					</span>
 
-					<span className="text-muted-foreground text-xs">
+					<span className="text-muted-foreground text-sm">
 						<Trans>Anyone with the link can view the resume.</Trans>
 					</span>
 				</Label>
 			</div>
 
 			{resume.isPublic && (
-				<div className="space-y-4 rounded-md border p-4">
+				<div className="space-y-4 rounded-xl border bg-card p-4">
 					<div className="flex items-center gap-x-4">
 						<Switch
 							id="sharing-downloads-switch"

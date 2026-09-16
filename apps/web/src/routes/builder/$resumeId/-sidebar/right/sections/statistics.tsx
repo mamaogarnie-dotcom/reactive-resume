@@ -94,16 +94,16 @@ function StatisticsItem({ label, value, series, timestamp }: StatisticsItemProps
 			</div>
 			<p className="font-medium text-muted-foreground leading-none">{label}</p>
 			{delta === null ? (
-				<span className="text-muted-foreground text-xs">
+				<span className="text-muted-foreground text-sm">
 					<Trans>No prior data</Trans>
 				</span>
 			) : (
-				<span className={cn("text-xs", delta >= 0 ? "text-emerald-600 dark:text-emerald-500" : "text-red-600")}>
+				<span className={cn("text-sm", delta >= 0 ? "text-emerald-600 dark:text-emerald-500" : "text-red-600")}>
 					{`${delta >= 0 ? "+" : ""}${delta}% `}
 					<Trans>vs previous 30 days</Trans>
 				</span>
 			)}
-			{timestamp && <span className="block text-muted-foreground text-xs">{timestamp}</span>}
+			{timestamp && <span className="block text-muted-foreground text-sm">{timestamp}</span>}
 		</div>
 	);
 }

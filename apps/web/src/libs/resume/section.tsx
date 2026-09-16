@@ -23,7 +23,7 @@ import {
 	PaintBrushBroadIcon,
 	PaletteIcon,
 	PhoneIcon,
-	ReadCvLogoIcon,
+	FileTextIcon,
 	SealCheckIcon,
 	ShareFatIcon,
 	StarIcon,
@@ -165,7 +165,7 @@ export const getSectionIcon = (type: SidebarSection | CustomOnlyType, props?: Ic
 			.with("typography", () => <TextTIcon {...iconProps} />)
 			.with("design", () => <PaletteIcon {...iconProps} />)
 			.with("styles", () => <PaintBrushBroadIcon {...iconProps} />)
-			.with("page", () => <ReadCvLogoIcon {...iconProps} />)
+			.with("page", () => <FileTextIcon {...iconProps} />)
 			.with("notes", () => <NotepadIcon {...iconProps} />)
 			.with("sharing", () => <ShareFatIcon {...iconProps} />)
 			.with("statistics", () => <ChartLineIcon {...iconProps} />)

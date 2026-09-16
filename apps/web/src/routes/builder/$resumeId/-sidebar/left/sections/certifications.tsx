@@ -20,7 +20,7 @@ export function CertificationsSectionBuilder() {
 	return (
 		<SectionBase
 			type="certifications"
-			className={cn("rounded-md border", section.items.length === 0 && "border-dashed")}
+			className={cn("rounded-xl border bg-card", section.items.length === 0 && "border-dashed")}
 		>
 			<Reorder.Group axis="y" values={section.items} onReorder={handleReorder}>
 				<AnimatePresence>

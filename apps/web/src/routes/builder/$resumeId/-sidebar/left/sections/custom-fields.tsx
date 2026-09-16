@@ -92,7 +92,7 @@ export const CustomFieldsSection = withForm({
 
 											<PopoverContent align="center">
 												<div className="flex flex-col gap-y-1.5">
-													<Label htmlFor={linkField.name} className="text-muted-foreground text-xs">
+													<Label htmlFor={linkField.name} className="text-muted-foreground text-sm">
 														<Trans>Enter the URL to link to</Trans>
 													</Label>
 

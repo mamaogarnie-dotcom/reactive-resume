@@ -74,7 +74,7 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 				<div className="space-y-4">
 					<div className="wrap-anywhere space-y-1">
 						<p className="font-medium">{client.client_name || clientId}</p>
-						<p className="text-muted-foreground text-xs">
+						<p className="text-muted-foreground text-sm">
 							<Trans>Client ID</Trans>: {clientId}
 						</p>
 					</div>

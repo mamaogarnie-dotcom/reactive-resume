@@ -53,7 +53,7 @@ function MobileBuilderTabBar({ activeTab, onTabChange }: MobileBuilderTabBarProp
 						aria-current={isActive ? "page" : undefined}
 						onClick={() => onTabChange(value)}
 						className={cn(
-							"flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs transition-colors",
+							"flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-sm transition-colors",
 							isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
 						)}
 					>

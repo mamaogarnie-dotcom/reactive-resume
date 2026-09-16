@@ -128,7 +128,7 @@ function ZoomMenu() {
 						size="sm"
 						variant="ghost"
 						aria-label={t`Zoom level`}
-						className="h-8 min-w-14 px-2 font-medium text-xs tabular-nums"
+						className="h-8 min-w-14 px-2 font-medium text-sm tabular-nums"
 					>
 						{Math.round(scale * 100)}%
 					</Button>

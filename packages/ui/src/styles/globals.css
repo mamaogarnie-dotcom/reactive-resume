@@ -1,7 +1,8 @@
 @import "tailwindcss" source(none);
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/ibm-plex-sans";
+@import "@fontsource-variable/source-sans-3";
+@import "@fontsource/dm-serif-display";
 @import "@phosphor-icons/web/regular/style.css";
 
 @plugin "@tailwindcss/typography";
@@ -12,42 +13,81 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-	--radius: 0.3rem;
-	--font-body: "IBM Plex Sans Variable", sans-serif;
+	/* 1story V1 - authoritative light theme. */
+	/* Dark theme stays isolated in .dark and will be designed separately. */
 
-	--accent-foreground: oklch(0.205 0 0);
-	--accent: oklch(0.97 0 0);
-	--background: oklch(1 0 0);
-	--border: oklch(0.922 0 0);
-	--card-foreground: oklch(0.145 0 0);
-	--card: oklch(1 0 0);
+	--radius: 0.3rem;
+	--font-body: "Source Sans 3 Variable", "Source Sans 3", sans-serif;
+	--font-display: "DM Serif Display", Georgia, serif;
+
+	/* Core surfaces and text */
+	--background: #F5F8F2;
+	--foreground: #3C4F27;
+	--card: #FCFDFB;
+	--card-foreground: #3C4F27;
+	--popover: #FCFDFB;
+	--popover-foreground: #3C4F27;
+
+	/* Primary interaction */
+	--primary: #4E6B35;
+	--primary-foreground: #FCFDFB;
+	--primary-hover: #425C2D;
+	--primary-pressed: #374D26;
+
+	/* Secondary and quiet surfaces */
+	--secondary: #EEF3E8;
+	--secondary-foreground: #3C4F27;
+	--muted: #EEF3E8;
+	--muted-foreground: #66705F;
+
+	/* Global accent stays soft green; purple remains intentional and sparse. */
+	--accent: #EEF3E8;
+	--accent-foreground: #3C4F27;
+
+	/* Brand accents */
+	--brand-accent: #DE6E17;
+	--brand-purple: #A878AA;
+	--brand-lavender: #E2C5E7;
+	--purple-foreground: #734A75;
+
+	/* Borders, controls and focus */
+	--border: #D9E2D2;
+	--input: #7E8B76;
+	--control-border: #7E8B76;
+	--ring: #4E6B35;
+
+	/* Disabled */
+	--disabled: #E8ECE5;
+	--disabled-foreground: #7A8474;
+
+	/* Semantic states */
+	--destructive: #B84444;
+	--error: #B84444;
+	--error-background: #FBEAEA;
+	--success: #2B7556;
+	--success-background: #E7F3ED;
+	--warning: #9B6100;
+	--warning-background: #FFF1D6;
+	--info: #366A9F;
+	--info-background: #E8F0F8;
+
+	/* Charts stay neutral until a dedicated production chart palette is approved. */
 	--chart-1: oklch(0.87 0 0);
 	--chart-2: oklch(0.556 0 0);
 	--chart-3: oklch(0.439 0 0);
 	--chart-4: oklch(0.371 0 0);
 	--chart-5: oklch(0.269 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--foreground: oklch(0.145 0 0);
-	--input: oklch(0.922 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--muted: oklch(0.97 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--popover: oklch(1 0 0);
-	--primary-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.205 0 0);
-	--ring: oklch(0.708 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.97 0 0);
-	--sidebar-accent-foreground: oklch(0.205 0 0);
-	--sidebar-accent: oklch(0.97 0 0);
-	--sidebar-border: oklch(0.922 0 0);
-	--sidebar-foreground: oklch(0.145 0 0);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.205 0 0);
-	--sidebar-ring: oklch(0.708 0 0);
-	--sidebar: oklch(0.985 0 0);
-}
 
+	/* Sidebar follows the 1story light-theme foundation. */
+	--sidebar: #FCFDFB;
+	--sidebar-foreground: #3C4F27;
+	--sidebar-primary: #4E6B35;
+	--sidebar-primary-foreground: #FCFDFB;
+	--sidebar-accent: #EEF3E8;
+	--sidebar-accent-foreground: #3C4F27;
+	--sidebar-border: #D9E2D2;
+	--sidebar-ring: #4E6B35;
+}
 .dark {
 	--accent-foreground: oklch(0.985 0 0);
 	--accent: oklch(0.269 0 0);
@@ -84,6 +124,7 @@
 
 @theme inline {
 	--font-sans: var(--font-body);
+	--font-heading: var(--font-display);
 
 	/* Strong easing curves — built-in CSS easings are too weak for UI motion. */
 	--ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
@@ -105,6 +146,29 @@
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
+
+	/* 1story interaction and brand */
+	--color-primary-hover: var(--primary-hover);
+	--color-primary-pressed: var(--primary-pressed);
+	--color-brand-accent: var(--brand-accent);
+	--color-brand-purple: var(--brand-purple);
+	--color-brand-lavender: var(--brand-lavender);
+	--color-purple-foreground: var(--purple-foreground);
+
+	/* 1story controls and disabled */
+	--color-control-border: var(--control-border);
+	--color-disabled: var(--disabled);
+	--color-disabled-foreground: var(--disabled-foreground);
+
+	/* 1story semantic states */
+	--color-error: var(--error);
+	--color-error-background: var(--error-background);
+	--color-success: var(--success);
+	--color-success-background: var(--success-background);
+	--color-warning: var(--warning);
+	--color-warning-background: var(--warning-background);
+	--color-info: var(--info);
+	--color-info-background: var(--info-background);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -120,6 +184,12 @@
 	--radius-2xl: calc(var(--radius) * 1.8);
 	--radius-3xl: calc(var(--radius) * 2.2);
 	--radius-4xl: calc(var(--radius) * 2.6);
+
+	/* Explicit 1story component radii; adopted by components in BRAND-4. */
+	--radius-input: 10px;
+	--radius-button: 12px;
+	--radius-card: 12px;
+	--radius-modal: 14px;
 	--aspect-page: 210 / 297;
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);

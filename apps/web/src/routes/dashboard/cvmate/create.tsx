@@ -2,6 +2,8 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { FileTextIcon } from "@phosphor-icons/react";
 import { Button } from "@reactive-resume/ui/components/button";
+import { Input } from "@reactive-resume/ui/components/input";
+import { Textarea } from "@reactive-resume/ui/components/textarea";
 import { Separator } from "@reactive-resume/ui/components/separator";
 import { resolveCvLanguage } from "@reactive-resume/utils/locale";
 import { useMutation } from "@tanstack/react-query";
@@ -15,14 +17,8 @@ export const Route = createFileRoute("/dashboard/cvmate/create")({
 	component: RouteComponent,
 });
 
-const textareaClassName =
-	"min-h-56 w-full resize-y rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50";
 
-const fileClassName =
-	"block w-full rounded-md border bg-background px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm disabled:cursor-not-allowed disabled:opacity-50";
 
-const generatedTextareaClassName =
-	"min-h-28 w-full resize-y rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50";
 
 type RequirementCategory =
 	| "required"
@@ -394,12 +390,12 @@ function RouteComponent() {
 	const renderSelectionItem = (item: SelectionItem, nested = false) => (
 		<div
 			key={item.id}
-			className={`rounded-md border p-3 ${nested ? "ml-6 border-dashed" : ""}`}
+			className={`rounded-lg border bg-card p-3 ${nested ? "ml-6 border-dashed" : ""}`}
 		>
 			<div className="flex items-start gap-3">
 				<input
-					type="checkbox"
-					className="mt-1 size-4 shrink-0"
+					type="checkbox" aria-labelledby={`cvmate-selection-label-${item.id}`}
+					className="mt-1 size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 					checked={item.selected}
 					disabled={selectionPending}
 					onChange={(event) =>
@@ -409,20 +405,20 @@ function RouteComponent() {
 						})
 					}
 				/>
-				<div className="min-w-0 flex-1 space-y-1">
+				<div id={`cvmate-selection-label-${item.id}`} className="min-w-0 flex-1 space-y-1">
 					<div className="flex flex-wrap items-center gap-2">
 						<span className="text-sm">{selectionLabel(item)}</span>
-						<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+						<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
 							{sourceTypeLabel(item.sourceType)}
 						</span>
 						{item.recommended ? (
-							<span className="rounded-full bg-muted px-2 py-0.5 font-medium text-xs">
+							<span className="rounded-full bg-muted px-2 py-0.5 font-medium text-sm">
 								<Trans>Recommended</Trans>
 							</span>
 						) : null}
 					</div>
 					{item.recommendationReason ? (
-						<p className="text-muted-foreground text-xs">
+						<p className="text-muted-foreground text-sm">
 							{item.recommendationReason}
 						</p>
 					) : null}
@@ -452,7 +448,7 @@ function RouteComponent() {
 
 				{!analyzeOffer.data ? (
 					<form
-						className="space-y-5 rounded-lg border p-5"
+						className="space-y-5 rounded-xl border bg-card p-5"
 						onSubmit={(event) => {
 							event.preventDefault();
 							if (canAnalyze) analyzeOffer.mutate();
@@ -465,9 +461,9 @@ function RouteComponent() {
 							>
 								<Trans>Paste job offer</Trans>
 							</label>
-							<textarea
+							<Textarea
 								id="cvmate-job-offer-text"
-								className={textareaClassName}
+								className="min-h-56 resize-y"
 								placeholder={t`Paste the complete job offer here...`}
 								value={rawText}
 								disabled={analyzeOffer.isPending}
@@ -482,15 +478,15 @@ function RouteComponent() {
 							>
 								<Trans>Or attach a file</Trans>
 							</label>
-							<input
+							<Input
 								id="cvmate-job-offer-file"
 								type="file"
-								className={fileClassName}
+								className="h-auto py-2"
 								accept="application/pdf,image/jpeg,image/png,image/webp,image/gif"
 								disabled={analyzeOffer.isPending}
 								onChange={(event) => setAsset(event.target.files?.[0] ?? null)}
 							/>
-							<p className="text-muted-foreground text-xs">
+							<p className="text-muted-foreground text-sm">
 								<Trans>PDF, JPEG, PNG, WebP or GIF, up to 10 MB.</Trans>
 							</p>
 						</div>
@@ -518,7 +514,7 @@ function RouteComponent() {
 					</form>
 				) : (
 					<div className="space-y-6">
-						<div className="rounded-lg border p-5">
+						<div className="rounded-xl border bg-card p-5">
 							<div className="flex flex-wrap items-start justify-between gap-4">
 								<div className="space-y-1">
 									<h3 className="font-medium text-base">
@@ -550,12 +546,12 @@ function RouteComponent() {
 								if (requirements.length === 0) return null;
 
 								return (
-									<section key={category} className="rounded-lg border p-5">
+									<section key={category} className="rounded-xl border bg-card p-5">
 										<div className="mb-3 flex items-center justify-between gap-3">
 											<h3 className="font-medium text-sm">
 												{categoryTitle(category)}
 											</h3>
-											<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+											<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
 												{requirements.length}
 											</span>
 										</div>
@@ -567,7 +563,7 @@ function RouteComponent() {
 												>
 													<div className="flex items-start justify-between gap-3">
 														<span>{requirement.text}</span>
-														<span className="shrink-0 text-muted-foreground text-xs">
+														<span className="shrink-0 text-muted-foreground text-sm">
 															{priorityLabel(requirement.priority)}
 														</span>
 													</div>
@@ -580,7 +576,7 @@ function RouteComponent() {
 						</div>
 
 						{analyzeOffer.data.requirements.length === 0 ? (
-							<div className="rounded-lg border p-5 text-muted-foreground text-sm">
+							<div className="rounded-xl border bg-card p-5 text-muted-foreground text-sm">
 								<Trans>
 									Analysis completed, but no structured requirements were
 									extracted.
@@ -589,7 +585,7 @@ function RouteComponent() {
 						) : null}
 
 						{selectionItems.length === 0 ? (
-							<div className="rounded-lg border p-5">
+							<div className="rounded-xl border bg-card p-5">
 								<div className="space-y-1">
 									<h3 className="font-medium">
 										<Trans>Match your Master Profile</Trans>
@@ -628,7 +624,7 @@ function RouteComponent() {
 							</div>
 						) : (
 							<>
-								<section className="space-y-4 rounded-lg border p-5">
+								<section className="space-y-4 rounded-xl border bg-card p-5">
 									<div className="flex flex-wrap items-start justify-between gap-4">
 										<div className="space-y-1">
 											<h3 className="font-medium">
@@ -641,7 +637,7 @@ function RouteComponent() {
 												</Trans>
 											</p>
 										</div>
-										<div className="flex flex-wrap gap-2 text-muted-foreground text-xs">
+										<div className="flex flex-wrap gap-2 text-muted-foreground text-sm">
 											<span className="rounded-full bg-muted px-2 py-1">
 												{recommendedCount} <Trans>recommended</Trans>
 											</span>
@@ -699,7 +695,7 @@ function RouteComponent() {
 									</div>
 								</section>
 
-								<section className="space-y-4 rounded-lg border p-5">
+								<section className="space-y-4 rounded-xl border bg-card p-5">
 									<div className="space-y-1">
 										<h3 className="font-medium">
 											<Trans>Gaps</Trans>
@@ -726,7 +722,7 @@ function RouteComponent() {
 												>
 													<div className="space-y-1">
 														<p className="text-sm">{gap.text}</p>
-														<p className="text-muted-foreground text-xs">
+														<p className="text-muted-foreground text-sm">
 															{priorityLabel(gap.severity)} ·{" "}
 															{gapOriginLabel(gap.origin)}
 														</p>
@@ -774,7 +770,7 @@ function RouteComponent() {
 								</div>
 
 								{hasTailoredContent ? (
-									<section className="space-y-5 rounded-lg border p-5">
+									<section className="space-y-5 rounded-xl border bg-card p-5">
 										<div className="space-y-1">
 											<h3 className="font-medium">
 												<Trans>Tailored CV content</Trans>
@@ -812,14 +808,14 @@ function RouteComponent() {
 																{label}
 															</label>
 															{content.finalText ? (
-																<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+																<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
 																	<Trans>Edited</Trans>
 																</span>
 															) : null}
 														</div>
-														<textarea
+														<Textarea
 															id={`cvmate-generated-${content.id}`}
-															className={generatedTextareaClassName}
+															className="min-h-28 resize-y"
 															value={content.finalText ?? content.aiText ?? ""}
 															disabled={saveGeneratedContent.isPending}
 															onChange={(event) => {

@@ -23,7 +23,7 @@ export function ProjectsSectionBuilder() {
 	};
 
 	return (
-		<SectionBase type="projects" className={cn("rounded-md border", section.items.length === 0 && "border-dashed")}>
+		<SectionBase type="projects" className={cn("rounded-xl border bg-card", section.items.length === 0 && "border-dashed")}>
 			<Reorder.Group axis="y" values={section.items} onReorder={handleReorder}>
 				<AnimatePresence>
 					{section.items.map((item) => (

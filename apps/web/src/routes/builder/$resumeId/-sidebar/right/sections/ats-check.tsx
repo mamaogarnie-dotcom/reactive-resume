@@ -56,7 +56,7 @@ type SeverityCountProps = {
 
 function SeverityCount({ severity, count }: SeverityCountProps) {
 	return (
-		<span className="inline-flex items-center gap-1.5 text-muted-foreground text-xs">
+		<span className="inline-flex items-center gap-1.5 text-muted-foreground text-sm">
 			<span className={cn("size-2 shrink-0 rounded-full", severityDotClass(severity))} aria-hidden />
 			{match(severity)
 				.with("error", () => <Plural value={count} one="# error" other="# errors" />)
@@ -77,13 +77,13 @@ function AtsFindingRow({ finding, onJump }: AtsFindingRowProps) {
 	const location = getAtsFindingLocation(finding.pointer);
 
 	return (
-		<li className="space-y-2 rounded-md border bg-card p-3">
+		<li className="space-y-2 rounded-xl border bg-card p-3">
 			<div className="flex items-start gap-2">
 				<span className={cn("mt-1.5 size-2 shrink-0 rounded-full", severityDotClass(finding.severity))} aria-hidden />
 
 				<div className="min-w-0 flex-1 space-y-1">
 					<p className="font-medium text-sm leading-snug">{message.title}</p>
-					<p className="text-muted-foreground text-xs leading-normal">{message.action}</p>
+					<p className="text-muted-foreground text-sm leading-normal">{message.action}</p>
 				</div>
 
 				<Badge variant="secondary" className="shrink-0">
@@ -92,7 +92,7 @@ function AtsFindingRow({ finding, onJump }: AtsFindingRowProps) {
 			</div>
 
 			{location && (
-				<Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onClick={() => onJump(finding.pointer)}>
+				<Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-sm" onClick={() => onJump(finding.pointer)}>
 					{location}
 					<ArrowRightIcon />
 				</Button>
@@ -129,8 +129,8 @@ function LiveLintTier() {
 
 	return (
 		<div className="space-y-3">
-			<div className="space-y-3 rounded-md border bg-card p-3">
-				<p className="text-muted-foreground text-xs leading-normal">
+			<div className="space-y-3 rounded-xl border bg-card p-3">
+				<p className="text-muted-foreground text-sm leading-normal">
 					<Trans>
 						These checks run as you type and never leave your browser. They test whether software can read your resume,
 						not how well it is written.
@@ -162,7 +162,7 @@ function LiveLintTier() {
 			</div>
 
 			{findings.length === 0 ? (
-				<div className="flex items-center gap-3 rounded-md border border-dashed p-3">
+				<div className="flex items-center gap-3 rounded-xl border border-dashed bg-card p-3">
 					<CheckCircleIcon className="size-5 shrink-0 text-emerald-600" />
 					<p className="text-muted-foreground text-sm leading-normal">
 						<Trans>Every check passed. Nothing here should stop a parser from reading your resume.</Trans>
@@ -214,12 +214,12 @@ function DeepCheckTier() {
 
 	return (
 		<div className="space-y-3">
-			<div className="space-y-3 rounded-md border bg-card p-3">
+			<div className="space-y-3 rounded-xl border bg-card p-3">
 				<div className="space-y-1">
 					<p className="font-medium text-sm leading-none">
 						<Trans>Deep check</Trans>
 					</p>
-					<p className="text-muted-foreground text-xs leading-normal">
+					<p className="text-muted-foreground text-sm leading-normal">
 						<Trans>
 							Renders your current resume to PDF and runs the full file check in your browser. Nothing is uploaded.
 						</Trans>
@@ -227,7 +227,7 @@ function DeepCheckTier() {
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="builder-ats-job-description" className="text-xs">
+					<Label htmlFor="builder-ats-job-description" className="text-sm">
 						<Trans>Job description (optional)</Trans>
 					</Label>
 					<Textarea

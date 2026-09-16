@@ -1,0 +1,2 @@
+ALTER TABLE "cvmate_experience_fact" ADD COLUMN "kind" text DEFAULT 'unspecified' NOT NULL;--> statement-breakpoint
+ALTER TABLE "cvmate_experience_fact" ADD CONSTRAINT "cvmate_experience_fact_kind_valid" CHECK ("kind" IN ('responsibility', 'achievement', 'unspecified'));

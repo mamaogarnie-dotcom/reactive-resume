@@ -15,7 +15,7 @@ function Tabs({ className, orientation = "horizontal", ...props }: TabsPrimitive
 }
 
 const tabsListVariants = cva(
-	"group/tabs-list relative inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground data-[variant=line]:rounded-none group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
+	"group/tabs-list relative inline-flex w-fit items-center justify-center rounded-button p-[3px] text-muted-foreground data-[variant=line]:rounded-none group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
 	{
 		variants: {
 			variant: {
@@ -53,7 +53,7 @@ function TabsIndicator({ className, ...props }: TabsPrimitive.Indicator.Props) {
 		<TabsPrimitive.Indicator
 			data-slot="tabs-indicator"
 			className={cn(
-				"absolute top-(--active-tab-top) left-(--active-tab-left) h-(--active-tab-height) w-(--active-tab-width) rounded-md border border-transparent bg-background shadow-sm transition-[left,top,width,height] duration-200 ease-(--ease-out-strong) dark:border-input dark:bg-input/30",
+				"absolute top-(--active-tab-top) left-(--active-tab-left) h-(--active-tab-height) w-(--active-tab-width) rounded-input border border-transparent bg-background transition-[left,top,width,height] duration-200 ease-(--ease-out-strong) dark:border-input dark:bg-input/30",
 				className,
 			)}
 			{...props}
@@ -66,7 +66,7 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
 		<TabsPrimitive.Tab
 			data-slot="tabs-trigger"
 			className={cn(
-				"relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-1.5 py-0.5 font-medium text-foreground/60 text-sm transition hover:text-foreground focus-visible:border-ring focus-visible:outline-1 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-start]:ps-1 has-data-[icon=inline-end]:pe-1 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start dark:text-muted-foreground dark:hover:text-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+				"relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-input border border-transparent px-1.5 py-0.5 font-medium text-foreground/60 text-base transition hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-start]:ps-1 has-data-[icon=inline-end]:pe-1 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start dark:text-muted-foreground dark:hover:text-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 				"group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent",
 				"data-active:text-foreground dark:data-active:text-foreground",
 				"after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-vertical/tabs:after:-inset-e-1 group-data-horizontal/tabs:after:inset-x-0 group-data-vertical/tabs:after:inset-y-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",

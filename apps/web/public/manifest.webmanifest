@@ -1,95 +1,44 @@
 {
-	"name": "1story",
-	"short_name": "1story",
-	"description": "CV dopasowane do konkretnej oferty pracy.",
-	"id": "/?source=pwa",
-	"start_url": "/?source=pwa",
-	"scope": "/",
-	"lang": "pl",
-	"display": "standalone",
-	"orientation": "portrait",
-	"theme_color": "#09090B",
-	"background_color": "#09090B",
-	"icons": [
-		{ "src": "favicon.ico", "sizes": "128x128", "type": "image/x-icon" },
-		{ "src": "pwa-64x64.png", "sizes": "64x64", "type": "image/png" },
-		{ "src": "pwa-192x192.png", "sizes": "192x192", "type": "image/png" },
-		{ "src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-		{ "src": "maskable-icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-	],
-	"screenshots": [
-		{
-			"src": "screenshots/web/1-landing-page.webp",
-			"sizes": "1920x1080 any",
-			"type": "image/webp",
-			"form_factor": "wide",
-			"label": "Landing Page"
-		},
-		{
-			"src": "screenshots/web/2-resume-dashboard.webp",
-			"sizes": "1920x1080 any",
-			"type": "image/webp",
-			"form_factor": "wide",
-			"label": "Resume Dashboard"
-		},
-		{
-			"src": "screenshots/web/3-builder-screen.webp",
-			"sizes": "1920x1080 any",
-			"type": "image/webp",
-			"form_factor": "wide",
-			"label": "Builder Screen"
-		},
-		{
-			"src": "screenshots/web/4-template-gallery.webp",
-			"sizes": "1920x1080 any",
-			"type": "image/webp",
-			"form_factor": "wide",
-			"label": "Template Gallery"
-		},
-		{
-			"src": "screenshots/mobile/1-landing-page.webp",
-			"sizes": "1284x2778 any",
-			"type": "image/webp",
-			"form_factor": "narrow",
-			"label": "Landing Page"
-		},
-		{
-			"src": "screenshots/mobile/2-resume-dashboard.webp",
-			"sizes": "1284x2778 any",
-			"type": "image/webp",
-			"form_factor": "narrow",
-			"label": "Resume Dashboard"
-		},
-		{
-			"src": "screenshots/mobile/3-builder-screen.webp",
-			"sizes": "1284x2778 any",
-			"type": "image/webp",
-			"form_factor": "narrow",
-			"label": "Builder Screen"
-		},
-		{
-			"src": "screenshots/mobile/4-template-gallery.webp",
-			"sizes": "1284x2778 any",
-			"type": "image/webp",
-			"form_factor": "narrow",
-			"label": "Template Gallery"
-		}
-	],
-	"categories": [
-		"ai",
-		"builder",
-		"business",
-		"career",
-		"cv",
-		"editor",
-		"generator",
-		"job-search",
-		"multilingual",
-		"privacy",
-		"productivity",
-		"resume",
-		"templates",
-		"utilities",
-		"writing"
-	]
+    "name":  "1story",
+    "short_name":  "1story",
+    "description":  "CV dopasowane do konkretnej oferty pracy.",
+    "id":  "/?source=pwa",
+    "start_url":  "/?source=pwa",
+    "scope":  "/",
+    "lang":  "pl",
+    "display":  "standalone",
+    "orientation":  "portrait",
+    "theme_color":  "#F5F8F2",
+    "background_color":  "#F5F8F2",
+    "icons":  [
+                  {
+                      "src":  "pwa-192x192.png",
+                      "sizes":  "192x192",
+                      "type":  "image/png",
+                      "purpose":  "any"
+                  },
+                  {
+                      "src":  "pwa-512x512.png",
+                      "sizes":  "512x512",
+                      "type":  "image/png",
+                      "purpose":  "any"
+                  }
+              ],
+    "categories":  [
+                       "ai",
+                       "builder",
+                       "business",
+                       "career",
+                       "cv",
+                       "editor",
+                       "generator",
+                       "job-search",
+                       "multilingual",
+                       "privacy",
+                       "productivity",
+                       "resume",
+                       "templates",
+                       "utilities",
+                       "writing"
+                   ]
 }

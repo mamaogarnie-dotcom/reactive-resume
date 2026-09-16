@@ -6,6 +6,7 @@ import { user } from "./auth";
 export type CvmateProfileSectionKind =
 	| "basics"
 	| "experience"
+	| "achievements"
 	| "skills"
 	| "education"
 	| "languages"
@@ -22,6 +23,8 @@ export type CvmateProfileSectionKind =
 	| "licenses"
 	| "photos"
 	| "custom";
+
+export type CvmateExperienceFactKind = "responsibility" | "achievement" | "unspecified";
 
 export type CvmateProfileListItemKind = "competency" | "software" | "tool" | "interest";
 
@@ -135,6 +138,11 @@ export const cvmateExperienceFact = pg.pgTable(
 			.notNull()
 			.references(() => cvmateMasterProfile.id, { onDelete: "cascade" }),
 		text: pg.text("text").notNull(),
+		kind: pg
+			.text("kind")
+			.$type<CvmateExperienceFactKind>()
+			.notNull()
+			.default("unspecified"),
 		createdAt: pg.timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: pg
 			.timestamp("updated_at", { withTimezone: true })
@@ -146,6 +154,10 @@ export const cvmateExperienceFact = pg.pgTable(
 		pg.index().on(t.masterProfileId),
 		pg.unique("cvmate_experience_fact_id_profile_unique").on(t.id, t.masterProfileId),
 		pg.check("cvmate_experience_fact_text_not_blank", sql`btrim(${t.text}) <> ''`),
+		pg.check(
+			"cvmate_experience_fact_kind_valid",
+			sql`${t.kind} IN ('responsibility', 'achievement', 'unspecified')`,
+		),
 	],
 );
 

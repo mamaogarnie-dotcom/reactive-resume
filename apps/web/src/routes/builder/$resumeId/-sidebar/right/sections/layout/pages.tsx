@@ -296,11 +296,11 @@ function PageContainer({
 	const fullWidthSwitchId = useId();
 
 	return (
-		<div className="space-y-3 rounded-md border border-dashed bg-background/40">
+		<div className="space-y-3 rounded-xl border border-dashed bg-card">
 			<div className="@container bg-secondary/50 px-4 py-3">
 				<div className="grid @max-[22rem]:grid-cols-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2">
 					<div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-						<span className="font-medium text-xs">
+						<span className="font-medium text-sm">
 							<Trans comment="Layout editor page label with 1-based page number">Page {pageIndex + 1}</Trans>
 						</span>
 
@@ -311,7 +311,7 @@ function PageContainer({
 								onCheckedChange={(checked) => onToggleFullWidth(pageIndex, checked)}
 							/>
 
-							<span className="font-medium text-muted-foreground text-xs">
+							<span className="font-medium text-muted-foreground text-sm">
 								<Trans comment="Layout editor toggle label that makes a page single-column">Full Width</Trans>
 							</span>
 						</label>
@@ -381,12 +381,12 @@ function LayoutColumn({
 	return (
 		<SortableContext id={droppableId} items={items} strategy={verticalListSortingStrategy}>
 			<div className={cn("space-y-1.5", disabled && "opacity-50", className)}>
-				{!hideLabel && <div className="@md:row-start-1 ps-4 font-medium text-xs">{getColumnLabel(columnId)}</div>}
+				{!hideLabel && <div className="@md:row-start-1 ps-4 font-medium text-sm">{getColumnLabel(columnId)}</div>}
 
 				<div
 					ref={setNodeRef}
 					className={cn(
-						"space-y-2.5 rounded-md border border-dashed p-3 pb-8 transition-colors",
+						"space-y-2.5 rounded-xl border border-dashed p-3 pb-8 transition-colors",
 						isOver && !disabled ? "border-primary/60 bg-primary/5" : "bg-background/40",
 					)}
 				>
@@ -395,7 +395,7 @@ function LayoutColumn({
 					))}
 
 					{items.length === 0 && (
-						<div className="rounded-md border border-dashed p-4 font-medium text-muted-foreground text-xs">
+						<div className="rounded-xl border border-dashed bg-card p-4 font-medium text-muted-foreground text-sm">
 							<Trans>Drag and drop sections here to move them between columns</Trans>
 						</div>
 					)}
@@ -570,7 +570,7 @@ function SectionBreakItems({ id }: SectionBreakItemsProps) {
 				<Trans comment="Layout editor toggle that prevents a section from splitting across pages">Keep together</Trans>
 			</DropdownMenuCheckboxItem>
 
-			<p className="px-2 pb-1 text-muted-foreground text-xs">
+			<p className="px-2 pb-1 text-muted-foreground text-sm">
 				<Trans comment="Helper note explaining the keep-together limitation">
 					Only applies when the section fits on a single page.
 				</Trans>
