@@ -144,10 +144,6 @@ msgctxt "Home page FAQ section heading with each word visually separated into in
 msgid "<0>Frequently</0><1>Asked</1><2>Questions</2>"
 msgstr "<0>Często</0><1>Zadawane</1><2>Pytania</2>"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "<0>Thank you for using Reactive Resume. I build this app mostly in my spare time, with help from open-source contributors around the world.</0><1>If it has been useful to you and you'd like to keep it free and open for everyone, please consider donating. Any amount helps.</1>"
-msgstr "<0>Dziękuję, że korzystasz z Reactive Resume. Tworzę tę aplikację głównie w wolnym czasie, przy pomocy współtwórców open source z całego świata.</0><1>Jeśli okazała się przydatna i chcesz, aby pozostała darmowa i otwarta dla wszystkich, rozważ darowiznę. Każda kwota pomaga.</1>"
-
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "1 Column / Inline"
 msgstr "1 kolumna / w wierszu"
@@ -163,6 +159,23 @@ msgstr "1 rok"
 #: src/routes/_home/-sections/features.tsx
 msgid "15 Templates"
 msgstr "15 szablonów"
+
+#: src/routes/_home/-sections/header.tsx
+msgid "1story - Go to homepage"
+msgstr "1story — przejdź do strony głównej"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "1story default"
+msgstr "Domyślna treść 1story"
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
+msgid "1story helps you turn your career history into tailored CVs while keeping you in control of the final content."
+msgstr "1story pomaga tworzyć dopasowane CV na podstawie Twojej historii zawodowej, a ostateczna treść zawsze pozostaje pod Twoją kontrolą."
+
+#. App version label in footer; includes semantic version variable
+#: src/components/ui/copyright.tsx
+msgid "1story v<0>{__APP_VERSION__}</0>"
+msgstr "1story v<0>{__APP_VERSION__}</0>"
 
 #: src/dialogs/api-key/create.tsx
 msgid "3 months"
@@ -248,6 +261,14 @@ msgstr "Adres internetowy jest zapisany bez https://."
 msgid "A4"
 msgstr "A4"
 
+#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
+msgid "About 1story"
+msgstr "O 1story"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Accent colors"
+msgstr "Kolory akcentowe"
+
 #: src/features/auth/pages/consent.tsx
 msgid "Access your account through the API, including reading and changing your resumes and job applications."
 msgstr "Uzyskaj dostęp do swojego konta za pośrednictwem interfejsu API, w tym czytaj i zmieniaj swoje CV i podania o pracę."
@@ -266,6 +287,14 @@ msgstr "Konto"
 msgid "Account menu"
 msgstr "Menu konta"
 
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "Achievement"
+msgstr "Osiągnięcie"
+
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "Achievements"
+msgstr "Osiągnięcia"
+
 #: src/features/applications/components/table-view.tsx
 msgid "Actions"
 msgstr "Działania"
@@ -280,6 +309,7 @@ msgstr "Rzeczywisty rozmiar (100%)"
 
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/table-view.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Add"
 msgstr "Dodaj"
 
@@ -373,13 +403,29 @@ msgstr "Dodaj sekcję zatytułowaną \"Education\" (Wykształcenie). Wiele syste
 msgid "Add a section headed \"Experience\" or \"Work Experience\". It is the field most systems rank on."
 msgstr "Dodaj sekcję zatytułowaną \"Experience\" lub \"Work Experience\" (Doświadczenie zawodowe). To pole, na podstawie którego większość systemów ocenia CV."
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Add a skill"
+msgstr "Dodaj umiejętność"
+
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Add a tag and press Enter…"
 msgstr "Dodaj tag i naciśnij Enter…"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Add a tool"
+msgstr "Dodaj narzędzie"
+
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "Add achievement"
+msgstr "Dodaj osiągnięcie"
+
 #: src/libs/resume/ats.ts
 msgid "Add an entry, or use projects and volunteer work to show equivalent history."
 msgstr "Dodaj wpis albo użyj projektów i wolontariatu, aby pokazać równoważne doświadczenie."
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Add an interest"
+msgstr "Dodaj zainteresowanie"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Add and test a provider before starting an agent thread."
@@ -398,9 +444,17 @@ msgstr "Dodaj aplikację"
 msgid "Add at least a city and country so roles can be matched to your region."
 msgstr "Dodaj co najmniej miasto i kraj, aby dopasować oferty do Twojego regionu."
 
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "Add concrete results, improvements, measurable impact, or other professional achievements worth using in a tailored resume."
+msgstr "Dodaj konkretne wyniki, usprawnienia, mierzalne efekty lub inne osiągnięcia zawodowe, które warto wykorzystać w dopasowanym CV."
+
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Add contact"
 msgstr "Dodaj kontakt"
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Add employment"
+msgstr "Dodaj doświadczenie"
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Add favorite"
@@ -439,9 +493,21 @@ msgstr "Dodaj stronę"
 msgid "Add Provider"
 msgstr "Dodaj dostawcę"
 
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Add responsibility"
+msgstr "Dodaj obowiązek"
+
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Add Role"
 msgstr "Dodaj stanowisko"
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Add roles that can later be used to create tailored resumes."
+msgstr "Dodaj stanowiska, które później można wykorzystać do tworzenia dopasowanych CV."
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Add software"
+msgstr "Dodaj oprogramowanie"
 
 #: src/features/ats-checker/messages.ts
 msgid "Add some whitespace between sections so a person can skim it."
@@ -462,6 +528,20 @@ msgstr "Dodaj dwa lub trzy zdania na górze opisujące, czym się zajmujesz."
 #: src/libs/resume/ats.ts
 msgid "Add your full name under Basics."
 msgstr "Dodaj imię i nazwisko w sekcji Podstawowe."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Added by you"
+msgstr "Dodane przez Ciebie"
+
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Adding..."
+msgstr "Dodawanie..."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Additional"
+msgstr "Dodatkowe"
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Adjust the resume for a remote-first role that values async communication and ownership."
@@ -597,6 +677,10 @@ msgid "Analyze another offer"
 msgstr "Przeanalizuj inną ofertę"
 
 #: src/routes/dashboard/cvmate/create.tsx
+msgid "Analyze the job offer before creating a CV."
+msgstr "Przeanalizuj ofertę pracy przed utworzeniem CV."
+
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Analyzed job offer"
 msgstr "Przeanalizowana oferta pracy"
 
@@ -649,10 +733,6 @@ msgstr "Klucze API"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "API keys are encrypted on the server and never shown again after saving."
 msgstr "Klucze API są szyfrowane na serwerze i nie są nigdy ponownie wyświetlane po zapisaniu."
-
-#: src/features/settings/pages/api-keys.tsx
-msgid "API Reference"
-msgstr "Dokumentacja API"
 
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "App"
@@ -789,6 +869,10 @@ msgstr "Kierunek studiów"
 msgid "Artificial Intelligence"
 msgstr "Sztuczna inteligencja"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Asian style"
+msgstr "Styl azjatycki"
+
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Ask anything about this resume"
 msgstr "Zapytaj o wszystko na temat tego CV"
@@ -808,6 +892,10 @@ msgstr "Kontrola ATS"
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "ATS Checker"
 msgstr "Sprawdzanie ATS"
+
+#: src/dialogs/resume/template/data.ts
+msgid "ATS friendly"
+msgstr "Przyjazny dla ATS"
 
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/application-form-sheet.tsx
@@ -852,6 +940,11 @@ msgstr "Dostępne w wielu językach. Jeśli chcesz pomóc w tłumaczeniu, zajrzy
 msgid "Avoid heavy letter-spacing effects, then re-export."
 msgstr "Unikaj mocnych efektów rozstrzelenia liter, a następnie wyeksportuj ponownie."
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Award"
+msgstr "Nagroda"
+
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
 msgid "Awarder"
@@ -860,8 +953,13 @@ msgstr "Przyznający wyróżnienie"
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Awards"
 msgstr "Wyróżnienia"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Awards and distinctions worth keeping in your career profile."
+msgstr "Nagrody i wyróżnienia, które warto zachować w profilu zawodowym."
 
 #: src/libs/locale.ts
 msgid "Azerbaijani"
@@ -969,12 +1067,20 @@ msgstr "Lista wypunktowana"
 msgid "Bulleted list"
 msgstr "Lista punktowana"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Business analyst"
+msgstr "Analityk biznesowy"
+
 #. Tagline shown in app footer/about area
 #: src/components/ui/copyright.tsx
 #: src/routes/_home/-sections/features.tsx
 #: src/routes/_home/-sections/prefooter.tsx
 msgid "By the community, for the community."
 msgstr "Stworzone przez społeczność dla społeczności."
+
+#: src/dialogs/resume/template/data.ts
+msgid "Calm"
+msgstr "Spokojny"
 
 #: src/routes/_home/-sections/faq.tsx
 msgid "Can I export my resume to PDF?"
@@ -1005,6 +1111,9 @@ msgstr "Czy mogę wyeksportować swoje CV do PDF?"
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
 msgid "Cancel"
 msgstr "Anuluj"
 
@@ -1024,9 +1133,19 @@ msgstr "Wyrównaj do środka"
 msgid "Cerebras"
 msgstr "Mózgi"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Certificates, credentials and professional qualifications."
+msgstr "Certyfikaty, poświadczenia i kwalifikacje zawodowe."
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Certification"
+msgstr "Certyfikat"
+
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Certifications"
 msgstr "Certyfikaty"
 
@@ -1045,10 +1164,6 @@ msgstr "Zmień kolory, czcionki i wygląd tak, jak lubisz."
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Change the filter or update one of your CVs."
 msgstr "Zmień filtr albo zaktualizuj jedno ze swoich CV."
-
-#: src/features/command-palette/pages/preferences/index.tsx
-msgid "Change theme to…"
-msgstr "Zmień motyw na…"
 
 #: src/dialogs/resume/index.tsx
 msgid "Changed your mind? Rename your resume to something more descriptive."
@@ -1147,6 +1262,10 @@ msgstr "Wybierz aplikację"
 msgid "Choose CV content"
 msgstr "Wybierz treść CV"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV language."
+msgstr "Wybierz jedną klauzulę rekrutacyjną. 1story automatycznie użyje wersji polskiej lub angielskiej zgodnie z językiem CV."
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
 msgstr "Wybierz format PDF, DOCX, Markdown lub JSON. Eksportuj CV i list motywacyjny osobno, jeśli są dostępne."
@@ -1154,6 +1273,18 @@ msgstr "Wybierz format PDF, DOCX, Markdown lub JSON. Eksportuj CV i list motywac
 #: src/components/level/combobox.tsx
 msgid "Circle"
 msgstr "Koło"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Clause"
+msgstr "Klauzula"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Clean"
+msgstr "Czysty"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Clean typography"
+msgstr "Czysta typografia"
 
 #. Clear the highlight color
 #. Clear the text color
@@ -1178,6 +1309,10 @@ msgstr "Kliknij tutaj, aby wybrać plik do importu"
 msgid "Client ID"
 msgstr "Identyfikator klienta"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Client-facing"
+msgstr "Kontakt z klientem"
+
 #: src/features/cover-letters/editor-dialog.tsx
 #: src/features/cover-letters/editor.tsx
 msgid "Close"
@@ -1186,6 +1321,14 @@ msgstr "Zamknij"
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Close AI assistant"
 msgstr "Zamknij asystenta AI"
+
+#: src/dialogs/resume/template/data.ts
+msgid "CN/JP/KR"
+msgstr "CN/JP/KR"
+
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Code must be 6 digits"
+msgstr "Kod musi składać się z 6 cyfr."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Cohere"
@@ -1215,10 +1358,19 @@ msgstr "Paleta poleceń - {currentPage}"
 msgid "Community"
 msgstr "Społeczność"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Compact"
+msgstr "Kompaktowy"
+
 #: src/dialogs/resume/sections/experience.tsx
 #: src/features/applications/components/application-form-sheet.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
 msgid "Company"
 msgstr "Firma"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Company / client"
+msgstr "Firma / klient"
 
 #: src/features/applications/components/table-view.tsx
 msgid "Company / Role"
@@ -1282,6 +1434,10 @@ msgstr "Połączenie nieudane."
 msgid "Connection verified. The provider is ready to use."
 msgstr "Połączenie zweryfikowane. Dostawca jest gotowy do użycia."
 
+#: src/dialogs/resume/template/data.ts
+msgid "Consulting"
+msgstr "Doradztwo"
+
 #: src/features/ats-checker/messages.ts
 msgid "Contact details"
 msgstr "Dane kontaktowe"
@@ -1299,6 +1455,10 @@ msgstr "Zawierać"
 #: src/features/cover-letters/editor.tsx
 msgid "Content"
 msgstr "Treść"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Content creator"
+msgstr "Twórca treści"
 
 #: src/features/ats-checker/messages.ts
 msgid "Content is laid out in a grid."
@@ -1320,10 +1480,6 @@ msgstr "Przejdź do dopasowania treści"
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Continue where you left off"
 msgstr "Kontynuuj tam, gdzie przerwałeś"
-
-#: src/dialogs/resume/import.tsx
-msgid "Continue where you left off by importing a resume you built in Reactive Resume or another resume builder. Supported formats are PDF, Microsoft Word, and JSON files from Reactive Resume or JSON Resume."
-msgstr "Wróć do miejsca, w którym skończyłeś, importując CV utworzone w Reactive Resume lub innym kreatorze CV. Obsługiwane formaty to PDF, Microsoft Word i pliki JSON z Reactive Resume lub JSON Resume."
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Conversation copied."
@@ -1398,6 +1554,10 @@ msgstr "Skopiuj ten tajny klucz i użyj go w swoich aplikacjach, aby uzyskać do
 msgid "Copy URL"
 msgstr "Kopiuj URL"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Corporate"
+msgstr "Korporacyjny"
+
 #: src/libs/resume/ats.ts
 msgid "Correct the year, or use \"Present\" for ongoing work."
 msgstr "Popraw rok albo użyj „obecnie” w przypadku trwającej pracy."
@@ -1405,6 +1565,22 @@ msgstr "Popraw rok albo użyj „obecnie” w przypadku trwającej pracy."
 #: src/features/ats-checker/messages.ts
 msgid "Correct the year, or write \"Present\" for ongoing work."
 msgstr "Popraw rok albo napisz \"Present\", jeśli praca nadal trwa."
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Could not add employment."
+msgstr "Nie udało się dodać doświadczenia."
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Could not add the experience fact."
+msgstr "Nie udało się dodać informacji o doświadczeniu."
+
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "Could not add this achievement."
+msgstr "Nie udało się dodać osiągnięcia."
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Could not add this record."
+msgstr "Nie udało się dodać tego wpisu."
 
 #: src/features/cover-letters/editor-dialog.tsx
 #: src/features/cover-letters/library.tsx
@@ -1419,6 +1595,14 @@ msgstr "Nie udało się nawiązać tego połączenia. Uruchom ponownie połącze
 msgid "Could not copy to clipboard. Please copy the text manually."
 msgstr "Nie można skopiować do schowka. Proszę skopiować tekst ręcznie."
 
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Could not delete employment."
+msgstr "Nie udało się usunąć doświadczenia."
+
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "Could not delete this achievement."
+msgstr "Nie udało się usunąć osiągnięcia."
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not generate the DOCX. Please try again."
 msgstr "Nie udało się wygenerować pliku DOCX. Proszę spróbować ponownie."
@@ -1427,6 +1611,10 @@ msgstr "Nie udało się wygenerować pliku DOCX. Proszę spróbować ponownie."
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Could not generate the PDF. Please try again."
 msgstr "Nie udało się wygenerować pliku PDF. Proszę spróbować ponownie."
+
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "Could not load achievements."
+msgstr "Nie udało się wczytać osiągnięć."
 
 #: src/features/cover-letters/library.tsx
 msgid "Could not load cover letters."
@@ -1473,6 +1661,14 @@ msgstr "Nie udało się skonfigurować uwierzytelniania dwuskładnikowego."
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Could not sort these items; they stayed at the end: {0}."
 msgstr "Nie można posortować tych elementów; pozostali na końcu: {0}."
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Could not update employment."
+msgstr "Nie udało się zaktualizować doświadczenia."
+
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "Could not update this achievement."
+msgstr "Nie udało się zaktualizować osiągnięcia."
 
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Could not update this CV."
@@ -1530,6 +1726,22 @@ msgstr "Licz według źródła"
 #: src/features/ats-checker/report/jd-coverage.tsx
 msgid "Counted separately from the parse score. Coverage does not predict anything."
 msgstr "Liczone osobno od wyniku odczytu pliku. Pokrycie niczego nie przewiduje."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Course"
+msgstr "Kurs"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Course name"
+msgstr "Nazwa kursu"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Courses"
+msgstr "Kursy"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Courses and training completed during your career."
+msgstr "Kursy i szkolenia ukończone w trakcie kariery zawodowej."
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Cover"
@@ -1723,6 +1935,22 @@ msgstr "Tworzenie klucza API..."
 msgid "Creating your resume..."
 msgstr "Tworzenie CV..."
 
+#: src/dialogs/resume/template/data.ts
+msgid "Creative"
+msgstr "Kreatywny"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Credential number"
+msgstr "Numer certyfikatu"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Credential URL"
+msgstr "Adres URL certyfikatu"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Critical"
+msgstr "Kluczowe"
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Crop and Upload"
 msgstr "Przytnij i prześlij"
@@ -1735,6 +1963,10 @@ msgstr "Przytnij zdjęcie"
 msgid "CSV data"
 msgstr "Dane CSV"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Current and future recruitment processes"
+msgstr "Aktualna i przyszłe rekrutacje"
+
 #: src/features/applications/components/export-applications-sheet.tsx
 msgid "Current filters"
 msgstr "Aktualne filtry"
@@ -1742,6 +1974,10 @@ msgstr "Aktualne filtry"
 #: src/dialogs/auth/change-password.tsx
 msgid "Current Password"
 msgstr "Obecne hasło"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Current recruitment only"
+msgstr "Tylko aktualna rekrutacja"
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Current stage"
@@ -1760,6 +1996,10 @@ msgstr "Niestandardowe"
 msgid "Custom OAuth"
 msgstr "Niestandardowy OAuth"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Custom section item"
+msgstr "Element sekcji własnej"
+
 #: src/libs/resume/section.tsx
 msgid "Custom Sections"
 msgstr "Sekcje niestandardowe"
@@ -1767,6 +2007,10 @@ msgstr "Sekcje niestandardowe"
 #: src/libs/resume/section.tsx
 msgid "Custom Styles"
 msgstr "Style niestandardowe"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Custom text"
+msgstr "Własna treść"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
@@ -1781,11 +2025,13 @@ msgstr "Czeski"
 msgid "Danish"
 msgstr "Duński"
 
-#. Appearance theme option for dark mode
-#: src/features/user/dropdown-menu.tsx
 #: src/libs/theme.ts
 msgid "Dark"
 msgstr "Ciemny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Dark sidebar"
+msgstr "Ciemny pasek boczny"
 
 #: src/features/command-palette/pages/preferences/theme.tsx
 msgid "Dark theme"
@@ -1795,6 +2041,10 @@ msgstr "Ciemny motyw"
 msgid "Dashboard"
 msgstr "Panel"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Data science"
+msgstr "Data science"
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Data Security"
 msgstr "Bezpieczeństwo danych"
@@ -1802,6 +2052,7 @@ msgstr "Bezpieczeństwo danych"
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/publication.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Date"
 msgstr "Data"
 
@@ -1835,6 +2086,7 @@ msgid "Default template"
 msgstr "Domyślny szablon"
 
 #: src/dialogs/resume/sections/education.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Degree"
 msgstr "Stopień"
 
@@ -1855,6 +2107,9 @@ msgstr "Stopień"
 #: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Delete"
@@ -1864,6 +2119,10 @@ msgstr "Usuń"
 #: src/features/settings/pages/account.tsx
 msgid "Delete Account"
 msgstr "Usuń konto"
+
+#: src/features/settings/pages/api-keys.tsx
+msgid "Delete API key"
+msgstr "Usuń klucz API"
 
 #: src/features/ats-checker/messages.ts
 msgid "Delete it. Hidden keywords are treated as a deliberate attempt to game the search."
@@ -1950,6 +2209,7 @@ msgstr "Opisz, co robiłeś, aby wpis zawierał słowa kluczowe pomocne przy dop
 #: src/dialogs/resume/sections/publication.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Description"
 msgstr "Opis"
 
@@ -1958,10 +2218,22 @@ msgstr "Opis"
 msgid "Design"
 msgstr "Projekt"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Designer"
+msgstr "Projektant"
+
 #. Label above the raw error text forwarded by the identity provider
 #: src/features/auth/pages/error.tsx
 msgid "Details from the provider:"
 msgstr "Szczegóły od dostawcy:"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Detected"
+msgstr "Wykryte"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Developer"
+msgstr "Programista"
 
 #. Destructive action button to turn off two-factor authentication
 #: src/dialogs/auth/disable-two-factor.tsx
@@ -1999,8 +2271,11 @@ msgstr "Discord"
 msgid "Dismiss"
 msgstr "Odrzucać"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Do not add a recruitment clause"
+msgstr "Nie dodawaj klauzuli rekrutacyjnej"
+
 #: src/routes/_home/-sections/footer.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Documentation"
 msgstr "Dokumentacja"
 
@@ -2016,10 +2291,6 @@ msgstr "Nie masz konta? <0/>"
 msgid "Donate"
 msgstr "Podarować"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Donate to Reactive Resume"
-msgstr "Przekaż darowiznę na rzecz Reactive Resume"
-
 #: src/routes/_home/-sections/donate.tsx
 msgid "Donations pay for bug fixes, security updates, and the ordinary work of keeping the app running."
 msgstr "Darowizny opłacają poprawki błędów, aktualizacje bezpieczeństwa i zwykłą pracę nad utrzymaniem aplikacji."
@@ -2027,6 +2298,10 @@ msgstr "Darowizny opłacają poprawki błędów, aktualizacje bezpieczeństwa i 
 #: src/routes/agent/-components/tool-part-card.tsx
 msgid "Done"
 msgstr "Gotowe"
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Down"
+msgstr "W dół"
 
 #. Action button to download two-factor backup codes as a text file
 #. Primary action in the builder header to open resume download options
@@ -2049,12 +2324,25 @@ msgstr "Pobierz szczegóły aplikacji, kontakty, notatki i historię osi czasu w
 msgid "Download CSV"
 msgstr "Pobierz plik CSV"
 
+#: src/features/resume/export/download-dialog.tsx
+msgid "Download DOCX"
+msgstr "Pobierz DOCX"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Download JSON"
+msgstr "Pobierz JSON"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Download Markdown"
+msgstr "Pobierz Markdown"
+
 #. Primary action in the builder header to open resume download options
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Download options"
 msgstr "Opcje pobierania"
 
 #: src/features/cover-letters/editor-dialog.tsx
+#: src/features/resume/export/download-dialog.tsx
 #: src/features/resume/public/public-resume.tsx
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Download PDF"
@@ -2128,14 +2416,25 @@ msgstr "Duplikowanie CV..."
 msgid "Dutch"
 msgstr "Holenderski"
 
-#: src/routes/builder/$resumeId/-components/version-history.tsx
-msgid "Earlier versions are kept; the builder's undo history is reset."
-msgstr "Wcześniejsze wersje zostają zachowane, a historia cofnięć konstruktora zostaje zresetowana."
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "e.g. Reduced processing time by 30%"
+msgstr "np. Skrócenie czasu realizacji procesu o 30%"
+
+#: src/features/resume/version-history.tsx
+msgid "Earlier versions are kept; restoring this snapshot does not delete the version history."
+msgstr "Wcześniejsze wersje są zachowywane; przywrócenie tego stanu nie usuwa historii wersji."
+
+#: src/dialogs/resume/template/data.ts
+msgid "Earthy"
+msgstr "Naturalny"
 
 #: src/components/input/chip-input.tsx
 #: src/features/applications/components/application-actions-menu.tsx
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
 msgid "Edit"
 msgstr "Edytuj"
 
@@ -2211,11 +2510,21 @@ msgstr "Edycja będzie wyłączona do momentu odblokowania."
 msgid "Editing keyword..."
 msgstr "Edytowanie słowa kluczowego..."
 
+#: src/dialogs/resume/template/data.ts
+msgid "Editorial"
+msgstr "Redakcyjny"
+
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Education"
 msgstr "Wykształcenie"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Efficient"
+msgstr "Efektywny"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
@@ -2244,6 +2553,15 @@ msgstr "W tym przypadku nie skonfigurowano dostarczania wiadomości e-mail, dlat
 msgid "Embed all fonts when exporting, so characters map the way you intended."
 msgstr "Osadź wszystkie czcionki podczas eksportu, aby znaki odwzorowały się zgodnie z zamierzeniem."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Employer priorities"
+msgstr "Priorytety pracodawcy"
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Employment"
+msgstr "Doświadczenie"
+
 #: src/features/settings/authentication/components/two-factor.tsx
 msgid "Enable 2FA"
 msgstr "Włącz 2FA"
@@ -2264,6 +2582,14 @@ msgstr "Włączone"
 msgid "Enabling two-factor authentication…"
 msgstr "Włączanie uwierzytelniania dwuskładnikowego…"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "End date"
+msgstr "Data zakończenia"
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "End date: YYYY, YYYY-MM or YYYY-MM-DD"
+msgstr "Data zakończenia: YYYY, YYYY-MM lub YYYY-MM-DD"
+
 #: src/libs/locale.ts
 msgid "English"
 msgstr "Angielski"
@@ -2271,6 +2597,10 @@ msgstr "Angielski"
 #: src/libs/locale.ts
 msgid "English (United Kingdom)"
 msgstr "Angielski (Wielka Brytania)"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "English version"
+msgstr "Wersja angielska"
 
 #: src/features/cover-letters/editor.tsx
 msgid "Enter a name for this cover letter."
@@ -2320,6 +2650,14 @@ msgstr "Wprowadź hasło, aby potwierdzić konfigurację uwierzytelniania dwusk�
 msgid "Enter your password to disable two-factor authentication. Your account will be less secure without 2FA enabled."
 msgstr "Wprowadź hasło, aby wyłączyć uwierzytelnianie dwuskładnikowe. Twoje konto będzie mniej bezpieczne bez włączonego 2FA."
 
+#: src/dialogs/resume/template/data.ts
+msgid "Enterprise"
+msgstr "Duże organizacje"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Entry level"
+msgstr "Poziom początkujący"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "Error"
 msgstr "Błąd"
@@ -2335,6 +2673,10 @@ msgstr "Każdy wkład pomaga, nawet najmniejszy.<0/>Dziękuję za wsparcie!"
 #: src/routes/_home/-sections/templates.tsx
 msgid "Every template has a different look, so pick the one that fits how you want to come across. Reactive Resume has 15 of them right now, with more on the way."
 msgstr "Każdy szablon wygląda inaczej, więc wybierz ten, który pasuje do wrażenia, jakie chcesz zrobić. Reactive Resume ma ich obecnie 15, a kolejne są w drodze."
+
+#: src/dialogs/resume/template/data.ts
+msgid "Executive"
+msgstr "Kadra kierownicza"
 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
@@ -2362,6 +2704,10 @@ msgstr "Wygasa za"
 #: src/features/settings/pages/api-keys.tsx
 msgid "Expires on {0}"
 msgstr "Wygasa dnia {0}"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Expiry date"
+msgstr "Data ważności"
 
 #: src/libs/resume/section.tsx
 msgid "Export"
@@ -2593,6 +2939,10 @@ msgstr "Ulubione"
 msgid "Features"
 msgstr "Funkcje"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Field of study"
+msgstr "Kierunek studiów"
+
 #: src/dialogs/resume/import.tsx
 msgid "File"
 msgstr "Plik"
@@ -2612,6 +2962,10 @@ msgstr "Filtruj według"
 #: src/routes/dashboard/applications/index.tsx
 msgid "Filter by tags"
 msgstr "Filtruj według tagów"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Finance"
+msgstr "Finanse"
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Find the weak bullet points and rewrite them with stronger outcomes, numbers, scope, and sharper verbs."
@@ -2825,6 +3179,10 @@ msgstr "Ocena"
 msgid "Greek"
 msgstr "Grecki"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Grid layout"
+msgstr "Układ siatkowy"
+
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Groq"
 msgstr "Groq"
@@ -2867,6 +3225,10 @@ msgstr "Nagłówek 6"
 msgid "Headline"
 msgstr "Nagłówek"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Healthcare"
+msgstr "Ochrona zdrowia"
+
 #: src/libs/locale.ts
 msgid "Hebrew"
 msgstr "Hebrajski"
@@ -2874,10 +3236,6 @@ msgstr "Hebrajski"
 #: src/routes/_home/-sections/donate.tsx
 msgid "Help me bring more experienced contributors on board, so the work doesn't rest on one maintainer."
 msgstr "Pomóż mi ściągnąć więcej doświadczonych współtwórców, żeby praca nie spoczywała na jednym opiekunie projektu."
-
-#: src/features/settings/pages/preferences.tsx
-msgid "Help translate the app to your language"
-msgstr "Pomóż przetłumaczyć aplikację na swój język"
 
 #: src/dialogs/api-key/create.tsx
 msgid "Here's your new API key"
@@ -2966,13 +3324,17 @@ msgstr "Strona główna"
 msgid "How do I share my resume?"
 msgstr "Jak mogę udostępnić swoje CV?"
 
-#: src/features/settings/pages/api-keys.tsx
-msgid "How do I use the API?"
-msgstr "Jak korzystać z API?"
-
 #: src/routes/_home/-sections/faq.tsx
 msgid "How is my data protected?"
 msgstr "Jak chronione są moje dane?"
+
+#: src/dialogs/resume/template/data.ts
+msgid "HR"
+msgstr "HR"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "https://..."
+msgstr "https://..."
 
 #: src/libs/locale.ts
 msgid "Hungarian"
@@ -2981,6 +3343,10 @@ msgstr "Węgierski"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgid "Hyphenation"
 msgstr "Dzielenie wyrazów"
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "I currently work here"
+msgstr "Obecnie tu pracuję"
 
 #: src/components/level/combobox.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -3034,6 +3400,14 @@ msgstr "Importuj z biblioteki"
 #: src/features/cover-letters/library.tsx
 msgid "Import JSON"
 msgstr "Importuj JSON"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Important"
+msgstr "Ważne"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Important keywords"
+msgstr "Najważniejsze słowa"
 
 #. placeholder {0}: result.imported
 #: src/features/applications/components/import-applications-sheet.tsx
@@ -3093,6 +3467,10 @@ msgstr "Wbudowany"
 msgid "Inline Code"
 msgstr "Kod inline"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Inline header"
+msgstr "Nagłówek w jednej linii"
+
 #: src/routes/dashboard/applications/index.tsx
 msgid "Insights"
 msgstr "Spostrzeżenia"
@@ -3107,6 +3485,10 @@ msgstr "Analizowanie strony {0} z {1}…"
 msgid "Instant Generation"
 msgstr "Natychmiastowa generacja"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Institution"
+msgstr "Instytucja"
+
 #: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/settings/integrations/route.tsx
@@ -3116,8 +3498,13 @@ msgstr "Integracje"
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Interests"
 msgstr "Zainteresowania"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Internship"
+msgstr "Staż"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Invalid AI provider configuration."
@@ -3131,9 +3518,21 @@ msgstr "Czy Reactive Resume jest dostępne w wielu językach?"
 msgid "Is Reactive Resume really free?"
 msgstr "Czy Reactive Resume jest naprawdę darmowe?"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Issue date"
+msgstr "Data wydania"
+
 #: src/dialogs/resume/sections/certification.tsx
 msgid "Issuer"
 msgstr "Wydawca"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Issuer / organization"
+msgstr "Wystawca / organizacja"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Issuing organization"
+msgstr "Organizacja wydająca"
 
 #: src/libs/locale.ts
 msgid "Italian"
@@ -3172,6 +3571,10 @@ msgstr "Link do ogłoszenia"
 msgid "Job search pipeline"
 msgstr "Proces szukania pracy"
 
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Job title"
+msgstr "Stanowisko"
+
 #. Example full name placeholder on profile settings form
 #. Example full name placeholder on registration form
 #: src/features/auth/pages/register.tsx
@@ -3190,6 +3593,10 @@ msgstr "john.doe"
 #: src/dialogs/resume/import.tsx
 msgid "JSON Resume"
 msgstr "Wznowienie JSON"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Junior"
+msgstr "Junior"
 
 #: src/components/input/rich-input.tsx
 msgid "Justify Align"
@@ -3279,14 +3686,21 @@ msgstr "Poziomy"
 #: src/features/settings/pages/preferences.tsx
 #: src/features/user/dropdown-menu.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Language"
 msgstr "Język"
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Languages"
 msgstr "Języki"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Languages and your level of proficiency."
+msgstr "Języki i poziom ich znajomości."
 
 #. placeholder {0}: statistics.lastDownloadedAt.toDateString()
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
@@ -3354,6 +3768,10 @@ msgstr "Opuścić stronę i skonfigurować dostawcę AI?"
 msgid "Left Align"
 msgstr "Wyrównaj do lewej"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Legal"
+msgstr "Prawo"
+
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "Długość nie jest wadą i nie ma uniwersalnej zasady jednej strony. Zachowaj strony, które są tego warte."
@@ -3365,6 +3783,7 @@ msgstr "List"
 #: src/dialogs/resume/sections/language.tsx
 #: src/dialogs/resume/sections/skill.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Level"
 msgstr "Poziom"
 
@@ -3373,16 +3792,27 @@ msgstr "Poziom"
 msgid "Level {level} of 5"
 msgstr "Poziom {level} z 5"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "License"
+msgstr "Uprawnienie"
+
 #: src/components/ui/copyright.tsx
 msgid "Licensed under <0>MIT</0>."
 msgstr "Na licencji <0>MIT</0>."
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Licenses"
+msgstr "Uprawnienia"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Licenses, permits and other formal authorizations."
+msgstr "Uprawnienia, zezwolenia i inne formalne autoryzacje."
 
 #: src/features/ats-checker/messages.ts
 msgid "Ligatures can drop letters out of words such as \"workflow\"."
 msgstr "Ligatury mogą gubić litery w słowach takich jak \"workflow\"."
 
-#. Appearance theme option for light mode
-#: src/features/user/dropdown-menu.tsx
 #: src/libs/theme.ts
 msgid "Light"
 msgstr "Jasny"
@@ -3442,6 +3872,10 @@ msgstr "Wymień narzędzia i technologie, których używasz. Rekruterzy wyszukuj
 msgid "Lithuanian"
 msgstr "Litewski"
 
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "Loading achievements..."
+msgstr "Wczytywanie osiągnięć..."
+
 #: src/dialogs/resume/import.tsx
 msgid "Loading AI providers. Please try again in a moment."
 msgstr "Ładowanie dostawców sztucznej inteligencji. Spróbuj ponownie za chwilę."
@@ -3449,6 +3883,14 @@ msgstr "Ładowanie dostawców sztucznej inteligencji. Spróbuj ponownie za chwil
 #: src/features/auth/pages/consent.tsx
 msgid "Loading connection request..."
 msgstr "Ładowanie prośby o połączenie..."
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/custom-styles.tsx
+msgid "Loading editor"
+msgstr "Ładowanie edytora"
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Loading experience..."
+msgstr "Wczytywanie doświadczenia..."
 
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Loading profile..."
@@ -3472,7 +3914,11 @@ msgstr "Ładowanie wątków…"
 msgid "Loading your CVs…"
 msgstr "Wczytywanie Twoich CV…"
 
-#: src/routes/builder/$resumeId/-components/version-history.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Loading..."
+msgstr "Wczytywanie..."
+
+#: src/features/resume/version-history.tsx
 msgid "Loading…"
 msgstr "Ładowanie…"
 
@@ -3483,6 +3929,7 @@ msgstr "Ładowanie…"
 #: src/features/applications/components/table-view.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Location"
 msgstr "Lokalizacja"
@@ -3511,6 +3958,10 @@ msgstr "Utraciłeś dostęp do aplikacji uwierzytelniającej?"
 #: src/features/ats-checker/ai-review/ai-review-results.tsx
 msgid "Low impact"
 msgstr "Mały wpływ"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Magenta accent"
+msgstr "Fuksjowy akcent"
 
 #. Layout editor column label for the primary content area
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
@@ -3569,6 +4020,10 @@ msgstr "Oznacz jako gotowe"
 msgid "Mark rejected"
 msgstr "Marek odrzucony"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Marketing"
+msgstr "Marketing"
+
 #: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
@@ -3601,6 +4056,10 @@ msgstr "Średni wpływ"
 msgid "Microsoft Word"
 msgstr "Microsoft Word"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Minimal"
+msgstr "Minimalistyczny"
+
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Missing working resume"
 msgstr "Brakuje CV"
@@ -3613,6 +4072,10 @@ msgstr "Mistral AI"
 msgid "Model"
 msgstr "Model"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Modern"
+msgstr "Nowoczesny"
+
 #: src/features/ats-checker/messages.ts
 msgid "More than one email address appears."
 msgstr "Pojawia się więcej niż jeden adres e-mail."
@@ -3624,6 +4087,10 @@ msgstr "Większość punktów zaczyna się od pustosłowia zamiast od konkretneg
 #: src/features/ats-checker/messages.ts
 msgid "Most entries have no dates."
 msgstr "Większość wpisów nie ma dat."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Most important requirements"
+msgstr "Najważniejsze wymagania"
 
 #: src/libs/resume/ats.ts
 msgid "Most systems file candidates by email. Add one under Basics."
@@ -3676,6 +4143,10 @@ msgstr "Wielojęzyczna"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Must start with https://"
 msgstr "Proszę zacząć od https://"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Muted sidebar"
+msgstr "Stonowany pasek boczny"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
@@ -3769,6 +4240,14 @@ msgstr "Nowy wątek"
 msgid "Next"
 msgstr "Dalej"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Nice to have"
+msgstr "Mile widziane"
+
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+msgid "No achievements added yet."
+msgstr "Nie dodano jeszcze osiągnięć."
+
 #: src/routes/_home/-sections/features.tsx
 msgid "No ads and no trackers, so nothing gets in your way."
 msgstr "Żadnych reklam ani trackerów, nic Ci nie przeszkadza."
@@ -3823,6 +4302,10 @@ msgstr "Dostawca sztucznej inteligencji nie odesłał żadnych danych."
 msgid "No dates were found."
 msgstr "Nie znaleziono dat."
 
+#: src/dialogs/resume/template/data.ts
+msgid "No decoration"
+msgstr "Bez ozdobników"
+
 #: src/features/ats-checker/messages.ts
 msgid "No education section was found."
 msgstr "Nie znaleziono sekcji dotyczącej wykształcenia."
@@ -3859,6 +4342,10 @@ msgstr "Żadnych przewidywań, czy zostaniesz odrzucony. Żadne narzędzie tego 
 msgid "No prior data"
 msgstr "Brak wcześniejszych danych"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "No records added yet."
+msgstr "Nie dodano jeszcze żadnych wpisów."
+
 #: src/routes/_home/ats-checker.tsx
 msgid "No repeating the claim that most resumes are thrown out automatically."
 msgstr "Żadnego powtarzania twierdzenia, że większość CV jest odrzucana automatycznie."
@@ -3880,7 +4367,7 @@ msgstr "Brak życiorysów odpowiadających Twojemu wyszukiwaniu."
 msgid "No resumes yet."
 msgstr "Nie ma jeszcze żadnych CV."
 
-#: src/routes/builder/$resumeId/-components/version-history.tsx
+#: src/features/resume/version-history.tsx
 msgid "No saved versions yet."
 msgstr "Brak zapisanych wersji."
 
@@ -3908,9 +4395,17 @@ msgstr "Z tego pliku nie udało się odczytać tekstu."
 msgid "No threads yet."
 msgstr "Brak wątków."
 
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "No work experience has been added yet."
+msgstr "Nie dodano jeszcze doświadczenia zawodowego."
+
 #: src/features/ats-checker/messages.ts
 msgid "No work-experience section was found."
 msgstr "Nie znaleziono sekcji z doświadczeniem zawodowym."
+
+#: src/dialogs/resume/template/data.ts
+msgid "Nonprofit"
+msgstr "Non-profit"
 
 #: src/libs/locale.ts
 msgid "Norwegian"
@@ -3932,10 +4427,6 @@ msgstr "Brak w Twoim CV"
 msgid "Not scored"
 msgstr "Bez oceny"
 
-#: src/features/resume/stylesheet/editor.tsx
-msgid "Not sure what to write?"
-msgstr "Nie wiesz co napisać?"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "Note"
 msgstr "Notatka"
@@ -3945,6 +4436,10 @@ msgstr "Notatka"
 #: src/libs/resume/section.tsx
 msgid "Notes"
 msgstr "Notatki"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Nothing added yet."
+msgstr "Nic jeszcze nie dodano."
 
 #: src/features/ats-checker/messages.ts
 msgid "Nothing marks a role as ongoing."
@@ -4065,11 +4560,14 @@ msgstr "Otwieranie pliku…"
 msgid "OpenRouter"
 msgstr "OpenRouter"
 
-#: src/features/resume/stylesheet/editor.tsx
 #: src/routes/_home/-sections/donate.tsx
 #: src/routes/_home/-sections/footer.tsx
 msgid "opens in new tab"
 msgstr "otwiera się w nowej karcie"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Operations"
+msgstr "Operacje"
 
 #: src/routes/agent/-components/patch-approval-card.tsx
 msgid "Optional note for the agent"
@@ -4105,8 +4603,13 @@ msgid "Ordered List"
 msgstr "Lista numerowana"
 
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Organization"
 msgstr "Organizacja"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Organizer"
+msgstr "Organizator"
 
 #: src/components/input/rich-input.tsx
 msgid "Original table formatting is preserved. This content is read-only because it cannot be edited safely."
@@ -4342,6 +4845,14 @@ msgstr "Prześlij plik PDF."
 msgid "Polish"
 msgstr "Polski"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Polish version"
+msgstr "Wersja polska"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Polished"
+msgstr "Dopracowany"
+
 #. Preset button for setting picture aspect ratio to portrait orientation
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Portrait"
@@ -4387,6 +4898,10 @@ msgstr "Przygotowywanie CV..."
 msgid "Preparing your resume for printing..."
 msgstr "Przygotowanie CV do druku..."
 
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Present"
+msgstr "Obecnie"
+
 #: src/components/input/color-picker.tsx
 msgid "Presets"
 msgstr "Ustawienia wstępne"
@@ -4428,6 +4943,14 @@ msgstr "Kolor główny"
 msgid "Print or export the form to a flat PDF before sending it."
 msgstr "Wydrukuj lub wyeksportuj formularz do płaskiego PDF-a przed wysłaniem."
 
+#: src/dialogs/resume/template/data.ts
+msgid "Professional"
+msgstr "Profesjonalny"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Professional references and recommendations."
+msgstr "Referencje i rekomendacje zawodowe."
+
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Professional summary"
 msgstr "Podsumowanie zawodowe"
@@ -4441,6 +4964,14 @@ msgstr "Poziom zaawansowania"
 #: src/routes/dashboard/settings/profile.tsx
 msgid "Profile"
 msgstr "Profil"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Profile information"
+msgstr "Informacja z profilu"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Profile photo"
+msgstr "Zdjęcie profilowe"
 
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Profile saved."
@@ -4456,11 +4987,24 @@ msgstr "Profile"
 msgid "Progress Bar"
 msgstr "Pasek postępu"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Project"
+msgstr "Projekt"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Project name"
+msgstr "Nazwa projektu"
+
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Projects"
 msgstr "Projekty"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Projects that may strengthen a tailored CV."
+msgstr "Projekty, które mogą wzmocnić dopasowane CV."
 
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Protect your resume with a password"
@@ -4528,10 +5072,6 @@ msgstr "Wyeksportuj ponownie z osadzonymi czcionkami, a następnie otwórz plik 
 msgid "Re-score"
 msgstr "Ponownie zdobądź wynik"
 
-#: src/routes/_home/-sections/header.tsx
-msgid "Reactive Resume - Go to homepage"
-msgstr "Reactive Resume – przejdź do strony głównej"
-
 #. Import source option for current Reactive Resume JSON format
 #: src/dialogs/resume/import.tsx
 msgid "Reactive Resume (JSON)"
@@ -4557,11 +5097,6 @@ msgstr "Reactive Resume jest darmowy i ma otwarte oprogramowanie. Jeśli Ci pomo
 msgid "Reactive Resume is open source, private, and free. It shows no ads, doesn't track what you do, and doesn't lock features behind a paywall."
 msgstr "Reactive Resume jest open source, prywatne i darmowe. Nie wyświetla reklam, nie śledzi tego, co robisz, i nie chowa funkcji za paywallem."
 
-#. App version label in footer; includes semantic version variable
-#: src/components/ui/copyright.tsx
-msgid "Reactive Resume v<0>{__APP_VERSION__}</0>"
-msgstr "Reaktywne CV v<0>{__APP_VERSION__}</0>"
-
 #. Import source option for legacy Reactive Resume v4 JSON format
 #: src/dialogs/resume/import.tsx
 msgid "Reactive Resume v4 (JSON)"
@@ -4570,10 +5105,6 @@ msgstr "Reactive Resume v4 (JSON)"
 #: src/routes/agent/-components/tool-part-card.tsx
 msgid "Read an attachment"
 msgstr "Odczytano załącznik"
-
-#: src/features/resume/stylesheet/editor.tsx
-msgid "Read the Applying Custom Styles guide."
-msgstr "Przeczytaj przewodnik Stosowanie niestandardowych stylów."
 
 #: src/routes/agent/-components/tool-part-card.tsx
 msgid "Read the resume"
@@ -4634,6 +5165,10 @@ msgstr "polecane"
 msgid "Recommended"
 msgstr "Polecane"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Recruitment clauses"
+msgstr "Klauzule rekrutacyjne"
+
 #: src/components/level/combobox.tsx
 msgid "Rectangle"
 msgstr "Prostokąt"
@@ -4650,9 +5185,18 @@ msgstr "Przerobić"
 msgid "Redo stylesheet edit"
 msgstr "Ponów edycję arkusza stylów"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Reference"
+msgstr "Referencja"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Reference / person"
+msgstr "Referencja / osoba"
+
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "References"
 msgstr "Referencje"
 
@@ -4681,6 +5225,7 @@ msgid "Remote, Hybrid, a city…"
 msgstr "Zdalnie, hybrydowo, miasto…"
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
 msgid "Remove"
 msgstr "Usuń"
 
@@ -4758,10 +5303,6 @@ msgstr "Zastąp tabele zwykłymi akapitami i listami. Komórki są wyodrębniane
 msgid "Replace the attached cover letter?"
 msgstr "Zamienić załączony list motywacyjny?"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Report a Bug"
-msgstr "Zgłoś błąd"
-
 #: src/routes/_home/-sections/footer.tsx
 msgid "Report an issue"
 msgstr "Zgłoś problem"
@@ -4800,16 +5341,28 @@ msgstr "Resetowanie hasła..."
 msgid "Resources"
 msgstr "Zasoby"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Responsibilities"
+msgstr "Obowiązki"
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Responsibility"
+msgstr "Obowiązek"
+
 #: src/routes/agent/-components/agent-chat.tsx
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Restore"
-msgstr "Przywrócić"
+msgstr "Przywróć"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Restore default"
+msgstr "Przywróć domyślną"
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Restore the resume to before this patch?"
 msgstr "Przywrócić CV do stanu sprzed tej poprawki?"
 
-#: src/routes/builder/$resumeId/-components/version-history.tsx
+#: src/features/resume/version-history.tsx
 msgid "Restore this version?"
 msgstr "Przywrócić tę wersję?"
 
@@ -4906,6 +5459,10 @@ msgstr "Przepisz to CV dla założyciela startupu przechodzącego na rolę produ
 msgid "Right Align"
 msgstr "Wyrównaj do prawej"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Role"
+msgstr "Rola"
+
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Role (optional)"
 msgstr "Rola (opcjonalnie)"
@@ -4962,6 +5519,9 @@ msgstr "Zakres wynagrodzeń"
 #. Passkey rename prompt confirm action in authentication settings
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Save"
 msgstr "Zapisz"
@@ -5007,6 +5567,10 @@ msgstr "Zapisz zmiany"
 msgid "Save changes before previewing, exporting, or changing styling."
 msgstr "Zapisz zmiany przed podglądem, eksportowaniem lub zmianą stylizacji."
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Save clause"
+msgstr "Zapisz klauzulę"
+
 #: src/features/cover-letters/library.tsx
 msgid "Save copy to library"
 msgstr "Zapisz kopię w bibliotece"
@@ -5032,6 +5596,9 @@ msgstr "Zapisano"
 msgid "Saving is taking longer than expected. Your changes are still open."
 msgstr "Zapisywanie trwa dłużej, niż oczekiwano. Twoje zmiany są nadal otwarte."
 
+#: src/routes/dashboard/cvmate/-components/achievements.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Saving..."
 msgstr "Zapisywanie..."
@@ -5047,6 +5614,10 @@ msgstr "Zeskanuj poniższy kod QR ulubioną aplikacją uwierzytelniającą. Moż
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "Szkoła"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Schools, universities and other formal education."
+msgstr "Szkoły, uczelnie i inne formy edukacji formalnej."
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Score my fit"
@@ -5209,6 +5780,10 @@ msgstr "Wysyła tekst już wyodrębniony z Twojego PDF-a do wybranego poniżej d
 msgid "Sends the text already extracted from your PDF, plus the job description you pasted, to the AI provider you choose below. The PDF file itself is never uploaded."
 msgstr "Wysyła tekst już wyodrębniony z Twojego PDF-a oraz wklejony opis stanowiska do wybranego poniżej dostawcy AI. Sam plik PDF nigdy nie jest przesyłany."
 
+#: src/dialogs/resume/template/data.ts
+msgid "Senior"
+msgstr "Senior"
+
 #: src/components/input/rich-input.tsx
 msgid "Separator"
 msgstr "Separator"
@@ -5351,6 +5926,7 @@ msgid "Showing {0} of {1}"
 msgstr "Wyświetlanie {0} z {1}"
 
 #. Layout editor column label for the secondary sidebar area
+#: src/dialogs/resume/template/data.ts
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Sidebar"
 msgstr "Pasek boczny"
@@ -5418,6 +5994,14 @@ msgid "Signing up..."
 msgstr "Rejestrowanie..."
 
 #: src/dialogs/resume/template/data.ts
+msgid "Simple"
+msgstr "Prosty"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Single-column"
+msgstr "Jedna kolumna"
+
+#: src/dialogs/resume/template/data.ts
 msgid "Single-column with a magenta left border accent; compact and efficient for entry-level or internship applications."
 msgstr "Jedna kolumna z fuksjowym akcentem na lewym obramowaniu; kompaktowy i wydajny układ dla aplikacji na stanowiska początkujące lub staże."
 
@@ -5448,6 +6032,7 @@ msgstr "Rozmiar"
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Skills"
 msgstr "Umiejętności"
 
@@ -5473,6 +6058,14 @@ msgstr "Słoweński"
 #: src/dialogs/resume/index.tsx
 msgid "Slug"
 msgstr "Krótka nazwa"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Soft accent"
+msgstr "Delikatny akcent"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Software"
+msgstr "Oprogramowanie"
 
 #: src/libs/resume/ats.ts
 msgid "Some application systems require one before you can submit."
@@ -5557,7 +6150,6 @@ msgid "Source"
 msgstr "Źródło"
 
 #: src/routes/_home/-sections/footer.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Source Code"
 msgstr "Kod źródłowy"
 
@@ -5582,13 +6174,13 @@ msgstr "Odstępy (pionowe)"
 msgid "Spanish"
 msgstr "Hiszpański"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Specialization"
+msgstr "Specjalizacja"
+
 #: src/features/ats-checker/messages.ts
 msgid "Spell the month, as in \"Mar 2022\"."
 msgstr "Zapisz nazwę miesiąca słownie, np. \"Mar 2022\"."
-
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Sponsors"
-msgstr "Sponsorzy"
 
 #: src/routes/_home/-sections/footer.tsx
 msgid "Sponsorships"
@@ -5635,9 +6227,25 @@ msgstr "Zacznij tworzyć swoje CV, nadając mu nazwę."
 msgid "Start building your resume from scratch"
 msgstr "Zacznij tworzyć swoje CV od zera"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Start creating the CV before generating tailored content."
+msgstr "Najpierw rozpocznij tworzenie CV, zanim wygenerujesz dopasowaną treść."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Start creating the CV before opening the editor."
+msgstr "Najpierw rozpocznij tworzenie CV, zanim otworzysz edytor."
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Start date"
+msgstr "Data rozpoczęcia"
+
 #: src/features/applications/components/export-applications-sheet.tsx
 msgid "Start date must be on or before end date."
 msgstr "Data rozpoczęcia musi przypadać w dniu zakończenia lub wcześniej."
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Start date: YYYY, YYYY-MM or YYYY-MM-DD"
+msgstr "Data rozpoczęcia: YYYY, YYYY-MM lub YYYY-MM-DD"
 
 #: src/features/ats-checker/messages.ts
 msgid "Start each one with a concrete verb: built, led, reduced, migrated."
@@ -5659,6 +6267,10 @@ msgstr "Rozpocznij CV od swojego imienia i nazwiska w osobnym wierszu."
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Start thread"
 msgstr "Rozpocznij wątek"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Startup"
+msgstr "Startup"
 
 #: src/libs/resume/section.tsx
 msgid "Statistics"
@@ -5726,9 +6338,9 @@ msgstr "Podsumowanie"
 msgid "Support Reactive Resume"
 msgstr "Wesprzyj Reactive Resume"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "Support the app by doing what you can!"
-msgstr "Wesprzyj aplikację, robiąc to, co możesz!"
+#: src/dialogs/resume/template/data.ts
+msgid "Sustainability"
+msgstr "Zrównoważony rozwój"
 
 #: src/features/ats-checker/messages.ts
 #: src/libs/resume/ats.ts
@@ -5798,6 +6410,18 @@ msgstr "Dostosowanie nie powiodło się."
 msgid "Tamil"
 msgstr "Tamilski"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Tech"
+msgstr "Technologia"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Technical"
+msgstr "Techniczny"
+
+#: src/dialogs/resume/template/data.ts
+msgid "Technical PM"
+msgstr "Techniczny PM"
+
 #: src/libs/locale.ts
 msgid "Telugu"
 msgstr "Telugu"
@@ -5811,6 +6435,10 @@ msgstr "Szablon"
 #: src/dialogs/resume/template/gallery.tsx
 msgid "Template Gallery"
 msgstr "Galeria szablonów"
+
+#: src/routes/templates/$.tsx
+msgid "Template not found"
+msgstr "Nie znaleziono szablonu"
 
 #: src/routes/_home/-sections/templates.tsx
 msgid "Templates"
@@ -5849,6 +6477,10 @@ msgstr "Tekst jest zapisany znak po znaku."
 msgid "Text sits in the header or footer area."
 msgstr "Tekst znajduje się w obszarze nagłówka lub stopki."
 
+#: src/dialogs/resume/template/data.ts
+msgid "Text-dense"
+msgstr "Zwarty tekst"
+
 #: src/libs/locale.ts
 msgid "Thai"
 msgstr "Tajski"
@@ -5881,10 +6513,6 @@ msgstr "Ten dostawca logowania nie jest już dostępny na tym serwerze."
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "The agent needs your input."
 msgstr "Agent potrzebuje Twojej opinii."
-
-#: src/features/settings/pages/api-keys.tsx
-msgid "The API documentation shows how to connect Reactive Resume to your own applications. It covers the endpoints, the request format, and authentication."
-msgstr "Dokumentacja API pokazuje, jak podłączyć Reactive Resume do własnych aplikacji. Opisuje endpointy, format żądań i uwierzytelnianie."
 
 #: src/features/settings/pages/api-keys.tsx
 msgid "The API key has been deleted."
@@ -5984,10 +6612,7 @@ msgstr "Wprowadzony adres URL jest nieprawidłowy."
 msgid "The working resume was deleted. This thread is read-only."
 msgstr "CV zostało usunięte. Ten wątek jest tylko do odczytu."
 
-#. Menu item that opens appearance theme selection submenu
 #: src/features/command-palette/pages/preferences/theme.tsx
-#: src/features/settings/pages/preferences.tsx
-#: src/features/user/dropdown-menu.tsx
 msgid "Theme"
 msgstr "Motyw"
 
@@ -6365,6 +6990,10 @@ msgstr "Tokeny: {total}"
 msgid "Tokens: {total} ({cached} cached)"
 msgstr "Tokeny: {total} ({cached} z pamięci podręcznej)"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Tools"
+msgstr "Narzędzia"
+
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Track a job you're applying to and link the resume you sent."
 msgstr "Śledź ofertę pracy, na którą aplikujesz i połącz wysłane CV."
@@ -6377,8 +7006,11 @@ msgstr "Śledź swoją pierwszą aplikację"
 msgid "Track your resume's views and downloads"
 msgstr "Śledź wyświetlenia i pobrania swojego CV"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Traditional"
+msgstr "Tradycyjny"
+
 #: src/routes/_home/-sections/footer.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Translations"
 msgstr "Tłumaczenia"
 
@@ -6405,6 +7037,10 @@ msgstr "Wyłącz opcjonalne ligatury podczas eksportu."
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
 msgid "Turn on public sharing to track how many times your resume has been viewed or downloaded. Only you can see these numbers."
 msgstr "Włącz udostępnianie publiczne, aby śledzić, ile razy Twoje CV zostało wyświetlone lub pobrane. Te liczby widzisz tylko Ty."
+
+#: src/dialogs/resume/template/data.ts
+msgid "Two-column"
+msgstr "Dwie kolumny"
 
 #: src/dialogs/resume/template/data.ts
 msgid "Two-column with a bold colored sidebar and skill bars; great for creative or tech roles where visual flair is welcome."
@@ -6492,6 +7128,10 @@ msgstr "Cofnij archiwizację"
 msgid "Underline"
 msgstr "Podkreślenie"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Understated"
+msgstr "Stonowany"
+
 #: src/dialogs/resume/template/gallery.tsx
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Undo"
@@ -6526,6 +7166,10 @@ msgstr "Nienazwany klucz dostępu"
 #: src/features/settings/pages/profile.tsx
 msgid "Unverified"
 msgstr "Niezweryfikowany"
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Up"
+msgstr "W górę"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
@@ -6654,6 +7298,10 @@ msgstr "Przesyłanie obrazu…"
 msgid "Uploading…"
 msgstr "Przesyłanie…"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Uppercase headings"
+msgstr "Nagłówki wielkimi literami"
+
 #. Form field label for the generated public resume link in sharing settings
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -6720,6 +7368,10 @@ msgstr "Użyj prostych nagłówków, takich jak \"Experience\", \"Education\" i 
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "Use sample"
 msgstr "Użyj próbki"
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
+msgid "Use the builder to review, refine, preview, and export the CV created from your Master Profile."
+msgstr "W kreatorze możesz sprawdzić, dopracować, podejrzeć i wyeksportować CV utworzone na podstawie Twojego profilu."
 
 #: src/features/ats-checker/messages.ts
 msgid "Use your editor's normal bullet list, so stray glyphs do not land mid-sentence."
@@ -6798,7 +7450,11 @@ msgstr "Weryfikowanie hasła..."
 msgid "Verifying your email is required when resetting your password."
 msgstr "Weryfikacja adresu e-mail jest wymagana przy resetowaniu hasła."
 
-#: src/routes/builder/$resumeId/-components/version-history.tsx
+#: src/dialogs/resume/template/data.ts
+msgid "Versatile"
+msgstr "Uniwersalny"
+
+#: src/features/resume/version-history.tsx
 msgid "Version history"
 msgstr "Historia wersji"
 
@@ -6818,10 +7474,23 @@ msgstr "Wietnamski"
 msgid "Views"
 msgstr "Wyświetlenia"
 
+#: src/dialogs/resume/template/data.ts
+msgid "Visual flair"
+msgstr "Wyrazisty wizualnie"
+
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Volunteer"
+msgstr "Wolontariat"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Volunteer roles that can be relevant to an application."
+msgstr "Doświadczenia wolontariackie, które mogą być istotne w rekrutacji."
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Volunteer work"
 msgstr "Wolontariat"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
@@ -6968,9 +7637,17 @@ msgstr "Czy Twoje imię i nazwisko, e-mail, telefon i daty pozostają nienaruszo
 msgid "Whether your timeline can be reconstructed."
 msgstr "Czy Twoją oś czasu można odtworzyć."
 
+#: src/dialogs/resume/template/data.ts
+msgid "Whitespace"
+msgstr "Dużo pustej przestrzeni"
+
 #: src/features/ats-checker/messages.ts
 msgid "Words run together when the text is extracted."
 msgstr "Słowa zlewają się ze sobą podczas wyodrębniania tekstu."
+
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Work experience"
+msgstr "Doświadczenie zawodowe"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Work OpenAI"
@@ -7127,6 +7804,10 @@ msgstr "Wiersze są bardzo ciasno ułożone."
 msgid "Your margins are very narrow."
 msgstr "Twoje marginesy są bardzo wąskie."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Your Master Profile does not contain any content that can be selected for this CV."
+msgstr "Twój profil nie zawiera żadnych informacji, które można wybrać do tego CV."
+
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Your Master Profile has not been created yet. Saving these details will create it automatically."
 msgstr "Twój profil nie został jeszcze utworzony. Zapisanie tych danych utworzy go automatycznie."
@@ -7172,7 +7853,7 @@ msgstr "Twoje CV zostało zduplikowane."
 msgid "Your resume has been imported."
 msgstr "Twoje CV zostało zaimportowane."
 
-#: src/routes/builder/$resumeId/-components/version-history.tsx
+#: src/features/resume/version-history.tsx
 msgid "Your resume has been restored to the selected version."
 msgstr "Twoje CV zostało przywrócone do wybranej wersji."
 
@@ -7220,6 +7901,10 @@ msgstr "Twój zapisany list motywacyjny pozostanie niezmieniony."
 msgid "Your support keeps the project free and open to everyone, now and later."
 msgstr "Twoje wsparcie sprawia, że projekt pozostaje darmowy i otwarty dla wszystkich, teraz i później."
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "YYYY, YYYY-MM or YYYY-MM-DD"
+msgstr "YYYY, YYYY-MM lub YYYY-MM-DD"
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Zoom"
 msgstr "Brzęczenie"
@@ -7240,595 +7925,3 @@ msgstr "Pomniejsz"
 #: src/libs/locale.ts
 msgid "Zulu"
 msgstr "Zulu"
-
-
-msgid "Projects that may strengthen a tailored CV."
-msgstr "Projekty, które mogą wzmocnić dopasowane CV."
-
-msgid "Project name"
-msgstr "Nazwa projektu"
-
-msgid "Company / client"
-msgstr "Firma / klient"
-
-msgid "Start date"
-msgstr "Data rozpoczęcia"
-
-msgid "YYYY, YYYY-MM or YYYY-MM-DD"
-msgstr "YYYY, YYYY-MM lub YYYY-MM-DD"
-
-msgid "End date"
-msgstr "Data zakończenia"
-
-msgid "Schools, universities and other formal education."
-msgstr "Szkoły, uczelnie i inne formy edukacji formalnej."
-
-msgid "Institution"
-msgstr "Instytucja"
-
-msgid "Field of study"
-msgstr "Kierunek studiów"
-
-msgid "Specialization"
-msgstr "Specjalizacja"
-
-msgid "Courses"
-msgstr "Kursy"
-
-msgid "Courses and training completed during your career."
-msgstr "Kursy i szkolenia ukończone w trakcie kariery zawodowej."
-
-msgid "Course name"
-msgstr "Nazwa kursu"
-
-msgid "Organizer"
-msgstr "Organizator"
-
-msgid "Certificates, credentials and professional qualifications."
-msgstr "Certyfikaty, poświadczenia i kwalifikacje zawodowe."
-
-msgid "Certification"
-msgstr "Certyfikat"
-
-msgid "Issuing organization"
-msgstr "Organizacja wydająca"
-
-msgid "Issue date"
-msgstr "Data wydania"
-
-msgid "Expiry date"
-msgstr "Data ważności"
-
-msgid "Credential number"
-msgstr "Numer certyfikatu"
-
-msgid "Credential URL"
-msgstr "Adres URL certyfikatu"
-
-msgid "https://..."
-msgstr "https://..."
-
-msgid "Volunteer work"
-msgstr "Wolontariat"
-
-msgid "Volunteer roles that can be relevant to an application."
-msgstr "Doświadczenia wolontariackie, które mogą być istotne w rekrutacji."
-
-msgid "Role"
-msgstr "Rola"
-
-msgid "Languages and your level of proficiency."
-msgstr "Języki i poziom ich znajomości."
-
-msgid "Awards and distinctions worth keeping in your career profile."
-msgstr "Nagrody i wyróżnienia, które warto zachować w profilu zawodowym."
-
-msgid "Award"
-msgstr "Nagroda"
-
-msgid "Professional references and recommendations."
-msgstr "Referencje i rekomendacje zawodowe."
-
-msgid "Reference / person"
-msgstr "Referencja / osoba"
-
-msgid "Issuer / organization"
-msgstr "Wystawca / organizacja"
-
-msgid "Licenses"
-msgstr "Uprawnienia"
-
-msgid "Licenses, permits and other formal authorizations."
-msgstr "Uprawnienia, zezwolenia i inne formalne autoryzacje."
-
-msgid "License"
-msgstr "Uprawnienie"
-
-msgid "Add a skill"
-msgstr "Dodaj umiejętność"
-
-msgid "Software"
-msgstr "Oprogramowanie"
-
-msgid "Add software"
-msgstr "Dodaj oprogramowanie"
-
-msgid "Tools"
-msgstr "Narzędzia"
-
-msgid "Add a tool"
-msgstr "Dodaj narzędzie"
-
-msgid "Add an interest"
-msgstr "Dodaj zainteresowanie"
-
-msgid "Adding..."
-msgstr "Dodawanie..."
-
-msgid "Could not add this record."
-msgstr "Nie udało się dodać tego wpisu."
-
-msgid "Loading..."
-msgstr "Wczytywanie..."
-
-msgid "No records added yet."
-msgstr "Nie dodano jeszcze żadnych wpisów."
-
-msgid "Nothing added yet."
-msgstr "Nic jeszcze nie dodano."
-
-msgid "Current recruitment — Polish"
-msgstr "Aktualna rekrutacja — język polski"
-
-msgid "Current recruitment — English"
-msgstr "Aktualna rekrutacja — język angielski"
-
-msgid "Future recruitment — Polish"
-msgstr "Przyszłe rekrutacje — język polski"
-
-msgid "Future recruitment — English"
-msgstr "Przyszłe rekrutacje — język angielski"
-
-msgid "Recruitment clauses"
-msgstr "Klauzule rekrutacyjne"
-
-msgid "Store reusable consent clauses and switch them on only when needed."
-msgstr "Przechowuj klauzule zgody do wielokrotnego użycia i włączaj je tylko wtedy, gdy są potrzebne."
-
-msgid "Save clause"
-msgstr "Zapisz klauzulę"
-
-msgid "Work experience"
-msgstr "Doświadczenie zawodowe"
-
-msgid "Add roles that can later be used to create tailored resumes."
-msgstr "Dodaj stanowiska, które później można wykorzystać do tworzenia dopasowanych CV."
-
-msgid "Job title"
-msgstr "Stanowisko"
-
-msgid "Start date: YYYY, YYYY-MM or YYYY-MM-DD"
-msgstr "Data rozpoczęcia: YYYY, YYYY-MM lub YYYY-MM-DD"
-
-msgid "End date: YYYY, YYYY-MM or YYYY-MM-DD"
-msgstr "Data zakończenia: YYYY, YYYY-MM lub YYYY-MM-DD"
-
-msgid "I currently work here"
-msgstr "Obecnie tu pracuję"
-
-msgid "Add employment"
-msgstr "Dodaj doświadczenie"
-
-msgid "Could not add employment."
-msgstr "Nie udało się dodać doświadczenia."
-
-msgid "Loading experience..."
-msgstr "Wczytywanie doświadczenia..."
-
-msgid "No work experience has been added yet."
-msgstr "Nie dodano jeszcze doświadczenia zawodowego."
-
-msgid "Employment"
-msgstr "Doświadczenie"
-
-msgid "Present"
-msgstr "Obecnie"
-
-msgid "Up"
-msgstr "W górę"
-
-msgid "Down"
-msgstr "W dół"
-
-msgid "Responsibility or achievement"
-msgstr "Obowiązek lub osiągnięcie"
-
-msgid "Add fact"
-msgstr "Dodaj informację"
-
-msgid "Could not add the experience fact."
-msgstr "Nie udało się dodać informacji o doświadczeniu."
-
-msgid "Could not update employment."
-msgstr "Nie udało się zaktualizować doświadczenia."
-
-msgid "Could not delete employment."
-msgstr "Nie udało się usunąć doświadczenia."
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Analyze the job offer before creating a CV."
-msgstr "Przeanalizuj ofertę pracy przed utworzeniem CV."
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Your Master Profile does not contain any content that can be selected for this CV."
-msgstr "Twój profil nie zawiera żadnych informacji, które można wybrać do tego CV."
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Start creating the CV before generating tailored content."
-msgstr "Najpierw rozpocznij tworzenie CV, zanim wygenerujesz dopasowaną treść."
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Start creating the CV before opening the editor."
-msgstr "Najpierw rozpocznij tworzenie CV, zanim otworzysz edytor."
-
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Most important requirements"
-msgstr "Najważniejsze wymagania"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Nice to have"
-msgstr "Mile widziane"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Responsibilities"
-msgstr "Obowiązki"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Important keywords"
-msgstr "Najważniejsze słowa"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Employer priorities"
-msgstr "Priorytety pracodawcy"
-
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Critical"
-msgstr "Kluczowe"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Important"
-msgstr "Ważne"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Additional"
-msgstr "Dodatkowe"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Detected"
-msgstr "Wykryte"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Added by you"
-msgstr "Dodane przez Ciebie"
-
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Project"
-msgstr "Projekt"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Course"
-msgstr "Kurs"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Reference"
-msgstr "Referencja"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Profile information"
-msgstr "Informacja z profilu"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Clause"
-msgstr "Klauzula"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Profile photo"
-msgstr "Zdjęcie profilowe"
-
-#: src/routes/dashboard/cvmate/create.tsx
-msgid "Custom section item"
-msgstr "Element sekcji własnej"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Accent colors"
-msgstr "Kolory akcentowe"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Asian style"
-msgstr "Styl azjatycki"
-
-#: src/dialogs/resume/template/data.ts
-msgid "ATS friendly"
-msgstr "Przyjazny dla ATS"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Business analyst"
-msgstr "Analityk biznesowy"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Calm"
-msgstr "Spokojny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Clean"
-msgstr "Czysty"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Clean typography"
-msgstr "Czysta typografia"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Client-facing"
-msgstr "Kontakt z klientem"
-
-#: src/dialogs/resume/template/data.ts
-msgid "CN/JP/KR"
-msgstr "CN/JP/KR"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Compact"
-msgstr "Kompaktowy"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Consulting"
-msgstr "Doradztwo"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Content creator"
-msgstr "Twórca treści"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Corporate"
-msgstr "Korporacyjny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Creative"
-msgstr "Kreatywny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Dark sidebar"
-msgstr "Ciemny pasek boczny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Data science"
-msgstr "Data science"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Designer"
-msgstr "Projektant"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Developer"
-msgstr "Programista"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Earthy"
-msgstr "Naturalny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Editorial"
-msgstr "Redakcyjny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Efficient"
-msgstr "Efektywny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Enterprise"
-msgstr "Duże organizacje"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Entry level"
-msgstr "Poziom początkujący"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Executive"
-msgstr "Kadra kierownicza"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Finance"
-msgstr "Finanse"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Grid layout"
-msgstr "Układ siatkowy"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Healthcare"
-msgstr "Ochrona zdrowia"
-
-#: src/dialogs/resume/template/data.ts
-msgid "HR"
-msgstr "HR"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Inline header"
-msgstr "Nagłówek w jednej linii"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Internship"
-msgstr "Staż"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Junior"
-msgstr "Junior"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Legal"
-msgstr "Prawo"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Magenta accent"
-msgstr "Fuksjowy akcent"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Marketing"
-msgstr "Marketing"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Minimal"
-msgstr "Minimalistyczny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Modern"
-msgstr "Nowoczesny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Muted sidebar"
-msgstr "Stonowany pasek boczny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "No decoration"
-msgstr "Bez ozdobników"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Nonprofit"
-msgstr "Non-profit"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Operations"
-msgstr "Operacje"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Polished"
-msgstr "Dopracowany"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Professional"
-msgstr "Profesjonalny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Senior"
-msgstr "Senior"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Simple"
-msgstr "Prosty"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Single-column"
-msgstr "Jedna kolumna"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Soft accent"
-msgstr "Delikatny akcent"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Startup"
-msgstr "Startup"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Sustainability"
-msgstr "Zrównoważony rozwój"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Tech"
-msgstr "Technologia"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Technical"
-msgstr "Techniczny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Technical PM"
-msgstr "Techniczny PM"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Text-dense"
-msgstr "Zwarty tekst"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Traditional"
-msgstr "Tradycyjny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Two-column"
-msgstr "Dwie kolumny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Understated"
-msgstr "Stonowany"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Uppercase headings"
-msgstr "Nagłówki wielkimi literami"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Versatile"
-msgstr "Uniwersalny"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Visual flair"
-msgstr "Wyrazisty wizualnie"
-
-#: src/dialogs/resume/template/data.ts
-msgid "Whitespace"
-msgstr "Dużo pustej przestrzeni"
-
-#: src/routes/builder/$resumeId/-sidebar/right/sections/custom-styles.tsx
-msgid "Loading editor"
-msgstr "Ładowanie edytora"
-
-#: src/features/resume/version-history.tsx
-msgid "Earlier versions are kept; restoring this snapshot does not delete the version history."
-msgstr "Wcześniejsze wersje są zachowywane; przywrócenie tego stanu nie usuwa historii wersji."
-
-#: src/features/resume/export/download-dialog.tsx
-msgid "Download DOCX"
-msgstr "Pobierz DOCX"
-
-#: src/features/resume/export/download-dialog.tsx
-msgid "Download Markdown"
-msgstr "Pobierz Markdown"
-
-#: src/features/resume/export/download-dialog.tsx
-msgid "Download JSON"
-msgstr "Pobierz JSON"
-
-#: LANG-10 targeted localization
-msgid "Code must be 6 digits"
-msgstr "Kod musi składać się z 6 cyfr."
-
-#: LANG-10 targeted localization
-msgid "Template not found"
-msgstr "Nie znaleziono szablonu"
-
-msgid "Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV language."
-msgstr "Wybierz jedną klauzulę rekrutacyjną. 1story automatycznie użyje wersji polskiej lub angielskiej zgodnie z językiem CV."
-
-msgid "Do not add a recruitment clause"
-msgstr "Nie dodawaj klauzuli rekrutacyjnej"
-
-msgid "Current recruitment only"
-msgstr "Tylko aktualna rekrutacja"
-
-msgid "Current and future recruitment processes"
-msgstr "Aktualna i przyszłe rekrutacje"
-
-msgid "Polish version"
-msgstr "Wersja polska"
-
-msgid "English version"
-msgstr "Wersja angielska"
-
-msgid "1story default"
-msgstr "Domyślna treść 1story"
-
-msgid "Custom text"
-msgstr "Własna treść"
-
-msgid "Restore default"
-msgstr "Przywróć domyślną"

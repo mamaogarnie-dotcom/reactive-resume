@@ -17,7 +17,7 @@ const globals = read("../../../packages/ui/src/styles/globals.css");
 
 describe("BRAND-8 accessibility contract", () => {
 it("provides an accessible name for API key deletion", () => {
-expect(count(apiKeys, 'aria-label="Delete API key"')).toBe(1);
+expect(count(apiKeys, 'aria-label={t`Delete API key`}')).toBe(1);
 });
 
 it("programmatically labels the Create CV selection checkbox", () => {
