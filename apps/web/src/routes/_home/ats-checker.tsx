@@ -1,17 +1,17 @@
+import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { CheckCircleIcon, ProhibitIcon, ShieldCheckIcon } from "@phosphor-icons/react";
-import { Skeleton } from "@reactive-resume/ui/components/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { m } from "motion/react";
 import { lazy, Suspense } from "react";
+import { Skeleton } from "@reactive-resume/ui/components/skeleton";
 import { Spotlight } from "@/components/animation/spotlight";
 import { AiReviewCard } from "@/features/ats-checker/ai-review/ai-review-card";
 import { LockedAiCard } from "@/features/ats-checker/ai-review/locked-card";
 import { ParsePreview } from "@/features/ats-checker/parse-preview";
 
-const PAGE_TITLE = "ATS Checker - 1story";
-const PAGE_DESCRIPTION =
-	"Check whether software can read your resume PDF. Runs entirely in your browser, so your file is never uploaded.";
+const PAGE_TITLE = `${t`ATS Checker`} - 1story`;
+const PAGE_DESCRIPTION = t`Check whether software can read your resume PDF. Runs entirely in your browser, so your file is never uploaded.`;
 
 // The checker pulls in PDF.js and the analysis engine, neither of which the page copy needs.
 const AtsCheckerTool = lazy(() =>

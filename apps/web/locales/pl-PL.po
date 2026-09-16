@@ -1194,6 +1194,10 @@ msgstr "Sprawdź, czy wyeksportowany plik zawiera wszystko, czego oczekujesz, i 
 msgid "Check what an applicant tracking system would miss, and only add keywords you're sure about."
 msgstr "Sprawdź, co pominąłby system śledzenia kandydatów (ATS), i dodawaj tylko te słowa kluczowe, których jesteś pewien."
 
+#: src/routes/_home/ats-checker.tsx
+msgid "Check whether software can read your resume PDF. Runs entirely in your browser, so your file is never uploaded."
+msgstr "Sprawdź, czy oprogramowanie potrafi odczytać Twoje CV w PDF. Wszystko działa bezpośrednio w Twojej przeglądarce, więc plik nigdy nie jest wysyłany."
+
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Check your email for a link to reset your password."
 msgstr "Sprawdź swoją skrzynkę e-mail, aby znaleźć link do zresetowania hasła."
