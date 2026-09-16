@@ -1260,7 +1260,7 @@ msgstr "Wybierz aplikację"
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Choose CV content"
-msgstr "Wybierz treść CV"
+msgstr "Wybierz treści do CV"
 
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV language."
@@ -2216,7 +2216,7 @@ msgstr "Opis"
 #: src/libs/resume/section.tsx
 #: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
 msgid "Design"
-msgstr "Projekt"
+msgstr "Wygląd"
 
 #: src/dialogs/resume/template/data.ts
 msgid "Designer"
@@ -2711,7 +2711,7 @@ msgstr "Data ważności"
 
 #: src/libs/resume/section.tsx
 msgid "Export"
-msgstr "Eksportuj"
+msgstr "Eksport"
 
 #: src/features/applications/components/export-applications-sheet.tsx
 msgid "Export applications"
@@ -3093,7 +3093,7 @@ msgstr "Edytor pełnoekranowy"
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Gaps"
-msgstr "Braki"
+msgstr "Braki i propozycje AI"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Gaps:"
@@ -4028,11 +4028,11 @@ msgstr "Marketing"
 #: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Master Profile"
-msgstr "Profil zawodowy"
+msgstr "Mój profil zawodowy"
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Match Master Profile"
-msgstr "Dopasuj profil"
+msgstr "Dobierz treści"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Match scoring failed."
@@ -4040,11 +4040,11 @@ msgstr "Punktacja meczowa failed."
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Match your Master Profile"
-msgstr "Dopasuj swój profil"
+msgstr "Dobierz treści z profilu"
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Matching profile..."
-msgstr "Dopasowywanie profilu..."
+msgstr "Dobieranie treści..."
 
 #: src/features/ats-checker/ai-review/ai-review-results.tsx
 msgid "Medium impact"
@@ -4917,7 +4917,7 @@ msgstr "Proszę wcisnąć <0>Enter</0>, aby otworzyć"
 
 #: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
 msgid "Preview"
-msgstr "Zapowiedź"
+msgstr "Podgląd"
 
 #: src/features/resume/stylesheet/status.tsx
 msgid "Preview and export fall back to base styles."
@@ -5716,7 +5716,7 @@ msgstr "Zaznacz wszystko"
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Select all recommended"
-msgstr "Wybierz wszystkie polecane"
+msgstr "Wybierz wszystkie rekomendowane"
 
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Select an agent model"
@@ -7371,7 +7371,7 @@ msgstr "Użyj próbki"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Use the builder to review, refine, preview, and export the CV created from your Master Profile."
-msgstr "W kreatorze możesz sprawdzić, dopracować, podejrzeć i wyeksportować CV utworzone na podstawie Twojego profilu."
+msgstr "W edytorze możesz sprawdzić, dopracować, podejrzeć i wyeksportować CV utworzone na podstawie Twojego profilu."
 
 #: src/features/ats-checker/messages.ts
 msgid "Use your editor's normal bullet list, so stray glyphs do not land mid-sentence."
