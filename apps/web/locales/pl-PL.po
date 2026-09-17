@@ -271,7 +271,7 @@ msgstr "Kolory akcentowe"
 
 #: src/features/auth/pages/consent.tsx
 msgid "Access your account through the API, including reading and changing your resumes and job applications."
-msgstr "Uzyskaj dostęp do swojego konta za pośrednictwem interfejsu API, w tym czytaj i zmieniaj swoje CV i podania o pracę."
+msgstr "Uzyskaj dostęp do swojego konta za pośrednictwem interfejsu API, w tym do odczytu i modyfikowania CV oraz zgłoszeń rekrutacyjnych."
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Access your resumes and data programmatically using the API."
@@ -323,7 +323,7 @@ msgstr "Dodaj ofertę, na którą aplikujesz, i podepnij wysłane CV. Przesuwaj 
 
 #: src/components/input/chip-input.tsx
 msgid "Add a keyword..."
-msgstr "Proszę dodać słowo kluczowe..."
+msgstr "Dodaj słowo kluczowe..."
 
 #. Tooltip for action button that opens URL label editor
 #: src/components/input/url-input.tsx
@@ -466,7 +466,7 @@ msgstr "Dodaj liczby tam, gdzie je masz: wolumeny, procenty, ramy czasowe, wielk
 
 #: src/components/input/chip-input.tsx
 msgid "Add keyword"
-msgstr "Proszę dodać słowo kluczowe"
+msgstr "Dodaj słowo kluczowe"
 
 #: src/components/input/rich-input.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
@@ -895,7 +895,7 @@ msgstr "Sprawdzanie ATS"
 
 #: src/dialogs/resume/template/data.ts
 msgid "ATS friendly"
-msgstr "Przyjazny dla ATS"
+msgstr "Dostosowany do ATS"
 
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/application-form-sheet.tsx
@@ -1003,7 +1003,7 @@ msgstr "Bengalski"
 
 #: src/features/resume/export/download-dialog.tsx
 msgid "Best for applications, sharing, and printing."
-msgstr "Najlepsze do wysyłania aplikacji, udostępniania i drukowania."
+msgstr "Najlepszy do aplikowania, udostępniania i drukowania."
 
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Blank draft"
@@ -1045,7 +1045,7 @@ msgstr "Stwórz własne CV"
 #. Screen-reader dialog title for the command palette in the resume builder
 #: src/features/command-palette/index.tsx
 msgid "Builder Command Palette"
-msgstr "Paleta poleceń kreatora"
+msgstr "Paleta poleceń edytora CV"
 
 #: src/libs/locale.ts
 msgid "Bulgarian"
@@ -1246,7 +1246,7 @@ msgstr "Wybierz plik PDF"
 #. Preset or custom shade refer to the color picker
 #: src/components/input/rich-input.tsx
 msgid "Choose a preset or custom shade."
-msgstr "Proszę wybrać wstępnie ustawiony lub niestandardowy odcień."
+msgstr "Wybierz gotowy lub niestandardowy odcień."
 
 #: src/features/cover-letters/editor-dialog.tsx
 #: src/features/cover-letters/library.tsx
@@ -1609,12 +1609,12 @@ msgstr "Nie udało się usunąć osiągnięcia."
 
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not generate the DOCX. Please try again."
-msgstr "Nie udało się wygenerować pliku DOCX. Proszę spróbować ponownie."
+msgstr "Nie udało się wygenerować pliku DOCX. Spróbuj ponownie."
 
 #: src/features/resume/export/use-resume-export.ts
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Could not generate the PDF. Please try again."
-msgstr "Nie udało się wygenerować pliku PDF. Proszę spróbować ponownie."
+msgstr "Nie udało się wygenerować pliku PDF. Spróbuj ponownie."
 
 #: src/routes/dashboard/cvmate/-components/achievements.tsx
 msgid "Could not load achievements."
@@ -1638,12 +1638,12 @@ msgstr "Nie udało się wczytać Twojego profilu."
 
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not prepare your resume for printing. Please try again."
-msgstr "Nie udało się przygotować Twojego CV do druku. Proszę spróbować ponownie."
+msgstr "Nie udało się przygotować Twojego CV do druku. Spróbuj ponownie."
 
 #. Error shown when AI provider is unreachable during PDF/DOCX resume import
 #: src/dialogs/resume/import.tsx
 msgid "Could not reach the AI provider. Please try again."
-msgstr "Nie udało się połączyć z dostawcą AI. Proszę spróbować ponownie."
+msgstr "Nie udało się połączyć z dostawcą AI. Spróbuj ponownie."
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Could not restore this patch."
@@ -1911,12 +1911,12 @@ msgstr "Stwórz od podstaw"
 #. Call-to-action link from login page to account registration page
 #: src/features/auth/pages/login.tsx
 msgid "Create one now"
-msgstr "Proszę utworzyć go teraz"
+msgstr "Utwórz go teraz"
 
 #. Accessible label for create-resume split button group
 #: src/dialogs/resume/index.tsx
 msgid "Create resume with options"
-msgstr "Proszę utworzyć CV z opcjami"
+msgstr "Utwórz CV z opcjami"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Create, customize, and share your resume. Reactive Resume is open source, it doesn't track you, and it stays free."
@@ -2138,7 +2138,7 @@ msgstr "Usuń stronę"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Delete picture"
-msgstr "Proszę usunąć zdjęcie"
+msgstr "Usuń zdjęcie"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Delete provider"
@@ -2450,7 +2450,7 @@ msgstr "Edytuj {0}"
 #. Screen reader label for button that edits a keyword chip. Variable is the current keyword text.
 #: src/components/input/chip-input.tsx
 msgid "Edit {chip}"
-msgstr "Proszę edytować {chip}"
+msgstr "Edytuj {chip}"
 
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Edit application"
@@ -2488,7 +2488,7 @@ msgstr "Edytuj szczegóły"
 
 #: src/components/input/chip-input.tsx
 msgid "Edit keyword"
-msgstr "Proszę edytować słowo kluczowe"
+msgstr "Edytuj słowo kluczowe"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Edit model"
@@ -2612,7 +2612,7 @@ msgstr "Wprowadź nazwę tego listu motywacyjnego."
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Enter a name for your passkey."
-msgstr "Proszę wprowadzić nazwę klucza dostępu."
+msgstr "Wprowadź nazwę klucza dostępu."
 
 #: src/features/auth/pages/reset-password.tsx
 msgid "Enter a new password for your account"
@@ -2769,17 +2769,17 @@ msgstr "Nie udało się zarchiwizować wątku."
 #. Fallback toast when creating an API key fails
 #: src/dialogs/api-key/create.tsx
 msgid "Failed to create API key. Please try again."
-msgstr "Nie udało się utworzyć klucza API. Proszę spróbować ponownie."
+msgstr "Nie udało się utworzyć klucza API. Spróbuj ponownie."
 
 #. Fallback toast when account registration fails without a server error message
 #: src/features/auth/pages/register.tsx
 msgid "Failed to create your account. Please try again."
-msgstr "Nie udało się utworzyć konta. Proszę spróbować ponownie."
+msgstr "Nie udało się utworzyć konta. Spróbuj ponownie."
 
 #. Fallback toast when deleting a passkey fails
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Failed to delete passkey. Please try again."
-msgstr "Nie udało się usunąć klucza dostępu. Proszę spróbować ponownie."
+msgstr "Nie udało się usunąć klucza dostępu. Spróbuj ponownie."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Failed to delete provider."
@@ -2788,7 +2788,7 @@ msgstr "Nie udało się usunąć dostawcy."
 #. Fallback toast when deleting an API key fails
 #: src/features/settings/pages/api-keys.tsx
 msgid "Failed to delete the API key. Please try again."
-msgstr "Nie udało się usunąć klucza API. Proszę spróbować ponownie."
+msgstr "Nie udało się usunąć klucza API. Spróbuj ponownie."
 
 #: src/routes/agent/-components/agent-chat.tsx
 #: src/routes/agent/-components/thread-sidebar.tsx
@@ -2798,17 +2798,17 @@ msgstr "Nie udało się usunąć wątku."
 #. Fallback toast when account deletion fails
 #: src/features/settings/pages/account.tsx
 msgid "Failed to delete your account. Please try again."
-msgstr "Usunięcie konta nie powiodło się. Proszę spróbować ponownie."
+msgstr "Usunięcie konta nie powiodło się. Spróbuj ponownie."
 
 #. Fallback toast when disabling two-factor authentication fails
 #: src/dialogs/auth/disable-two-factor.tsx
 msgid "Failed to disable two-factor authentication. Please try again."
-msgstr "Nie udało się wyłączyć uwierzytelniania dwuskładnikowego. Proszę spróbować ponownie."
+msgstr "Nie udało się wyłączyć uwierzytelniania dwuskładnikowego. Spróbuj ponownie."
 
 #. Fallback toast when enabling two-factor authentication fails
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Failed to enable two-factor authentication. Please try again."
-msgstr "Nie udało się włączyć uwierzytelniania dwuskładnikowego. Proszę spróbować ponownie."
+msgstr "Nie udało się włączyć uwierzytelniania dwuskładnikowego. Spróbuj ponownie."
 
 #. Fallback toast when data export fails
 #: src/features/settings/pages/account.tsx
@@ -2818,32 +2818,32 @@ msgstr "Nie udało się wyeksportować danych. Spróbuj ponownie."
 #. Fallback toast when linking a social authentication provider fails
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Failed to link provider. Please try again."
-msgstr "Nie udało się połączyć z dostawcą. Proszę spróbować ponownie."
+msgstr "Nie udało się połączyć z dostawcą. Spróbuj ponownie."
 
 #. Fallback toast when passkey registration fails
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Failed to register passkey. Please try again."
-msgstr "Nie udało się zarejestrować klucza dostępu. Proszę spróbować ponownie."
+msgstr "Nie udało się zarejestrować klucza dostępu. Spróbuj ponownie."
 
 #. Fallback toast when renaming a passkey fails
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Failed to rename passkey. Please try again."
-msgstr "Nie udało się zmienić nazwy klucza dostępu. Proszę spróbować ponownie."
+msgstr "Nie udało się zmienić nazwy klucza dostępu. Spróbuj ponownie."
 
 #. Fallback toast when requesting email change confirmation fails
 #: src/features/settings/pages/profile.tsx
 msgid "Failed to request email change. Please try again."
-msgstr "Prośba o zmianę adresu e-mail nie powiodła się. Proszę spróbować ponownie."
+msgstr "Prośba o zmianę adresu e-mail nie powiodła się. Spróbuj ponownie."
 
 #. Fallback toast when resending account verification email fails
 #: src/features/settings/pages/profile.tsx
 msgid "Failed to resend verification email. Please try again."
-msgstr "Nie udało się ponownie wysłać wiadomości weryfikacyjnej. Proszę spróbować ponownie."
+msgstr "Nie udało się ponownie wysłać wiadomości weryfikacyjnej. Spróbuj ponownie."
 
 #. Fallback toast when resetting password fails and no backend message is available
 #: src/features/auth/pages/reset-password.tsx
 msgid "Failed to reset your password. Please try again."
-msgstr "Nie udało się zresetować hasła. Proszę spróbować ponownie."
+msgstr "Nie udało się zresetować hasła. Spróbuj ponownie."
 
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Failed to review this resume."
@@ -2856,7 +2856,7 @@ msgstr "Nie udało się zapisać dostawcy sztucznej inteligencji."
 #. Fallback toast when requesting password reset email fails without backend message
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Failed to send password reset email. Please try again."
-msgstr "Nie udało się wysłać wiadomości e-mail z resetem hasła. Proszę spróbować ponownie."
+msgstr "Nie udało się wysłać wiadomości e-mail z resetem hasła. Spróbuj ponownie."
 
 #. Fallback toast when sign-in fails and no server error message is available
 #. Fallback toast when sign-in fails without an error message
@@ -2868,7 +2868,7 @@ msgstr "Logowanie nie powiodło się. Spróbuj ponownie."
 #. Fallback toast when signing out fails
 #: src/features/user/dropdown-menu.tsx
 msgid "Failed to sign out. Please try again."
-msgstr "Nie udało się wylogować. Proszę spróbować ponownie."
+msgstr "Nie udało się wylogować. Spróbuj ponownie."
 
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Failed to start agent thread."
@@ -2881,7 +2881,7 @@ msgstr "Nie udało się uruchomić asystenta AI."
 #. Fallback toast when unlinking a social authentication provider fails
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Failed to unlink provider. Please try again."
-msgstr "Nie udało się odłączyć dostawcy. Proszę spróbować ponownie."
+msgstr "Nie udało się odłączyć dostawcy. Spróbuj ponownie."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Failed to update provider."
@@ -2894,12 +2894,12 @@ msgstr "Nie udało się zaktualizować ustawień wątku."
 #. Fallback toast when changing account password fails
 #: src/dialogs/auth/change-password.tsx
 msgid "Failed to update your password. Please try again."
-msgstr "Nie udało się zaktualizować hasła. Proszę spróbować ponownie."
+msgstr "Nie udało się zaktualizować hasła. Spróbuj ponownie."
 
 #. Fallback toast when updating profile details fails
 #: src/features/settings/pages/profile.tsx
 msgid "Failed to update your profile. Please try again."
-msgstr "Nie udało się zaktualizować Państwa profilu. Proszę spróbować ponownie."
+msgstr "Nie udało się zaktualizować Twojego profilu. Spróbuj ponownie."
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Failed to upload attachment."
@@ -2908,24 +2908,24 @@ msgstr "Nie udało się przesłać załącznika."
 #. Fallback toast when uploading profile picture for resume fails
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Failed to upload picture. Please try again."
-msgstr "Nie udało się przesłać zdjęcia. Proszę spróbować ponownie."
+msgstr "Nie udało się przesłać zdjęcia. Spróbuj ponownie."
 
 #. Fallback toast when resume password verification fails unexpectedly
 #: src/features/auth/pages/resume-password.tsx
 msgid "Failed to verify the password. Please try again."
-msgstr "Nie udało się zweryfikować hasła. Proszę spróbować ponownie."
+msgstr "Nie udało się zweryfikować hasła. Spróbuj ponownie."
 
 #. Fallback toast when verifying a backup two-factor authentication code fails
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Failed to verify your backup code. Please try again."
-msgstr "Nie udało się zweryfikować kodu kopii zapasowej. Proszę spróbować ponownie."
+msgstr "Nie udało się zweryfikować kodu kopii zapasowej. Spróbuj ponownie."
 
 #. Fallback toast when verifying a two-factor authentication code fails
 #. Fallback toast when verifying two-factor setup code fails
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Failed to verify your code. Please try again."
-msgstr "Nie udało się zweryfikować kodu. Proszę spróbować ponownie."
+msgstr "Nie udało się zweryfikować kodu. Spróbuj ponownie."
 
 #: src/features/resume/stylesheet/status.tsx
 msgid "Fatal error"
@@ -3158,7 +3158,7 @@ msgstr "Przejdź do panelu"
 #. Accessible label for button navigating from builder to resumes dashboard
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Go to resumes dashboard"
-msgstr "Proszę przejść do pulpitu CV"
+msgstr "Przejdź do panelu CV"
 
 #: src/features/command-palette/pages/navigation.tsx
 msgid "Go to…"
@@ -3290,7 +3290,7 @@ msgstr "Ukryj podkreślenie linku"
 #: src/features/auth/pages/reset-password.tsx
 #: src/features/auth/pages/resume-password.tsx
 msgid "Hide password"
-msgstr "Proszę ukryć hasło"
+msgstr "Ukryj hasło"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Hide picture"
@@ -4146,7 +4146,7 @@ msgstr "Wielojęzyczna"
 #. Placeholder text for custom link URL field in resume builder
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Must start with https://"
-msgstr "Proszę zacząć od https://"
+msgstr "Adres URL musi zaczynać się od https://."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Muted sidebar"
@@ -4534,7 +4534,7 @@ msgstr "Otwórz tryb ostrości"
 
 #: src/routes/agent/-components/resume-pane.tsx
 msgid "Open in builder"
-msgstr "Otwórz w kreatorze"
+msgstr "Otwórz w edytorze CV"
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Open in CV editor"
@@ -4542,7 +4542,7 @@ msgstr "Otwórz w edytorze CV"
 
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Open Integrations Settings"
-msgstr "Proszę otworzyć Ustawienia integracji"
+msgstr "Otwórz ustawienia integracji"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Open Source"
@@ -4917,7 +4917,7 @@ msgstr "Naciśnij <0>{RETURN_KEY}</0> lub <1>{COMMA_KEY}</1>, aby dodać lub zap
 #. Command palette hint that pressing Enter opens the selected resume
 #: src/features/command-palette/pages/resumes.tsx
 msgid "Press <0>Enter</0> to open"
-msgstr "Proszę wcisnąć <0>Enter</0>, aby otworzyć"
+msgstr "Naciśnij <0>Enter</0>, aby otworzyć"
 
 #: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
 msgid "Preview"
@@ -5236,7 +5236,7 @@ msgstr "Usuń"
 #. Screen reader label for button that removes a keyword chip. Variable is the current keyword text.
 #: src/components/input/chip-input.tsx
 msgid "Remove {chip}"
-msgstr "Proszę usunąć {chip}"
+msgstr "Usuń {chip}"
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Remove contact"
@@ -5913,7 +5913,7 @@ msgstr "Pokaż link w tytule"
 #: src/features/auth/pages/reset-password.tsx
 #: src/features/auth/pages/resume-password.tsx
 msgid "Show password"
-msgstr "Proszę pokazać hasło"
+msgstr "Pokaż hasło"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Show picture"
@@ -5954,7 +5954,7 @@ msgstr "Zaloguj się i podłącz własnego dostawcę AI, aby otrzymać propozycj
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
-msgstr "Proszę się zalogować"
+msgstr "Zaloguj się"
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -6007,7 +6007,7 @@ msgstr "Jedna kolumna"
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column with a magenta left border accent; compact and efficient for entry-level or internship applications."
-msgstr "Jedna kolumna z fuksjowym akcentem na lewym obramowaniu; kompaktowy i wydajny układ dla aplikacji na stanowiska początkujące lub staże."
+msgstr "Jedna kolumna z fuksjowym akcentem na lewym obramowaniu; kompaktowy i wydajny układ dla osób aplikujących na stanowiska juniorskie lub staże."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column with a minimal top header and lots of whitespace; clean and modern for designers or content creators."
@@ -6019,7 +6019,7 @@ msgstr "Jedna kolumna z paskiem bocznym i przejrzystą siatką; uniwersalny ukł
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column with an inline three-column entry header (position · organization · period); compact and ATS-friendly, well-suited for Asian resume conventions (CN/JP/KR)."
-msgstr "Jedna kolumna z wbudowanym trzykolumnowym nagłówkiem wpisu (stanowisko · organizacja · okres); kompaktowy i przyjazny dla ATS, dobrze dopasowany do azjatyckich konwencji CV (CN/JP/KR)."
+msgstr "Jedna kolumna z wbudowanym trzykolumnowym nagłówkiem wpisu (stanowisko · organizacja · okres); kompaktowy, dostosowany do ATS i dobrze dopasowany do azjatyckich standardów CV (CN/JP/KR)."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column with uppercase section headings and a primary-color top rule on every page; polished for executive, consulting, or startup resumes."
@@ -6803,11 +6803,11 @@ msgstr "To może potrwać kilka minut, w zależności od czasu odpowiedzi dostaw
 
 #: src/dialogs/resume/import.tsx
 msgid "This may take a moment. Please do not close the window or refresh the page."
-msgstr "Może to chwilę potrwać. Proszę nie zamykać okna i nie odświeżać strony."
+msgstr "Może to chwilę potrwać. Nie zamykaj okna ani nie odświeżaj strony."
 
 #: src/features/ats-checker/report/report-view.tsx
 msgid "This measures how faithfully software can extract this file's text. It does not predict whether an application will be rejected, and no tool can. Your file was read in this browser and never uploaded."
-msgstr "To mierzy, jak wiernie oprogramowanie potrafi wyciągnąć tekst z tego pliku. Nie przewiduje, czy aplikacja zostanie odrzucona, i żadne narzędzie tego nie potrafi. Twój plik został odczytany w tej przeglądarce i nigdy nie został wysłany."
+msgstr "To pokazuje, jak wiernie oprogramowanie potrafi odczytać tekst z tego pliku. Nie przewiduje, czy Twoje zgłoszenie zostanie odrzucone — i żadne narzędzie tego nie potrafi. Twój plik został odczytany w tej przeglądarce i nigdy nie został wysłany."
 
 #: src/features/ats-checker/messages.ts
 msgid "This page is in columns, and the text extracts out of order."
@@ -7076,7 +7076,7 @@ msgstr "Dwie kolumny, czysty i profesjonalny układ z subtelnymi separatorami se
 
 #: src/dialogs/resume/template/data.ts
 msgid "Two-column, minimal and text-dense with no decorative elements; perfect for traditional industries or ATS-heavy applications."
-msgstr "Dwie kolumny, minimalistyczny i gęsty tekstowo układ bez elementów dekoracyjnych; idealny dla tradycyjnych branż lub aplikacji silnie filtrowanych przez systemy ATS."
+msgstr "Dwie kolumny, minimalistyczny i gęsty tekstowo układ bez elementów dekoracyjnych; dobry wybór dla tradycyjnych branż i rekrutacji silnie opartych na ATS."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Two-column, minimal with light gray sidebar and subtle icons; professional and understated for legal, finance, or executive roles."
@@ -7292,7 +7292,7 @@ msgstr "Prześlij załączniki"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Upload picture"
-msgstr "Proszę przesłać zdjęcie"
+msgstr "Prześlij zdjęcie"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Uploading picture…"
@@ -7358,12 +7358,12 @@ msgstr "Użyj rozmiaru co najmniej 9pt."
 
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Use between 6 and 64 characters."
-msgstr "Proszę użyć od 6 do 64 znaków."
+msgstr "Użyj od 6 do 64 znaków."
 
 #: src/components/input/color-picker.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Use color {color}"
-msgstr "Proszę użyć koloru {color}"
+msgstr "Użyj koloru {color}"
 
 #: src/features/ats-checker/messages.ts
 msgid "Use plain headings such as \"Experience\", \"Education\" and \"Skills\"."
