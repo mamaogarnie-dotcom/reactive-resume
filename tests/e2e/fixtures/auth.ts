@@ -1,10 +1,24 @@
 import type { APIRequestContext, Browser, BrowserContext, Page } from "@playwright/test";
 import type { E2EAccount } from "./data";
 
+export type E2EUiLocale = "en-US" | null;
+
 async function assertAuthResponse(response: Awaited<ReturnType<APIRequestContext["post"]>>) {
 	if (response.ok()) return;
 
 	throw new Error(`Authentication request failed with ${response.status()}: ${await response.text()}`);
+}
+
+export async function applyE2EUiLocale(context: BrowserContext, baseURL: string, uiLocale: E2EUiLocale) {
+	if (!uiLocale) return;
+
+	await context.addCookies([
+		{
+			name: "locale",
+			value: uiLocale,
+			url: baseURL,
+		},
+	]);
 }
 
 export async function registerViaUi(page: Page, account: E2EAccount) {
@@ -56,11 +70,16 @@ export async function createAuthenticatedContext(
 	request: APIRequestContext,
 	account: E2EAccount,
 	baseURL: string,
+	uiLocale: E2EUiLocale = "en-US",
 ): Promise<BrowserContext> {
 	await registerViaApi(request, account, baseURL);
 
-	return browser.newContext({
+	const context = await browser.newContext({
 		baseURL,
 		storageState: await request.storageState(),
 	});
+
+	await applyE2EUiLocale(context, baseURL, uiLocale);
+
+	return context;
 }

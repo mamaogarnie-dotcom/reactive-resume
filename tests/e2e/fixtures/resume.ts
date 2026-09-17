@@ -4,18 +4,32 @@ import { createResumeName } from "./data";
 
 export async function createSampleResumeFromDashboard(page: Page, testInfo: TestInfo) {
 	const resumeName = createResumeName(testInfo);
+	const baseURL = String(testInfo.project.use.baseURL ?? "http://localhost:3000");
+	const slug = resumeName
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-|-$/g, "");
 
-	await page.goto("/dashboard/resumes");
-	await page.getByText("Create a new resume").click();
+	const response = await page.context().request.post(`${baseURL}/api/openapi/resumes`, {
+		data: {
+			name: resumeName,
+			slug,
+			tags: [],
+			withSampleData: true,
+		},
+	});
 
-	const dialog = page.getByRole("dialog", { name: "Create a new resume" });
-	await dialog.getByLabel("Name").fill(resumeName);
+	if (!response.ok()) {
+		throw new Error(`Could not create E2E sample resume: ${response.status()} ${await response.text()}`);
+	}
 
-	const createGroup = dialog.getByRole("group", { name: "Create resume with options" });
-	await createGroup.getByRole("button").last().click();
-	await page.getByRole("menuitem", { name: "Create a Sample Resume" }).click();
+	const resumeId = (await response.json()) as string;
 
-	// Creating a resume now navigates straight into the builder.
+	if (typeof resumeId !== "string" || resumeId.length === 0) {
+		throw new Error("Create resume API did not return a resume ID.");
+	}
+
+	await page.goto(`/builder/${resumeId}`);
 	await page.waitForURL(/\/builder\/.+/);
 
 	return resumeName;

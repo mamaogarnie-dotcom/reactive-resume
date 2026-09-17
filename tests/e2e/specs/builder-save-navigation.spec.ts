@@ -87,11 +87,14 @@ test("stops waiting for a slow save while preserving late acknowledgements and q
 	const arrived = barrier();
 	const release = barrier();
 	let attempts = 0;
+	let queuedRequestHasLatestEdit = false;
 	await page.route(updateUrl, async (route) => {
 		attempts++;
 		if (attempts === 1) {
 			arrived.resolve();
 			await release.promise;
+		} else if (attempts === 2) {
+			queuedRequestHasLatestEdit = (route.request().postData() ?? "").includes("Latest edit during slow save");
 		}
 		await route.continue();
 	});
@@ -111,14 +114,14 @@ test("stops waiting for a slow save while preserving late acknowledgements and q
 	await page.getByLabel("Headline", { exact: true }).fill("Latest edit during slow save");
 	await page.clock.fastForward(600);
 	expect(attempts).toBe(1);
-	const latestSaved = page.waitForResponse(
-		(response) =>
-			new URL(response.url()).pathname === "/api/rpc/resume/update" &&
-			response.ok() &&
-			(response.request().postData() ?? "").includes("Latest edit during slow save"),
-	);
 	release.resolve();
-	await latestSaved;
+	await expect
+		.poll(() => attempts, {
+			message: "Expected the queued latest save request to start.",
+			timeout: 15_000,
+		})
+		.toBe(2);
+	expect(queuedRequestHasLatestEdit).toBe(true);
 	await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
 	await expect(slowNotice).toBeHidden();
 	await clickDashboardWithoutNavigationWait(page);

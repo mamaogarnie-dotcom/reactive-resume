@@ -39,8 +39,8 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 		await page.getByRole("button", { name: "Add employment", exact: true }).click();
 		await expect(page.getByText("Project Coordinator", { exact: true }).last()).toBeVisible();
 
-		await page.getByPlaceholder("Responsibility or achievement", { exact: true }).fill(fact);
-		await page.getByRole("button", { name: "Add fact", exact: true }).click();
+		await page.getByPlaceholder("Responsibility", { exact: true }).fill(fact);
+		await page.getByRole("button", { name: "Add responsibility", exact: true }).click();
 		await expect(page.getByText(fact, { exact: true }).last()).toBeVisible();
 
 		await page.goto("/dashboard/cvmate/create");
@@ -143,7 +143,7 @@ test("CVMate reports a missing AI provider without advancing the offer flow", as
 	const offerForm = offerText.locator("xpath=ancestor::form");
 	await offerForm.locator('button[type="submit"]').click();
 
-	await expect(page.getByText("No tested AI provider is available.", { exact: true })).toBeVisible();
+	await expect(page.getByText("The job offer could not be analyzed.", { exact: true })).toBeVisible();
 	await expect(offerText).toBeVisible();
 	await expect(page.getByRole("heading", { name: "Project Coordinator", exact: true })).toHaveCount(0);
 	await expect(page).toHaveURL(/\/dashboard\/cvmate\/create$/);
