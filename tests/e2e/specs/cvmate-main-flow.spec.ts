@@ -39,10 +39,6 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 		await page.getByRole("button", { name: "Add employment", exact: true }).click();
 		await expect(page.getByText("Project Coordinator", { exact: true }).last()).toBeVisible();
 
-		await page.getByPlaceholder("Responsibility", { exact: true }).fill(fact);
-		await page.getByRole("button", { name: "Add responsibility", exact: true }).click();
-		await expect(page.getByText(fact, { exact: true }).last()).toBeVisible();
-
 		await page.goto("/dashboard/cvmate/create");
 
 		const offerText = page.locator("#cvmate-job-offer-text");
@@ -56,13 +52,42 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 		const flow = analyzedHeading.locator("xpath=../../../..");
 		await flow.locator('button[type="button"]').last().click();
 
-		const factInSelection = flow.getByText(fact, { exact: true }).first();
+		const selectionSection = flow
+			.getByRole("heading", { name: "Choose CV content", exact: true })
+			.locator("xpath=ancestor::section[1]");
+
+		await expect(selectionSection).toBeVisible();
+
+		const quickAddInput = selectionSection.getByPlaceholder("Responsibility", {
+			exact: true,
+		});
+
+		await expect(quickAddInput).toBeVisible();
+		await quickAddInput.fill(fact);
+
+		const quickAddForm = quickAddInput.locator("xpath=ancestor::form");
+
+		await quickAddForm.getByRole("button", { name: "Add responsibility", exact: true }).click();
+
+		const factInSelection = selectionSection.getByText(fact, {
+			exact: true,
+		});
+
 		await expect(factInSelection).toBeVisible();
 
-		const selectionSection = factInSelection.locator("xpath=ancestor::section[1]");
-		const selectRecommended = selectionSection.locator('button[type="button"]').last();
-		await expect(selectRecommended).toBeEnabled();
-		await selectRecommended.click();
+		const retryRecommendations = selectionSection.getByRole("button", {
+			name: "Retry AI recommendations",
+			exact: true,
+		});
+
+		await expect(retryRecommendations).toBeEnabled();
+		await retryRecommendations.click();
+
+		await expect(
+			factInSelection.locator("xpath=..").getByText("Recommended", {
+				exact: true,
+			}),
+		).toBeVisible();
 
 		const continueButton = flow.locator('button[type="button"]').last();
 		await expect(continueButton).toBeEnabled();
@@ -128,6 +153,9 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 		if (!downloadPath) throw new Error("CVMate PDF download did not produce a file.");
 
 		expect((await readFile(downloadPath)).subarray(0, 5).toString()).toBe("%PDF-");
+
+		await page.goto("/dashboard/cvmate/profile");
+		await expect(page.getByText(fact, { exact: true }).last()).toBeVisible();
 	} finally {
 		await stub.close();
 	}
