@@ -5,10 +5,13 @@ import { expect, test } from "../fixtures/test";
 const jobOffer = [
 	"Example Consulting is hiring a Project Coordinator in Wroclaw.",
 	"Required: experience coordinating project delivery and client communication.",
+	"Required: experience using Jira for project tracking.",
 ].join("\n");
 
 const fact = "Coordinated project delivery and client communication.";
 const summary = "Project coordinator with experience in project delivery and client communication.";
+const gapText = "Experience using Jira for project tracking.";
+const gapEvidence = "Jira";
 
 test("CVMate happy path builds a tailored CV from profile to PDF export", async ({ authPage: page }) => {
 	test.setTimeout(120_000);
@@ -88,6 +91,24 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 				exact: true,
 			}),
 		).toBeVisible();
+		const gapsSection = flow.getByRole("heading", { name: "Gaps", exact: true }).locator("xpath=ancestor::section[1]");
+
+		const gapTextItem = gapsSection.getByText(gapText, {
+			exact: true,
+		});
+
+		await expect(gapTextItem).toBeVisible();
+
+		const gapCard = gapTextItem.locator("xpath=ancestor::div[.//form][1]");
+		const gapForm = gapCard.locator("form");
+
+		await gapForm.getByLabel("Type", { exact: true }).selectOption("tool");
+		await gapForm.getByPlaceholder("Profile information", { exact: true }).fill(gapEvidence);
+
+		await gapForm.getByRole("button", { name: "Add", exact: true }).click();
+
+		await expect(gapsSection.getByText(gapText, { exact: true })).toHaveCount(0);
+		await expect(gapsSection.getByText("No open gaps detected.", { exact: true })).toBeVisible();
 
 		const continueButton = flow.locator('button[type="button"]').last();
 		await expect(continueButton).toBeEnabled();
@@ -156,6 +177,7 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 
 		await page.goto("/dashboard/cvmate/profile");
 		await expect(page.getByText(fact, { exact: true }).last()).toBeVisible();
+		await expect(page.getByText(gapEvidence, { exact: true }).last()).toBeVisible();
 	} finally {
 		await stub.close();
 	}

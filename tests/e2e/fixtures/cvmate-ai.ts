@@ -81,6 +81,12 @@ function responseFor(text: string): { stage: CvmateAiStage; content: string } {
 						sourceText: "Experience coordinating project delivery and client communication.",
 						text: "Experience coordinating project delivery and client communication.",
 					},
+					{
+						category: "required",
+						priority: "important",
+						sourceText: "Experience using Jira for project tracking.",
+						text: "Experience using Jira for project tracking.",
+					},
 				],
 			}),
 		};
@@ -89,6 +95,12 @@ function responseFor(text: string): { stage: CvmateAiStage; content: string } {
 	if (text.includes("You recommend content for a CV using only facts already stored")) {
 		const items = taggedJson<CandidateSelectionItem[]>(text, "CANDIDATE_SELECTION_ITEMS");
 		const fact = items.find((item) => item.sourceType === "experience_fact");
+		const gapEligibleRequirementIds = taggedJson<string[]>(text, "GAP_ELIGIBLE_REQUIREMENT_IDS");
+		const gapRequirementId = gapEligibleRequirementIds[1];
+
+		if (!gapRequirementId) {
+			throw new Error("CVMATE_E2E_STUB_MISSING_GAP_REQUIREMENT");
+		}
 
 		if (!fact) throw new Error("CVMATE_E2E_STUB_MISSING_EXPERIENCE_FACT");
 
@@ -101,7 +113,7 @@ function responseFor(text: string): { stage: CvmateAiStage; content: string } {
 						reason: "Direct evidence from the stored responsibility.",
 					},
 				],
-				gapRequirementIds: [],
+				gapRequirementIds: [gapRequirementId],
 			}),
 		};
 	}

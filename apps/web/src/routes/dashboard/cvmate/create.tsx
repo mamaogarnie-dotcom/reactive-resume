@@ -21,6 +21,13 @@ type RequirementCategory = "required" | "preferred" | "responsibility" | "keywor
 type SelectionItem = Awaited<ReturnType<typeof orpc.cvmateBuild.listSelectionItems.call>>[number];
 type Gap = Awaited<ReturnType<typeof orpc.cvmateBuild.listGaps.call>>[number];
 type GeneratedContent = Awaited<ReturnType<typeof orpc.cvmateBuild.listGeneratedContent.call>>[number];
+type GapEvidenceKind = "competency" | "software" | "tool" | "responsibility";
+
+type GapEvidenceDraft = {
+	kind: GapEvidenceKind;
+	text: string;
+	employmentSelectionItemId: string;
+};
 
 function categoryTitle(category: RequirementCategory) {
 	switch (category) {
@@ -104,6 +111,7 @@ function RouteComponent() {
 	const [gaps, setGaps] = useState<Gap[]>([]);
 	const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([]);
 	const [quickFactTextByEmployment, setQuickFactTextByEmployment] = useState<Record<string, string>>({});
+	const [gapEvidenceDrafts, setGapEvidenceDrafts] = useState<Record<string, GapEvidenceDraft>>({});
 
 	const analyzeOffer = useMutation({
 		mutationFn: async () => {
@@ -341,6 +349,166 @@ function RouteComponent() {
 		},
 	});
 
+	const resolveGapWithEvidence = useMutation({
+		mutationFn: async (input: { gap: Gap; kind: GapEvidenceKind; text: string; employmentSelectionItemId: string }) => {
+			if (!buildId) {
+				throw new Error(t`Start creating the CV before generating tailored content.`);
+			}
+
+			const text = input.text.trim();
+
+			if (!text) {
+				throw new Error("Profile evidence cannot be empty.");
+			}
+
+			let factId: string | null = null;
+			let listItemId: string | null = null;
+			let linkedEmploymentId: string | null = null;
+			let createdSelectionItem: SelectionItem | null = null;
+			let parentSelectionItem: SelectionItem | null = null;
+			let parentChanged = false;
+
+			try {
+				let resolutionSourceType: "experience_fact" | "profile_list_item";
+				let resolutionSourceId: string;
+
+				if (input.kind === "responsibility") {
+					const employmentItem = selectionItems.find(
+						(item) => item.id === input.employmentSelectionItemId && item.sourceType === "employment",
+					);
+
+					if (!employmentItem) {
+						throw new Error("A responsibility must be linked to an employment.");
+					}
+
+					const sortOrder =
+						selectionItems
+							.filter((item) => item.parentSelectionItemId === employmentItem.id)
+							.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
+
+					const fact = await orpc.cvmateProfile.createExperienceFact.call({
+						text,
+						kind: "responsibility",
+					});
+
+					factId = fact.id;
+					linkedEmploymentId = employmentItem.sourceId;
+
+					await orpc.cvmateProfile.linkEmploymentFact.call({
+						employmentId: employmentItem.sourceId,
+						experienceFactId: fact.id,
+						sortOrder,
+					});
+
+					createdSelectionItem = await orpc.cvmateBuild.createSelectionItem.call({
+						cvBuildId: buildId,
+						parentSelectionItemId: employmentItem.id,
+						sourceType: "experience_fact",
+						sourceId: fact.id,
+						selected: true,
+						sortOrder,
+					});
+
+					parentSelectionItem = employmentItem;
+
+					if (!employmentItem.selected) {
+						parentSelectionItem = await orpc.cvmateBuild.updateSelectionItem.call({
+							id: employmentItem.id,
+							selected: true,
+						});
+
+						parentChanged = true;
+					}
+
+					resolutionSourceType = "experience_fact";
+					resolutionSourceId = fact.id;
+				} else {
+					const listItem = await orpc.cvmateProfile.createListItem.call({
+						kind: input.kind,
+						value: text,
+					});
+
+					listItemId = listItem.id;
+
+					const sortOrder = selectionItems.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
+
+					createdSelectionItem = await orpc.cvmateBuild.createSelectionItem.call({
+						cvBuildId: buildId,
+						parentSelectionItemId: null,
+						sourceType: "profile_list_item",
+						sourceId: listItem.id,
+						selected: true,
+						sortOrder,
+					});
+
+					resolutionSourceType = "profile_list_item";
+					resolutionSourceId = listItem.id;
+				}
+
+				const updatedGap = await orpc.cvmateBuild.updateGap.call({
+					id: input.gap.id,
+					resolutionSourceType,
+					resolutionSourceId,
+				});
+
+				return {
+					gap: updatedGap,
+					selectionItem: createdSelectionItem,
+					parentSelectionItem,
+				};
+			} catch (error) {
+				if (createdSelectionItem) {
+					await orpc.cvmateBuild.deleteSelectionItem.call({ id: createdSelectionItem.id }).catch(() => undefined);
+				}
+
+				if (parentChanged && parentSelectionItem) {
+					await orpc.cvmateBuild.updateSelectionItem
+						.call({
+							id: parentSelectionItem.id,
+							selected: false,
+						})
+						.catch(() => undefined);
+				}
+
+				if (linkedEmploymentId && factId) {
+					await orpc.cvmateProfile.unlinkEmploymentFact
+						.call({
+							employmentId: linkedEmploymentId,
+							experienceFactId: factId,
+						})
+						.catch(() => undefined);
+				}
+
+				if (factId) {
+					await orpc.cvmateProfile.deleteExperienceFact.call({ id: factId }).catch(() => undefined);
+				}
+
+				if (listItemId) {
+					await orpc.cvmateProfile.deleteListItem.call({ id: listItemId }).catch(() => undefined);
+				}
+
+				throw error;
+			}
+		},
+		onSuccess: ({ gap, selectionItem, parentSelectionItem }, variables) => {
+			setSelectionItems((items) => [
+				...items.map((item) =>
+					parentSelectionItem && item.id === parentSelectionItem.id ? parentSelectionItem : item,
+				),
+				selectionItem,
+			]);
+
+			setGaps((items) => items.map((item) => (item.id === gap.id ? gap : item)));
+
+			setGapEvidenceDrafts((current) => {
+				const next = { ...current };
+				delete next[variables.gap.id];
+				return next;
+			});
+
+			setGeneratedContent([]);
+		},
+	});
 	const dismissGap = useMutation({
 		mutationFn: (id: string) => orpc.cvmateBuild.updateGap.call({ id, status: "dismissed" }),
 		onSuccess: (updated) => {
@@ -425,7 +593,11 @@ function RouteComponent() {
 	const hasTailoredContent = visibleGeneratedContent.some((item) => item.kind === "professional_summary");
 
 	const canAnalyze = rawText.trim().length > 0 || asset !== null;
-	const selectionPending = updateSelection.isPending || selectRecommended.isPending || quickAddResponsibility.isPending;
+	const selectionPending =
+		updateSelection.isPending ||
+		selectRecommended.isPending ||
+		quickAddResponsibility.isPending ||
+		resolveGapWithEvidence.isPending;
 
 	const reset = () => {
 		setRawText("");
@@ -435,10 +607,12 @@ function RouteComponent() {
 		setGaps([]);
 		setGeneratedContent([]);
 		setQuickFactTextByEmployment({});
+		setGapEvidenceDrafts({});
 		analyzeOffer.reset();
 		recommendContent.reset();
 		updateSelection.reset();
 		quickAddResponsibility.reset();
+		resolveGapWithEvidence.reset();
 		selectRecommended.reset();
 		dismissGap.reset();
 		generateTailoredContent.reset();
@@ -791,25 +965,163 @@ function RouteComponent() {
 											<Trans>No open gaps detected.</Trans>
 										</p>
 									) : (
-										<div className="space-y-2">
-											{openGaps.map((gap) => (
-												<div key={gap.id} className="flex items-start justify-between gap-4 rounded-md bg-muted/40 p-3">
-													<div className="space-y-1">
-														<p className="text-sm">{gap.text}</p>
-														<p className="text-muted-foreground text-sm">
-															{priorityLabel(gap.severity)} · {gapOriginLabel(gap.origin)}
-														</p>
+										<div className="space-y-3">
+											{openGaps.map((gap) => {
+												const draft = gapEvidenceDrafts[gap.id] ?? {
+													kind: "competency" as GapEvidenceKind,
+													text: "",
+													employmentSelectionItemId:
+														rootSelectionItems.find((item) => item.sourceType === "employment")?.id ?? "",
+												};
+
+												const isResponsibility = draft.kind === "responsibility";
+
+												const active =
+													resolveGapWithEvidence.isPending && resolveGapWithEvidence.variables?.gap.id === gap.id;
+
+												return (
+													<div key={gap.id} className="space-y-3 rounded-md bg-muted/40 p-3">
+														<div className="flex items-start justify-between gap-4">
+															<div className="space-y-1">
+																<p className="text-sm">{gap.text}</p>
+																<p className="text-muted-foreground text-sm">
+																	{priorityLabel(gap.severity)} · {gapOriginLabel(gap.origin)}
+																</p>
+															</div>
+
+															<Button
+																type="button"
+																variant="outline"
+																disabled={dismissGap.isPending || resolveGapWithEvidence.isPending}
+																onClick={() => dismissGap.mutate(gap.id)}
+															>
+																<Trans>Dismiss</Trans>
+															</Button>
+														</div>
+
+														<form
+															className="space-y-2 rounded-lg border border-dashed bg-card p-3"
+															onSubmit={(event) => {
+																event.preventDefault();
+
+																const text = draft.text.trim();
+
+																if (!text || resolveGapWithEvidence.isPending) {
+																	return;
+																}
+
+																resolveGapWithEvidence.mutate({
+																	gap,
+																	kind: draft.kind,
+																	text,
+																	employmentSelectionItemId: draft.employmentSelectionItemId,
+																});
+															}}
+														>
+															<div className="grid gap-2 md:grid-cols-2">
+																<select
+																	aria-label={t`Type`}
+																	className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+																	value={draft.kind}
+																	disabled={resolveGapWithEvidence.isPending}
+																	onChange={(event) => {
+																		const kind = event.target.value as GapEvidenceKind;
+
+																		setGapEvidenceDrafts((current) => ({
+																			...current,
+																			[gap.id]: {
+																				...draft,
+																				kind,
+																				employmentSelectionItemId:
+																					kind === "responsibility" && !draft.employmentSelectionItemId
+																						? (rootSelectionItems.find((item) => item.sourceType === "employment")
+																								?.id ?? "")
+																						: draft.employmentSelectionItemId,
+																			},
+																		}));
+																	}}
+																>
+																	<option value="competency">{t`Skills`}</option>
+																	<option value="software">{t`Software`}</option>
+																	<option value="tool">{t`Tools`}</option>
+																	<option value="responsibility">{t`Responsibility`}</option>
+																</select>
+
+																{isResponsibility ? (
+																	<select
+																		aria-label={t`Employment`}
+																		className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+																		value={draft.employmentSelectionItemId}
+																		disabled={resolveGapWithEvidence.isPending}
+																		onChange={(event) =>
+																			setGapEvidenceDrafts((current) => ({
+																				...current,
+																				[gap.id]: {
+																					...draft,
+																					employmentSelectionItemId: event.target.value,
+																				},
+																			}))
+																		}
+																	>
+																		{rootSelectionItems
+																			.filter((item) => item.sourceType === "employment")
+																			.map((item) => (
+																				<option key={item.id} value={item.id}>
+																					{selectionLabel(item)}
+																				</option>
+																			))}
+																	</select>
+																) : null}
+															</div>
+
+															<div className="flex flex-col gap-2 sm:flex-row">
+																<Input
+																	className="min-w-0 flex-1"
+																	aria-label={t`Profile information`}
+																	placeholder={t`Profile information`}
+																	value={draft.text}
+																	disabled={resolveGapWithEvidence.isPending}
+																	onChange={(event) =>
+																		setGapEvidenceDrafts((current) => ({
+																			...current,
+																			[gap.id]: {
+																				...draft,
+																				text: event.target.value,
+																			},
+																		}))
+																	}
+																/>
+
+																<Button
+																	type="submit"
+																	variant="outline"
+																	className="shrink-0"
+																	disabled={
+																		!draft.text.trim() ||
+																		resolveGapWithEvidence.isPending ||
+																		(isResponsibility && !draft.employmentSelectionItemId)
+																	}
+																>
+																	<Trans>Add</Trans>
+																	{active ? (
+																		<span className="sr-only">
+																			<Trans>Saving...</Trans>
+																		</span>
+																	) : null}
+																</Button>
+															</div>
+
+															{resolveGapWithEvidence.isError && resolveGapWithEvidence.variables?.gap.id === gap.id ? (
+																<p className="text-destructive text-sm">
+																	{getOrpcErrorMessage(resolveGapWithEvidence.error, {
+																		fallback: t`Could not update this CV.`,
+																	})}
+																</p>
+															) : null}
+														</form>
 													</div>
-													<Button
-														type="button"
-														variant="outline"
-														disabled={dismissGap.isPending}
-														onClick={() => dismissGap.mutate(gap.id)}
-													>
-														<Trans>Dismiss</Trans>
-													</Button>
-												</div>
-											))}
+												);
+											})}
 										</div>
 									)}
 								</section>
