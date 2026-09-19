@@ -1,10 +1,9 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { Button } from "@reactive-resume/ui/components/button";
-import { Input } from "@reactive-resume/ui/components/input";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-
+import { Button } from "@reactive-resume/ui/components/button";
+import { Input } from "@reactive-resume/ui/components/input";
 import { orpc } from "@/libs/orpc/client";
 
 export function WorkExperienceSection() {
@@ -24,17 +23,11 @@ export function WorkExperienceSection() {
 	const [editIsCurrent, setEditIsCurrent] = useState(false);
 	const [editingFactId, setEditingFactId] = useState<string | null>(null);
 	const [editFactText, setEditFactText] = useState("");
-	const [factTextByEmployment, setFactTextByEmployment] = useState<
-		Record<string, string>
-	>({});
+	const [factTextByEmployment, setFactTextByEmployment] = useState<Record<string, string>>({});
 
-	const profileQuery = useQuery(
-		orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
-	);
+	const profileQuery = useQuery(orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }));
 
-	const employments = [...(profileQuery.data?.employments ?? [])].sort(
-		(a, b) => a.sortOrder - b.sortOrder,
-	);
+	const employments = [...(profileQuery.data?.employments ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
 	const employmentFacts = profileQuery.data?.employmentFacts ?? [];
 	const experienceFacts = profileQuery.data?.experienceFacts ?? [];
 
@@ -74,11 +67,7 @@ export function WorkExperienceSection() {
 	);
 
 	const createAndLinkFact = useMutation({
-		mutationFn: async (input: {
-			employmentId: string;
-			text: string;
-			sortOrder: number;
-		}) => {
+		mutationFn: async (input: { employmentId: string; text: string; sortOrder: number }) => {
 			const fact = await orpc.cvmateProfile.createExperienceFact.call({
 				text: input.text,
 				kind: "responsibility",
@@ -91,9 +80,7 @@ export function WorkExperienceSection() {
 					sortOrder: input.sortOrder,
 				});
 			} catch (error) {
-				await orpc.cvmateProfile.deleteExperienceFact
-					.call({ id: fact.id })
-					.catch(() => undefined);
+				await orpc.cvmateProfile.deleteExperienceFact.call({ id: fact.id }).catch(() => undefined);
 				throw error;
 			}
 
@@ -158,39 +145,31 @@ export function WorkExperienceSection() {
 		onSuccess: () => void profileQuery.refetch(),
 	});
 
-	const canCreate = [company, jobTitle, location, startDate, endDate].some(
+	const canCreate = [company, jobTitle, location, startDate, endDate].some((value) => value.trim().length > 0);
+
+	const canUpdate = [editCompany, editJobTitle, editLocation, editStartDate, editEndDate].some(
 		(value) => value.trim().length > 0,
 	);
 
-	const canUpdate = [
-		editCompany,
-		editJobTitle,
-		editLocation,
-		editStartDate,
-		editEndDate,
-	].some((value) => value.trim().length > 0);
-
 	return (
 		<section
-aria-labelledby="master-profile-work-experience"
-className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
->
+			aria-labelledby="master-profile-work-experience"
+			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+		>
 			<div>
-				<h2 id="master-profile-work-experience" className="text-xl font-semibold text-foreground">
+				<h2 id="master-profile-work-experience" className="font-semibold text-foreground text-xl">
 					<Trans>Work experience</Trans>
 				</h2>
-				<p className="text-sm text-muted-foreground">
-					<Trans>
-						Add roles that can later be used to create tailored resumes.
-					</Trans>
+				<p className="text-muted-foreground text-sm">
+					<Trans>Add roles that can later be used to create tailored resumes.</Trans>
 				</p>
 			</div>
 
 			<form
 				className="space-y-4 rounded-card border border-border bg-muted p-4"
 				onSubmit={(event) => {
-				event.preventDefault();
-				if (!canCreate) return;
+					event.preventDefault();
+					if (!canCreate) return;
 
 					createEmployment.mutate({
 						company: company.trim() || null,
@@ -206,31 +185,36 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 				<div className="grid gap-3 md:grid-cols-2">
 					<Input
 						className="w-full"
-						aria-label={t`Company`} placeholder={t`Company`}
+						aria-label={t`Company`}
+						placeholder={t`Company`}
 						value={company}
 						onChange={(event) => setCompany(event.target.value)}
 					/>
 					<Input
 						className="w-full"
-						aria-label={t`Job title`} placeholder={t`Job title`}
+						aria-label={t`Job title`}
+						placeholder={t`Job title`}
 						value={jobTitle}
 						onChange={(event) => setJobTitle(event.target.value)}
 					/>
 					<Input
 						className="w-full"
-						aria-label={t`Location`} placeholder={t`Location`}
+						aria-label={t`Location`}
+						placeholder={t`Location`}
 						value={location}
 						onChange={(event) => setLocation(event.target.value)}
 					/>
 					<Input
 						className="w-full"
-						aria-label={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`} placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+						aria-label={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+						placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						value={startDate}
 						onChange={(event) => setStartDate(event.target.value)}
 					/>
 					<Input
 						className="w-full"
-						aria-label={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`} placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+						aria-label={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+						placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						value={endDate}
 						disabled={isCurrent}
 						onChange={(event) => setEndDate(event.target.value)}
@@ -239,7 +223,8 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 
 				<label className="flex items-center gap-2 text-base">
 					<input
-						type="checkbox" className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+						type="checkbox"
+						className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
 						checked={isCurrent}
 						onChange={(event) => {
 							setIsCurrent(event.target.checked);
@@ -249,34 +234,26 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 					<Trans>I currently work here</Trans>
 				</label>
 
-				<Button
-					type="submit"
-					className="w-fit"
-					disabled={!canCreate || createEmployment.isPending}
-				>
-					{createEmployment.isPending ? (
-						<Trans>Adding...</Trans>
-					) : (
-						<Trans>Add employment</Trans>
-					)}
+				<Button type="submit" className="w-fit" disabled={!canCreate || createEmployment.isPending}>
+					{createEmployment.isPending ? <Trans>Adding...</Trans> : <Trans>Add employment</Trans>}
 				</Button>
 			</form>
 
 			{createEmployment.isError ? (
-				<p className="text-sm text-destructive">
+				<p className="text-destructive text-sm">
 					<Trans>Could not add employment.</Trans>
 				</p>
 			) : null}
 
 			<div className="space-y-3">
 				{profileQuery.isLoading ? (
-					<p className="text-sm text-muted-foreground">
+					<p className="text-muted-foreground text-sm">
 						<Trans>Loading experience...</Trans>
 					</p>
 				) : null}
 
 				{!profileQuery.isLoading && employments.length === 0 ? (
-					<p className="text-sm text-muted-foreground">
+					<p className="text-muted-foreground text-sm">
 						<Trans>No work experience has been added yet.</Trans>
 					</p>
 				) : null}
@@ -288,31 +265,36 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 								<div className="grid gap-3 md:grid-cols-2">
 									<Input
 										className="w-full"
-										aria-label={t`Company`} placeholder={t`Company`}
+										aria-label={t`Company`}
+										placeholder={t`Company`}
 										value={editCompany}
 										onChange={(event) => setEditCompany(event.target.value)}
 									/>
 									<Input
 										className="w-full"
-										aria-label={t`Job title`} placeholder={t`Job title`}
+										aria-label={t`Job title`}
+										placeholder={t`Job title`}
 										value={editJobTitle}
 										onChange={(event) => setEditJobTitle(event.target.value)}
 									/>
 									<Input
 										className="w-full"
-										aria-label={t`Location`} placeholder={t`Location`}
+										aria-label={t`Location`}
+										placeholder={t`Location`}
 										value={editLocation}
 										onChange={(event) => setEditLocation(event.target.value)}
 									/>
 									<Input
 										className="w-full"
-										aria-label={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`} placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+										aria-label={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+										placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										value={editStartDate}
 										onChange={(event) => setEditStartDate(event.target.value)}
 									/>
 									<Input
 										className="w-full"
-										aria-label={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`} placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+										aria-label={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+										placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										value={editEndDate}
 										disabled={editIsCurrent}
 										onChange={(event) => setEditEndDate(event.target.value)}
@@ -321,7 +303,8 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 
 								<label className="flex items-center gap-2 text-base">
 									<input
-										type="checkbox" className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+										type="checkbox"
+										className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
 										checked={editIsCurrent}
 										onChange={(event) => {
 											setEditIsCurrent(event.target.checked);
@@ -334,7 +317,8 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 								<div className="flex flex-wrap gap-2">
 									<Button
 										type="button"
-										variant="outline" size="sm"
+										variant="outline"
+										size="sm"
 										disabled={!canUpdate || updateEmployment.isPending}
 										onClick={() =>
 											updateEmployment.mutate({
@@ -343,22 +327,17 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 												jobTitle: editJobTitle.trim() || null,
 												location: editLocation.trim() || null,
 												startDate: editStartDate.trim() || null,
-												endDate: editIsCurrent
-													? null
-													: editEndDate.trim() || null,
+												endDate: editIsCurrent ? null : editEndDate.trim() || null,
 												isCurrent: editIsCurrent,
 											})
 										}
 									>
-										{updateEmployment.isPending ? (
-											<Trans>Saving...</Trans>
-										) : (
-											<Trans>Save</Trans>
-										)}
+										{updateEmployment.isPending ? <Trans>Saving...</Trans> : <Trans>Save</Trans>}
 									</Button>
 									<Button
 										type="button"
-										variant="outline" size="sm"
+										variant="outline"
+										size="sm"
 										disabled={updateEmployment.isPending}
 										onClick={() => setEditingId(null)}
 									>
@@ -369,31 +348,30 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 						) : (
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 								<div className="min-w-0 space-y-1">
-									<p className="font-medium">
-										{employment.jobTitle || employment.company || t`Employment`}
-									</p>
+									<p className="font-medium">{employment.jobTitle || employment.company || t`Employment`}</p>
 									{employment.jobTitle && employment.company ? (
-										<p className="text-sm text-muted-foreground">
-											{employment.company}
-										</p>
+										<p className="text-muted-foreground text-sm">{employment.company}</p>
 									) : null}
-									<p className="text-sm text-muted-foreground">
+									<p className="text-muted-foreground text-sm">
 										{employment.startDate || "?"} {" – "}
-										{employment.isCurrent
-											? t`Present`
-											: employment.endDate || "?"}
+										{employment.isCurrent ? t`Present` : employment.endDate || "?"}
 									</p>
-									{employment.location ? (
-										<p className="text-sm text-muted-foreground">
-											{employment.location}
-										</p>
-									) : null}
+									{employment.location ? <p className="text-muted-foreground text-sm">{employment.location}</p> : null}
 								</div>
-
+								{!employment.company ? (
+									<p
+										role="status"
+										data-testid={`cvmate-incomplete-employment-${employment.id}`}
+										className="rounded-md border border-orange-200 bg-orange-50 p-2 text-orange-900 text-sm"
+									>
+										<Trans>Complete this employment before using it in a CV. Required field: Company.</Trans>
+									</p>
+								) : null}{" "}
 								<div className="flex flex-wrap gap-2 sm:shrink-0">
 									<Button
 										type="button"
-										variant="outline" size="sm"
+										variant="outline"
+										size="sm"
 										onClick={() => {
 											setEditingId(employment.id);
 											setEditCompany(employment.company ?? "");
@@ -408,11 +386,10 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 									</Button>
 									<Button
 										type="button"
-										variant="outline" size="sm"
+										variant="outline"
+										size="sm"
 										disabled={deleteEmployment.isPending}
-										onClick={() =>
-											deleteEmployment.mutate({ id: employment.id })
-										}
+										onClick={() => deleteEmployment.mutate({ id: employment.id })}
 									>
 										<Trans>Delete</Trans>
 									</Button>
@@ -424,32 +401,24 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 							.filter((link) => link.employmentId === employment.id)
 							.sort((a, b) => a.sortOrder - b.sortOrder)
 							.map((link, index, links) => {
-								const fact = experienceFacts.find(
-									(item) => item.id === link.experienceFactId,
-								);
+								const fact = experienceFacts.find((item) => item.id === link.experienceFactId);
 								if (!fact) return null;
 
 								return (
-									<div
-										key={link.experienceFactId}
-										className="mt-3 rounded-input bg-muted px-3 py-2"
-									>
+									<div key={link.experienceFactId} className="mt-3 rounded-input bg-muted px-3 py-2">
 										{editingFactId === fact.id ? (
 											<div className="flex flex-wrap gap-2">
 												<Input
 													className="min-w-0 flex-1"
-													aria-label={t`Responsibility`} value={editFactText}
-													onChange={(event) =>
-														setEditFactText(event.target.value)
-													}
+													aria-label={t`Responsibility`}
+													value={editFactText}
+													onChange={(event) => setEditFactText(event.target.value)}
 												/>
 												<Button
 													type="button"
-													variant="outline" size="sm"
-													disabled={
-														!editFactText.trim() ||
-														updateExperienceFact.isPending
-													}
+													variant="outline"
+													size="sm"
+													disabled={!editFactText.trim() || updateExperienceFact.isPending}
 													onClick={() =>
 														updateExperienceFact.mutate({
 															id: fact.id,
@@ -457,15 +426,12 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 														})
 													}
 												>
-													{updateExperienceFact.isPending ? (
-														<Trans>Saving...</Trans>
-													) : (
-														<Trans>Save</Trans>
-													)}
+													{updateExperienceFact.isPending ? <Trans>Saving...</Trans> : <Trans>Save</Trans>}
 												</Button>
 												<Button
 													type="button"
-													variant="outline" size="sm"
+													variant="outline"
+													size="sm"
 													disabled={updateExperienceFact.isPending}
 													onClick={() => {
 														setEditingFactId(null);
@@ -480,10 +446,10 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 												<p className="min-w-0 flex-1 text-sm">{fact.text}</p>
 												<Button
 													type="button"
-													variant="outline" size="sm" className="shrink-0"
-													disabled={
-														index === 0 || reorderEmploymentFact.isPending
-													}
+													variant="outline"
+													size="sm"
+													className="shrink-0"
+													disabled={index === 0 || reorderEmploymentFact.isPending}
 													onClick={() => {
 														const previous = links[index - 1];
 														if (!previous) return;
@@ -501,11 +467,10 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 												</Button>
 												<Button
 													type="button"
-													variant="outline" size="sm" className="shrink-0"
-													disabled={
-														index === links.length - 1 ||
-														reorderEmploymentFact.isPending
-													}
+													variant="outline"
+													size="sm"
+													className="shrink-0"
+													disabled={index === links.length - 1 || reorderEmploymentFact.isPending}
 													onClick={() => {
 														const next = links[index + 1];
 														if (!next) return;
@@ -523,7 +488,9 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 												</Button>
 												<Button
 													type="button"
-													variant="outline" size="sm" className="shrink-0"
+													variant="outline"
+													size="sm"
+													className="shrink-0"
 													onClick={() => {
 														setEditingFactId(fact.id);
 														setEditFactText(fact.text);
@@ -533,7 +500,9 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 												</Button>
 												<Button
 													type="button"
-													variant="outline" size="sm" className="shrink-0"
+													variant="outline"
+													size="sm"
+													className="shrink-0"
 													disabled={unlinkEmploymentFact.isPending}
 													onClick={() =>
 														unlinkEmploymentFact.mutate({
@@ -561,8 +530,7 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 								const sortOrder =
 									employmentFacts
 										.filter((link) => link.employmentId === employment.id)
-										.reduce((max, link) => Math.max(max, link.sortOrder), -1) +
-									1;
+										.reduce((max, link) => Math.max(max, link.sortOrder), -1) + 1;
 
 								createAndLinkFact.mutate({
 									employmentId: employment.id,
@@ -573,7 +541,8 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 						>
 							<Input
 								className="min-w-0 flex-1"
-								aria-label={t`Responsibility`} placeholder={t`Responsibility`}
+								aria-label={t`Responsibility`}
+								placeholder={t`Responsibility`}
 								value={factTextByEmployment[employment.id] ?? ""}
 								onChange={(event) =>
 									setFactTextByEmployment((current) => ({
@@ -584,14 +553,12 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 							/>
 							<Button
 								type="submit"
-								variant="outline" size="sm" className="shrink-0"
-								disabled={
-									!(factTextByEmployment[employment.id] ?? "").trim() ||
-									createAndLinkFact.isPending
-								}
+								variant="outline"
+								size="sm"
+								className="shrink-0"
+								disabled={!(factTextByEmployment[employment.id] ?? "").trim() || createAndLinkFact.isPending}
 							>
-								{createAndLinkFact.isPending &&
-								createAndLinkFact.variables?.employmentId === employment.id ? (
+								{createAndLinkFact.isPending && createAndLinkFact.variables?.employmentId === employment.id ? (
 									<Trans>Adding...</Trans>
 								) : (
 									<Trans>Add responsibility</Trans>
@@ -602,17 +569,17 @@ className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 				))}
 
 				{createAndLinkFact.isError ? (
-					<p className="text-sm text-destructive">
+					<p className="text-destructive text-sm">
 						<Trans>Could not add the experience fact.</Trans>
 					</p>
 				) : null}
 				{updateEmployment.isError ? (
-					<p className="text-sm text-destructive">
+					<p className="text-destructive text-sm">
 						<Trans>Could not update employment.</Trans>
 					</p>
 				) : null}
 				{deleteEmployment.isError ? (
-					<p className="text-sm text-destructive">
+					<p className="text-destructive text-sm">
 						<Trans>Could not delete employment.</Trans>
 					</p>
 				) : null}

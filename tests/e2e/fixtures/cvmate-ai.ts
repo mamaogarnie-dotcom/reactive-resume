@@ -114,6 +114,13 @@ function responseFor(text: string): { stage: CvmateAiStage; content: string } {
 					},
 				],
 				gapRequirementIds: [gapRequirementId],
+				gapSuggestions: [
+					{
+						requirementId: gapRequirementId,
+						kind: "tool",
+						text: "Jira",
+					},
+				],
 			}),
 		};
 	}

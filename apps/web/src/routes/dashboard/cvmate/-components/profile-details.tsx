@@ -1,23 +1,18 @@
 import type { MessageDescriptor } from "@lingui/core";
+import type { RecruitmentClauseLanguage, RecruitmentClauseScope } from "@reactive-resume/utils/recruitment-clause";
+import type { FormEvent } from "react";
 import { msg } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
-import {
-getDefaultRecruitmentClause,
-type RecruitmentClauseLanguage,
-type RecruitmentClauseScope,
-} from "@reactive-resume/utils/recruitment-clause";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { getDefaultRecruitmentClause } from "@reactive-resume/utils/recruitment-clause";
 import { orpc } from "@/libs/orpc/client";
 
-type ProfileAggregate = NonNullable<
-	Awaited<ReturnType<typeof orpc.cvmateProfile.getCurrent.call>>
->;
+type ProfileAggregate = NonNullable<Awaited<ReturnType<typeof orpc.cvmateProfile.getCurrent.call>>>;
 
 type DetailedKind =
 	| "project"
@@ -269,10 +264,7 @@ function emptyValues(fields: readonly FieldDefinition[]): FormValues {
 	return Object.fromEntries(fields.map((field) => [field.key, ""]));
 }
 
-function itemToValues(
-	item: GenericItem,
-	fields: readonly FieldDefinition[],
-): FormValues {
+function itemToValues(item: GenericItem, fields: readonly FieldDefinition[]): FormValues {
 	return Object.fromEntries(
 		fields.map((field) => {
 			const value = item[field.key];
@@ -281,10 +273,26 @@ function itemToValues(
 	);
 }
 
-function getDetailedItems(
-	profile: ProfileAggregate | null | undefined,
-	kind: DetailedKind,
-): GenericItem[] {
+function requiredFieldKey(kind: DetailedKind): string | null {
+	switch (kind) {
+		case "project":
+		case "certification":
+		case "award":
+		case "reference":
+		case "license":
+			return "name";
+		case "education":
+			return "institution";
+		case "volunteer":
+			return "organization";
+		case "language":
+			return "language";
+		case "course":
+			return null;
+	}
+}
+
+function getDetailedItems(profile: ProfileAggregate | null | undefined, kind: DetailedKind): GenericItem[] {
 	if (!profile) return [];
 
 	switch (kind) {
@@ -309,14 +317,10 @@ function getDetailedItems(
 	}
 }
 
-async function createDetailed(
-	kind: DetailedKind,
-	values: FormValues,
-	sortOrder: number,
-) {
+async function createDetailed(kind: DetailedKind, values: FormValues, sortOrder: number) {
 	switch (kind) {
 		case "project":
-			return orpc.cvmateProfile.createProject.call({
+			return await orpc.cvmateProfile.createProject.call({
 				name: nullable(values.name),
 				company: nullable(values.company),
 				startDate: nullable(values.startDate),
@@ -325,7 +329,7 @@ async function createDetailed(
 				sortOrder,
 			});
 		case "education":
-			return orpc.cvmateProfile.createEducation.call({
+			return await orpc.cvmateProfile.createEducation.call({
 				institution: nullable(values.institution),
 				fieldOfStudy: nullable(values.fieldOfStudy),
 				specialization: nullable(values.specialization),
@@ -336,7 +340,7 @@ async function createDetailed(
 				sortOrder,
 			});
 		case "course":
-			return orpc.cvmateProfile.createCourse.call({
+			return await orpc.cvmateProfile.createCourse.call({
 				name: nullable(values.name),
 				organizer: nullable(values.organizer),
 				date: nullable(values.date),
@@ -344,7 +348,7 @@ async function createDetailed(
 				sortOrder,
 			});
 		case "certification":
-			return orpc.cvmateProfile.createCertification.call({
+			return await orpc.cvmateProfile.createCertification.call({
 				name: nullable(values.name),
 				issuingOrganization: nullable(values.issuingOrganization),
 				issueDate: nullable(values.issueDate),
@@ -355,7 +359,7 @@ async function createDetailed(
 				sortOrder,
 			});
 		case "volunteer":
-			return orpc.cvmateProfile.createVolunteer.call({
+			return await orpc.cvmateProfile.createVolunteer.call({
 				organization: nullable(values.organization),
 				role: nullable(values.role),
 				date: nullable(values.date),
@@ -363,13 +367,13 @@ async function createDetailed(
 				sortOrder,
 			});
 		case "language":
-			return orpc.cvmateProfile.createLanguage.call({
+			return await orpc.cvmateProfile.createLanguage.call({
 				language: nullable(values.language),
 				level: nullable(values.level),
 				sortOrder,
 			});
 		case "award":
-			return orpc.cvmateProfile.createAward.call({
+			return await orpc.cvmateProfile.createAward.call({
 				name: nullable(values.name),
 				organizer: nullable(values.organizer),
 				date: nullable(values.date),
@@ -377,7 +381,7 @@ async function createDetailed(
 				sortOrder,
 			});
 		case "reference":
-			return orpc.cvmateProfile.createReference.call({
+			return await orpc.cvmateProfile.createReference.call({
 				name: nullable(values.name),
 				issuer: nullable(values.issuer),
 				date: nullable(values.date),
@@ -385,7 +389,7 @@ async function createDetailed(
 				sortOrder,
 			});
 		case "license":
-			return orpc.cvmateProfile.createLicense.call({
+			return await orpc.cvmateProfile.createLicense.call({
 				name: nullable(values.name),
 				date: nullable(values.date),
 				description: nullable(values.description),
@@ -394,14 +398,10 @@ async function createDetailed(
 	}
 }
 
-async function updateDetailed(
-	kind: DetailedKind,
-	id: string,
-	values: FormValues,
-) {
+async function updateDetailed(kind: DetailedKind, id: string, values: FormValues) {
 	switch (kind) {
 		case "project":
-			return orpc.cvmateProfile.updateProject.call({
+			return await orpc.cvmateProfile.updateProject.call({
 				id,
 				name: nullable(values.name),
 				company: nullable(values.company),
@@ -410,7 +410,7 @@ async function updateDetailed(
 				description: nullable(values.description),
 			});
 		case "education":
-			return orpc.cvmateProfile.updateEducation.call({
+			return await orpc.cvmateProfile.updateEducation.call({
 				id,
 				institution: nullable(values.institution),
 				fieldOfStudy: nullable(values.fieldOfStudy),
@@ -421,7 +421,7 @@ async function updateDetailed(
 				description: nullable(values.description),
 			});
 		case "course":
-			return orpc.cvmateProfile.updateCourse.call({
+			return await orpc.cvmateProfile.updateCourse.call({
 				id,
 				name: nullable(values.name),
 				organizer: nullable(values.organizer),
@@ -429,7 +429,7 @@ async function updateDetailed(
 				description: nullable(values.description),
 			});
 		case "certification":
-			return orpc.cvmateProfile.updateCertification.call({
+			return await orpc.cvmateProfile.updateCertification.call({
 				id,
 				name: nullable(values.name),
 				issuingOrganization: nullable(values.issuingOrganization),
@@ -440,7 +440,7 @@ async function updateDetailed(
 				description: nullable(values.description),
 			});
 		case "volunteer":
-			return orpc.cvmateProfile.updateVolunteer.call({
+			return await orpc.cvmateProfile.updateVolunteer.call({
 				id,
 				organization: nullable(values.organization),
 				role: nullable(values.role),
@@ -448,13 +448,13 @@ async function updateDetailed(
 				description: nullable(values.description),
 			});
 		case "language":
-			return orpc.cvmateProfile.updateLanguage.call({
+			return await orpc.cvmateProfile.updateLanguage.call({
 				id,
 				language: nullable(values.language),
 				level: nullable(values.level),
 			});
 		case "award":
-			return orpc.cvmateProfile.updateAward.call({
+			return await orpc.cvmateProfile.updateAward.call({
 				id,
 				name: nullable(values.name),
 				organizer: nullable(values.organizer),
@@ -462,7 +462,7 @@ async function updateDetailed(
 				description: nullable(values.description),
 			});
 		case "reference":
-			return orpc.cvmateProfile.updateReference.call({
+			return await orpc.cvmateProfile.updateReference.call({
 				id,
 				name: nullable(values.name),
 				issuer: nullable(values.issuer),
@@ -470,7 +470,7 @@ async function updateDetailed(
 				description: nullable(values.description),
 			});
 		case "license":
-			return orpc.cvmateProfile.updateLicense.call({
+			return await orpc.cvmateProfile.updateLicense.call({
 				id,
 				name: nullable(values.name),
 				date: nullable(values.date),
@@ -482,23 +482,23 @@ async function updateDetailed(
 async function deleteDetailed(kind: DetailedKind, id: string) {
 	switch (kind) {
 		case "project":
-			return orpc.cvmateProfile.deleteProject.call({ id });
+			return await orpc.cvmateProfile.deleteProject.call({ id });
 		case "education":
-			return orpc.cvmateProfile.deleteEducation.call({ id });
+			return await orpc.cvmateProfile.deleteEducation.call({ id });
 		case "course":
-			return orpc.cvmateProfile.deleteCourse.call({ id });
+			return await orpc.cvmateProfile.deleteCourse.call({ id });
 		case "certification":
-			return orpc.cvmateProfile.deleteCertification.call({ id });
+			return await orpc.cvmateProfile.deleteCertification.call({ id });
 		case "volunteer":
-			return orpc.cvmateProfile.deleteVolunteer.call({ id });
+			return await orpc.cvmateProfile.deleteVolunteer.call({ id });
 		case "language":
-			return orpc.cvmateProfile.deleteLanguage.call({ id });
+			return await orpc.cvmateProfile.deleteLanguage.call({ id });
 		case "award":
-			return orpc.cvmateProfile.deleteAward.call({ id });
+			return await orpc.cvmateProfile.deleteAward.call({ id });
 		case "reference":
-			return orpc.cvmateProfile.deleteReference.call({ id });
+			return await orpc.cvmateProfile.deleteReference.call({ id });
 		case "license":
-			return orpc.cvmateProfile.deleteLicense.call({ id });
+			return await orpc.cvmateProfile.deleteLicense.call({ id });
 	}
 }
 
@@ -518,18 +518,13 @@ function RecordFields({
 	return (
 		<div className="grid gap-3 md:grid-cols-2">
 			{fields.map((field) => (
-				<div
-					key={field.key}
-					className={`space-y-1 text-sm ${field.wide ? "md:col-span-2" : ""}`}
-				>
+				<div key={field.key} className={`space-y-1 text-sm ${field.wide ? "md:col-span-2" : ""}`}>
 					<span className="font-medium">{i18n.t(field.label)}</span>
 					{field.multiline ? (
 						<Textarea
 							className="min-h-24 resize-y"
 							aria-label={i18n.t(field.label)}
-							placeholder={
-								field.placeholder ? i18n.t(field.placeholder) : undefined
-							}
+							placeholder={field.placeholder ? i18n.t(field.placeholder) : undefined}
 							value={values[field.key] ?? ""}
 							disabled={disabled}
 							onChange={(event) => onChange(field.key, event.target.value)}
@@ -539,9 +534,7 @@ function RecordFields({
 							className="w-full"
 							aria-label={i18n.t(field.label)}
 							type={field.type ?? "text"}
-							placeholder={
-								field.placeholder ? i18n.t(field.placeholder) : undefined
-							}
+							placeholder={field.placeholder ? i18n.t(field.placeholder) : undefined}
 							value={values[field.key] ?? ""}
 							disabled={disabled}
 							onChange={(event) => onChange(field.key, event.target.value)}
@@ -555,16 +548,10 @@ function RecordFields({
 
 function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 	const { i18n } = useLingui();
-	const profileQuery = useQuery(
-		orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
-	);
-	const [form, setForm] = useState<FormValues>(() =>
-		emptyValues(definition.fields),
-	);
+	const profileQuery = useQuery(orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }));
+	const [form, setForm] = useState<FormValues>(() => emptyValues(definition.fields));
 	const [editingId, setEditingId] = useState<string | null>(null);
-	const [editForm, setEditForm] = useState<FormValues>(() =>
-		emptyValues(definition.fields),
-	);
+	const [editForm, setEditForm] = useState<FormValues>(() => emptyValues(definition.fields));
 
 	const items = getDetailedItems(profileQuery.data, definition.kind)
 		.slice()
@@ -595,20 +582,19 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 		onSuccess: () => void profileQuery.refetch(),
 	});
 
-	const hasCreateContent = Object.values(form).some(
-		(value) => value.trim().length > 0,
-	);
-	const hasEditContent = Object.values(editForm).some(
-		(value) => value.trim().length > 0,
-	);
+	const hasCreateContent = Object.values(form).some((value) => value.trim().length > 0);
+	const hasEditContent = Object.values(editForm).some((value) => value.trim().length > 0);
 
 	return (
-		<section aria-labelledby={`master-profile-${definition.kind}`} className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6">
+		<section
+			aria-labelledby={`master-profile-${definition.kind}`}
+			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+		>
 			<div>
-				<h2 id={`master-profile-${definition.kind}`} className="text-xl font-semibold text-foreground">{i18n.t(definition.title)}</h2>
-				<p className="text-sm text-muted-foreground">
-					{i18n.t(definition.description)}
-				</p>
+				<h2 id={`master-profile-${definition.kind}`} className="font-semibold text-foreground text-xl">
+					{i18n.t(definition.title)}
+				</h2>
+				<p className="text-muted-foreground text-sm">{i18n.t(definition.description)}</p>
 			</div>
 
 			<form
@@ -622,23 +608,16 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 					fields={definition.fields}
 					values={form}
 					disabled={createMutation.isPending}
-					onChange={(key, value) =>
-						setForm((current) => ({ ...current, [key]: value }))
-					}
+					onChange={(key, value) => setForm((current) => ({ ...current, [key]: value }))}
 				/>
-				<Button
-					type="submit"
-					className="w-fit"
-					disabled={!hasCreateContent || createMutation.isPending}
-				>
-					{createMutation.isPending ? (
-						<Trans>Adding...</Trans>
-					) : (
-						<Trans>Add</Trans>
-					)}
+				<Button type="submit" className="w-fit" disabled={!hasCreateContent || createMutation.isPending}>
+					{createMutation.isPending ? <Trans>Adding...</Trans> : <Trans>Add</Trans>}
 				</Button>
 				{createMutation.isError ? (
-					<p role="alert" className="rounded-input border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+					<p
+						role="alert"
+						className="rounded-input border border-destructive/30 bg-destructive/10 p-3 text-destructive text-sm"
+					>
 						<Trans>Could not add this record.</Trans>
 					</p>
 				) : null}
@@ -646,12 +625,12 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 
 			<div className="space-y-2">
 				{profileQuery.isLoading ? (
-					<p role="status" className="rounded-input border border-border bg-muted p-3 text-sm text-muted-foreground">
+					<p role="status" className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
 						<Trans>Loading...</Trans>
 					</p>
 				) : null}
 				{!profileQuery.isLoading && items.length === 0 ? (
-					<p className="rounded-input border border-border bg-muted p-3 text-sm text-muted-foreground">
+					<p className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
 						<Trans>No records added yet.</Trans>
 					</p>
 				) : null}
@@ -674,19 +653,17 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 								<div className="flex flex-wrap gap-2">
 									<Button
 										type="button"
-										variant="outline" size="sm"
+										variant="outline"
+										size="sm"
 										disabled={!hasEditContent || updateMutation.isPending}
 										onClick={() => updateMutation.mutate()}
 									>
-										{updateMutation.isPending ? (
-											<Trans>Saving...</Trans>
-										) : (
-											<Trans>Save</Trans>
-										)}
+										{updateMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save</Trans>}
 									</Button>
 									<Button
 										type="button"
-										variant="outline" size="sm"
+										variant="outline"
+										size="sm"
 										disabled={updateMutation.isPending}
 										onClick={() => setEditingId(null)}
 									>
@@ -699,23 +676,42 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 								<div className="min-w-0 space-y-1 text-sm">
 									{definition.fields.map((field) => {
 										const value = item[field.key];
-										if (typeof value !== "string" || value.trim().length === 0)
-											return null;
+										if (typeof value !== "string" || value.trim().length === 0) return null;
 
 										return (
 											<p key={field.key}>
-												<span className="font-medium">
-													{i18n.t(field.label)}:
-												</span>{" "}
+												<span className="font-medium">{i18n.t(field.label)}:</span>{" "}
 												<span className="whitespace-pre-wrap">{value}</span>
 											</p>
 										);
 									})}
 								</div>
-								<div className="flex flex-wrap gap-2 sm:shrink-0">
+								{(() => {
+									const requiredKey = requiredFieldKey(definition.kind);
+									if (!requiredKey) return null;
+
+									const requiredValue = item[requiredKey];
+									if (typeof requiredValue === "string" && requiredValue.trim().length > 0) {
+										return null;
+									}
+
+									const requiredField = definition.fields.find((field) => field.key === requiredKey);
+
+									return (
+										<p
+											role="status"
+											data-testid={`cvmate-incomplete-${definition.kind}-${item.id}`}
+											className="rounded-md border border-orange-200 bg-orange-50 p-2 text-orange-900 text-sm"
+										>
+											<Trans>Complete this record before using it in a CV.</Trans> <Trans>Required field:</Trans>{" "}
+											{requiredField ? i18n.t(requiredField.label) : requiredKey}
+										</p>
+									);
+								})()} <div className="flex flex-wrap gap-2 sm:shrink-0">
 									<Button
 										type="button"
-										variant="outline" size="sm"
+										variant="outline"
+										size="sm"
 										onClick={() => {
 											setEditingId(item.id);
 											setEditForm(itemToValues(item, definition.fields));
@@ -725,7 +721,8 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 									</Button>
 									<Button
 										type="button"
-										variant="outline" size="sm"
+										variant="outline"
+										size="sm"
 										disabled={deleteMutation.isPending}
 										onClick={() => deleteMutation.mutate(item.id)}
 									>
@@ -751,9 +748,7 @@ function ListSection({
 	placeholder: MessageDescriptor;
 }) {
 	const { i18n } = useLingui();
-	const profileQuery = useQuery(
-		orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
-	);
+	const profileQuery = useQuery(orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }));
 	const [value, setValue] = useState("");
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editValue, setEditValue] = useState("");
@@ -786,8 +781,13 @@ function ListSection({
 	);
 
 	return (
-		<section aria-labelledby={`master-profile-${kind}`} className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6">
-			<h2 id={`master-profile-${kind}`} className="text-xl font-semibold text-foreground">{i18n.t(title)}</h2>
+		<section
+			aria-labelledby={`master-profile-${kind}`}
+			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+		>
+			<h2 id={`master-profile-${kind}`} className="font-semibold text-foreground text-xl">
+				{i18n.t(title)}
+			</h2>
 			<form
 				className="flex flex-wrap gap-2"
 				onSubmit={(event) => {
@@ -803,16 +803,13 @@ function ListSection({
 			>
 				<Input
 					className="min-w-0 flex-1"
-					aria-label={i18n.t(placeholder)} placeholder={i18n.t(placeholder)}
+					aria-label={i18n.t(placeholder)}
+					placeholder={i18n.t(placeholder)}
 					value={value}
 					disabled={createMutation.isPending}
 					onChange={(event) => setValue(event.target.value)}
 				/>
-				<Button
-					type="submit"
-					className="shrink-0"
-					disabled={!value.trim() || createMutation.isPending}
-				>
+				<Button type="submit" className="shrink-0" disabled={!value.trim() || createMutation.isPending}>
 					<Trans>Add</Trans>
 				</Button>
 			</form>
@@ -832,17 +829,14 @@ function ListSection({
 						>
 							<Input
 								className="w-full"
-								aria-label={i18n.t(title)} value={editValue}
+								aria-label={i18n.t(title)}
+								value={editValue}
 								onChange={(event) => setEditValue(event.target.value)}
 							/>
 							<Button type="submit" variant="outline" size="sm">
 								<Trans>Save</Trans>
 							</Button>
-							<Button
-								type="button"
-								variant="outline" size="sm"
-								onClick={() => setEditingId(null)}
-							>
+							<Button type="button" variant="outline" size="sm" onClick={() => setEditingId(null)}>
 								<Trans>Cancel</Trans>
 							</Button>
 						</form>
@@ -854,7 +848,9 @@ function ListSection({
 							<span>{item.value}</span>
 							<Button
 								type="button"
-								variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground"
+								variant="ghost"
+								size="sm"
+								className="text-muted-foreground hover:text-foreground"
 								onClick={() => {
 									setEditingId(item.id);
 									setEditValue(item.value);
@@ -864,7 +860,9 @@ function ListSection({
 							</Button>
 							<Button
 								type="button"
-								variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive"
+								variant="ghost"
+								size="sm"
+								className="text-muted-foreground hover:text-destructive"
 								disabled={deleteMutation.isPending}
 								onClick={() => deleteMutation.mutate({ id: item.id })}
 							>
@@ -875,7 +873,7 @@ function ListSection({
 				)}
 			</div>
 			{!profileQuery.isLoading && items.length === 0 ? (
-				<p className="rounded-input border border-border bg-muted p-3 text-sm text-muted-foreground">
+				<p className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
 					<Trans>Nothing added yet.</Trans>
 				</p>
 			) : null}
@@ -888,292 +886,249 @@ type ClauseLanguage = RecruitmentClauseLanguage;
 type ClauseKey = `${ClauseScope}:${ClauseLanguage}`;
 
 type ClauseDraft = {
-content: string;
-isDefault: boolean;
+	content: string;
+	isDefault: boolean;
 };
 
 const clauseScopeDefinitions: readonly {
-scope: ClauseScope;
-title: MessageDescriptor;
+	scope: ClauseScope;
+	title: MessageDescriptor;
 }[] = [
-{
-scope: "current",
-title: msg`Current recruitment only`,
-},
-{
-scope: "current_and_future",
-title: msg`Current and future recruitment processes`,
-},
+	{
+		scope: "current",
+		title: msg`Current recruitment only`,
+	},
+	{
+		scope: "current_and_future",
+		title: msg`Current and future recruitment processes`,
+	},
 ];
 
 const clauseLanguageDefinitions: readonly {
-language: ClauseLanguage;
-title: MessageDescriptor;
+	language: ClauseLanguage;
+	title: MessageDescriptor;
 }[] = [
-{
-language: "pl",
-title: msg`Polish version`,
-},
-{
-language: "en",
-title: msg`English version`,
-},
+	{
+		language: "pl",
+		title: msg`Polish version`,
+	},
+	{
+		language: "en",
+		title: msg`English version`,
+	},
 ];
 
 function clauseKey(scope: ClauseScope, language: ClauseLanguage): ClauseKey {
-return `${scope}:${language}`;
+	return `${scope}:${language}`;
 }
 
 function emptyClauseDrafts(): Record<ClauseKey, ClauseDraft> {
-return {
-"current:pl": {
-content: getDefaultRecruitmentClause("current", "pl"),
-isDefault: true,
-},
-"current:en": {
-content: getDefaultRecruitmentClause("current", "en"),
-isDefault: true,
-},
-"current_and_future:pl": {
-content: getDefaultRecruitmentClause("current_and_future", "pl"),
-isDefault: true,
-},
-"current_and_future:en": {
-content: getDefaultRecruitmentClause("current_and_future", "en"),
-isDefault: true,
-},
-};
+	return {
+		"current:pl": {
+			content: getDefaultRecruitmentClause("current", "pl"),
+			isDefault: true,
+		},
+		"current:en": {
+			content: getDefaultRecruitmentClause("current", "en"),
+			isDefault: true,
+		},
+		"current_and_future:pl": {
+			content: getDefaultRecruitmentClause("current_and_future", "pl"),
+			isDefault: true,
+		},
+		"current_and_future:en": {
+			content: getDefaultRecruitmentClause("current_and_future", "en"),
+			isDefault: true,
+		},
+	};
 }
 
 function ClausesSection() {
-const { i18n } = useLingui();
-const profileQuery = useQuery(
-orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }),
-);
-const [drafts, setDrafts] =
-useState<Record<ClauseKey, ClauseDraft>>(emptyClauseDrafts);
+	const { i18n } = useLingui();
+	const profileQuery = useQuery(orpc.cvmateProfile.getCurrent.queryOptions({ input: {} }));
+	const [drafts, setDrafts] = useState<Record<ClauseKey, ClauseDraft>>(emptyClauseDrafts);
 
-useEffect(() => {
-const next = emptyClauseDrafts();
+	useEffect(() => {
+		const next = emptyClauseDrafts();
 
-for (const clause of profileQuery.data?.clauses ?? []) {
-const key = clauseKey(clause.scope, clause.language);
-next[key] = {
-content:
-clause.content ??
-getDefaultRecruitmentClause(clause.scope, clause.language),
-isDefault: clause.content === null,
-};
-}
+		for (const clause of profileQuery.data?.clauses ?? []) {
+			const key = clauseKey(clause.scope, clause.language);
+			next[key] = {
+				content: clause.content ?? getDefaultRecruitmentClause(clause.scope, clause.language),
+				isDefault: clause.content === null,
+			};
+		}
 
-setDrafts(next);
-}, [profileQuery.data?.clauses]);
+		setDrafts(next);
+	}, [profileQuery.data?.clauses]);
 
-const selectedScope =
-clauseScopeDefinitions.find((definition) =>
-(profileQuery.data?.clauses ?? []).some(
-(clause) =>
-clause.scope === definition.scope && clause.isEnabled,
-),
-)?.scope ?? null;
+	const selectedScope =
+		clauseScopeDefinitions.find((definition) =>
+			(profileQuery.data?.clauses ?? []).some((clause) => clause.scope === definition.scope && clause.isEnabled),
+		)?.scope ?? null;
 
-const selectionMutation = useMutation({
-mutationFn: async (nextScope: ClauseScope | null) => {
-const allScopes = clauseScopeDefinitions.map(
-(definition) => definition.scope,
-);
+	const selectionMutation = useMutation({
+		mutationFn: async (nextScope: ClauseScope | null) => {
+			const allScopes = clauseScopeDefinitions.map((definition) => definition.scope);
 
-const orderedScopes =
-nextScope === null
-? allScopes
-: [
-...allScopes.filter((scope) => scope !== nextScope),
-nextScope,
-];
+			const orderedScopes =
+				nextScope === null ? allScopes : [...allScopes.filter((scope) => scope !== nextScope), nextScope];
 
-for (const scope of orderedScopes) {
-for (const definition of clauseLanguageDefinitions) {
-await orpc.cvmateProfile.upsertClause.call({
-scope,
-language: definition.language,
-isEnabled: nextScope === scope,
-});
-}
-}
-},
-onSuccess: () => void profileQuery.refetch(),
-});
+			for (const scope of orderedScopes) {
+				for (const definition of clauseLanguageDefinitions) {
+					await orpc.cvmateProfile.upsertClause.call({
+						scope,
+						language: definition.language,
+						isEnabled: nextScope === scope,
+					});
+				}
+			}
+		},
+		onSuccess: () => void profileQuery.refetch(),
+	});
 
-const saveMutation = useMutation({
-mutationFn: ({
-scope,
-language,
-}: {
-scope: ClauseScope;
-language: ClauseLanguage;
-}) => {
-const draft = drafts[clauseKey(scope, language)];
+	const saveMutation = useMutation({
+		mutationFn: ({ scope, language }: { scope: ClauseScope; language: ClauseLanguage }) => {
+			const draft = drafts[clauseKey(scope, language)];
 
-return orpc.cvmateProfile.upsertClause.call({
-scope,
-language,
-isEnabled: selectedScope === scope,
-content: draft.isDefault ? null : draft.content.trim() || null,
-});
-},
-onSuccess: () => void profileQuery.refetch(),
-});
+			return orpc.cvmateProfile.upsertClause.call({
+				scope,
+				language,
+				isEnabled: selectedScope === scope,
+				content: draft.isDefault ? null : draft.content.trim() || null,
+			});
+		},
+		onSuccess: () => void profileQuery.refetch(),
+	});
 
-const restoreMutation = useMutation({
-mutationFn: ({
-scope,
-language,
-}: {
-scope: ClauseScope;
-language: ClauseLanguage;
-}) =>
-orpc.cvmateProfile.upsertClause.call({
-scope,
-language,
-isEnabled: selectedScope === scope,
-content: null,
-}),
-onSuccess: () => void profileQuery.refetch(),
-});
+	const restoreMutation = useMutation({
+		mutationFn: ({ scope, language }: { scope: ClauseScope; language: ClauseLanguage }) =>
+			orpc.cvmateProfile.upsertClause.call({
+				scope,
+				language,
+				isEnabled: selectedScope === scope,
+				content: null,
+			}),
+		onSuccess: () => void profileQuery.refetch(),
+	});
 
-const mutationPending =
-selectionMutation.isPending ||
-saveMutation.isPending ||
-restoreMutation.isPending;
+	const mutationPending = selectionMutation.isPending || saveMutation.isPending || restoreMutation.isPending;
 
-return (
-<section aria-labelledby="master-profile-recruitment-clauses" className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6">
-<div>
-<h2 id="master-profile-recruitment-clauses" className="text-xl font-semibold text-foreground">
-<Trans>Recruitment clauses</Trans>
-</h2>
-<p className="text-sm text-muted-foreground">
-<Trans>
-Choose one recruitment clause. 1story will automatically use the
-Polish or English version based on the CV language.
-</Trans>
-</p>
-</div>
+	return (
+		<section
+			aria-labelledby="master-profile-recruitment-clauses"
+			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+		>
+			<div>
+				<h2 id="master-profile-recruitment-clauses" className="font-semibold text-foreground text-xl">
+					<Trans>Recruitment clauses</Trans>
+				</h2>
+				<p className="text-muted-foreground text-sm">
+					<Trans>
+						Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV
+						language.
+					</Trans>
+				</p>
+			</div>
 
-<div className="space-y-2 rounded-card border border-border bg-muted p-4">
-<label className="flex items-center gap-2 text-base">
-<input
-type="radio"
-className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-name="recruitment-clause-scope"
-checked={selectedScope === null}
-disabled={mutationPending}
-onChange={() => selectionMutation.mutate(null)}
-/>
-<Trans>Do not add a recruitment clause</Trans>
-</label>
-</div>
+			<div className="space-y-2 rounded-card border border-border bg-muted p-4">
+				<label className="flex items-center gap-2 text-base">
+					<input
+						type="radio"
+						className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
+						name="recruitment-clause-scope"
+						checked={selectedScope === null}
+						disabled={mutationPending}
+						onChange={() => selectionMutation.mutate(null)}
+					/>
+					<Trans>Do not add a recruitment clause</Trans>
+				</label>
+			</div>
 
-<div className="space-y-4">
-{clauseScopeDefinitions.map((scopeDefinition) => (
-<div
-key={scopeDefinition.scope}
-className="space-y-4 rounded-card border border-border bg-background p-4"
->
-<label className="flex items-center gap-2 font-medium text-base">
-<input
-type="radio"
-className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-name="recruitment-clause-scope"
-checked={selectedScope === scopeDefinition.scope}
-disabled={mutationPending}
-onChange={() =>
-selectionMutation.mutate(scopeDefinition.scope)
-}
-/>
-{i18n.t(scopeDefinition.title)}
-</label>
+			<div className="space-y-4">
+				{clauseScopeDefinitions.map((scopeDefinition) => (
+					<div key={scopeDefinition.scope} className="space-y-4 rounded-card border border-border bg-background p-4">
+						<label className="flex items-center gap-2 font-medium text-base">
+							<input
+								type="radio"
+								className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
+								name="recruitment-clause-scope"
+								checked={selectedScope === scopeDefinition.scope}
+								disabled={mutationPending}
+								onChange={() => selectionMutation.mutate(scopeDefinition.scope)}
+							/>
+							{i18n.t(scopeDefinition.title)}
+						</label>
 
-<div className="grid gap-4 lg:grid-cols-2">
-{clauseLanguageDefinitions.map((languageDefinition) => {
-const key = clauseKey(
-scopeDefinition.scope,
-languageDefinition.language,
-);
-const draft = drafts[key];
+						<div className="grid gap-4 lg:grid-cols-2">
+							{clauseLanguageDefinitions.map((languageDefinition) => {
+								const key = clauseKey(scopeDefinition.scope, languageDefinition.language);
+								const draft = drafts[key];
 
-return (
-<div key={key} className="space-y-3">
-<div className="flex items-center justify-between gap-3">
-<p className="font-medium text-sm">
-{i18n.t(languageDefinition.title)}
-</p>
-<p className="text-sm text-muted-foreground">
-{draft.isDefault ? (
-<Trans>1story default</Trans>
-) : (
-<Trans>Custom text</Trans>
-)}
-</p>
-</div>
+								return (
+									<div key={key} className="space-y-3">
+										<div className="flex items-center justify-between gap-3">
+											<p className="font-medium text-sm">{i18n.t(languageDefinition.title)}</p>
+											<p className="text-muted-foreground text-sm">
+												{draft.isDefault ? <Trans>1story default</Trans> : <Trans>Custom text</Trans>}
+											</p>
+										</div>
 
-<Textarea
-className="min-h-24 resize-y"
-aria-label={i18n.t(languageDefinition.title)}
-value={draft.content}
-onChange={(event) =>
-setDrafts((current) => ({
-...current,
-[key]: {
-content: event.target.value,
-isDefault: false,
-},
-}))
-}
-/>
+										<Textarea
+											className="min-h-24 resize-y"
+											aria-label={i18n.t(languageDefinition.title)}
+											value={draft.content}
+											onChange={(event) =>
+												setDrafts((current) => ({
+													...current,
+													[key]: {
+														content: event.target.value,
+														isDefault: false,
+													},
+												}))
+											}
+										/>
 
-<div className="flex flex-wrap gap-2">
-<Button
-type="button"
-variant="outline" size="sm"
-disabled={mutationPending}
-onClick={() =>
-saveMutation.mutate({
-scope: scopeDefinition.scope,
-language: languageDefinition.language,
-})
-}
->
-{saveMutation.isPending ? (
-<Trans>Saving...</Trans>
-) : (
-<Trans>Save clause</Trans>
-)}
-</Button>
+										<div className="flex flex-wrap gap-2">
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												disabled={mutationPending}
+												onClick={() =>
+													saveMutation.mutate({
+														scope: scopeDefinition.scope,
+														language: languageDefinition.language,
+													})
+												}
+											>
+												{saveMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save clause</Trans>}
+											</Button>
 
-<Button
-type="button"
-variant="outline" size="sm"
-disabled={mutationPending || draft.isDefault}
-onClick={() =>
-restoreMutation.mutate({
-scope: scopeDefinition.scope,
-language: languageDefinition.language,
-})
-}
->
-<Trans>Restore default</Trans>
-</Button>
-</div>
-</div>
-);
-})}
-</div>
-</div>
-))}
-</div>
-</section>
-);
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												disabled={mutationPending || draft.isDefault}
+												onClick={() =>
+													restoreMutation.mutate({
+														scope: scopeDefinition.scope,
+														language: languageDefinition.language,
+													})
+												}
+											>
+												<Trans>Restore default</Trans>
+											</Button>
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				))}
+			</div>
+		</section>
+	);
 }
 export function ProfileDetailsSection() {
 	return (
@@ -1185,12 +1140,8 @@ export function ProfileDetailsSection() {
 			</div>
 
 			{detailedDefinitions.map((definition) => (
-
-
-					<DetailedSection key={definition.kind} definition={definition} />
-
+				<DetailedSection key={definition.kind} definition={definition} />
 			))}
-
 
 			<ClausesSection />
 		</div>

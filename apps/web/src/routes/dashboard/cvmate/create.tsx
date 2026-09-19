@@ -32,6 +32,12 @@ type GapEvidenceDraft = {
 	employmentSelectionItemId: string;
 };
 
+type GapSuggestion = {
+	gapId: string;
+	kind: GapEvidenceKind;
+	text: string;
+};
+
 function categoryTitle(category: RequirementCategory) {
 	switch (category) {
 		case "required":
@@ -106,6 +112,65 @@ function selectionLabel(item: SelectionItem) {
 	return item.sourceTextSnapshot?.trim() || sourceTypeLabel(item.sourceType);
 }
 
+function snapshotString(item: SelectionItem, key: string) {
+	const value = item.sourceDataSnapshot[key];
+	return typeof value === "string" ? value.trim() : "";
+}
+
+function selectionCompletenessWarning(item: SelectionItem): string | null {
+	switch (item.sourceType) {
+		case "employment":
+			return snapshotString(item, "company") ? null : t`Add a company before using this employment in the CV.`;
+		case "project":
+			return snapshotString(item, "name") ? null : t`Add a project name before using this record in the CV.`;
+		case "education":
+			return snapshotString(item, "institution")
+				? null
+				: t`Add an institution before using this education record in the CV.`;
+		case "course":
+			return ["name", "organizer", "date", "description"].some((key) => Boolean(snapshotString(item, key)))
+				? null
+				: t`Add course content before using this record in the CV.`;
+		case "certification":
+			return snapshotString(item, "name") ? null : t`Add a certification name before using this record in the CV.`;
+		case "volunteer":
+			return snapshotString(item, "organization")
+				? null
+				: t`Add an organization before using this volunteer record in the CV.`;
+		case "language":
+			return snapshotString(item, "language") ? null : t`Add a language before using this record in the CV.`;
+		case "award":
+			return snapshotString(item, "name") ? null : t`Add an award name before using this record in the CV.`;
+		case "reference":
+			return snapshotString(item, "name") ? null : t`Add a reference name before using this record in the CV.`;
+		case "license":
+			return snapshotString(item, "name") ? null : t`Add a license name before using this record in the CV.`;
+		case "clause":
+			if (item.sourceDataSnapshot.isEnabled !== true) {
+				return t`Enable this clause before using it in the CV.`;
+			}
+			return snapshotString(item, "content") ? null : t`Add clause content before using it in the CV.`;
+		case "custom_section_item": {
+			const section = item.sourceDataSnapshot.section;
+			const sectionKind =
+				section && typeof section === "object" && "kind" in section && typeof section.kind === "string"
+					? section.kind
+					: null;
+			const hasContent = ["title", "subtitle", "date", "description", "url"].some((key) =>
+				Boolean(snapshotString(item, key)),
+			);
+
+			if (sectionKind !== "custom") {
+				return t`This item must belong to a custom section before it can be used in the CV.`;
+			}
+
+			return hasContent ? null : t`Add content before using this custom section item in the CV.`;
+		}
+		default:
+			return null;
+	}
+}
+
 function RouteComponent() {
 	const [rawText, setRawText] = useState("");
 	const [asset, setAsset] = useState<File | null>(null);
@@ -115,6 +180,7 @@ function RouteComponent() {
 	const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([]);
 	const [quickFactTextByEmployment, setQuickFactTextByEmployment] = useState<Record<string, string>>({});
 	const [gapEvidenceDrafts, setGapEvidenceDrafts] = useState<Record<string, GapEvidenceDraft>>({});
+	const [gapSuggestions, setGapSuggestions] = useState<GapSuggestion[]>([]);
 	const [previewResult, setPreviewResult] = useState<BuildPreview | null>(null);
 
 	const analyzeOffer = useMutation({
@@ -174,6 +240,7 @@ function RouteComponent() {
 		onSuccess: (result) => {
 			setSelectionItems(result.selectionItems);
 			setGaps(result.gaps);
+			setGapSuggestions(result.gapSuggestions);
 		},
 	});
 
@@ -503,6 +570,7 @@ function RouteComponent() {
 			]);
 
 			setGaps((items) => items.map((item) => (item.id === gap.id ? gap : item)));
+			setGapSuggestions((items) => items.filter((item) => item.gapId !== gap.id));
 
 			setGapEvidenceDrafts((current) => {
 				const next = { ...current };
@@ -517,6 +585,7 @@ function RouteComponent() {
 		mutationFn: (id: string) => orpc.cvmateBuild.updateGap.call({ id, status: "dismissed" }),
 		onSuccess: (updated) => {
 			setGaps((items) => items.map((item) => (item.id === updated.id ? updated : item)));
+			setGapSuggestions((items) => items.filter((item) => item.gapId !== updated.id));
 		},
 	});
 
@@ -647,6 +716,7 @@ function RouteComponent() {
 		setGeneratedContent([]);
 		setQuickFactTextByEmployment({});
 		setGapEvidenceDrafts({});
+		setGapSuggestions([]);
 		setPreviewResult(null);
 		analyzeOffer.reset();
 		recommendContent.reset();
@@ -662,41 +732,53 @@ function RouteComponent() {
 		materializeCv.reset();
 	};
 
-	const renderSelectionItem = (item: SelectionItem, nested = false) => (
-		<div key={item.id} className={`rounded-lg border bg-card p-3 ${nested ? "ml-6 border-dashed" : ""}`}>
-			<div className="flex items-start gap-3">
-				<input
-					type="checkbox"
-					aria-labelledby={`cvmate-selection-label-${item.id}`}
-					className="mt-1 size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
-					checked={item.selected}
-					disabled={selectionPending}
-					onChange={(event) =>
-						updateSelection.mutate({
-							item,
-							selected: event.target.checked,
-						})
-					}
-				/>
-				<div id={`cvmate-selection-label-${item.id}`} className="min-w-0 flex-1 space-y-1">
-					<div className="flex flex-wrap items-center gap-2">
-						<span className="text-sm">{selectionLabel(item)}</span>
-						<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
-							{sourceTypeLabel(item.sourceType)}
-						</span>
-						{item.recommended ? (
-							<span className="rounded-full bg-muted px-2 py-0.5 font-medium text-sm">
-								<Trans>Recommended</Trans>
+	const renderSelectionItem = (item: SelectionItem, nested = false) => {
+		const completenessWarning = selectionCompletenessWarning(item);
+
+		return (
+			<div key={item.id} className={`rounded-lg border bg-card p-3 ${nested ? "ml-6 border-dashed" : ""}`}>
+				<div className="flex items-start gap-3">
+					<input
+						type="checkbox"
+						aria-labelledby={`cvmate-selection-label-${item.id}`}
+						className="mt-1 size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
+						checked={item.selected}
+						disabled={selectionPending}
+						onChange={(event) =>
+							updateSelection.mutate({
+								item,
+								selected: event.target.checked,
+							})
+						}
+					/>
+					<div id={`cvmate-selection-label-${item.id}`} className="min-w-0 flex-1 space-y-1">
+						<div className="flex flex-wrap items-center gap-2">
+							<span className="text-sm">{selectionLabel(item)}</span>
+							<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
+								{sourceTypeLabel(item.sourceType)}
 							</span>
+							{item.recommended ? (
+								<span className="rounded-full bg-muted px-2 py-0.5 font-medium text-sm">
+									<Trans>Recommended</Trans>
+								</span>
+							) : null}
+						</div>
+						{item.recommendationReason ? (
+							<p className="text-muted-foreground text-sm">{item.recommendationReason}</p>
+						) : null}
+						{completenessWarning ? (
+							<p
+								data-testid={`cvmate-selection-warning-${item.id}`}
+								className="rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-orange-900 text-sm"
+							>
+								{completenessWarning}
+							</p>
 						) : null}
 					</div>
-					{item.recommendationReason ? (
-						<p className="text-muted-foreground text-sm">{item.recommendationReason}</p>
-					) : null}
 				</div>
 			</div>
-		</div>
-	);
+		);
+	};
 	const renderQuickAddResponsibility = (employmentItem: SelectionItem) => {
 		if (employmentItem.sourceType !== "employment") return null;
 
@@ -971,13 +1053,26 @@ function RouteComponent() {
 									) : null}
 
 									<div className="space-y-3">
-										{rootSelectionItems.map((item) => (
-											<div key={item.id} className="space-y-2">
-												{renderSelectionItem(item)}
-												{(childrenByParent.get(item.id) ?? []).map((child) => renderSelectionItem(child, true))}
-												{renderQuickAddResponsibility(item)}
-											</div>
-										))}
+										{rootSelectionItems.map((item) => {
+											const children = childrenByParent.get(item.id) ?? [];
+
+											return (
+												<div key={item.id} className="space-y-2">
+													{renderSelectionItem(item)}
+													{item.sourceType === "employment" && children.length > 0 ? (
+														<div
+															data-testid={`cvmate-responsibility-list-${item.id}`}
+															className="max-h-64 space-y-2 overflow-y-auto pr-1"
+														>
+															{children.map((child) => renderSelectionItem(child, true))}
+														</div>
+													) : (
+														children.map((child) => renderSelectionItem(child, true))
+													)}
+													{renderQuickAddResponsibility(item)}
+												</div>
+											);
+										})}
 									</div>
 
 									{quickAddResponsibility.isError ? (
@@ -1020,6 +1115,7 @@ function RouteComponent() {
 
 												const active =
 													resolveGapWithEvidence.isPending && resolveGapWithEvidence.variables?.gap.id === gap.id;
+												const suggestions = gapSuggestions.filter((suggestion) => suggestion.gapId === gap.id);
 
 												return (
 													<div key={gap.id} className="space-y-3 rounded-md bg-muted/40 p-3">
@@ -1041,6 +1137,44 @@ function RouteComponent() {
 															</Button>
 														</div>
 
+														{suggestions.length > 0 ? (
+															<div className="space-y-2 rounded-lg border border-dashed bg-card p-3">
+																<p className="font-medium text-sm">
+																	<Trans>AI suggestion</Trans>
+																</p>
+																<p className="text-muted-foreground text-sm">
+																	<Trans>
+																		This is only a draft. Use it only if it is true for your real experience.
+																	</Trans>
+																</p>
+																{suggestions.map((suggestion, index) => (
+																	<div
+																		key={`${gap.id}-${suggestion.kind}-${index}`}
+																		className="flex flex-col gap-2 rounded-md bg-muted/40 p-2 sm:flex-row sm:items-center sm:justify-between"
+																	>
+																		<span className="text-sm">{suggestion.text}</span>
+																		<Button
+																			type="button"
+																			variant="outline"
+																			size="sm"
+																			disabled={resolveGapWithEvidence.isPending}
+																			onClick={() =>
+																				setGapEvidenceDrafts((current) => ({
+																					...current,
+																					[gap.id]: {
+																						...draft,
+																						kind: suggestion.kind,
+																						text: suggestion.text,
+																					},
+																				}))
+																			}
+																		>
+																			<Trans>Use suggestion</Trans>
+																		</Button>
+																	</div>
+																))}
+															</div>
+														) : null}
 														<form
 															className="space-y-2 rounded-lg border border-dashed bg-card p-3"
 															onSubmit={(event) => {

@@ -78,6 +78,11 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 
 		await expect(factInSelection).toBeVisible();
 
+		const responsibilityList = selectionSection.locator('[data-testid^="cvmate-responsibility-list-"]').first();
+
+		await expect(responsibilityList).toBeVisible();
+		await expect(responsibilityList).toHaveClass(/max-h-64/);
+		await expect(responsibilityList).toHaveClass(/overflow-y-auto/);
 		const retryRecommendations = selectionSection.getByRole("button", {
 			name: "Retry AI recommendations",
 			exact: true,
@@ -102,8 +107,18 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 		const gapCard = gapTextItem.locator("xpath=ancestor::div[.//form][1]");
 		const gapForm = gapCard.locator("form");
 
-		await gapForm.getByLabel("Type", { exact: true }).selectOption("tool");
-		await gapForm.getByPlaceholder("Profile information", { exact: true }).fill(gapEvidence);
+		await expect(gapCard.getByText("AI suggestion", { exact: true })).toBeVisible();
+		await expect(
+			gapCard.getByText("This is only a draft. Use it only if it is true for your real experience.", {
+				exact: true,
+			}),
+		).toBeVisible();
+		await expect(gapForm.getByPlaceholder("Profile information", { exact: true })).toHaveValue("");
+
+		await gapCard.getByRole("button", { name: "Use suggestion", exact: true }).click();
+
+		await expect(gapForm.getByLabel("Type", { exact: true })).toHaveValue("tool");
+		await expect(gapForm.getByPlaceholder("Profile information", { exact: true })).toHaveValue(gapEvidence);
 
 		await gapForm.getByRole("button", { name: "Add", exact: true }).click();
 

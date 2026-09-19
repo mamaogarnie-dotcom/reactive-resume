@@ -310,8 +310,17 @@ msgstr "Rzeczywisty rozmiar (100%)"
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/table-view.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Add"
 msgstr "Dodaj"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add a certification name before using this record in the CV."
+msgstr "Dodaj nazwę certyfikatu, zanim użyjesz tego wpisu w CV."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add a company before using this employment in the CV."
+msgstr "Dodaj nazwę firmy, zanim użyjesz tego doświadczenia zawodowego w CV."
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
@@ -329,6 +338,14 @@ msgstr "Dodaj słowo kluczowe..."
 #: src/components/input/url-input.tsx
 msgid "Add a label to the URL"
 msgstr "Dodaj etykietę do adresu URL"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add a language before using this record in the CV."
+msgstr "Dodaj język, zanim użyjesz tego wpisu w CV."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add a license name before using this record in the CV."
+msgstr "Dodaj nazwę licencji, zanim użyjesz tego wpisu w CV."
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/awards.tsx
 msgid "Add a new award"
@@ -395,6 +412,14 @@ msgstr "Dodaj notatkę…"
 msgid "Add a period such as \"Jan 2020 - Present\" so it lands on your timeline."
 msgstr "Dodaj okres, na przykład „sty 2020 – obecnie”, aby pojawił się na osi czasu."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add a project name before using this record in the CV."
+msgstr "Dodaj nazwę projektu, zanim użyjesz tego wpisu w CV."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add a reference name before using this record in the CV."
+msgstr "Dodaj nazwę referencji, zanim użyjesz tego wpisu w CV."
+
 #: src/features/ats-checker/messages.ts
 msgid "Add a section headed \"Education\". Many systems have a required education field."
 msgstr "Dodaj sekcję zatytułowaną \"Education\" (Wykształcenie). Wiele systemów wymaga pola dotyczącego wykształcenia."
@@ -419,13 +444,25 @@ msgstr "Dodaj narzędzie"
 msgid "Add achievement"
 msgstr "Dodaj osiągnięcie"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add an award name before using this record in the CV."
+msgstr "Dodaj nazwę nagrody, zanim użyjesz tego wpisu w CV."
+
 #: src/libs/resume/ats.ts
 msgid "Add an entry, or use projects and volunteer work to show equivalent history."
 msgstr "Dodaj wpis albo użyj projektów i wolontariatu, aby pokazać równoważne doświadczenie."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add an institution before using this education record in the CV."
+msgstr "Dodaj nazwę instytucji, zanim użyjesz tego wpisu o wykształceniu w CV."
+
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Add an interest"
 msgstr "Dodaj zainteresowanie"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add an organization before using this volunteer record in the CV."
+msgstr "Dodaj nazwę organizacji, zanim użyjesz tego wpisu o wolontariacie w CV."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Add and test a provider before starting an agent thread."
@@ -444,6 +481,10 @@ msgstr "Dodaj aplikację"
 msgid "Add at least a city and country so roles can be matched to your region."
 msgstr "Dodaj co najmniej miasto i kraj, aby dopasować oferty do Twojego regionu."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add clause content before using it in the CV."
+msgstr "Dodaj treść klauzuli, zanim użyjesz jej w CV."
+
 #: src/routes/dashboard/cvmate/-components/achievements.tsx
 msgid "Add concrete results, improvements, measurable impact, or other professional achievements worth using in a tailored resume."
 msgstr "Dodaj konkretne wyniki, usprawnienia, mierzalne efekty lub inne osiągnięcia zawodowe, które warto wykorzystać w dopasowanym CV."
@@ -451,6 +492,14 @@ msgstr "Dodaj konkretne wyniki, usprawnienia, mierzalne efekty lub inne osiągni
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Add contact"
 msgstr "Dodaj kontakt"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add content before using this custom section item in the CV."
+msgstr "Dodaj treść, zanim użyjesz tego wpisu sekcji niestandardowej w CV."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Add course content before using this record in the CV."
+msgstr "Dodaj informacje o kursie, zanim użyjesz tego wpisu w CV."
 
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
 msgid "Add employment"
@@ -494,6 +543,7 @@ msgid "Add Provider"
 msgstr "Dodaj dostawcę"
 
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Add responsibility"
 msgstr "Dodaj obowiązek"
 
@@ -614,6 +664,10 @@ msgstr "Rekomendacje AI są tylko propozycjami. To Ty decydujesz, co trafi do fi
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "AI recommendations could not be generated. You can still select content manually."
 msgstr "Nie udało się wygenerować rekomendacji AI. Nadal możesz wybrać treści ręcznie."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "AI suggestion"
+msgstr "Sugestia AI"
 
 #: src/libs/locale.ts
 msgid "Albanian"
@@ -980,6 +1034,10 @@ msgstr "Powrót do CV"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "Powrót do logowania"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Background color"
+msgstr "Kolor tła"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Background Color"
@@ -1388,6 +1446,14 @@ msgstr "Firma A–Z"
 msgid "Compare this resume against this job posting URL and update the keywords without overselling anything."
 msgstr "Porównaj to CV z ogłoszeniem o pracę pod tym adresem URL i zaktualizuj słowa kluczowe, niczego nie koloryzując."
 
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
+msgid "Complete this employment before using it in a CV. Required field: Company."
+msgstr "Uzupełnij to doświadczenie zawodowe, zanim użyjesz go w CV. Wymagane pole: Firma."
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Complete this record before using it in a CV."
+msgstr "Uzupełnij ten wpis, zanim użyjesz go w CV."
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Completely free, forever, no hidden costs."
 msgstr "Całkowicie za darmo, na zawsze, bez ukrytych kosztów."
@@ -1674,6 +1740,7 @@ msgstr "Nie udało się zaktualizować doświadczenia."
 msgid "Could not update this achievement."
 msgstr "Nie udało się zaktualizować osiągnięcia."
 
+#: src/routes/dashboard/cvmate/create.tsx
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Could not update this CV."
 msgstr "Nie udało się zaktualizować tego CV."
@@ -2573,6 +2640,10 @@ msgstr "Włącz 2FA"
 #: src/routes/builder/$resumeId/-sidebar/left/index.tsx
 msgid "Enable editing"
 msgstr "Włącz edycję"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Enable this clause before using it in the CV."
+msgstr "Włącz tę klauzulę, zanim użyjesz jej w CV."
 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Enable Two-Factor Authentication"
@@ -4920,6 +4991,7 @@ msgid "Press <0>Enter</0> to open"
 msgstr "Naciśnij <0>Enter</0>, aby otworzyć"
 
 #: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Preview"
 msgstr "Podgląd"
 
@@ -4938,6 +5010,10 @@ msgstr "Podgląd pliku PDF"
 #: src/features/cover-letters/library.tsx
 msgid "Previous"
 msgstr "Poprzedni"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Primary color"
+msgstr "Kolor główny"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Primary Color"
@@ -5311,6 +5387,10 @@ msgstr "Zamienić załączony list motywacyjny?"
 msgid "Report an issue"
 msgstr "Zgłoś problem"
 
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "Required field:"
+msgstr "Wymagane pole:"
+
 #: src/features/settings/pages/profile.tsx
 msgid "Resend verification email"
 msgstr "Wyślij ponownie e-mail weryfikacyjny"
@@ -5350,6 +5430,7 @@ msgid "Responsibilities"
 msgstr "Obowiązki"
 
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Responsibility"
 msgstr "Obowiązek"
 
@@ -5603,6 +5684,7 @@ msgstr "Zapisywanie trwa dłużej, niż oczekiwano. Twoje zmiany są nadal otwar
 #: src/routes/dashboard/cvmate/-components/achievements.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Saving..."
 msgstr "Zapisywanie..."
@@ -6037,6 +6119,7 @@ msgstr "Rozmiar"
 #: src/libs/resume/section-title.ts
 #: src/libs/resume/section.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Skills"
 msgstr "Umiejętności"
 
@@ -6068,6 +6151,7 @@ msgid "Soft accent"
 msgstr "Delikatny akcent"
 
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Software"
 msgstr "Oprogramowanie"
 
@@ -6433,6 +6517,7 @@ msgstr "Telugu"
 #: src/features/cover-letters/editor-dialog.tsx
 #: src/features/cover-letters/library.tsx
 #: src/libs/resume/section.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Template"
 msgstr "Szablon"
 
@@ -6467,6 +6552,10 @@ msgstr "Testowanie… {elapsedSeconds}s"
 #: src/components/input/rich-input.tsx
 msgid "Text alignment"
 msgstr "Wyrównanie tekstu"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Text color"
+msgstr "Kolor tekstu"
 
 #: src/components/input/rich-input.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -6789,6 +6878,14 @@ msgstr "To jest formularz XFA, więc większość oprogramowania odczytuje tylko
 msgid "This is not a common resume page size."
 msgstr "To nietypowy rozmiar strony jak na CV."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "This is only a draft. Use it only if it is true for your real experience."
+msgstr "To tylko propozycja. Użyj jej wyłącznie, jeśli jest zgodna z Twoim rzeczywistym doświadczeniem."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "This item must belong to a custom section before it can be used in the CV."
+msgstr "Ten wpis musi należeć do sekcji niestandardowej, zanim będzie można użyć go w CV."
+
 #: src/dialogs/api-key/create.tsx
 msgid "This key is shown only once. Copy it before you close this dialog."
 msgstr "Ten klucz jest pokazywany tylko raz. Skopiuj go, zanim zamkniesz to okno."
@@ -6995,6 +7092,7 @@ msgid "Tokens: {total} ({cached} cached)"
 msgstr "Tokeny: {total} ({cached} z pamięci podręcznej)"
 
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Tools"
 msgstr "Narzędzia"
 
@@ -7102,6 +7200,7 @@ msgstr "Kod QR uwierzytelniania dwuskładnikowego"
 
 #: src/dialogs/resume/import.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Type"
 msgstr "Typ"
 
@@ -7372,6 +7471,10 @@ msgstr "Użyj prostych nagłówków, takich jak \"Experience\", \"Education\" i 
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "Use sample"
 msgstr "Użyj próbki"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Use suggestion"
+msgstr "Użyj sugestii"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Use the builder to review, refine, preview, and export the CV created from your Master Profile."

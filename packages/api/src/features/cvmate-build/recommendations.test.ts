@@ -255,6 +255,13 @@ describe("cvmateBuildAiRecommendationOutputSchema", () => {
 					},
 				],
 				gapRequirementIds: ["req-2"],
+				gapSuggestions: [
+					{
+						requirementId: "req-2",
+						kind: "software",
+						text: "CRM",
+					},
+				],
 			}),
 		).toEqual({
 			recommendations: [
@@ -264,6 +271,13 @@ describe("cvmateBuildAiRecommendationOutputSchema", () => {
 				},
 			],
 			gapRequirementIds: ["req-2"],
+			gapSuggestions: [
+				{
+					requirementId: "req-2",
+					kind: "software",
+					text: "CRM",
+				},
+			],
 		});
 	});
 });
@@ -339,6 +353,61 @@ describe("recommendation helpers", () => {
 		);
 
 		expect(result.map((item) => item.id)).toEqual(["req-1"]);
+	});
+
+	it("maps suggestions only to open detected gaps produced by the same AI result", () => {
+		const output = cvmateBuildAiRecommendationOutputSchema.parse({
+			recommendations: [],
+			gapRequirementIds: ["req-1"],
+			gapSuggestions: [
+				{
+					requirementId: "req-1",
+					kind: "tool",
+					text: "Excel",
+				},
+			],
+		});
+		const detectedGaps = __testables.resolveGapRequirements(output, jobOfferSnapshot.requirements, existingGaps);
+		const baseGap = existingGaps[0];
+		if (!baseGap) throw new Error("Missing base test gap.");
+
+		const updatedGaps = [
+			...existingGaps,
+			{
+				...baseGap,
+				id: "detected-gap-1",
+				requirementTextSnapshot: "Excel",
+				text: "Excel",
+				severity: "critical" as const,
+				origin: "detected" as const,
+				status: "open" as const,
+			},
+		];
+
+		expect(__testables.resolveGapSuggestions(output, detectedGaps, updatedGaps)).toEqual([
+			{
+				gapId: "detected-gap-1",
+				kind: "tool",
+				text: "Excel",
+			},
+		]);
+
+		expect(() =>
+			__testables.resolveGapSuggestions(
+				{
+					...output,
+					gapSuggestions: [
+						{
+							requirementId: "req-2",
+							kind: "software",
+							text: "CRM",
+						},
+					],
+				},
+				detectedGaps,
+				updatedGaps,
+			),
+		).toThrow();
 	});
 });
 

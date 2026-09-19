@@ -1,10 +1,10 @@
-import { ORPCError } from "@orpc/client";
 import type { AIProvider } from "@reactive-resume/ai/types";
+import { ORPCError } from "@orpc/client";
+import { and, eq } from "drizzle-orm";
+import z from "zod";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { generateId } from "@reactive-resume/utils/string";
-import { and, eq } from "drizzle-orm";
-import z from "zod";
 import { generateJson } from "../ai/generate-json";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
@@ -13,20 +13,11 @@ import { cvmateBuildService } from "./service";
 
 const MAX_RECOMMENDATIONS = 500;
 const MAX_GAPS = 100;
+const MAX_GAP_SUGGESTIONS = 100;
 
-const requirementCategorySchema = z.enum([
-	"required",
-	"preferred",
-	"responsibility",
-	"keyword",
-	"other",
-]);
+const requirementCategorySchema = z.enum(["required", "preferred", "responsibility", "keyword", "other"]);
 
-const requirementPrioritySchema = z.enum([
-	"critical",
-	"important",
-	"additional",
-]);
+const requirementPrioritySchema = z.enum(["critical", "important", "additional"]);
 
 const requirementSnapshotSchema = z
 	.object({
@@ -58,6 +49,16 @@ export const cvmateBuildAiRecommendationOutputSchema = z.object({
 		)
 		.max(MAX_RECOMMENDATIONS),
 	gapRequirementIds: z.array(z.string().trim().min(1)).max(MAX_GAPS),
+	gapSuggestions: z
+		.array(
+			z.object({
+				requirementId: z.string().trim().min(1),
+				kind: z.enum(["competency", "software", "tool", "responsibility"]),
+				text: z.string().trim().min(1).max(500),
+			}),
+		)
+		.max(MAX_GAP_SUGGESTIONS)
+		.optional(),
 });
 
 type RunnableProvider = {
@@ -68,9 +69,7 @@ type RunnableProvider = {
 	baseURL: string | null;
 };
 
-type SelectionItem = Awaited<
-	ReturnType<typeof cvmateBuildService.listSelectionItems>
->[number];
+type SelectionItem = Awaited<ReturnType<typeof cvmateBuildService.listSelectionItems>>[number];
 
 type Gap = Awaited<ReturnType<typeof cvmateBuildService.listGaps>>[number];
 
@@ -92,6 +91,14 @@ Security and factuality rules:
   candidate facts.
 - Return only selectionItemId values present in the supplied candidate items.
 - gapRequirementIds may contain only IDs from GAP_ELIGIBLE_REQUIREMENT_IDS.
+- gapSuggestions are hypothetical prompts for the user, not candidate facts.
+- A gap suggestion may reference only a requirement ID also returned in
+  gapRequirementIds and may use only competency, software, tool, or
+  responsibility as its kind.
+- Keep each suggestion short and derived only from the wording of that job
+  requirement. Do not claim or imply that the candidate has that evidence.
+- The application will show suggestions as optional drafts that the user must
+  confirm as true before explicitly adding them to the Master Profile.
 - A gap means the supplied candidate snapshots do not contain adequate direct
   evidence for that requirement.
 - Do not create gaps for responsibilities, generic keywords, or other items
@@ -107,7 +114,14 @@ Return JSON only with:
       "reason": "..."
     }
   ],
-  "gapRequirementIds": ["..."]
+  "gapRequirementIds": ["..."],
+  "gapSuggestions": [
+    {
+      "requirementId": "...",
+      "kind": "competency",
+      "text": "..."
+    }
+  ]
 }
 `.trim();
 
@@ -133,8 +147,7 @@ function parseJobOfferSnapshot(value: unknown) {
 
 	if (parsed.data.requirements.length === 0) {
 		throw new ORPCError("BAD_REQUEST", {
-			message:
-				"The job offer must be analyzed before CV recommendations can be generated.",
+			message: "The job offer must be analyzed before CV recommendations can be generated.",
 		});
 	}
 
@@ -166,11 +179,7 @@ function buildPrompt(input: {
 	}));
 
 	const gapEligibleRequirementIds = requirements
-		.filter(
-			(requirement) =>
-				requirement.category === "required" ||
-				requirement.category === "preferred",
-		)
+		.filter((requirement) => requirement.category === "required" || requirement.category === "preferred")
 		.map((requirement) => requirement.id);
 
 	return `
@@ -201,25 +210,19 @@ function validateAndExpandRecommendations(
 	output: z.infer<typeof cvmateBuildAiRecommendationOutputSchema>,
 	selectionItems: SelectionItem[],
 ) {
-	const itemsById = new Map(
-		selectionItems.map((item) => [item.id, item] as const),
-	);
+	const itemsById = new Map(selectionItems.map((item) => [item.id, item] as const));
 
 	const recommendations = new Map<string, string>();
 
 	for (const recommendation of output.recommendations) {
 		if (!itemsById.has(recommendation.selectionItemId)) {
 			throw new ORPCError("BAD_REQUEST", {
-				message:
-					"The AI returned a recommendation for an unknown candidate item.",
+				message: "The AI returned a recommendation for an unknown candidate item.",
 			});
 		}
 
 		if (!recommendations.has(recommendation.selectionItemId)) {
-			recommendations.set(
-				recommendation.selectionItemId,
-				recommendation.reason,
-			);
+			recommendations.set(recommendation.selectionItemId, recommendation.reason);
 		}
 	}
 
@@ -237,8 +240,7 @@ function validateAndExpandRecommendations(
 
 			if (!parent) {
 				throw new ORPCError("BAD_REQUEST", {
-					message:
-						"A recommended candidate item references an unavailable parent item.",
+					message: "A recommended candidate item references an unavailable parent item.",
 				});
 			}
 
@@ -260,11 +262,7 @@ function resolveGapRequirements(
 ) {
 	const eligibleRequirements = new Map(
 		requirements
-			.filter(
-				(requirement) =>
-					requirement.category === "required" ||
-					requirement.category === "preferred",
-			)
+			.filter((requirement) => requirement.category === "required" || requirement.category === "preferred")
 			.map((requirement) => [requirement.id, requirement] as const),
 	);
 
@@ -282,8 +280,7 @@ function resolveGapRequirements(
 
 		if (!requirement) {
 			throw new ORPCError("BAD_REQUEST", {
-				message:
-					"The AI returned a gap for an unknown or ineligible job requirement.",
+				message: "The AI returned a gap for an unknown or ineligible job requirement.",
 			});
 		}
 
@@ -300,10 +297,72 @@ function resolveGapRequirements(
 	return gaps;
 }
 
-async function resolveProvider(
-	userId: string,
-	aiProviderId?: string,
-): Promise<RunnableProvider> {
+function validateGapSuggestionsBeforeMutation(
+	output: z.infer<typeof cvmateBuildAiRecommendationOutputSchema>,
+	detectedGaps: JobRequirementSnapshot[],
+) {
+	const detectedRequirementIds = new Set(detectedGaps.map((requirement) => requirement.id));
+
+	for (const suggestion of output.gapSuggestions ?? []) {
+		if (!detectedRequirementIds.has(suggestion.requirementId)) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "The AI returned a gap suggestion for a requirement that is not an open detected gap.",
+			});
+		}
+	}
+}
+
+function resolveGapSuggestions(
+	output: z.infer<typeof cvmateBuildAiRecommendationOutputSchema>,
+	detectedGaps: JobRequirementSnapshot[],
+	updatedGaps: Gap[],
+) {
+	const detectedByRequirementId = new Map(detectedGaps.map((requirement) => [requirement.id, requirement] as const));
+	const openDetectedGapByText = new Map(
+		updatedGaps
+			.filter((gap) => gap.origin === "detected" && gap.status === "open")
+			.map((gap) => [normalizeText(gap.requirementTextSnapshot ?? gap.text), gap] as const),
+	);
+	const seen = new Set<string>();
+	const suggestions: Array<{
+		gapId: string;
+		kind: "competency" | "software" | "tool" | "responsibility";
+		text: string;
+	}> = [];
+
+	for (const suggestion of output.gapSuggestions ?? []) {
+		const requirement = detectedByRequirementId.get(suggestion.requirementId);
+
+		if (!requirement) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "The AI returned a gap suggestion for a requirement that is not an open detected gap.",
+			});
+		}
+
+		const gap = openDetectedGapByText.get(normalizeText(requirement.text));
+
+		if (!gap) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "The AI returned a gap suggestion that could not be matched to an open detected gap.",
+			});
+		}
+
+		const key = `${gap.id}:${suggestion.kind}:${normalizeText(suggestion.text)}`;
+
+		if (seen.has(key)) continue;
+		seen.add(key);
+
+		suggestions.push({
+			gapId: gap.id,
+			kind: suggestion.kind,
+			text: suggestion.text,
+		});
+	}
+
+	return suggestions;
+}
+
+async function resolveProvider(userId: string, aiProviderId?: string): Promise<RunnableProvider> {
 	const provider = aiProviderId
 		? await aiProvidersService.getRunnableById({
 				id: aiProviderId,
@@ -321,11 +380,7 @@ async function resolveProvider(
 }
 
 export const cvmateBuildRecommendationsService = {
-	generate: async (input: {
-		id: string;
-		userId: string;
-		aiProviderId?: string;
-	}) => {
+	generate: async (input: { id: string; userId: string; aiProviderId?: string }) => {
 		const build = await cvmateBuildService.getById({
 			id: input.id,
 			userId: input.userId,
@@ -346,8 +401,7 @@ export const cvmateBuildRecommendationsService = {
 
 		if (selectionItems.length === 0) {
 			throw new ORPCError("BAD_REQUEST", {
-				message:
-					"The CV build does not contain candidate selection items to recommend.",
+				message: "The CV build does not contain candidate selection items to recommend.",
 			});
 		}
 
@@ -385,16 +439,11 @@ export const cvmateBuildRecommendationsService = {
 			},
 		);
 
-		const recommendations = validateAndExpandRecommendations(
-			output,
-			selectionItems,
-		);
+		const recommendations = validateAndExpandRecommendations(output, selectionItems);
 
-		const detectedGaps = resolveGapRequirements(
-			output,
-			jobOffer.requirements,
-			existingGaps,
-		);
+		const detectedGaps = resolveGapRequirements(output, jobOffer.requirements, existingGaps);
+
+		validateGapSuggestionsBeforeMutation(output, detectedGaps);
 
 		await db.transaction(async (tx) => {
 			for (const item of selectionItems) {
@@ -407,10 +456,7 @@ export const cvmateBuildRecommendationsService = {
 						recommendationReason: reason,
 					})
 					.where(
-						and(
-							eq(schema.cvmateCvSelectionItem.id, item.id),
-							eq(schema.cvmateCvSelectionItem.cvBuildId, build.id),
-						),
+						and(eq(schema.cvmateCvSelectionItem.id, item.id), eq(schema.cvmateCvSelectionItem.cvBuildId, build.id)),
 					);
 			}
 
@@ -463,9 +509,12 @@ export const cvmateBuildRecommendationsService = {
 			}),
 		]);
 
+		const gapSuggestions = resolveGapSuggestions(output, detectedGaps, updatedGaps);
+
 		return {
 			selectionItems: updatedSelectionItems,
 			gaps: updatedGaps,
+			gapSuggestions,
 		};
 	},
 };
@@ -474,6 +523,7 @@ export const __testables = {
 	buildPrompt,
 	parseJobOfferSnapshot,
 	resolveGapRequirements,
+	resolveGapSuggestions,
 	validateAndExpandRecommendations,
 	SYSTEM_PROMPT,
 };

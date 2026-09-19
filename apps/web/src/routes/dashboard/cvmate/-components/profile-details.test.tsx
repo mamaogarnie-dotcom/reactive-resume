@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	queryOptions: vi.fn(() => ({})),
@@ -84,15 +84,7 @@ describe("ProfileDetailsSection", () => {
 	it("renders the stable Master Profile section headings", () => {
 		renderProfileDetails();
 
-		for (const name of [
-			"Skills",
-			"Software",
-			"Tools",
-			"Interests",
-			"Projects",
-			"Education",
-			"Recruitment clauses",
-		])
+		for (const name of ["Skills", "Software", "Tools", "Interests", "Projects", "Education", "Recruitment clauses"])
 			expect(screen.getByRole("heading", { name })).toBeInTheDocument();
 	});
 
@@ -114,30 +106,51 @@ describe("ProfileDetailsSection", () => {
 		const radios = screen.getAllByRole("radio");
 
 		expect(radios).toHaveLength(3);
-		expect(
-			screen.getByRole("radio", { name: "Do not add a recruitment clause" }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("radio", { name: "Current recruitment only" }),
-		).toBeInTheDocument();
+		expect(screen.getByRole("radio", { name: "Do not add a recruitment clause" })).toBeInTheDocument();
+		expect(screen.getByRole("radio", { name: "Current recruitment only" })).toBeInTheDocument();
 		expect(
 			screen.getByRole("radio", {
 				name: "Current and future recruitment processes",
 			}),
 		).toBeInTheDocument();
-		expect(
-			new Set(radios.map((radio) => radio.getAttribute("name"))),
-		).toEqual(new Set(["recruitment-clause-scope"]));
+		expect(new Set(radios.map((radio) => radio.getAttribute("name")))).toEqual(new Set(["recruitment-clause-scope"]));
 	});
 
 	it("gives both language editors an accessible name in each clause scope", () => {
 		renderProfileDetails();
 
-		expect(
-			screen.getAllByRole("textbox", { name: "Polish version" }),
-		).toHaveLength(2);
-		expect(
-			screen.getAllByRole("textbox", { name: "English version" }),
-		).toHaveLength(2);
+		expect(screen.getAllByRole("textbox", { name: "Polish version" })).toHaveLength(2);
+		expect(screen.getAllByRole("textbox", { name: "English version" })).toHaveLength(2);
+	});
+
+	it("warns about an incomplete detailed record without blocking the Master Profile", () => {
+		vi.mocked(useQuery).mockReturnValue({
+			data: {
+				...emptyProfile,
+				projects: [
+					{
+						id: "project-1",
+						name: null,
+						company: null,
+						startDate: null,
+						endDate: null,
+						description: "Project evidence without a name.",
+						sortOrder: 0,
+					},
+				],
+			},
+			isLoading: false,
+			isError: false,
+			refetch: mocks.refetch,
+		} as unknown as ReturnType<typeof useQuery>);
+
+		renderProfileDetails();
+
+		const warning = screen.getByTestId("cvmate-incomplete-project-project-1");
+
+		expect(warning).toHaveTextContent("Complete this record before using it in a CV.");
+		expect(warning).toHaveTextContent("Required field:");
+		expect(warning).toHaveTextContent("Project name");
+		expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
 	});
 });

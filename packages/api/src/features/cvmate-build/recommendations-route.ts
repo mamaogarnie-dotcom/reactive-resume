@@ -9,6 +9,13 @@ import { cvmateBuildRecommendationsService } from "./recommendations";
 const recommendationResultSchema = z.object({
 	selectionItems: z.array(cvmateSelectionItemSchema),
 	gaps: z.array(cvmateGapSchema),
+	gapSuggestions: z.array(
+		z.object({
+			gapId: z.string().trim().min(1),
+			kind: z.enum(["competency", "software", "tool", "responsibility"]),
+			text: z.string().trim().min(1).max(500),
+		}),
+	),
 });
 
 export const recommendationsRouter = {
