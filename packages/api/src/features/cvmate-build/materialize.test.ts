@@ -62,6 +62,7 @@ const build = {
 	id: "build-1",
 	masterProfileId: "profile-1",
 	targetLanguage: "pl",
+	designSettings: null,
 	jobOfferSnapshot: {
 		roleTitle: "Operations Manager",
 		companyName: "Acme",
@@ -138,6 +139,41 @@ beforeEach(() => {
 	resumeServiceMock.update.mockResolvedValue(undefined);
 });
 
+describe("cvmateBuildMaterializeService.preview", () => {
+	it("returns canonical preview data without materializing a Resume", async () => {
+		const result = await cvmateBuildMaterializeService.preview({
+			id: "build-1",
+			userId: "user-1",
+		});
+
+		const recommendedDesignSettings = {
+			template: "onyx",
+			primaryColor: "#4E6B35",
+			textColor: "#1F2937",
+			backgroundColor: "#FFFFFF",
+		};
+
+		expect(adapterMock).toHaveBeenCalledWith({
+			profile,
+			selectionItems,
+			generatedContent,
+			targetLanguage: "pl",
+			designSettings: recommendedDesignSettings,
+		});
+
+		expect(result).toEqual({
+			data: resumeData,
+			designSettings: recommendedDesignSettings,
+			usesRecommendation: true,
+		});
+
+		expect(resumeServiceMock.create).not.toHaveBeenCalled();
+		expect(resumeServiceMock.update).not.toHaveBeenCalled();
+		expect(dbMock.select).not.toHaveBeenCalled();
+		expect(dbMock.insert).not.toHaveBeenCalled();
+		expect(dbMock.update).not.toHaveBeenCalled();
+	});
+});
 describe("cvmateBuildMaterializeService.materialize", () => {
 	it("creates a Reactive Resume and 1story document on first materialization", async () => {
 		mockDocumentSelect([]);
@@ -159,6 +195,12 @@ describe("cvmateBuildMaterializeService.materialize", () => {
 			selectionItems,
 			generatedContent,
 			targetLanguage: "pl",
+			designSettings: {
+				template: "onyx",
+				primaryColor: "#4E6B35",
+				textColor: "#1F2937",
+				backgroundColor: "#FFFFFF",
+			},
 		});
 
 		expect(resumeServiceMock.create).toHaveBeenCalledWith({

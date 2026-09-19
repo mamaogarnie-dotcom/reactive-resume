@@ -23,5 +23,6 @@ export const cvmateBuildRouter = {
 	updateGeneratedContentFinalText: crudRouter.updateGeneratedContentFinalText,
 	listDocuments: documentsRouter.list,
 	updateDocument: documentsRouter.update,
+	preview: crudRouter.preview,
 	materialize: crudRouter.materialize,
 };

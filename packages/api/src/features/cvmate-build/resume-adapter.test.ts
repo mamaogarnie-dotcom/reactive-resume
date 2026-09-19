@@ -65,6 +65,27 @@ describe("createResumeDataFromCvmate", () => {
 		});
 	});
 
+	it("applies CVMate template and color settings to canonical resume metadata", () => {
+		const result = createResumeDataFromCvmate({
+			profile: masterProfile,
+			selectionItems: [],
+			generatedContent: [],
+			targetLanguage: "pl",
+			designSettings: {
+				template: "pikachu",
+				primaryColor: "#734A75",
+				textColor: "#1F2937",
+				backgroundColor: "#FFFFFF",
+			},
+		});
+
+		expect(result.metadata.template).toBe("pikachu");
+		expect(result.metadata.design.colors).toEqual({
+			primary: "rgba(115, 74, 117, 1)",
+			text: "rgba(31, 41, 55, 1)",
+			background: "rgba(255, 255, 255, 1)",
+		});
+	});
 	it("passes through canonical locales and falls back to the default locale", () => {
 		expect(
 			createResumeDataFromCvmate({
@@ -183,8 +204,7 @@ describe("createResumeDataFromCvmate", () => {
 
 		expect(error).toMatchObject({
 			code: "BAD_REQUEST",
-			message:
-				"A selected project must have a name before the CV can be created.",
+			message: "A selected project must have a name before the CV can be created.",
 		});
 	});
 
@@ -339,8 +359,7 @@ describe("createResumeDataFromCvmate", () => {
 				hidden: false,
 				organization: "Green Foundation",
 				period: "2024",
-				description:
-					"<p>Coordinator</p><p>Organized environmental projects</p>",
+				description: "<p>Coordinator</p><p>Organized environmental projects</p>",
 			}),
 		]);
 
@@ -449,8 +468,7 @@ describe("createResumeDataFromCvmate", () => {
 				position: "Project Coordinator",
 				location: "Wroclaw",
 				period: "2023-01 - 2025-06",
-				description:
-					"<ul><li>Prepared public procurement offers</li><li>Coordinated client communication</li></ul>",
+				description: "<ul><li>Prepared public procurement offers</li><li>Coordinated client communication</li></ul>",
 				roles: [],
 			}),
 		]);
@@ -490,8 +508,7 @@ describe("createResumeDataFromCvmate", () => {
 
 		expect(error).toMatchObject({
 			code: "BAD_REQUEST",
-			message:
-				"A selected experience fact must belong to a selected employment.",
+			message: "A selected experience fact must belong to a selected employment.",
 		});
 	});
 	it("maps list items and summary-backed custom content into renderable resume sections", () => {
@@ -639,8 +656,7 @@ describe("createResumeDataFromCvmate", () => {
 						{
 							id: "selection-course-1",
 							hidden: false,
-							content:
-								"<p>Advanced Excel</p><p>Training Academy</p><p>2025</p><p>Practical spreadsheet training</p>",
+							content: "<p>Advanced Excel</p><p>Training Academy</p><p>2025</p><p>Practical spreadsheet training</p>",
 						},
 					],
 				}),
@@ -652,8 +668,7 @@ describe("createResumeDataFromCvmate", () => {
 						{
 							id: "selection-clause-1",
 							hidden: false,
-							content:
-								"<p>I consent to the processing of my personal data.</p>",
+							content: "<p>I consent to the processing of my personal data.</p>",
 						},
 					],
 				}),
@@ -674,11 +689,7 @@ describe("createResumeDataFromCvmate", () => {
 		);
 
 		expect(result.metadata.layout.pages[0]?.main).toEqual(
-			expect.arrayContaining([
-				"cvmate-courses",
-				"cvmate-clauses",
-				"cvmate-custom-profile-section-1",
-			]),
+			expect.arrayContaining(["cvmate-courses", "cvmate-clauses", "cvmate-custom-profile-section-1"]),
 		);
 	});
 
@@ -796,9 +807,7 @@ describe("createResumeDataFromCvmate", () => {
 			targetLanguage: "en-US",
 		});
 
-		expect(result.summary.content).toBe(
-			"<p>Experienced coordinator &amp; project specialist</p>",
-		);
+		expect(result.summary.content).toBe("<p>Experienced coordinator &amp; project specialist</p>");
 
 		expect(result.sections.experience.items).toEqual([
 			expect.objectContaining({

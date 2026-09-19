@@ -4,11 +4,13 @@ import { FileTextIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { templateSchema } from "@reactive-resume/schema/templates";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Separator } from "@reactive-resume/ui/components/separator";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
 import { resolveCvLanguage } from "@reactive-resume/utils/locale";
+import { ResumePreview } from "@/features/resume/preview/preview";
 import { getOrpcErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { DashboardHeader } from "../-components/header";
@@ -21,6 +23,7 @@ type RequirementCategory = "required" | "preferred" | "responsibility" | "keywor
 type SelectionItem = Awaited<ReturnType<typeof orpc.cvmateBuild.listSelectionItems.call>>[number];
 type Gap = Awaited<ReturnType<typeof orpc.cvmateBuild.listGaps.call>>[number];
 type GeneratedContent = Awaited<ReturnType<typeof orpc.cvmateBuild.listGeneratedContent.call>>[number];
+type BuildPreview = Awaited<ReturnType<typeof orpc.cvmateBuild.preview.call>>;
 type GapEvidenceKind = "competency" | "software" | "tool" | "responsibility";
 
 type GapEvidenceDraft = {
@@ -112,6 +115,7 @@ function RouteComponent() {
 	const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([]);
 	const [quickFactTextByEmployment, setQuickFactTextByEmployment] = useState<Record<string, string>>({});
 	const [gapEvidenceDrafts, setGapEvidenceDrafts] = useState<Record<string, GapEvidenceDraft>>({});
+	const [previewResult, setPreviewResult] = useState<BuildPreview | null>(null);
 
 	const analyzeOffer = useMutation({
 		mutationFn: async () => {
@@ -516,6 +520,36 @@ function RouteComponent() {
 		},
 	});
 
+	const previewCv = useMutation({
+		mutationFn: () => {
+			if (!buildId) {
+				throw new Error(t`Start creating the CV before opening the editor.`);
+			}
+
+			return orpc.cvmateBuild.preview.call({ id: buildId });
+		},
+		onSuccess: (result) => {
+			setPreviewResult(result);
+		},
+	});
+
+	const updateDesignSettings = useMutation({
+		mutationFn: async (designSettings: BuildPreview["designSettings"]) => {
+			if (!buildId) {
+				throw new Error(t`Start creating the CV before opening the editor.`);
+			}
+
+			await orpc.cvmateBuild.update.call({
+				id: buildId,
+				designSettings,
+			});
+
+			return orpc.cvmateBuild.preview.call({ id: buildId });
+		},
+		onSuccess: (result) => {
+			setPreviewResult(result);
+		},
+	});
 	const generateTailoredContent = useMutation({
 		mutationFn: async () => {
 			if (!buildId) throw new Error(t`Start creating the CV before generating tailored content.`);
@@ -526,8 +560,12 @@ function RouteComponent() {
 
 			return result.generatedContent;
 		},
+		onMutate: () => {
+			setPreviewResult(null);
+		},
 		onSuccess: (items) => {
 			setGeneratedContent(items);
+			previewCv.mutate();
 		},
 	});
 
@@ -536,6 +574,7 @@ function RouteComponent() {
 			orpc.cvmateBuild.updateGeneratedContentFinalText.call(input),
 		onSuccess: (updated) => {
 			setGeneratedContent((items) => items.map((item) => (item.id === updated.id ? updated : item)));
+			previewCv.mutate();
 		},
 	});
 
@@ -608,6 +647,7 @@ function RouteComponent() {
 		setGeneratedContent([]);
 		setQuickFactTextByEmployment({});
 		setGapEvidenceDrafts({});
+		setPreviewResult(null);
 		analyzeOffer.reset();
 		recommendContent.reset();
 		updateSelection.reset();
@@ -615,6 +655,8 @@ function RouteComponent() {
 		resolveGapWithEvidence.reset();
 		selectRecommended.reset();
 		dismissGap.reset();
+		previewCv.reset();
+		updateDesignSettings.reset();
 		generateTailoredContent.reset();
 		saveGeneratedContent.reset();
 		materializeCv.reset();
@@ -1223,22 +1265,155 @@ function RouteComponent() {
 											</div>
 										) : null}
 
-										{materializeCv.isError ? (
-											<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
-												{getOrpcErrorMessage(materializeCv.error, {
-													fallback: t`The CV could not be opened in the editor.`,
-												})}
-											</div>
-										) : null}
+										<div className="space-y-4 border-t pt-5">
+											<div className="flex flex-wrap items-center justify-between gap-3">
+												<h3 className="font-medium">
+													<Trans>Preview</Trans>
+												</h3>
 
-										<div className="flex justify-end">
-											<Button
-												type="button"
-												disabled={materializeCv.isPending || saveGeneratedContent.isPending}
-												onClick={() => materializeCv.mutate()}
-											>
-												{materializeCv.isPending ? <Trans>Preparing CV...</Trans> : <Trans>Open in CV editor</Trans>}
-											</Button>
+												{previewResult?.usesRecommendation ? (
+													<span className="rounded-full bg-muted px-2 py-1 font-medium text-sm">
+														<Trans>Recommended</Trans>
+													</span>
+												) : null}
+											</div>
+
+											{previewCv.isPending && !previewResult ? (
+												<p className="text-muted-foreground text-sm">
+													<Trans>Preparing CV...</Trans>
+												</p>
+											) : null}
+
+											{previewResult ? (
+												<>
+													<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+														<label className="space-y-1 text-sm">
+															<span className="font-medium">
+																<Trans>Template</Trans>
+															</span>
+															<select
+																aria-label={t`Template`}
+																className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+																value={previewResult.designSettings.template}
+																disabled={updateDesignSettings.isPending}
+																onChange={(event) =>
+																	updateDesignSettings.mutate({
+																		...previewResult.designSettings,
+																		template: event.target.value as BuildPreview["designSettings"]["template"],
+																	})
+																}
+															>
+																{templateSchema.options.map((template) => (
+																	<option key={template} value={template}>
+																		{template.charAt(0).toUpperCase() + template.slice(1)}
+																	</option>
+																))}
+															</select>
+														</label>
+
+														<label className="space-y-1 text-sm">
+															<span className="font-medium">
+																<Trans>Primary color</Trans>
+															</span>
+															<input
+																type="color"
+																aria-label={t`Primary color`}
+																className="h-9 w-full cursor-pointer rounded-md border border-input bg-background p-1"
+																value={previewResult.designSettings.primaryColor}
+																disabled={updateDesignSettings.isPending}
+																onChange={(event) =>
+																	updateDesignSettings.mutate({
+																		...previewResult.designSettings,
+																		primaryColor: event.target.value,
+																	})
+																}
+															/>
+														</label>
+
+														<label className="space-y-1 text-sm">
+															<span className="font-medium">
+																<Trans>Text color</Trans>
+															</span>
+															<input
+																type="color"
+																aria-label={t`Text color`}
+																className="h-9 w-full cursor-pointer rounded-md border border-input bg-background p-1"
+																value={previewResult.designSettings.textColor}
+																disabled={updateDesignSettings.isPending}
+																onChange={(event) =>
+																	updateDesignSettings.mutate({
+																		...previewResult.designSettings,
+																		textColor: event.target.value,
+																	})
+																}
+															/>
+														</label>
+
+														<label className="space-y-1 text-sm">
+															<span className="font-medium">
+																<Trans>Background color</Trans>
+															</span>
+															<input
+																type="color"
+																aria-label={t`Background color`}
+																className="h-9 w-full cursor-pointer rounded-md border border-input bg-background p-1"
+																value={previewResult.designSettings.backgroundColor}
+																disabled={updateDesignSettings.isPending}
+																onChange={(event) =>
+																	updateDesignSettings.mutate({
+																		...previewResult.designSettings,
+																		backgroundColor: event.target.value,
+																	})
+																}
+															/>
+														</label>
+													</div>
+
+													<div
+														data-testid="cvmate-preview"
+														className="max-h-[760px] overflow-auto rounded-xl border bg-muted/20 p-3"
+													>
+														<ResumePreview
+															data={previewResult.data}
+															pageLayout="vertical"
+															pageScale={0.55}
+															showPageNumbers
+														/>
+													</div>
+												</>
+											) : null}
+
+											{previewCv.isError || updateDesignSettings.isError ? (
+												<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+													{getOrpcErrorMessage(updateDesignSettings.error ?? previewCv.error, {
+														fallback: t`The CV could not be opened in the editor.`,
+													})}
+												</div>
+											) : null}
+
+											{materializeCv.isError ? (
+												<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+													{getOrpcErrorMessage(materializeCv.error, {
+														fallback: t`The CV could not be opened in the editor.`,
+													})}
+												</div>
+											) : null}
+
+											<div className="flex justify-end">
+												<Button
+													type="button"
+													disabled={
+														!previewResult ||
+														previewCv.isPending ||
+														updateDesignSettings.isPending ||
+														materializeCv.isPending ||
+														saveGeneratedContent.isPending
+													}
+													onClick={() => materializeCv.mutate()}
+												>
+													{materializeCv.isPending ? <Trans>Preparing CV...</Trans> : <Trans>Open in CV editor</Trans>}
+												</Button>
+											</div>
 										</div>
 									</section>
 								) : null}

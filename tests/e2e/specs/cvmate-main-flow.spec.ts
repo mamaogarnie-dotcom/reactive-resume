@@ -14,7 +14,7 @@ const gapText = "Experience using Jira for project tracking.";
 const gapEvidence = "Jira";
 
 test("CVMate happy path builds a tailored CV from profile to PDF export", async ({ authPage: page }) => {
-	test.setTimeout(120_000);
+	test.setTimeout(240_000);
 
 	const stub = await startCvmateAiStub();
 
@@ -122,7 +122,58 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 			)
 			.toContain(summary);
 
-		const openEditorButton = flow.locator('button[type="button"]').last();
+		const previewHeading = flow.getByRole("heading", {
+			name: "Preview",
+			exact: true,
+		});
+		await expect(previewHeading).toBeVisible();
+
+		const preview = flow.getByTestId("cvmate-preview");
+		const templateSelect = flow.getByLabel("Template", { exact: true });
+
+		await expect(templateSelect).toHaveValue("onyx");
+		await expect(preview.locator('[data-resume-preview-template="onyx"]')).toBeVisible({ timeout: 15_000 });
+
+		await templateSelect.selectOption("pikachu");
+		await expect(templateSelect).toHaveValue("pikachu");
+		await expect(preview.locator('[data-resume-preview-template="pikachu"]')).toBeVisible({ timeout: 15_000 });
+
+		const designColorInputs = preview.locator("xpath=preceding-sibling::div[1]").locator('input[type="color"]');
+		await expect(designColorInputs).toHaveCount(3);
+
+		const primaryColor = designColorInputs.first();
+		await expect(primaryColor).toBeVisible();
+		await expect(primaryColor).toBeEnabled({ timeout: 30_000 });
+
+		const colorSaved = page.waitForResponse(
+			(response) => {
+				const postData = response.request().postData() ?? "";
+
+				return response.ok() && postData.toLowerCase().includes("#734a75");
+			},
+			{ timeout: 30_000 },
+		);
+
+		await primaryColor.evaluate((element) => {
+			const input = element as HTMLInputElement;
+			const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+
+			if (!valueSetter) {
+				throw new Error("CVMATE_E2E_COLOR_VALUE_SETTER_MISSING");
+			}
+
+			valueSetter.call(input, "#734a75");
+			input.dispatchEvent(new Event("input", { bubbles: true }));
+		});
+
+		await colorSaved;
+		await expect(primaryColor).toBeEnabled({ timeout: 30_000 });
+		await expect(primaryColor).toHaveValue("#734a75");
+
+		const openEditorButton = flow.getByRole("button", {
+			name: "Open in CV editor",
+			exact: true,
+		});
 		await expect(openEditorButton).toBeEnabled();
 		await openEditorButton.click();
 		await page.waitForURL(/\/builder\/.+/);
@@ -134,6 +185,8 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 			exact: true,
 		});
 		await expect(resumeHeading).toBeVisible();
+
+		await expect(page.locator('[data-resume-preview-template="pikachu"]').first()).toBeVisible({ timeout: 15_000 });
 
 		const headerTitleGroup = resumeHeading.locator("xpath=..");
 		const headerActions = headerTitleGroup.locator("xpath=following-sibling::div[1]");

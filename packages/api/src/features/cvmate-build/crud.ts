@@ -311,6 +311,25 @@ export const crudRouter = {
 			}),
 		),
 
+	preview: protectedProcedure
+		.route({
+			method: "GET",
+			path: "/cvmate/builds/{id}/preview",
+			tags: ["1story CV Build"],
+			operationId: "previewCvmateCvBuild",
+			summary: "Preview CV build",
+			description:
+				"Builds canonical Reactive Resume data from an owned 1story CV build without creating or updating a Resume. Requires authentication.",
+			successDescription: "The canonical preview data and effective design settings.",
+		})
+		.input(cvmateBuildMaterializeDto.preview.input)
+		.output(cvmateBuildMaterializeDto.preview.output)
+		.handler(({ input, context }) =>
+			cvmateBuildMaterializeService.preview({
+				id: input.id,
+				userId: context.user.id,
+			}),
+		),
 	materialize: protectedProcedure
 		.route({
 			method: "POST",
