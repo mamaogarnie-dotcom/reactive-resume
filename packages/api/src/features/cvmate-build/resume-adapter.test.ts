@@ -166,48 +166,284 @@ describe("createResumeDataFromCvmate", () => {
 		]);
 	});
 
-	it("rejects a selected project snapshot without a name", () => {
-		let error: unknown;
-
-		try {
-			createResumeDataFromCvmate({
-				profile: masterProfile,
-				selectionItems: [
-					{
-						id: "selection-project-without-name",
-						cvBuildId: "build-1",
-						parentSelectionItemId: null,
-						sourceType: "project",
-						sourceId: "project-without-name",
-						sourceTextSnapshot: null,
-						sourceDataSnapshot: {
-							name: null,
-							company: null,
-							startDate: null,
-							endDate: null,
-							description: null,
-						},
-						recommended: false,
-						selected: true,
-						recommendationReason: null,
-						sortOrder: 0,
-						createdAt: now,
-						updatedAt: now,
+	it("omits a selected project snapshot without a name instead of aborting CV generation", () => {
+		const result = createResumeDataFromCvmate({
+			profile: masterProfile,
+			selectionItems: [
+				{
+					id: "selection-project-without-name",
+					cvBuildId: "build-1",
+					parentSelectionItemId: null,
+					sourceType: "project",
+					sourceId: "project-without-name",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						name: null,
+						startDate: null,
+						endDate: null,
+						description: "Useful project details without a title",
 					},
-				],
-				generatedContent: [],
-				targetLanguage: "en-US",
-			});
-		} catch (caught) {
-			error = caught;
-		}
-
-		expect(error).toMatchObject({
-			code: "BAD_REQUEST",
-			message: "A selected project must have a name before the CV can be created.",
+					recommended: false,
+					selected: true,
+					recommendationReason: null,
+					sortOrder: 0,
+					createdAt: now,
+					updatedAt: now,
+				},
+			],
+			generatedContent: [],
+			targetLanguage: "en-US",
 		});
+
+		expect(result.sections.projects.items).toEqual([]);
 	});
 
+	it("omits incomplete selected user records while preserving canonical resume validity", () => {
+		const selectionBase = {
+			cvBuildId: "build-1",
+			parentSelectionItemId: null,
+			recommended: false,
+			selected: true,
+			recommendationReason: null,
+			sortOrder: 0,
+			createdAt: now,
+			updatedAt: now,
+		};
+
+		const result = createResumeDataFromCvmate({
+			profile: masterProfile,
+			selectionItems: [
+				{
+					...selectionBase,
+					id: "selection-employment-incomplete",
+					sourceType: "employment",
+					sourceId: "employment-incomplete",
+					sourceTextSnapshot: "Coordinator",
+					sourceDataSnapshot: {
+						company: null,
+						jobTitle: "Coordinator",
+						location: null,
+						startDate: null,
+						endDate: null,
+						isCurrent: false,
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-employment-fact",
+					parentSelectionItemId: "selection-employment-incomplete",
+					sourceType: "experience_fact",
+					sourceId: "fact-incomplete-parent",
+					sourceTextSnapshot: "Coordinated client communication",
+					sourceDataSnapshot: {
+						text: "Coordinated client communication",
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-project-incomplete",
+					sourceType: "project",
+					sourceId: "project-incomplete",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						name: null,
+						startDate: null,
+						endDate: null,
+						description: "Project description",
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-education-incomplete",
+					sourceType: "education",
+					sourceId: "education-incomplete",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						institution: null,
+						fieldOfStudy: "Biology",
+						specialization: null,
+						degree: "MSc",
+						startDate: null,
+						endDate: null,
+						description: null,
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-certification-incomplete",
+					sourceType: "certification",
+					sourceId: "certification-incomplete",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						name: null,
+						issuingOrganization: "Academy",
+						issueDate: null,
+						expiryDate: null,
+						credentialNumber: null,
+						credentialUrl: null,
+						description: null,
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-volunteer-incomplete",
+					sourceType: "volunteer",
+					sourceId: "volunteer-incomplete",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						organization: null,
+						role: "Coordinator",
+						date: null,
+						description: null,
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-language-incomplete",
+					sourceType: "language",
+					sourceId: "language-incomplete",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						language: null,
+						level: "B2",
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-award-incomplete",
+					sourceType: "award",
+					sourceId: "award-incomplete",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						name: null,
+						organizer: "Association",
+						date: null,
+						description: null,
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-reference-incomplete",
+					sourceType: "reference",
+					sourceId: "reference-incomplete",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						name: null,
+						issuer: "Former employer",
+						date: null,
+						description: null,
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-license-incomplete",
+					sourceType: "license",
+					sourceId: "license-incomplete",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						name: null,
+						date: "2020",
+						description: null,
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-course-empty",
+					sourceType: "course",
+					sourceId: "course-empty",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						name: null,
+						organizer: null,
+						date: null,
+						description: null,
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-clause-disabled",
+					sourceType: "clause",
+					sourceId: "clause-disabled",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						scope: "current",
+						language: "en",
+						isEnabled: false,
+						content: "Disabled clause content",
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-clause-empty",
+					sourceType: "clause",
+					sourceId: "clause-empty",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						scope: "current_and_future",
+						language: "pl",
+						isEnabled: true,
+						content: null,
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-custom-empty",
+					sourceType: "custom_section_item",
+					sourceId: "custom-empty",
+					sourceTextSnapshot: null,
+					sourceDataSnapshot: {
+						title: null,
+						subtitle: null,
+						date: null,
+						description: null,
+						url: null,
+						fields: null,
+						section: {
+							id: "custom-section",
+							kind: "custom",
+							title: "Additional Information",
+							isVisible: true,
+							sortOrder: 0,
+						},
+					},
+				},
+				{
+					...selectionBase,
+					id: "selection-custom-wrong-kind",
+					sourceType: "custom_section_item",
+					sourceId: "custom-wrong-kind",
+					sourceTextSnapshot: "Should not render",
+					sourceDataSnapshot: {
+						title: "Should not render",
+						subtitle: null,
+						date: null,
+						description: null,
+						url: null,
+						fields: null,
+						section: {
+							id: "experience-section",
+							kind: "experience",
+							title: "Experience",
+							isVisible: true,
+							sortOrder: 0,
+						},
+					},
+				},
+			],
+			generatedContent: [],
+			targetLanguage: "en-US",
+		});
+
+		expect(result.sections.experience.items).toEqual([]);
+		expect(result.sections.projects.items).toEqual([]);
+		expect(result.sections.education.items).toEqual([]);
+		expect(result.sections.certifications.items).toEqual([]);
+		expect(result.sections.volunteer.items).toEqual([]);
+		expect(result.sections.languages.items).toEqual([]);
+		expect(result.sections.awards.items).toEqual([]);
+		expect(result.sections.references.items).toEqual([]);
+		expect(result.customSections).toEqual([]);
+	});
 	it("maps selected frozen standard profile snapshots into resume sections", () => {
 		const selectionBase = {
 			cvBuildId: "build-1",

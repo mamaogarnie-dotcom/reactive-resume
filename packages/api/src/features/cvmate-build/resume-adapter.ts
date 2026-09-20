@@ -229,11 +229,6 @@ function itemWebsite(url = "") {
 	};
 }
 
-function requireSnapshotValue(value: string | null, message: string): string {
-	if (value) return value;
-	throw new ORPCError("BAD_REQUEST", { message });
-}
-
 function addSummaryItem(
 	groups: Map<string, SummaryGroup>,
 	groupId: string,
@@ -361,10 +356,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 		switch (selection.sourceType) {
 			case "employment": {
 				const snapshot = employmentSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const company = requireSnapshotValue(
-					snapshot.company,
-					"A selected employment must have a company before the CV can be created.",
-				);
+				if (!snapshot.company) break;
 
 				const facts = selectedItems
 					.filter((item) => item.sourceType === "experience_fact" && item.parentSelectionItemId === selection.id)
@@ -378,7 +370,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 				data.sections.experience.items.push({
 					id: selection.id,
 					hidden: false,
-					company,
+					company: snapshot.company,
 					position: snapshot.jobTitle ?? "",
 					location: snapshot.location ?? "",
 					period: formatEmploymentPeriod(snapshot.startDate, snapshot.endDate, snapshot.isCurrent, locale),
@@ -395,15 +387,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 			case "project": {
 				const snapshot = projectSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const name = requireSnapshotValue(
-					snapshot.name,
-					"A selected project must have a name before the CV can be created.",
-				);
+				if (!snapshot.name) break;
 
 				data.sections.projects.items.push({
 					id: selection.id,
 					hidden: false,
-					name,
+					name: snapshot.name,
 					period: formatPeriod(snapshot.startDate, snapshot.endDate),
 					website: itemWebsite(),
 					description: paragraphHtml(snapshot.description),
@@ -413,15 +402,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 			case "education": {
 				const snapshot = educationSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const school = requireSnapshotValue(
-					snapshot.institution,
-					"A selected education record must have an institution before the CV can be created.",
-				);
+				if (!snapshot.institution) break;
 
 				data.sections.education.items.push({
 					id: selection.id,
 					hidden: false,
-					school,
+					school: snapshot.institution,
 					degree: snapshot.degree ?? "",
 					area: joinNonEmpty([snapshot.fieldOfStudy, snapshot.specialization], " - "),
 					grade: "",
@@ -435,15 +421,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 			case "certification": {
 				const snapshot = certificationSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const title = requireSnapshotValue(
-					snapshot.name,
-					"A selected certification must have a name before the CV can be created.",
-				);
+				if (!snapshot.name) break;
 
 				data.sections.certifications.items.push({
 					id: selection.id,
 					hidden: false,
-					title,
+					title: snapshot.name,
 					issuer: snapshot.issuingOrganization ?? "",
 					date: snapshot.issueDate ?? "",
 					website: itemWebsite(snapshot.credentialUrl ?? ""),
@@ -454,15 +437,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 			case "volunteer": {
 				const snapshot = volunteerSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const organization = requireSnapshotValue(
-					snapshot.organization,
-					"A selected volunteer record must have an organization before the CV can be created.",
-				);
+				if (!snapshot.organization) break;
 
 				data.sections.volunteer.items.push({
 					id: selection.id,
 					hidden: false,
-					organization,
+					organization: snapshot.organization,
 					location: "",
 					period: snapshot.date ?? "",
 					website: itemWebsite(),
@@ -473,15 +453,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 			case "language": {
 				const snapshot = languageSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const language = requireSnapshotValue(
-					snapshot.language,
-					"A selected language record must have a language before the CV can be created.",
-				);
+				if (!snapshot.language) break;
 
 				data.sections.languages.items.push({
 					id: selection.id,
 					hidden: false,
-					language,
+					language: snapshot.language,
 					fluency: snapshot.level ?? "",
 					level: 0,
 				});
@@ -490,15 +467,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 			case "award": {
 				const snapshot = awardSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const title = requireSnapshotValue(
-					snapshot.name,
-					"A selected award must have a name before the CV can be created.",
-				);
+				if (!snapshot.name) break;
 
 				data.sections.awards.items.push({
 					id: selection.id,
 					hidden: false,
-					title,
+					title: snapshot.name,
 					awarder: snapshot.organizer ?? "",
 					date: snapshot.date ?? "",
 					website: itemWebsite(),
@@ -509,15 +483,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 			case "reference": {
 				const snapshot = referenceSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const name = requireSnapshotValue(
-					snapshot.name,
-					"A selected reference must have a name before the CV can be created.",
-				);
+				if (!snapshot.name) break;
 
 				data.sections.references.items.push({
 					id: selection.id,
 					hidden: false,
-					name,
+					name: snapshot.name,
 					position: snapshot.issuer ?? "",
 					website: itemWebsite(),
 					phone: "",
@@ -528,15 +499,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 			case "license": {
 				const snapshot = licenseSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const title = requireSnapshotValue(
-					snapshot.name,
-					"A selected license must have a name before the CV can be created.",
-				);
+				if (!snapshot.name) break;
 
 				data.sections.certifications.items.push({
 					id: selection.id,
 					hidden: false,
-					title,
+					title: snapshot.name,
 					issuer: "",
 					date: snapshot.date ?? "",
 					website: itemWebsite(),
@@ -576,11 +544,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 				const snapshot = courseSnapshotSchema.parse(selection.sourceDataSnapshot);
 				const content = paragraphsHtml([snapshot.name, snapshot.organizer, snapshot.date, snapshot.description]);
 
-				if (!content) {
-					throw new ORPCError("BAD_REQUEST", {
-						message: "A selected course must contain content before the CV can be created.",
-					});
-				}
+				if (!content) break;
 
 				addSummaryItem(summaryGroups, "cvmate-courses", "Courses", {
 					id: selection.id,
@@ -593,33 +557,19 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 			case "clause": {
 				const snapshot = clauseSnapshotSchema.parse(selection.sourceDataSnapshot);
 
-				if (!snapshot.isEnabled) {
-					throw new ORPCError("BAD_REQUEST", {
-						message: "A disabled clause cannot be selected for the CV.",
-					});
-				}
-
-				const content = requireSnapshotValue(
-					snapshot.content,
-					"A selected clause must have content before the CV can be created.",
-				);
+				if (!snapshot.isEnabled || !snapshot.content) break;
 
 				addSummaryItem(summaryGroups, "cvmate-clauses", "Clauses", {
 					id: selection.id,
 					hidden: false,
-					content: paragraphHtml(content),
+					content: paragraphHtml(snapshot.content),
 				});
 				break;
 			}
-
 			case "custom_section_item": {
 				const snapshot = customSectionItemSnapshotSchema.parse(selection.sourceDataSnapshot);
 
-				if (snapshot.section.kind !== "custom") {
-					throw new ORPCError("BAD_REQUEST", {
-						message: "A selected custom section item must belong to a custom section.",
-					});
-				}
+				if (snapshot.section.kind !== "custom") break;
 
 				const content = paragraphsHtml([
 					snapshot.title,
@@ -629,11 +579,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 					snapshot.url,
 				]);
 
-				if (!content) {
-					throw new ORPCError("BAD_REQUEST", {
-						message: "A selected custom section item must contain renderable content.",
-					});
-				}
+				if (!content) break;
 
 				addSummaryItem(summaryGroups, `cvmate-custom-${snapshot.section.id}`, snapshot.section.title, {
 					id: selection.id,

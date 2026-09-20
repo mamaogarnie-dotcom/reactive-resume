@@ -12,6 +12,8 @@ const fact = "Coordinated project delivery and client communication.";
 const summary = "Project coordinator with experience in project delivery and client communication.";
 const gapText = "Experience using Jira for project tracking.";
 const gapEvidence = "Jira";
+const activeBuildCompany = "Active Build Company";
+const activeBuildJobTitle = "Operations Assistant";
 
 test("CVMate happy path builds a tailored CV from profile to PDF export", async ({ authPage: page }) => {
 	test.setTimeout(240_000);
@@ -83,6 +85,19 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 		await expect(responsibilityList).toBeVisible();
 		await expect(responsibilityList).toHaveClass(/max-h-64/);
 		await expect(responsibilityList).toHaveClass(/overflow-y-auto/);
+
+		const inlineEmploymentForm = selectionSection.getByTestId("cvmate-inline-employment-form");
+		await expect(inlineEmploymentForm).toBeVisible();
+		await inlineEmploymentForm.getByPlaceholder("Company", { exact: true }).fill(activeBuildCompany);
+		await inlineEmploymentForm.getByPlaceholder("Job title", { exact: true }).fill(activeBuildJobTitle);
+		await inlineEmploymentForm.getByRole("button", { name: "Add employment", exact: true }).click();
+
+		const activeBuildSelection = selectionSection.getByText(activeBuildCompany, { exact: false }).last();
+		await expect(activeBuildSelection).toBeVisible();
+
+		const activeBuildSelectionRow = activeBuildSelection.locator("xpath=ancestor::div[.//input[@type='checkbox']][1]");
+		await expect(activeBuildSelectionRow.locator('input[type="checkbox"]')).toBeChecked();
+
 		const retryRecommendations = selectionSection.getByRole("button", {
 			name: "Retry AI recommendations",
 			exact: true,
@@ -246,6 +261,8 @@ test("CVMate happy path builds a tailored CV from profile to PDF export", async 
 		await page.goto("/dashboard/cvmate/profile");
 		await expect(page.getByText(fact, { exact: true }).last()).toBeVisible();
 		await expect(page.getByText(gapEvidence, { exact: true }).last()).toBeVisible();
+		await expect(page.getByText(activeBuildCompany, { exact: true }).last()).toBeVisible();
+		await expect(page.getByText(activeBuildJobTitle, { exact: true }).last()).toBeVisible();
 	} finally {
 		await stub.close();
 	}

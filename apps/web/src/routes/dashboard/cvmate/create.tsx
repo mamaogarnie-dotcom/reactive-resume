@@ -38,6 +38,24 @@ type GapSuggestion = {
 	text: string;
 };
 
+type InlineEmploymentDraft = {
+	company: string;
+	jobTitle: string;
+	location: string;
+	startDate: string;
+	endDate: string;
+	isCurrent: boolean;
+};
+
+const EMPTY_INLINE_EMPLOYMENT: InlineEmploymentDraft = {
+	company: "",
+	jobTitle: "",
+	location: "",
+	startDate: "",
+	endDate: "",
+	isCurrent: false,
+};
+
 function categoryTitle(category: RequirementCategory) {
 	switch (category) {
 		case "required":
@@ -179,6 +197,7 @@ function RouteComponent() {
 	const [gaps, setGaps] = useState<Gap[]>([]);
 	const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([]);
 	const [quickFactTextByEmployment, setQuickFactTextByEmployment] = useState<Record<string, string>>({});
+	const [inlineEmploymentDraft, setInlineEmploymentDraft] = useState<InlineEmploymentDraft>(EMPTY_INLINE_EMPLOYMENT);
 	const [gapEvidenceDrafts, setGapEvidenceDrafts] = useState<Record<string, GapEvidenceDraft>>({});
 	const [gapSuggestions, setGapSuggestions] = useState<GapSuggestion[]>([]);
 	const [previewResult, setPreviewResult] = useState<BuildPreview | null>(null);
@@ -285,6 +304,62 @@ function RouteComponent() {
 		onSuccess: (updatedItems) => {
 			const updates = new Map(updatedItems.map((item) => [item.id, item] as const));
 			setSelectionItems((items) => items.map((item) => updates.get(item.id) ?? item));
+			setGeneratedContent([]);
+		},
+	});
+
+	const quickAddEmployment = useMutation({
+		mutationFn: async (draft: InlineEmploymentDraft) => {
+			if (!buildId) {
+				throw new Error(t`Start creating the CV before generating tailored content.`);
+			}
+
+			const hasContent = [draft.company, draft.jobTitle, draft.location, draft.startDate, draft.endDate].some(
+				(value) => value.trim().length > 0,
+			);
+
+			if (!hasContent) {
+				throw new Error(t`Could not update this CV.`);
+			}
+
+			const employmentSortOrder = selectionItems.filter(
+				(item) => item.parentSelectionItemId === null && item.sourceType === "employment",
+			).length;
+			const selectionSortOrder = selectionItems.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
+			let employmentId: string | null = null;
+
+			try {
+				const employment = await orpc.cvmateProfile.createEmployment.call({
+					company: draft.company.trim() || null,
+					jobTitle: draft.jobTitle.trim() || null,
+					location: draft.location.trim() || null,
+					startDate: draft.startDate.trim() || null,
+					endDate: draft.isCurrent ? null : draft.endDate.trim() || null,
+					isCurrent: draft.isCurrent,
+					sortOrder: employmentSortOrder,
+				});
+
+				employmentId = employment.id;
+
+				return await orpc.cvmateBuild.createSelectionItem.call({
+					cvBuildId: buildId,
+					parentSelectionItemId: null,
+					sourceType: "employment",
+					sourceId: employment.id,
+					selected: true,
+					sortOrder: selectionSortOrder,
+				});
+			} catch (error) {
+				if (employmentId) {
+					await orpc.cvmateProfile.deleteEmployment.call({ id: employmentId }).catch(() => undefined);
+				}
+
+				throw error;
+			}
+		},
+		onSuccess: (employmentItem) => {
+			setSelectionItems((items) => [...items, employmentItem]);
+			setInlineEmploymentDraft(EMPTY_INLINE_EMPLOYMENT);
 			setGeneratedContent([]);
 		},
 	});
@@ -701,9 +776,17 @@ function RouteComponent() {
 	const hasTailoredContent = visibleGeneratedContent.some((item) => item.kind === "professional_summary");
 
 	const canAnalyze = rawText.trim().length > 0 || asset !== null;
+	const canQuickAddEmployment = [
+		inlineEmploymentDraft.company,
+		inlineEmploymentDraft.jobTitle,
+		inlineEmploymentDraft.location,
+		inlineEmploymentDraft.startDate,
+		inlineEmploymentDraft.endDate,
+	].some((value) => value.trim().length > 0);
 	const selectionPending =
 		updateSelection.isPending ||
 		selectRecommended.isPending ||
+		quickAddEmployment.isPending ||
 		quickAddResponsibility.isPending ||
 		resolveGapWithEvidence.isPending;
 
@@ -715,12 +798,14 @@ function RouteComponent() {
 		setGaps([]);
 		setGeneratedContent([]);
 		setQuickFactTextByEmployment({});
+		setInlineEmploymentDraft(EMPTY_INLINE_EMPLOYMENT);
 		setGapEvidenceDrafts({});
 		setGapSuggestions([]);
 		setPreviewResult(null);
 		analyzeOffer.reset();
 		recommendContent.reset();
 		updateSelection.reset();
+		quickAddEmployment.reset();
 		quickAddResponsibility.reset();
 		resolveGapWithEvidence.reset();
 		selectRecommended.reset();
@@ -1049,6 +1134,112 @@ function RouteComponent() {
 													<Trans>Select all recommended</Trans>
 												)}
 											</Button>
+										</div>
+									) : null}
+
+									<form
+										data-testid="cvmate-inline-employment-form"
+										className="grid gap-2 rounded-lg border border-dashed bg-muted/30 p-3 md:grid-cols-2"
+										onSubmit={(event) => {
+											event.preventDefault();
+
+											if (!canQuickAddEmployment || quickAddEmployment.isPending) return;
+
+											quickAddEmployment.mutate(inlineEmploymentDraft);
+										}}
+									>
+										<Input
+											aria-label={t`Company`}
+											placeholder={t`Company`}
+											value={inlineEmploymentDraft.company}
+											disabled={quickAddEmployment.isPending}
+											onChange={(event) =>
+												setInlineEmploymentDraft((current) => ({
+													...current,
+													company: event.target.value,
+												}))
+											}
+										/>
+										<Input
+											aria-label={t`Job title`}
+											placeholder={t`Job title`}
+											value={inlineEmploymentDraft.jobTitle}
+											disabled={quickAddEmployment.isPending}
+											onChange={(event) =>
+												setInlineEmploymentDraft((current) => ({
+													...current,
+													jobTitle: event.target.value,
+												}))
+											}
+										/>
+										<Input
+											aria-label={t`Location`}
+											placeholder={t`Location`}
+											value={inlineEmploymentDraft.location}
+											disabled={quickAddEmployment.isPending}
+											onChange={(event) =>
+												setInlineEmploymentDraft((current) => ({
+													...current,
+													location: event.target.value,
+												}))
+											}
+										/>
+										<Input
+											aria-label={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+											placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+											value={inlineEmploymentDraft.startDate}
+											disabled={quickAddEmployment.isPending}
+											onChange={(event) =>
+												setInlineEmploymentDraft((current) => ({
+													...current,
+													startDate: event.target.value,
+												}))
+											}
+										/>
+										<Input
+											aria-label={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+											placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+											value={inlineEmploymentDraft.endDate}
+											disabled={inlineEmploymentDraft.isCurrent || quickAddEmployment.isPending}
+											onChange={(event) =>
+												setInlineEmploymentDraft((current) => ({
+													...current,
+													endDate: event.target.value,
+												}))
+											}
+										/>
+										<div className="flex flex-wrap items-center justify-between gap-3">
+											<label className="flex items-center gap-2 text-sm">
+												<input
+													type="checkbox"
+													checked={inlineEmploymentDraft.isCurrent}
+													disabled={quickAddEmployment.isPending}
+													onChange={(event) =>
+														setInlineEmploymentDraft((current) => ({
+															...current,
+															isCurrent: event.target.checked,
+															endDate: event.target.checked ? "" : current.endDate,
+														}))
+													}
+												/>
+												<Trans>I currently work here</Trans>
+											</label>
+
+											<Button
+												type="submit"
+												variant="outline"
+												disabled={!canQuickAddEmployment || quickAddEmployment.isPending}
+											>
+												{quickAddEmployment.isPending ? <Trans>Adding...</Trans> : <Trans>Add employment</Trans>}
+											</Button>
+										</div>
+									</form>
+
+									{quickAddEmployment.isError ? (
+										<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+											{getOrpcErrorMessage(quickAddEmployment.error, {
+												fallback: t`Could not update this CV.`,
+											})}
 										</div>
 									) : null}
 
