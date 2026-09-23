@@ -21,6 +21,21 @@ const QUALITY_TARGET_FACTS_PER_EMPLOYMENT = 3;
 const QUALITY_TARGET_PROFILE_ITEMS = 5;
 const QUALITY_TARGET_PROJECTS = 1;
 
+const RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS = 3;
+const RECOMMENDATION_BUDGET_OPTIONAL_EMPLOYMENT_MIN_RATIO = 0.7;
+const RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT = 3;
+const RECOMMENDATION_BUDGET_MAX_PROFILE_ITEMS = 5;
+const RECOMMENDATION_BUDGET_MAX_PROJECTS = 1;
+const RECOMMENDATION_BUDGET_MAX_EDUCATION = 1;
+const RECOMMENDATION_BUDGET_MAX_VOLUNTEER = 1;
+const RECOMMENDATION_BUDGET_MAX_TOTAL =
+	RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS +
+	RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS * RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT +
+	RECOMMENDATION_BUDGET_MAX_PROFILE_ITEMS +
+	RECOMMENDATION_BUDGET_MAX_PROJECTS +
+	RECOMMENDATION_BUDGET_MAX_EDUCATION +
+	RECOMMENDATION_BUDGET_MAX_VOLUNTEER;
+
 const TECHNICAL_SOURCE_DATA_KEYS = new Set(["id", "masterProfileId", "createdAt", "updatedAt", "sortOrder"]);
 
 const requirementCategorySchema = z.enum(["required", "preferred", "responsibility", "keyword", "other"]);
@@ -515,11 +530,17 @@ function qualityRequirementWeight(requirement: JobRequirementSnapshot): number {
 
 function hasQuantifiedImpactEvidence(value: string): boolean {
 	const normalized = foldQualityText(value);
-
-	return (
-		/\b\d+(?:[.,]\d+)?\b/.test(normalized) ||
+	const hasMoneyOrPercentage =
 		/%/.test(normalized) ||
-		/\b(?:pln|zl|tys|mln|million|milion|thousand|tysiac)\b/.test(normalized)
+		/\b(?:pln|zl|tys|mln|million|milion|thousand|tysiac)\b/.test(normalized);
+
+	if (hasMoneyOrPercentage) return true;
+
+	const hasNumber = /\b\d+(?:[.,]\d+)?\b/.test(normalized);
+	if (!hasNumber) return false;
+
+	return /\b(?:offer|offers|ofert|oferty|oferta|wniosk|wnioski|application|applications|contract|contracts|kontrakt|kontrakty|umow|sprzedaz|sales|revenue|przychod|finansowan|pozyskan|saved|oszczedn|increase|increased|wzrost|decrease|decreased|spadek|reduction|reduced|redukc|orders|zamowien|transakc|mieszkan|properties|nieruchomosci)\b/.test(
+		normalized,
 	);
 }
 
@@ -582,6 +603,146 @@ function qualityReason(
 	return scored.hasQuantifiedImpact
 		? "Quantified result from a relevant employment entry."
 		: "Relevant supporting evidence from a covered CV section.";
+}
+
+function quantifiedImpactSignature(item: SelectionItem): string | null {
+	const normalized = foldQualityText(qualityCandidateText(item)).replace(/,/g, ".");
+	const numbers = [...normalized.matchAll(/\b\d+(?:\.\d+)?\b/g)].map((match) => match[0]);
+
+	return numbers.length > 0 ? numbers.join("|") : null;
+}
+
+function applyRecommendationBudgetPolicy(
+	baseRecommendations: Map<string, string>,
+	selectionItems: SelectionItem[],
+	requirements: JobRequirementSnapshot[],
+): Map<string, string> {
+	const budgeted = new Map<string, string>();
+	const scoredById = new Map(
+		selectionItems.map((item) => [item.id, scoreQualityItem(item, requirements)] as const),
+	);
+
+	const compareScored = (a: QualityScoredItem, b: QualityScoredItem) =>
+		b.score - a.score ||
+		Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
+		a.item.sortOrder - b.item.sortOrder;
+	const rankedEmploymentGroups = selectionItems
+		.filter(
+			(item) =>
+				item.sourceType === "employment" &&
+				baseRecommendations.has(item.id),
+		)
+		.map((employment) => {
+			const facts = selectionItems
+				.filter(
+					(item) =>
+						item.sourceType === "experience_fact" &&
+						item.parentSelectionItemId === employment.id &&
+						baseRecommendations.has(item.id),
+				)
+				.map((item) => scoredById.get(item.id))
+				.filter((item): item is QualityScoredItem => Boolean(item))
+				.sort(compareScored);
+
+			const employmentScore = scoredById.get(employment.id)?.score ?? 0;
+			const supportingScore = facts
+				.slice(0, RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT)
+				.reduce((sum, fact) => sum + fact.score, 0);
+
+			return {
+				employment,
+				facts,
+				score: employmentScore + supportingScore,
+			};
+		})
+		.sort(
+			(a, b) =>
+				b.score - a.score ||
+				a.employment.sortOrder - b.employment.sortOrder,
+		)
+		;
+
+	const minimumCoveredEmploymentScore =
+		rankedEmploymentGroups[QUALITY_TARGET_EMPLOYMENTS - 1]?.score ?? 0;
+	const optionalEmploymentThreshold =
+		minimumCoveredEmploymentScore *
+		RECOMMENDATION_BUDGET_OPTIONAL_EMPLOYMENT_MIN_RATIO;
+
+	const recommendedEmploymentGroups = rankedEmploymentGroups
+		.filter(
+			(group, index) =>
+				index < QUALITY_TARGET_EMPLOYMENTS ||
+				(minimumCoveredEmploymentScore > 0 &&
+					group.score >= optionalEmploymentThreshold),
+		)
+		.slice(0, RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS);
+
+	for (const group of recommendedEmploymentGroups) {
+		const employmentReason = baseRecommendations.get(group.employment.id);
+		if (employmentReason) {
+			budgeted.set(group.employment.id, employmentReason);
+		}
+
+		const selectedFacts: QualityScoredItem[] = [];
+		const usedImpactSignatures = new Set<string>();
+
+		const bestImpact = group.facts
+			.filter((fact) => fact.hasQuantifiedImpact && fact.score > 0)
+			.sort(compareScored)[0];
+
+		if (bestImpact) {
+			selectedFacts.push(bestImpact);
+			const signature = quantifiedImpactSignature(bestImpact.item);
+			if (signature) usedImpactSignatures.add(signature);
+		}
+
+		for (const fact of group.facts) {
+			if (selectedFacts.length >= RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT) break;
+			if (selectedFacts.some((selected) => selected.item.id === fact.item.id)) continue;
+
+			if (fact.hasQuantifiedImpact) {
+				const signature = quantifiedImpactSignature(fact.item);
+				if (signature && usedImpactSignatures.has(signature)) continue;
+				if (signature) usedImpactSignatures.add(signature);
+			}
+
+			selectedFacts.push(fact);
+		}
+
+		for (const fact of selectedFacts) {
+			const reason = baseRecommendations.get(fact.item.id);
+			if (reason) {
+				budgeted.set(fact.item.id, reason);
+			}
+		}
+	}
+
+	const addStandalone = (sourceType: SelectionItem["sourceType"], limit: number) => {
+		const candidates = selectionItems
+			.filter(
+				(item) =>
+					item.sourceType === sourceType &&
+					baseRecommendations.has(item.id),
+			)
+			.map((item) => scoredById.get(item.id))
+			.filter((item): item is QualityScoredItem => Boolean(item))
+			.sort(compareScored)
+			.slice(0, limit);
+
+		for (const candidate of candidates) {
+			const reason = baseRecommendations.get(candidate.item.id);
+			if (reason) {
+				budgeted.set(candidate.item.id, reason);
+			}
+		}
+	};
+
+	addStandalone("profile_list_item", RECOMMENDATION_BUDGET_MAX_PROFILE_ITEMS);
+	addStandalone("project", RECOMMENDATION_BUDGET_MAX_PROJECTS);
+	addStandalone("education", RECOMMENDATION_BUDGET_MAX_EDUCATION);
+	addStandalone("volunteer", RECOMMENDATION_BUDGET_MAX_VOLUNTEER);
+
+	return new Map([...budgeted.entries()].slice(0, RECOMMENDATION_BUDGET_MAX_TOTAL));
 }
 
 function applyQualityCoveragePolicy(
@@ -743,11 +904,14 @@ function applyQualityCoveragePolicy(
 			currentCount += 1;
 		}
 	};
-
 	supplementStandalone("profile_list_item", QUALITY_TARGET_PROFILE_ITEMS);
 	supplementStandalone("project", QUALITY_TARGET_PROJECTS);
 
-	return recommendations;
+	return applyRecommendationBudgetPolicy(
+		recommendations,
+		selectionItems,
+		requirements,
+	);
 }
 
 function validateAndExpandRecommendations(
@@ -1094,6 +1258,7 @@ resolvePromptAliases,
 	resolveGapSuggestions,
 	validateAndExpandRecommendations,
 	applyQualityCoveragePolicy,
+	applyRecommendationBudgetPolicy,
 	scoreQualityItem,
 	hasQuantifiedImpactEvidence,
 	SYSTEM_PROMPT,

@@ -864,6 +864,470 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 			onUsage: expect.any(Function),
 		});
 	});
+	it("does not classify plain team headcount as quantified impact", () => {
+		expect(__testables.hasQuantifiedImpactEvidence("Managed 27 production workers.")).toBe(false);
+		expect(
+			__testables.hasQuantifiedImpactEvidence(
+				"Coordinated a multinational team of 12 to 27 employees.",
+			),
+		).toBe(false);
+		expect(
+			__testables.hasQuantifiedImpactEvidence(
+				"Prepared 483 offers and contracts worth PLN 2.89 million.",
+			),
+		).toBe(true);
+		expect(
+			__testables.hasQuantifiedImpactEvidence(
+				"66 applications resulted in PLN 720 thousand of secured funding.",
+			),
+		).toBe(true);
+	});
+
+	it("drops a weak optional third employment below 70 percent of the second-ranked score", () => {
+		const selectionItems = [
+			{
+				id: "ratio-employment-a",
+				sourceType: "employment",
+				sourceId: "ratio-employment-a-source",
+				parentSelectionItemId: null,
+				sourceTextSnapshot: "Office document and contract coordination",
+				sourceDataSnapshot: { company: "A", jobTitle: "Office Coordinator" },
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 0,
+			},
+			{
+				id: "ratio-a-fact",
+				sourceType: "experience_fact",
+				sourceId: "ratio-a-fact-source",
+				parentSelectionItemId: "ratio-employment-a",
+				sourceTextSnapshot: "Prepared contracts, applications and document workflows with deadline control.",
+				sourceDataSnapshot: { kind: "responsibility", text: "Prepared contracts, applications and document workflows with deadline control." },
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 1,
+			},
+			{
+				id: "ratio-employment-b",
+				sourceType: "employment",
+				sourceId: "ratio-employment-b-source",
+				parentSelectionItemId: null,
+				sourceTextSnapshot: "Office documentation and client coordination",
+				sourceDataSnapshot: { company: "B", jobTitle: "Administrative Coordinator" },
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 10,
+			},
+			{
+				id: "ratio-b-fact",
+				sourceType: "experience_fact",
+				sourceId: "ratio-b-fact-source",
+				parentSelectionItemId: "ratio-employment-b",
+				sourceTextSnapshot: "Prepared documentation, offers and contracts and monitored deadlines.",
+				sourceDataSnapshot: { kind: "responsibility", text: "Prepared documentation, offers and contracts and monitored deadlines." },
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 11,
+			},
+			{
+				id: "ratio-employment-c",
+				sourceType: "employment",
+				sourceId: "ratio-employment-c-source",
+				parentSelectionItemId: null,
+				sourceTextSnapshot: "Production line coordinator",
+				sourceDataSnapshot: { company: "C", jobTitle: "Production Coordinator" },
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 20,
+			},
+			{
+				id: "ratio-c-fact",
+				sourceType: "experience_fact",
+				sourceId: "ratio-c-fact-source",
+				parentSelectionItemId: "ratio-employment-c",
+				sourceTextSnapshot: "Maintained production documentation.",
+				sourceDataSnapshot: { kind: "responsibility", text: "Maintained production documentation." },
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 21,
+			},
+		] as unknown as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[1];
+
+		const recommendations = new Map(
+			selectionItems.map((item) => [item.id, `reason-${item.id}`]),
+		);
+
+		const result = __testables.applyRecommendationBudgetPolicy(
+			recommendations,
+			selectionItems,
+			[
+				{
+					id: "ratio-req",
+					category: "required",
+					priority: "critical",
+					sourceText: null,
+					text: "Office documentation, contracts, applications, offers and deadline coordination",
+				},
+			],
+		);
+
+		expect(result.has("ratio-employment-a")).toBe(true);
+		expect(result.has("ratio-employment-b")).toBe(true);
+		expect(result.has("ratio-employment-c")).toBe(false);
+		expect(result.has("ratio-c-fact")).toBe(false);
+	});
+
+	it("keeps an optional third employment when its score remains close to the second-ranked score", () => {
+		const selectionItems = ["a", "b", "c"].flatMap((suffix, index) => [
+			{
+				id: `near-employment-${suffix}`,
+				sourceType: "employment",
+				sourceId: `near-employment-${suffix}-source`,
+				parentSelectionItemId: null,
+				sourceTextSnapshot: "Office document and contract coordination",
+				sourceDataSnapshot: { company: suffix.toUpperCase(), jobTitle: "Office Coordinator" },
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: index * 10,
+			},
+			{
+				id: `near-fact-${suffix}`,
+				sourceType: "experience_fact",
+				sourceId: `near-fact-${suffix}-source`,
+				parentSelectionItemId: `near-employment-${suffix}`,
+				sourceTextSnapshot: "Prepared contracts, applications, offers and documentation and monitored deadlines.",
+				sourceDataSnapshot: { kind: "responsibility", text: "Prepared contracts, applications, offers and documentation and monitored deadlines." },
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: index * 10 + 1,
+			},
+		]) as unknown as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[1];
+
+		const recommendations = new Map(
+			selectionItems.map((item) => [item.id, `reason-${item.id}`]),
+		);
+
+		const result = __testables.applyRecommendationBudgetPolicy(
+			recommendations,
+			selectionItems,
+			[
+				{
+					id: "near-req",
+					category: "required",
+					priority: "critical",
+					sourceText: null,
+					text: "Office documentation, contracts, applications, offers and deadline coordination",
+				},
+			],
+		);
+
+		expect(result.has("near-employment-a")).toBe(true);
+		expect(result.has("near-employment-b")).toBe(true);
+		expect(result.has("near-employment-c")).toBe(true);
+	});
+
+	it("caps an over-recall recommendation set while preserving impact and parent integrity", () => {
+		const employments = Array.from({ length: 4 }, (_, index) => ({
+			id: `budget-employment-${index}`,
+			sourceType: "employment",
+			sourceId: `budget-employment-source-${index}`,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: `Office coordination and document workflow Employer ${index}`,
+			sourceDataSnapshot: {
+				company: `Employer ${index}`,
+				jobTitle: "Office coordination",
+			},
+			selected: false,
+			recommended: false,
+			recommendationReason: null,
+			sortOrder: index * 10,
+		}));
+
+		const facts = employments.flatMap((employment, employmentIndex) => [
+			{
+				id: `budget-fact-${employmentIndex}-docs`,
+				sourceType: "experience_fact",
+				sourceId: `budget-fact-${employmentIndex}-docs-source`,
+				parentSelectionItemId: employment.id,
+				sourceTextSnapshot: "Prepared documents, applications and contracts.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Prepared documents, applications and contracts.",
+				},
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: employment.sortOrder + 1,
+			},
+			{
+				id: `budget-fact-${employmentIndex}-deadlines`,
+				sourceType: "experience_fact",
+				sourceId: `budget-fact-${employmentIndex}-deadlines-source`,
+				parentSelectionItemId: employment.id,
+				sourceTextSnapshot: "Monitored documentation and administrative deadlines.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Monitored documentation and administrative deadlines.",
+				},
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: employment.sortOrder + 2,
+			},
+			{
+				id: `budget-fact-${employmentIndex}-vendors`,
+				sourceType: "experience_fact",
+				sourceId: `budget-fact-${employmentIndex}-vendors-source`,
+				parentSelectionItemId: employment.id,
+				sourceTextSnapshot: "Coordinated suppliers, contractors and office workflow.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Coordinated suppliers, contractors and office workflow.",
+				},
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: employment.sortOrder + 3,
+			},
+			{
+				id: `budget-fact-${employmentIndex}-impact`,
+				sourceType: "experience_fact",
+				sourceId: `budget-fact-${employmentIndex}-impact-source`,
+				parentSelectionItemId: employment.id,
+				sourceTextSnapshot: `Prepared ${400 + employmentIndex} offers and contracts worth PLN ${2000 + employmentIndex}.`,
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: `Prepared ${400 + employmentIndex} offers and contracts worth PLN ${2000 + employmentIndex}.`,
+				},
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: employment.sortOrder + 4,
+			},
+		]);
+
+		const profiles = Array.from({ length: 7 }, (_, index) => ({
+			id: `budget-profile-${index}`,
+			sourceType: "profile_list_item",
+			sourceId: `budget-profile-source-${index}`,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: `Document workflow competency ${index}`,
+			sourceDataSnapshot: {
+				kind: "competency",
+				value: `Document workflow competency ${index}`,
+			},
+			selected: false,
+			recommended: false,
+			recommendationReason: null,
+			sortOrder: 100 + index,
+		}));
+
+		const projects = Array.from({ length: 2 }, (_, index) => ({
+			id: `budget-project-${index}`,
+			sourceType: "project",
+			sourceId: `budget-project-source-${index}`,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: `Document workflow project ${index}`,
+			sourceDataSnapshot: {
+				name: `Project ${index}`,
+				description: "Document workflow and deadline coordination",
+			},
+			selected: false,
+			recommended: false,
+			recommendationReason: null,
+			sortOrder: 120 + index,
+		}));
+
+		const education = Array.from({ length: 2 }, (_, index) => ({
+			id: `budget-education-${index}`,
+			sourceType: "education",
+			sourceId: `budget-education-source-${index}`,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: `Education ${index}`,
+			sourceDataSnapshot: {
+				institution: `School ${index}`,
+			},
+			selected: false,
+			recommended: false,
+			recommendationReason: null,
+			sortOrder: 130 + index,
+		}));
+
+		const volunteer = Array.from({ length: 2 }, (_, index) => ({
+			id: `budget-volunteer-${index}`,
+			sourceType: "volunteer",
+			sourceId: `budget-volunteer-source-${index}`,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: `Volunteer document coordination ${index}`,
+			sourceDataSnapshot: {
+				organization: `Organization ${index}`,
+				summary: "Document coordination",
+			},
+			selected: false,
+			recommended: false,
+			recommendationReason: null,
+			sortOrder: 140 + index,
+		}));
+
+		const selectionItems = [
+			...employments,
+			...facts,
+			...profiles,
+			...projects,
+			...education,
+			...volunteer,
+		] as unknown as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[1];
+
+		const recommendations = new Map(
+			selectionItems.map((item) => [item.id, `reason-${item.id}`]),
+		);
+
+		const requirements = [
+			{
+				id: "budget-req",
+				category: "required",
+				priority: "critical",
+				sourceText: null,
+				text: "Document workflow, deadlines, applications, offers, contracts and coordination",
+			},
+		] as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[2];
+
+		const result = __testables.applyRecommendationBudgetPolicy(
+			recommendations,
+			selectionItems,
+			requirements,
+		);
+
+		expect(result.size).toBeLessThanOrEqual(20);
+		expect([...result.keys()].filter((id) => id.startsWith("budget-employment-"))).toHaveLength(3);
+		expect(result.has("budget-employment-3")).toBe(false);
+
+		for (const employmentIndex of [0, 1, 2]) {
+			const factIds = [...result.keys()].filter((id) =>
+				id.startsWith(`budget-fact-${employmentIndex}-`),
+			);
+			expect(factIds).toHaveLength(3);
+			expect(result.has(`budget-fact-${employmentIndex}-impact`)).toBe(true);
+		}
+
+		expect([...result.keys()].filter((id) => id.startsWith("budget-profile-"))).toHaveLength(5);
+		expect([...result.keys()].filter((id) => id.startsWith("budget-project-"))).toHaveLength(1);
+		expect([...result.keys()].filter((id) => id.startsWith("budget-education-"))).toHaveLength(1);
+		expect([...result.keys()].filter((id) => id.startsWith("budget-volunteer-"))).toHaveLength(1);
+	});
+
+	it("deduplicates quantified facts with the same numeric impact signature", () => {
+		const selectionItems = [
+			{
+				id: "dedupe-employment",
+				sourceType: "employment",
+				sourceId: "dedupe-employment-source",
+				parentSelectionItemId: null,
+				sourceTextSnapshot: "Offer and contract coordination",
+				sourceDataSnapshot: {
+					company: "Example",
+					jobTitle: "Coordinator",
+				},
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 0,
+			},
+			{
+				id: "dedupe-impact-a",
+				sourceType: "experience_fact",
+				sourceId: "dedupe-impact-a-source",
+				parentSelectionItemId: "dedupe-employment",
+				sourceTextSnapshot: "Prepared 483 offers and contracts worth PLN 2.89 million.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Prepared 483 offers and contracts worth PLN 2.89 million.",
+				},
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 1,
+			},
+			{
+				id: "dedupe-impact-b",
+				sourceType: "experience_fact",
+				sourceId: "dedupe-impact-b-source",
+				parentSelectionItemId: "dedupe-employment",
+				sourceTextSnapshot: "483 offers resulted in contracts worth PLN 2.89 million.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "483 offers resulted in contracts worth PLN 2.89 million.",
+				},
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 2,
+			},
+			{
+				id: "dedupe-docs",
+				sourceType: "experience_fact",
+				sourceId: "dedupe-docs-source",
+				parentSelectionItemId: "dedupe-employment",
+				sourceTextSnapshot: "Prepared application and contract documentation.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Prepared application and contract documentation.",
+				},
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 3,
+			},
+			{
+				id: "dedupe-deadlines",
+				sourceType: "experience_fact",
+				sourceId: "dedupe-deadlines-source",
+				parentSelectionItemId: "dedupe-employment",
+				sourceTextSnapshot: "Monitored documentation deadlines.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Monitored documentation deadlines.",
+				},
+				selected: false,
+				recommended: false,
+				recommendationReason: null,
+				sortOrder: 4,
+			},
+		] as unknown as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[1];
+
+		const recommendations = new Map(
+			selectionItems.map((item) => [item.id, `reason-${item.id}`]),
+		);
+
+		const result = __testables.applyRecommendationBudgetPolicy(
+			recommendations,
+			selectionItems,
+			[
+				{
+					id: "dedupe-req",
+					category: "required",
+					priority: "critical",
+					sourceText: null,
+					text: "Applications, offers, contracts, documentation and deadlines",
+				},
+			],
+		);
+
+		expect(result.has("dedupe-employment")).toBe(true);
+		expect(result.has("dedupe-impact-a")).toBe(true);
+		expect(result.has("dedupe-impact-b")).toBe(false);
+		expect(
+			[...result.keys()].filter((id) => id.startsWith("dedupe-") && id !== "dedupe-employment"),
+		).toHaveLength(3);
+	});
 
 	it("rejects an invalid AI selection before mutating the database", async () => {
 		generateJsonMock.mockResolvedValue({
