@@ -110,7 +110,7 @@ function responseFor(text: string): { stage: CvmateAiStage; content: string } {
 				recommendations: [
 					{
 						selectionItemId: fact.id,
-						reason: "Direct evidence from the stored responsibility.",
+						requirementIds: [gapRequirementId],
 					},
 				],
 				gapRequirementIds: [gapRequirementId],
@@ -118,7 +118,6 @@ function responseFor(text: string): { stage: CvmateAiStage; content: string } {
 					{
 						requirementId: gapRequirementId,
 						kind: "tool",
-						text: "Jira",
 					},
 				],
 			}),

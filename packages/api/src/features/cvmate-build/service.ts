@@ -494,7 +494,10 @@ function buildInitialSelectionItems(
 	}
 
 	for (const item of profile.projects) add("project", item.id);
-	for (const item of profile.education) add("education", item.id);
+	const selectSingleEducationByDefault = profile.education.length === 1;
+	for (const item of profile.education) {
+		add("education", item.id, null, selectSingleEducationByDefault);
+	}
 	for (const item of profile.courses) add("course", item.id);
 	for (const item of profile.certifications) add("certification", item.id);
 	for (const item of profile.volunteer) add("volunteer", item.id);

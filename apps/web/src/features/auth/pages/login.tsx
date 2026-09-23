@@ -133,8 +133,9 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 								className="h-auto gap-1.5 px-1! py-0"
 								render={
 									<Link to="/auth/register" search={{ callbackURL, reauthenticate }}>
+										{" "}
 										<Trans comment="Call-to-action link from login page to account registration page">
-											Create one now
+											Create account
 										</Trans>{" "}
 										<ArrowRightIcon />
 									</Link>
@@ -247,7 +248,7 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 				</form>
 			)}
 
-			<SocialAuth />
+			<SocialAuth mode="login" />
 		</>
 	);
 }

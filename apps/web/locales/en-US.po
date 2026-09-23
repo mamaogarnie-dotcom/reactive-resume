@@ -172,6 +172,10 @@ msgstr "1story helps you turn your career history into tailored CVs while keepin
 msgid "1story v<0>{__APP_VERSION__}</0>"
 msgstr "1story v<0>{__APP_VERSION__}</0>"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "1story will securely read the public page. If the site blocks automatic access, paste the offer text or attach a file instead."
+msgstr "1story will securely read the public page. If the site blocks automatic access, paste the offer text or attach a file instead."
+
 #: src/dialogs/api-key/create.tsx
 msgid "3 months"
 msgstr "3 months"
@@ -305,6 +309,7 @@ msgstr "Actual size (100%)"
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/table-view.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Add"
 msgstr "Add"
@@ -497,6 +502,7 @@ msgid "Add course content before using this record in the CV."
 msgstr "Add course content before using this record in the CV."
 
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Add employment"
 msgstr "Add employment"
 
@@ -580,7 +586,9 @@ msgstr "Added by you"
 
 #: src/routes/dashboard/cvmate/-components/achievements.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Adding..."
 msgstr "Adding..."
 
@@ -1019,6 +1027,10 @@ msgstr "Azerbaijani"
 msgid "Back to authentication settings"
 msgstr "Back to authentication settings"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Back to job offer"
+msgstr "Back to job offer"
+
 #: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Back to resumes"
 msgstr "Back to resumes"
@@ -1166,6 +1178,7 @@ msgstr "Can I export my resume to PDF?"
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 #: src/routes/dashboard/cvmate/-components/achievements.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
 msgid "Cancel"
 msgstr "Cancel"
@@ -1319,6 +1332,10 @@ msgstr "Choose an application"
 msgid "Choose CV content"
 msgstr "Choose CV content"
 
+#: src/routes/dashboard/cvmate/-components/flexible-date-input.tsx
+msgid "Choose full date from calendar"
+msgstr "Choose full date from calendar"
+
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
 msgid "Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV language."
 msgstr "Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV language."
@@ -1326,6 +1343,14 @@ msgstr "Choose one recruitment clause. 1story will automatically use the Polish 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
 msgstr "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Choose the information from your Master Profile that you want to include in this CV. No AI will be used."
+msgstr "Choose the information from your Master Profile that you want to include in this CV. No AI will be used."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Choose the information from your Master Profile that you want to include. This path does not use AI."
+msgstr "Choose the information from your Master Profile that you want to include. This path does not use AI."
 
 #: src/components/level/combobox.tsx
 msgid "Circle"
@@ -1422,6 +1447,7 @@ msgstr "Compact"
 #: src/dialogs/resume/sections/experience.tsx
 #: src/features/applications/components/application-form-sheet.tsx
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Company"
 msgstr "Company"
 
@@ -1536,6 +1562,10 @@ msgstr "Content is laid out in a grid."
 #: src/features/auth/pages/register.tsx
 msgid "Continue"
 msgstr "Continue"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Continue CV"
+msgstr "Continue CV"
 
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Continue to tailored content"
@@ -1727,6 +1757,10 @@ msgstr "Could not set up two-factor authentication."
 msgid "Could not sort these items; they stayed at the end: {0}."
 msgstr "Could not sort these items; they stayed at the end: {0}."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Could not start a manual CV."
+msgstr "Could not start a manual CV."
+
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
 msgid "Could not update employment."
 msgstr "Could not update employment."
@@ -1867,9 +1901,9 @@ msgstr "Create a copy tuned to this job"
 msgid "Create a CV from your Master Profile and let AI recommend only information already stored there."
 msgstr "Create a CV from your Master Profile and let AI recommend only information already stored there."
 
-#: src/features/auth/pages/register.tsx
-msgid "Create a new account"
-msgstr "Create a new account"
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Create a CV without a job offer or AI"
+msgstr "Create a CV without a job offer or AI"
 
 #: src/dialogs/api-key/create.tsx
 #: src/features/settings/pages/api-keys.tsx
@@ -1950,6 +1984,18 @@ msgstr "Create a Sample Resume"
 msgid "Create a tailored CV from a job offer to see it here."
 msgstr "Create a tailored CV from a job offer to see it here."
 
+#. Call-to-action link from login page to account registration page
+#. Primary action button label on registration form
+#: src/features/auth/pages/login.tsx
+#: src/features/auth/pages/register.tsx
+msgid "Create account"
+msgstr "Create account"
+
+#. Google account creation button on the registration page
+#: src/features/auth/components/social-auth.tsx
+msgid "Create account with Google"
+msgstr "Create account with Google"
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Create as many resumes as you want."
 msgstr "Create as many resumes as you want."
@@ -1966,14 +2012,13 @@ msgstr "Create cover letter"
 msgid "Create CV"
 msgstr "Create CV"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Create CV manually without AI"
+msgstr "Create CV manually without AI"
+
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Create from scratch"
 msgstr "Create from scratch"
-
-#. Call-to-action link from login page to account registration page
-#: src/features/auth/pages/login.tsx
-msgid "Create one now"
-msgstr "Create one now"
 
 #. Accessible label for create-resume split button group
 #: src/dialogs/resume/index.tsx
@@ -2048,6 +2093,13 @@ msgstr "Current recruitment only"
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Current stage"
 msgstr "Current stage"
+
+#. Volunteer period checkbox and period label for an ongoing volunteer role
+#. Volunteer period checkbox for an ongoing volunteer role
+#. Volunteer period checkbox for an ongoing volunteer role
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
+msgid "Currently"
+msgstr "Currently"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgid "Currently available for German resumes. Uses the language set in Page."
@@ -2175,6 +2227,7 @@ msgstr "Degree"
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/dashboard/cvmate/-components/achievements.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
@@ -2276,6 +2329,7 @@ msgstr "Describe what you did so the entry contributes keywords for matching."
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 msgid "Description"
 msgstr "Description"
 
@@ -2500,6 +2554,7 @@ msgstr "Earthy"
 #: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
 #: src/routes/dashboard/cvmate/-components/achievements.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
 msgid "Edit"
 msgstr "Edit"
@@ -2657,6 +2712,7 @@ msgid "End date"
 msgstr "End date"
 
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "End date: YYYY, YYYY-MM or YYYY-MM-DD"
 msgstr "End date: YYYY, YYYY-MM or YYYY-MM-DD"
 
@@ -3139,6 +3195,10 @@ msgstr "Free-form"
 msgid "French"
 msgstr "French"
 
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
+msgid "From date"
+msgstr "From date"
+
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "From your resume and the posting"
 msgstr "From your resume and the posting"
@@ -3415,6 +3475,7 @@ msgid "Hyphenation"
 msgstr "Hyphenation"
 
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "I currently work here"
 msgstr "I currently work here"
 
@@ -3555,10 +3616,6 @@ msgstr "Inspecting page {0} of {1}…"
 msgid "Instant Generation"
 msgstr "Instant Generation"
 
-#: src/routes/dashboard/cvmate/-components/profile-details.tsx
-msgid "Institution"
-msgstr "Institution"
-
 #: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/settings/integrations/route.tsx
@@ -3642,6 +3699,7 @@ msgid "Job search pipeline"
 msgstr "Job search pipeline"
 
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Job title"
 msgstr "Job title"
 
@@ -4000,6 +4058,7 @@ msgstr "Loading…"
 #: src/features/ats-checker/parse-preview.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
 msgid "Location"
 msgstr "Location"
@@ -4061,6 +4120,10 @@ msgstr "Malay"
 #: src/libs/locale.ts
 msgid "Malayalam"
 msgstr "Malayalam"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Manual CV"
+msgstr "Manual CV"
 
 #: src/features/ats-checker/messages.ts
 msgid "Many bullets start with the same phrase."
@@ -4413,6 +4476,7 @@ msgid "No prior data"
 msgstr "No prior data"
 
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 msgid "No records added yet."
 msgstr "No records added yet."
 
@@ -4664,6 +4728,10 @@ msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) in
 msgid "or continue with"
 msgstr "or continue with"
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Or paste a link to the job offer"
+msgstr "Or paste a link to the job offer"
+
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Or upload a resume PDF"
 msgstr "Or upload a resume PDF"
@@ -4674,6 +4742,7 @@ msgstr "Ordered List"
 
 #: src/dialogs/resume/sections/volunteer.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 msgid "Organization"
 msgstr "Organization"
 
@@ -4790,8 +4859,8 @@ msgid "Paste the full job description here…"
 msgstr "Paste the full job description here…"
 
 #: src/routes/dashboard/cvmate/create.tsx
-msgid "Paste the job offer or attach a PDF/image. 1story will analyze it before building your tailored CV."
-msgstr "Paste the job offer or attach a PDF/image. 1story will analyze it before building your tailored CV."
+msgid "Paste the job offer, paste a link, or attach a PDF/image. 1story will analyze it before building your tailored CV."
+msgstr "Paste the job offer, paste a link, or attach a PDF/image. 1story will analyze it before building your tailored CV."
 
 #: src/features/ats-checker/tool.tsx
 msgid "Paste the posting to see which of its terms already appear in your resume."
@@ -4998,9 +5067,17 @@ msgstr "Preview and export fall back to base styles."
 msgid "Preview and export keep valid styles and ignore invalid styles."
 msgstr "Preview and export keep valid styles and ignore invalid styles."
 
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Preview CV"
+msgstr "Preview CV"
+
 #: src/features/cover-letters/editor-dialog.tsx
 msgid "Preview PDF"
 msgstr "Preview PDF"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Preview the content you selected before opening the CV editor."
+msgstr "Preview the content you selected before opening the CV editor."
 
 #: src/features/cover-letters/library.tsx
 msgid "Previous"
@@ -5540,6 +5617,7 @@ msgid "Right Align"
 msgstr "Right Align"
 
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 msgid "Role"
 msgstr "Role"
 
@@ -5619,6 +5697,8 @@ msgid "Save and analyze"
 msgstr "Save and analyze"
 
 #: src/features/applications/components/application-form-sheet.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
+#: src/routes/dashboard/cvmate/-components/work-experience.tsx
 msgid "Save changes"
 msgstr "Save changes"
 
@@ -5678,6 +5758,7 @@ msgstr "Saving is taking longer than expected. Your changes are still open."
 
 #: src/routes/dashboard/cvmate/-components/achievements.tsx
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
 #: src/routes/dashboard/cvmate/create.tsx
 #: src/routes/dashboard/cvmate/profile.tsx
@@ -6047,11 +6128,6 @@ msgstr "Sign in with GitHub, Google or a custom OAuth provider."
 msgid "Sign out"
 msgstr "Sign out"
 
-#. Primary action button label on registration form
-#: src/features/auth/pages/register.tsx
-msgid "Sign up"
-msgstr "Sign up"
-
 #. Title on the page shown after a failed or cancelled OAuth sign-in
 #: src/features/auth/pages/error.tsx
 msgid "Sign-in didn't complete"
@@ -6121,6 +6197,10 @@ msgstr "Skills"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Skip and Upload"
 msgstr "Skip and Upload"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Skip the job offer and choose the CV content yourself from your Master Profile. No AI will be used."
+msgstr "Skip the job offer and choose the CV content yourself from your Master Profile. No AI will be used."
 
 #: src/routes/_home/route.tsx
 #: src/routes/builder/$resumeId/-components/desktop-builder-shell.tsx
@@ -6327,6 +6407,7 @@ msgid "Start date must be on or before end date."
 msgstr "Start date must be on or before end date."
 
 #: src/routes/dashboard/cvmate/-components/work-experience.tsx
+#: src/routes/dashboard/cvmate/create.tsx
 msgid "Start date: YYYY, YYYY-MM or YYYY-MM-DD"
 msgstr "Start date: YYYY, YYYY-MM or YYYY-MM-DD"
 
@@ -6350,6 +6431,10 @@ msgstr "Start the resume with your name on its own line."
 #: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Start thread"
 msgstr "Start thread"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Starting manual CV..."
+msgstr "Starting manual CV..."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Startup"
@@ -6630,6 +6715,10 @@ msgstr "The imported file could not be parsed into a valid resume."
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "The job offer could not be analyzed."
 msgstr "The job offer could not be analyzed."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The job-offer page could not be read automatically. Paste the offer text or attach a PDF/image instead."
+msgstr "The job-offer page could not be read automatically. Paste the offer text or attach a PDF/image instead."
 
 #: src/features/ats-checker/messages.ts
 msgid "The order the text is stored in disagrees badly with the order it reads in."
@@ -6994,6 +7083,10 @@ msgstr "This thread is read-only"
 msgid "This thread is read-only because the working resume or AI provider is unavailable."
 msgstr "This thread is read-only because the working resume or AI provider is unavailable."
 
+#: src/features/auth/pages/register.tsx
+msgid "This username is already taken. Choose another."
+msgstr "This username is already taken. Choose another."
+
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "This will remove all items from this section."
 msgstr "This will remove all items from this section."
@@ -7042,6 +7135,10 @@ msgstr "Tip"
 #: src/dialogs/resume/sections/publication.tsx
 msgid "Title"
 msgstr "Title"
+
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
+msgid "To date"
+msgstr "To date"
 
 #: src/features/settings/pages/account.tsx
 msgid "To delete your account, type the confirmation text below, then click the button."
@@ -7238,6 +7335,10 @@ msgstr "Undo"
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Undo stylesheet edit"
 msgstr "Undo stylesheet edit"
+
+#: src/routes/dashboard/cvmate/-components/profile-details.tsx
+msgid "University / school"
+msgstr "University / school"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Unlimited Resumes"
@@ -7588,10 +7689,12 @@ msgid "Volunteer"
 msgstr "Volunteer"
 
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 msgid "Volunteer roles that can be relevant to an application."
 msgstr "Volunteer roles that can be relevant to an application."
 
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 msgid "Volunteer work"
 msgstr "Volunteer work"
 
@@ -8004,6 +8107,7 @@ msgid "Your support keeps the project free and open to everyone, now and later."
 msgstr "Your support keeps the project free and open to everyone, now and later."
 
 #: src/routes/dashboard/cvmate/-components/profile-details.tsx
+#: src/routes/dashboard/cvmate/-components/volunteer-section.tsx
 msgid "YYYY, YYYY-MM or YYYY-MM-DD"
 msgstr "YYYY, YYYY-MM or YYYY-MM-DD"
 
@@ -8027,3 +8131,39 @@ msgstr "Zoom out"
 #: src/libs/locale.ts
 msgid "Zulu"
 msgstr "Zulu"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Loading saved CV..."
+msgstr "Loading saved CV..."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "This CV could not be resumed"
+msgstr "This CV could not be resumed"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "The saved CV could not be loaded. It may no longer exist or you may not have access to it."
+msgstr "The saved CV could not be loaded. It may no longer exist or you may not have access to it."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Create a new CV"
+msgstr "Create a new CV"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Back to My CVs"
+msgstr "Back to My CVs"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Your profile contains education, but none is selected for this CV."
+msgstr "Your profile contains education, but none is selected for this CV."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Go back and select education, or consciously continue without it."
+msgstr "Go back and select education, or consciously continue without it."
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Continue without education"
+msgstr "Continue without education"
+
+#: src/routes/dashboard/cvmate/create.tsx
+msgid "Back and select education"
+msgstr "Back and select education"

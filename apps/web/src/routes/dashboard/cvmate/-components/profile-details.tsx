@@ -11,6 +11,8 @@ import { Input } from "@reactive-resume/ui/components/input";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
 import { getDefaultRecruitmentClause } from "@reactive-resume/utils/recruitment-clause";
 import { orpc } from "@/libs/orpc/client";
+import { FlexibleDateInput } from "./flexible-date-input";
+import { VolunteerSection } from "./volunteer-section";
 
 type ProfileAggregate = NonNullable<Awaited<ReturnType<typeof orpc.cvmateProfile.getCurrent.call>>>;
 
@@ -34,6 +36,7 @@ type FieldDefinition = {
 	label: MessageDescriptor;
 	placeholder?: MessageDescriptor;
 	type?: "text" | "url";
+	date?: boolean;
 	multiline?: boolean;
 	wide?: boolean;
 };
@@ -76,7 +79,7 @@ const detailedDefinitions: readonly DetailedDefinition[] = [
 		title: msg`Education`,
 		description: msg`Schools, universities and other formal education.`,
 		fields: [
-			{ key: "institution", label: msg`Institution` },
+			{ key: "institution", label: msg`University / school` },
 			{ key: "fieldOfStudy", label: msg`Field of study` },
 			{ key: "specialization", label: msg`Specialization` },
 			{ key: "degree", label: msg`Degree` },
@@ -84,11 +87,13 @@ const detailedDefinitions: readonly DetailedDefinition[] = [
 				key: "startDate",
 				label: msg`Start date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "endDate",
 				label: msg`End date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "description",
@@ -528,6 +533,15 @@ function RecordFields({
 							value={values[field.key] ?? ""}
 							disabled={disabled}
 							onChange={(event) => onChange(field.key, event.target.value)}
+						/>
+					) : field.date ? (
+						<FlexibleDateInput
+							className="max-w-80"
+							ariaLabel={i18n.t(field.label)}
+							placeholder={field.placeholder ? i18n.t(field.placeholder) : i18n.t(field.label)}
+							value={values[field.key] ?? ""}
+							disabled={disabled}
+							onChange={(value) => onChange(field.key, value)}
 						/>
 					) : (
 						<Input
@@ -1139,9 +1153,13 @@ export function ProfileDetailsSection() {
 				))}
 			</div>
 
-			{detailedDefinitions.map((definition) => (
-				<DetailedSection key={definition.kind} definition={definition} />
-			))}
+			{detailedDefinitions.map((definition) =>
+				definition.kind === "volunteer" ? (
+					<VolunteerSection key={definition.kind} />
+				) : (
+					<DetailedSection key={definition.kind} definition={definition} />
+				),
+			)}
 
 			<ClausesSection />
 		</div>

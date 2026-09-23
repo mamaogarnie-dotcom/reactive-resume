@@ -59,7 +59,7 @@ vi.mock("./service", () => ({
 	cvmateBuildService: buildServiceMock,
 }));
 
-const { __testables, cvmateBuildAiRecommendationOutputSchema, cvmateBuildRecommendationsService } = await import(
+const { __testables, cvmateBuildAiRecommendationOutputSchema, cvmateBuildAiRecommendationProviderOutputSchema, cvmateBuildRecommendationsService } = await import(
 	"./recommendations"
 );
 
@@ -134,7 +134,12 @@ const selectionItems: Parameters<typeof __testables.buildPrompt>[0]["selectionIt
 		sourceId: "fact-source-1",
 		sourceTextSnapshot: "Prepared Excel reports.",
 		sourceDataSnapshot: {
+			id: "raw-fact-id",
+			masterProfileId: "master-1",
 			text: "Prepared Excel reports.",
+			createdAt: "2026-01-01T10:00:00.000Z",
+			updatedAt: "2026-01-02T10:00:00.000Z",
+			sortOrder: 99,
 		},
 		recommended: false,
 		selected: false,
@@ -282,6 +287,41 @@ describe("cvmateBuildAiRecommendationOutputSchema", () => {
 	});
 });
 
+describe("cvmateBuildAiRecommendationProviderOutputSchema", () => {
+it("accepts compact relationship-only provider output", () => {
+expect(
+cvmateBuildAiRecommendationProviderOutputSchema.parse({
+recommendations: [
+{
+selectionItemId: "s2",
+requirementIds: ["r1", "r2"],
+},
+],
+gapRequirementIds: ["r2"],
+gapSuggestions: [
+{
+requirementId: "r2",
+kind: "software",
+},
+],
+}),
+).toEqual({
+recommendations: [
+{
+selectionItemId: "s2",
+requirementIds: ["r1", "r2"],
+},
+],
+gapRequirementIds: ["r2"],
+gapSuggestions: [
+{
+requirementId: "r2",
+kind: "software",
+},
+],
+});
+});
+});
 describe("recommendation helpers", () => {
 	it("builds a prompt from frozen offer and candidate snapshots", () => {
 		const prompt = __testables.buildPrompt({
@@ -290,7 +330,42 @@ describe("recommendation helpers", () => {
 		});
 
 		expect(prompt).toContain("Prepared Excel reports.");
-		expect(prompt).toContain('"id":"req-1"');
+
+expect(prompt).toContain(
+'<REQUIREMENTS columns="[id,category,priority,text,sourceText]">',
+);
+
+expect(prompt).toContain(
+'["r1","required","critical","Excel","Excel required"]',
+);
+
+expect(prompt).toContain(
+'<CANDIDATE_ITEMS columns="[id,parentId,sourceType,data,sourceText]">',
+);
+
+expect(prompt).toContain(
+'{"text":"Prepared Excel reports."}',
+);
+
+expect(prompt).toContain(
+'"Office Manager - Example Ltd"',
+);
+
+expect(
+(prompt.match(/Prepared Excel reports\./g) ?? []).length,
+).toBe(1);
+
+// Regression guard:
+// required + preferred requirements must remain gap-eligible.
+expect(prompt).toContain(
+'["r1","r2"]',
+);
+
+expect(prompt).not.toContain('"sourceDataSnapshot"');
+expect(prompt).not.toContain('"sourceTextSnapshot"');
+expect(prompt).not.toContain('"parentSelectionItemId"');
+expect(prompt).not.toContain("raw-fact-id");
+expect(prompt).not.toContain("master-1");
 		expect(prompt).toContain("<GAP_ELIGIBLE_REQUIREMENT_IDS>");
 		expect(__testables.SYSTEM_PROMPT).toContain("Never invent, infer, embellish, or add candidate experience");
 	});
@@ -411,6 +486,90 @@ describe("recommendation helpers", () => {
 	});
 });
 
+describe("prompt alias resolution", () => {
+it("maps aliases and derives display text from frozen requirements", () => {
+const output = __testables.resolvePromptAliases(
+{
+recommendations: [
+{
+selectionItemId: "s2",
+requirementIds: ["r1"],
+},
+],
+gapRequirementIds: ["r1", "r2"],
+gapSuggestions: [
+{
+requirementId: "r2",
+kind: "software",
+},
+],
+},
+selectionItems,
+jobOfferSnapshot.requirements as Parameters<
+typeof __testables.resolvePromptAliases
+>[2],
+);
+
+expect(output).toEqual({
+recommendations: [
+{
+selectionItemId: "fact-1",
+reason: "Excel",
+},
+],
+gapRequirementIds: ["req-1", "req-2"],
+gapSuggestions: [
+{
+requirementId: "req-2",
+kind: "software",
+text: "CRM",
+},
+],
+});
+});
+
+it("leaves an unknown selection ID for existing selection validation", () => {
+const output = __testables.resolvePromptAliases(
+{
+recommendations: [
+{
+selectionItemId: "invented-item",
+requirementIds: ["r1"],
+},
+],
+gapRequirementIds: [],
+},
+selectionItems,
+jobOfferSnapshot.requirements as Parameters<
+typeof __testables.resolvePromptAliases
+>[2],
+);
+
+expect(
+output.recommendations[0]?.selectionItemId,
+).toBe("invented-item");
+});
+
+it("rejects an unknown requirement alias before database mutation", () => {
+expect(() =>
+__testables.resolvePromptAliases(
+{
+recommendations: [
+{
+selectionItemId: "s2",
+requirementIds: ["r999"],
+},
+],
+gapRequirementIds: [],
+},
+selectionItems,
+jobOfferSnapshot.requirements as Parameters<
+typeof __testables.resolvePromptAliases
+>[2],
+),
+).toThrow();
+});
+});
 describe("cvmateBuildRecommendationsService.generate", () => {
 	it("updates recommendation fields only and replaces only open detected gaps", async () => {
 		const tx = createTransactionMock();
@@ -418,11 +577,11 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 		generateJsonMock.mockResolvedValue({
 			recommendations: [
 				{
-					selectionItemId: "fact-1",
-					reason: "Direct Excel evidence.",
+					selectionItemId: "s2",
+					requirementIds: ["r1"],
 				},
 			],
-			gapRequirementIds: ["req-1", "req-2"],
+			gapRequirementIds: ["r1", "r2"],
 		});
 
 		await cvmateBuildRecommendationsService.generate({
@@ -437,9 +596,16 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 			baseURL: "",
 		});
 
+		expect(generateJsonMock).toHaveBeenCalledOnce();
+		expect(generateJsonMock.mock.calls[0]?.[3]).toMatchObject({
+			maxOutputTokens: 2048,
+			onUsage: expect.any(Function),
+		});
+		expect(generateJsonMock.mock.calls[0]?.[3]).not.toHaveProperty("providerOptions");
+
 		expect(tx.set).toHaveBeenCalledWith({
 			recommended: true,
-			recommendationReason: "Direct Excel evidence.",
+			recommendationReason: "Excel",
 		});
 
 		expect(tx.set).toHaveBeenCalledWith({
@@ -481,12 +647,48 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 		});
 	});
 
+	it("uses low Groq reasoning for GPT-OSS recommendations only", async () => {
+		createTransactionMock();
+
+		providerMock.getDefaultRunnable.mockResolvedValue({
+			...provider,
+			provider: "groq",
+			model: "openai/gpt-oss-120b",
+		});
+
+		generateJsonMock.mockResolvedValue({
+			recommendations: [
+				{
+					selectionItemId: "s2",
+					requirementIds: ["r1"],
+				},
+			],
+			gapRequirementIds: [],
+		});
+
+		await cvmateBuildRecommendationsService.generate({
+			id: "build-1",
+			userId: "user-1",
+		});
+
+		expect(generateJsonMock).toHaveBeenCalledOnce();
+		expect(generateJsonMock.mock.calls[0]?.[3]).toMatchObject({
+			maxOutputTokens: 2048,
+			providerOptions: {
+				groq: {
+					reasoningEffort: "low",
+				},
+			},
+			onUsage: expect.any(Function),
+		});
+	});
+
 	it("rejects an invalid AI selection before mutating the database", async () => {
 		generateJsonMock.mockResolvedValue({
 			recommendations: [
 				{
 					selectionItemId: "invented-item",
-					reason: "Invented match.",
+					requirementIds: ["r1"],
 				},
 			],
 			gapRequirementIds: [],

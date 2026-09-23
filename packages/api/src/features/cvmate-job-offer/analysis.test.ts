@@ -17,6 +17,7 @@ const generateTextMock = vi.hoisted(() => vi.fn());
 const getModelMock = vi.hoisted(() => vi.fn(() => ({ model: true })));
 const generateIdMock = vi.hoisted(() => vi.fn());
 const storageReadMock = vi.hoisted(() => vi.fn());
+const fetchJobOfferTextFromUrlMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@reactive-resume/db/client", () => ({ db: dbMock }));
 
@@ -73,6 +74,10 @@ vi.mock("./service", () => ({
 	},
 }));
 
+vi.mock("./url-fetch", () => ({
+	fetchJobOfferTextFromUrl: fetchJobOfferTextFromUrlMock,
+}));
+
 const {
 	__testables,
 	analyzeJobOfferSources,
@@ -91,6 +96,7 @@ const provider = {
 
 const offer = {
 	id: "offer-1",
+	sourceUrl: null,
 	rawText: "We require Excel and experience in public procurement.",
 	roleTitle: null,
 	companyName: null,
@@ -361,6 +367,55 @@ describe("cvmateJobOfferAnalysisService", () => {
 			id: "offer-1",
 			analysisStatus: "analyzed",
 		});
+	});
+
+	it("fetches a stored source URL and feeds its text into the existing analysis pipeline", async () => {
+		getOfferMock.mockReset();
+
+		const linkOffer = {
+			...offer,
+			rawText: null,
+			sourceUrl: "https://jobs.example.com/office-manager",
+			assets: [],
+		};
+
+		getOfferMock.mockResolvedValueOnce(linkOffer).mockResolvedValueOnce({
+			...linkOffer,
+			analysisStatus: "analyzed",
+		});
+
+		fetchJobOfferTextFromUrlMock.mockResolvedValue(
+			"Example Consulting is hiring an Office Manager. Required: Excel and client communication.",
+		);
+
+		generateJsonMock.mockResolvedValue({
+			roleTitle: "Office Manager",
+			companyName: "Example Consulting",
+			location: null,
+			language: "en",
+			requirements: [],
+		});
+
+		mockSuccessTransaction();
+
+		await expect(
+			cvmateJobOfferAnalysisService.analyze({
+				id: "offer-1",
+				userId: "user-1",
+			}),
+		).resolves.toMatchObject({
+			id: "offer-1",
+			analysisStatus: "analyzed",
+		});
+
+		expect(fetchJobOfferTextFromUrlMock).toHaveBeenCalledWith("https://jobs.example.com/office-manager");
+		expect(generateJsonMock).toHaveBeenCalledTimes(1);
+
+		const prompt = generateJsonMock.mock.calls[0]?.[1] as {
+			prompt: string;
+		};
+
+		expect(prompt.prompt).toContain("Example Consulting is hiring an Office Manager");
 	});
 
 	it("reads stored image assets and analyzes an offer without pasted text", async () => {

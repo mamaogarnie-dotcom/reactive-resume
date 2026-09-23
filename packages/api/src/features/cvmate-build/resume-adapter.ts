@@ -75,12 +75,21 @@ const certificationSnapshotSchema = cvmateCertificationSchema.pick({
 	description: true,
 });
 
-const volunteerSnapshotSchema = cvmateVolunteerSchema.pick({
-	organization: true,
-	role: true,
-	date: true,
-	description: true,
-});
+const volunteerSnapshotSchema = cvmateVolunteerSchema
+	.pick({
+		organization: true,
+		role: true,
+		date: true,
+		startDate: true,
+		endDate: true,
+		isCurrent: true,
+		description: true,
+	})
+	.extend({
+		startDate: cvmateVolunteerSchema.shape.startDate.default(null),
+		endDate: cvmateVolunteerSchema.shape.endDate.default(null),
+		isCurrent: cvmateVolunteerSchema.shape.isCurrent.default(false),
+	});
 
 const languageSnapshotSchema = cvmateLanguageSchema.pick({
 	language: true,
@@ -444,7 +453,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 					hidden: false,
 					organization: snapshot.organization,
 					location: "",
-					period: snapshot.date ?? "",
+					period: formatEmploymentPeriod(
+						snapshot.startDate ?? snapshot.date,
+						snapshot.endDate,
+						snapshot.isCurrent,
+						locale,
+					),
 					website: itemWebsite(),
 					description: paragraphsHtml([snapshot.role, snapshot.description]),
 				});

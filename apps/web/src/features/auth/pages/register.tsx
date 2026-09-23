@@ -58,14 +58,18 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 			});
 
 			if (error) {
-				toast.add({
-					type: "error",
-					description:
-						error.message ||
+				const normalizedMessage = error.message?.trim().toLowerCase();
+				const description = normalizedMessage?.includes("username is already taken")
+					? t`This username is already taken. Choose another.`
+					: error.message ||
 						t({
 							comment: "Fallback toast when account registration fails without a server error message",
 							message: "Failed to create your account. Please try again.",
-						}),
+						});
+
+				toast.add({
+					type: "error",
+					description,
 					id: toastId,
 				});
 				return;
@@ -91,7 +95,7 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 		<>
 			<div className="space-y-1 text-center">
 				<h1 className="font-semibold text-2xl tracking-tight">
-					<Trans>Create a new account</Trans>
+					<Trans>Create account</Trans>
 				</h1>
 
 				<div className="text-muted-foreground">
@@ -250,12 +254,12 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 					</form.Field>
 
 					<Button type="submit" className="w-full">
-						<Trans comment="Primary action button label on registration form">Sign up</Trans>
+						<Trans comment="Primary action button label on registration form">Create account</Trans>
 					</Button>
 				</form>
 			)}
 
-			<SocialAuth />
+			<SocialAuth mode="register" />
 		</>
 	);
 }

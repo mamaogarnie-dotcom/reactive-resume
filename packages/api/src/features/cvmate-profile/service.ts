@@ -94,6 +94,9 @@ type VolunteerFields = {
 organization?: string | null | undefined;
 role?: string | null | undefined;
 date?: string | null | undefined;
+startDate?: string | null | undefined;
+endDate?: string | null | undefined;
+isCurrent?: boolean | undefined;
 description?: string | null | undefined;
 sortOrder?: number | undefined;
 };
@@ -585,9 +588,11 @@ function hasVolunteerContent(value: {
 organization: string | null;
 role: string | null;
 date: string | null;
+startDate: string | null;
+endDate: string | null;
 description: string | null;
 }) {
-return [value.organization, value.role, value.date, value.description].some(
+return [value.organization, value.role, value.date, value.startDate, value.endDate, value.description].some(
 (field) => typeof field === "string" && field.trim().length > 0,
 );
 }
@@ -1519,6 +1524,10 @@ fields.organization !== undefined
 : volunteer.organization,
 role: fields.role !== undefined ? fields.role : volunteer.role,
 date: fields.date !== undefined ? fields.date : volunteer.date,
+startDate:
+fields.startDate !== undefined ? fields.startDate : volunteer.startDate,
+endDate:
+fields.endDate !== undefined ? fields.endDate : volunteer.endDate,
 description:
 fields.description !== undefined
 ? fields.description

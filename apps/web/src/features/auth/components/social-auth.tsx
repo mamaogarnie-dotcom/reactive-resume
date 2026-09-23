@@ -12,7 +12,7 @@ import { authClient } from "@/libs/auth/client";
 import { orpc } from "@/libs/orpc/client";
 import { getAuthRedirectOptions, getOAuthPasskeyOptions, getOAuthSignInOptions, isOAuthRedirect } from "../redirect";
 
-export function SocialAuth() {
+export function SocialAuth({ mode = "login" }: { mode?: "login" | "register" }) {
 	const { data: providers = {}, isLoading } = useQuery(orpc.auth.providers.list.queryOptions());
 
 	return (
@@ -27,7 +27,7 @@ export function SocialAuth() {
 				<hr className="flex-1" />
 			</div>
 
-			{isLoading ? <SocialAuthSkeleton /> : <SocialAuthButtons providers={providers} />}
+			{isLoading ? <SocialAuthSkeleton /> : <SocialAuthButtons providers={providers} mode={mode} />}
 		</>
 	);
 }
@@ -45,9 +45,10 @@ function SocialAuthSkeleton() {
 
 type SocialAuthButtonsProps = {
 	providers: RouterOutput["auth"]["providers"]["list"];
+	mode: "login" | "register";
 };
 
-function SocialAuthButtons({ providers }: SocialAuthButtonsProps) {
+function SocialAuthButtons({ providers, mode }: SocialAuthButtonsProps) {
 	const router = useRouter();
 	const { callbackURL } = useSearch({ from: "/auth" });
 
@@ -122,7 +123,11 @@ function SocialAuthButtons({ providers }: SocialAuthButtonsProps) {
 				)}
 			>
 				<GoogleLogoIcon />
-				<Trans comment="Brand name label for Google social sign-in button">Google</Trans>
+				{mode === "register" ? (
+					<Trans comment="Google account creation button on the registration page">Create account with Google</Trans>
+				) : (
+					<Trans comment="Brand name label for Google social sign-in button">Google</Trans>
+				)}
 			</Button>
 
 			<Button

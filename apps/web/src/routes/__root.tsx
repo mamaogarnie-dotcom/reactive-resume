@@ -1,27 +1,21 @@
+import type { IconProps } from "@phosphor-icons/react";
+import type { FeatureFlags } from "@reactive-resume/api/features/flags";
+import type { AuthSession } from "@reactive-resume/auth/types";
+import type { Locale } from "@reactive-resume/utils/locale";
+import type { QueryClient } from "@tanstack/react-query";
+import type { orpc } from "@/libs/orpc/client";
+import type { Theme } from "@/libs/theme";
 import { DirectionProvider } from "@base-ui/react/direction-provider";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
-import type { IconProps } from "@phosphor-icons/react";
 import { IconContext } from "@phosphor-icons/react";
-import type { FeatureFlags } from "@reactive-resume/api/features/flags";
-import type { AuthSession } from "@reactive-resume/auth/types";
-import { Toaster } from "@reactive-resume/ui/components/toast";
-import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
-import type { Locale } from "@reactive-resume/utils/locale";
-import { TanStackDevtools } from "@tanstack/react-devtools";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
-import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
-import {
-	createRootRouteWithContext,
-	HeadContent,
-	Outlet,
-} from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
 import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import { useEffect } from "react";
-import { BreakpointIndicator } from "@/components/layout/breakpoint-indicator";
+import { Toaster } from "@reactive-resume/ui/components/toast";
+import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
 import { DialogManager } from "@/dialogs/manager";
 import { CommandPalette } from "@/features/command-palette";
 import { ThemeProvider } from "@/features/theme/provider";
@@ -29,9 +23,7 @@ import { ConfirmDialogProvider } from "@/hooks/use-confirm";
 import { PromptDialogProvider } from "@/hooks/use-prompt";
 import { getSession } from "@/libs/auth/session";
 import { getLocale, isRTL, loadLocale } from "@/libs/locale";
-import type { orpc } from "@/libs/orpc/client";
 import { client } from "@/libs/orpc/client";
-import type { Theme } from "@/libs/theme";
 import { getTheme } from "@/libs/theme";
 
 type RouterContext = {
@@ -145,23 +137,6 @@ function RootComponent() {
 														<DialogManager />
 														<CommandPalette />
 														<Toaster />
-
-														{import.meta.env.DEV && <BreakpointIndicator />}
-														{import.meta.env.DEV && (
-															<TanStackDevtools
-																config={{ position: "bottom-left" }}
-																plugins={[
-																	{
-																		name: "TanStack Query",
-																		render: <ReactQueryDevtoolsPanel />,
-																	},
-																	{
-																		name: "TanStack Router",
-																		render: <TanStackRouterDevtoolsPanel />,
-																	},
-																]}
-															/>
-														)}
 													</PromptDialogProvider>
 												</ConfirmDialogProvider>
 											</TooltipProvider>

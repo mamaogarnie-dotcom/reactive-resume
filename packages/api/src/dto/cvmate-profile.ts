@@ -191,6 +191,9 @@ masterProfileId: z.string(),
 organization: trimmedNullableString,
 role: trimmedNullableString,
 date: nullablePartialDateSchema,
+startDate: nullablePartialDateSchema,
+endDate: nullablePartialDateSchema,
+isCurrent: z.boolean(),
 description: trimmedNullableString,
 sortOrder: z.number().int(),
 createdAt: z.date(),
@@ -472,13 +475,16 @@ const volunteerEditableSchema = volunteerSchema
 organization: true,
 role: true,
 date: true,
+startDate: true,
+endDate: true,
+isCurrent: true,
 description: true,
 sortOrder: true,
 })
 .partial();
 
 const hasVolunteerContent = (value: z.infer<typeof volunteerEditableSchema>) =>
-[value.organization, value.role, value.date, value.description].some(
+[value.organization, value.role, value.date, value.startDate, value.endDate, value.description].some(
 (field) => typeof field === "string" && field.trim().length > 0,
 );
 

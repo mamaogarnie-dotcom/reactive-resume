@@ -14,6 +14,10 @@ import { cvmateBuildService } from "./service";
 const MAX_RECOMMENDATIONS = 500;
 const MAX_GAPS = 100;
 const MAX_GAP_SUGGESTIONS = 100;
+const MAX_MATCHED_REQUIREMENTS_PER_RECOMMENDATION = 4;
+const RECOMMENDATIONS_MAX_OUTPUT_TOKENS = 2048;
+
+const TECHNICAL_SOURCE_DATA_KEYS = new Set(["id", "masterProfileId", "createdAt", "updatedAt", "sortOrder"]);
 
 const requirementCategorySchema = z.enum(["required", "preferred", "responsibility", "keyword", "other"]);
 
@@ -39,26 +43,50 @@ const jobOfferSnapshotSchema = z
 	})
 	.passthrough();
 
+export const cvmateBuildAiRecommendationProviderOutputSchema = z.object({
+recommendations: z
+.array(
+z.object({
+selectionItemId: z.string().trim().min(1),
+requirementIds: z
+.array(z.string().trim().min(1))
+.min(1)
+.max(MAX_MATCHED_REQUIREMENTS_PER_RECOMMENDATION),
+}),
+)
+.max(MAX_RECOMMENDATIONS),
+gapRequirementIds: z.array(z.string().trim().min(1)).max(MAX_GAPS),
+gapSuggestions: z
+.array(
+z.object({
+requirementId: z.string().trim().min(1),
+kind: z.enum(["competency", "software", "tool", "responsibility"]),
+}),
+)
+.max(MAX_GAP_SUGGESTIONS)
+.optional(),
+});
+
 export const cvmateBuildAiRecommendationOutputSchema = z.object({
-	recommendations: z
-		.array(
-			z.object({
-				selectionItemId: z.string().trim().min(1),
-				reason: z.string().trim().min(1).max(500),
-			}),
-		)
-		.max(MAX_RECOMMENDATIONS),
-	gapRequirementIds: z.array(z.string().trim().min(1)).max(MAX_GAPS),
-	gapSuggestions: z
-		.array(
-			z.object({
-				requirementId: z.string().trim().min(1),
-				kind: z.enum(["competency", "software", "tool", "responsibility"]),
-				text: z.string().trim().min(1).max(500),
-			}),
-		)
-		.max(MAX_GAP_SUGGESTIONS)
-		.optional(),
+recommendations: z
+.array(
+z.object({
+selectionItemId: z.string().trim().min(1),
+reason: z.string().trim().min(1).max(500),
+}),
+)
+.max(MAX_RECOMMENDATIONS),
+gapRequirementIds: z.array(z.string().trim().min(1)).max(MAX_GAPS),
+gapSuggestions: z
+.array(
+z.object({
+requirementId: z.string().trim().min(1),
+kind: z.enum(["competency", "software", "tool", "responsibility"]),
+text: z.string().trim().min(1).max(500),
+}),
+)
+.max(MAX_GAP_SUGGESTIONS)
+.optional(),
 });
 
 type RunnableProvider = {
@@ -87,18 +115,17 @@ Security and factuality rules:
 - A job title alone is not proof that the candidate performed a specific duty.
 - Recommend an item only when that item's supplied snapshot gives reasonable
   evidence that it is relevant to the supplied job requirements.
-- recommendation reasons may explain the match, but must not introduce new
-  candidate facts.
-- Return only selectionItemId values present in the supplied candidate items.
+- Return only selectionItemId values present in CANDIDATE_ITEMS.
+- For every recommendation return between 1 and 4 requirementIds from
+  REQUIREMENTS that are directly supported by that candidate item.
+- Do not generate recommendation explanations, reasons, rewritten candidate
+  text, or gap-suggestion text. The application derives display text
+  deterministically from frozen job requirements.
 - gapRequirementIds may contain only IDs from GAP_ELIGIBLE_REQUIREMENT_IDS.
-- gapSuggestions are hypothetical prompts for the user, not candidate facts.
+- gapSuggestions are optional classifications for gaps, not candidate facts.
 - A gap suggestion may reference only a requirement ID also returned in
   gapRequirementIds and may use only competency, software, tool, or
   responsibility as its kind.
-- Keep each suggestion short and derived only from the wording of that job
-  requirement. Do not claim or imply that the candidate has that evidence.
-- The application will show suggestions as optional drafts that the user must
-  confirm as true before explicitly adding them to the Master Profile.
 - A gap means the supplied candidate snapshots do not contain adequate direct
   evidence for that requirement.
 - Do not create gaps for responsibilities, generic keywords, or other items
@@ -110,16 +137,15 @@ Return JSON only with:
 {
   "recommendations": [
     {
-      "selectionItemId": "...",
-      "reason": "..."
+      "selectionItemId": "s1",
+      "requirementIds": ["r1"]
     }
   ],
-  "gapRequirementIds": ["..."],
+  "gapRequirementIds": ["r2"],
   "gapSuggestions": [
     {
-      "requirementId": "...",
-      "kind": "competency",
-      "text": "..."
+      "requirementId": "r2",
+      "kind": "software"
     }
   ]
 }
@@ -154,51 +180,119 @@ function parseJobOfferSnapshot(value: unknown) {
 	return parsed.data;
 }
 
-function compactSourceData(value: Record<string, unknown>): string {
-	return JSON.stringify(value);
+function compactSourceData(value: Record<string, unknown>): Record<string, unknown> {
+	return Object.fromEntries(
+		Object.entries(value).filter(([key]) => !TECHNICAL_SOURCE_DATA_KEYS.has(key)),
+	);
+}
+
+function sourceDataContainsExactText(
+	value: Record<string, unknown>,
+	sourceText: string | null,
+): boolean {
+	if (!sourceText) return false;
+
+	return Object.values(value).some(
+		(candidate) => typeof candidate === "string" && candidate === sourceText,
+	);
 }
 
 function buildPrompt(input: {
-	jobOffer: z.infer<typeof jobOfferSnapshotSchema>;
-	selectionItems: SelectionItem[];
+jobOffer: z.infer<typeof jobOfferSnapshotSchema>;
+selectionItems: SelectionItem[];
 }): string {
-	const requirements = input.jobOffer.requirements.map((requirement) => ({
-		id: requirement.id,
-		category: requirement.category,
-		priority: requirement.priority,
-		text: requirement.text,
-		sourceText: requirement.sourceText ?? null,
-	}));
+const requirements = input.jobOffer.requirements.map((requirement) => ({
+id: requirement.id,
+category: requirement.category,
+priority: requirement.priority,
+text: requirement.text,
+sourceText: requirement.sourceText ?? null,
+}));
 
-	const selections = input.selectionItems.map((item) => ({
-		id: item.id,
-		parentSelectionItemId: item.parentSelectionItemId,
-		sourceType: item.sourceType,
-		sourceTextSnapshot: item.sourceTextSnapshot,
-		sourceDataSnapshot: compactSourceData(item.sourceDataSnapshot),
-	}));
+const requirementAliasById = new Map(
+requirements.map(
+(requirement, index) =>
+[requirement.id, `r${index + 1}`] as const,
+),
+);
 
-	const gapEligibleRequirementIds = requirements
-		.filter((requirement) => requirement.category === "required" || requirement.category === "preferred")
-		.map((requirement) => requirement.id);
+const selectionAliasById = new Map(
+input.selectionItems.map(
+(item, index) =>
+[item.id, `s${index + 1}`] as const,
+),
+);
 
-	return `
+const requirementRows = requirements.map((requirement) => [
+requirementAliasById.get(requirement.id) ?? requirement.id,
+requirement.category,
+requirement.priority,
+requirement.text,
+requirement.sourceText && requirement.sourceText !== requirement.text
+? requirement.sourceText
+: null,
+]);
+
+const selectionRows = input.selectionItems.map((item) => {
+const sourceDataSnapshot =
+compactSourceData(item.sourceDataSnapshot);
+
+const sourceTextSnapshot =
+item.sourceTextSnapshot;
+
+return [
+selectionAliasById.get(item.id) ?? item.id,
+
+item.parentSelectionItemId
+? selectionAliasById.get(item.parentSelectionItemId) ??
+item.parentSelectionItemId
+: null,
+
+item.sourceType,
+sourceDataSnapshot,
+
+sourceTextSnapshot &&
+!sourceDataContainsExactText(
+sourceDataSnapshot,
+sourceTextSnapshot,
+)
+? sourceTextSnapshot
+: null,
+];
+});
+
+const gapEligibleRequirementIds = requirements
+.filter(
+(requirement) =>
+requirement.category === "required" ||
+requirement.category === "preferred",
+)
+.map(
+(requirement) =>
+requirementAliasById.get(requirement.id) ??
+requirement.id,
+);
+
+return `
 Analyze relevance between the frozen job-offer requirements and the frozen
 candidate selection snapshots.
 
-<JOB_OFFER>
-${JSON.stringify({
-	roleTitle: input.jobOffer.roleTitle ?? null,
-	companyName: input.jobOffer.companyName ?? null,
-	location: input.jobOffer.location ?? null,
-	language: input.jobOffer.language ?? null,
-	requirements,
-})}
-</JOB_OFFER>
+<JOB_META columns="[roleTitle,companyName,location,language]">
+${JSON.stringify([
+input.jobOffer.roleTitle ?? null,
+input.jobOffer.companyName ?? null,
+input.jobOffer.location ?? null,
+input.jobOffer.language ?? null,
+])}
+</JOB_META>
 
-<CANDIDATE_SELECTION_ITEMS>
-${JSON.stringify(selections)}
-</CANDIDATE_SELECTION_ITEMS>
+<REQUIREMENTS columns="[id,category,priority,text,sourceText]">
+${JSON.stringify(requirementRows)}
+</REQUIREMENTS>
+
+<CANDIDATE_ITEMS columns="[id,parentId,sourceType,data,sourceText]">
+${JSON.stringify(selectionRows)}
+</CANDIDATE_ITEMS>
 
 <GAP_ELIGIBLE_REQUIREMENT_IDS>
 ${JSON.stringify(gapEligibleRequirementIds)}
@@ -206,6 +300,133 @@ ${JSON.stringify(gapEligibleRequirementIds)}
 `.trim();
 }
 
+function resolvePromptAliases(
+output: z.infer<typeof cvmateBuildAiRecommendationProviderOutputSchema>,
+selectionItems: SelectionItem[],
+requirements: JobRequirementSnapshot[],
+): z.infer<typeof cvmateBuildAiRecommendationOutputSchema> {
+const selectionIdByAlias = new Map<string, string>(
+selectionItems.map(
+(item, index) =>
+[`s${index + 1}`, item.id] as const,
+),
+);
+
+const requirementIdByAlias = new Map<string, string>(
+requirements.map(
+(requirement, index) =>
+[`r${index + 1}`, requirement.id] as const,
+),
+);
+
+const requirementById = new Map(
+requirements.map(
+(requirement) =>
+[requirement.id, requirement] as const,
+),
+);
+
+const resolveSelectionId = (value: string) =>
+selectionIdByAlias.get(value) ?? value;
+
+const resolveRequirement = (value: string) => {
+const id =
+requirementIdByAlias.get(value) ??
+value;
+
+const requirement =
+requirementById.get(id);
+
+if (!requirement) {
+throw new ORPCError("BAD_REQUEST", {
+message: "The AI returned an unknown job requirement.",
+});
+}
+
+return requirement;
+};
+
+const boundedText = (value: string) => {
+const trimmed = value.trim();
+
+if (trimmed.length <= 500) {
+return trimmed;
+}
+
+return `${trimmed.slice(0, 499).trimEnd()}…`;
+};
+
+return {
+recommendations:
+output.recommendations.map(
+(recommendation) => {
+const matchedRequirementIds = [
+...new Set(
+recommendation.requirementIds.map(
+(requirementId) =>
+resolveRequirement(
+requirementId,
+).id,
+),
+),
+];
+
+const reason = boundedText(
+matchedRequirementIds
+.map(
+(requirementId) =>
+requirementById.get(
+requirementId,
+)?.text ?? "",
+)
+.filter(Boolean)
+.join(" · "),
+);
+
+return {
+selectionItemId:
+resolveSelectionId(
+recommendation.selectionItemId,
+),
+reason,
+};
+},
+),
+
+gapRequirementIds:
+output.gapRequirementIds.map(
+(requirementId) =>
+resolveRequirement(
+requirementId,
+).id,
+),
+
+...(output.gapSuggestions
+? {
+gapSuggestions:
+output.gapSuggestions.map(
+(suggestion) => {
+const requirement =
+resolveRequirement(
+suggestion.requirementId,
+);
+
+return {
+requirementId:
+requirement.id,
+kind:
+suggestion.kind,
+text:
+boundedText(
+requirement.text,
+),
+};
+},
+),
+}
+: {}),
+};
+}
 function validateAndExpandRecommendations(
 	output: z.infer<typeof cvmateBuildAiRecommendationOutputSchema>,
 	selectionItems: SelectionItem[],
@@ -414,7 +635,7 @@ export const cvmateBuildRecommendationsService = {
 			baseURL: provider.baseURL ?? "",
 		});
 
-		const output = await generateJson(
+		const rawOutput = await generateJson(
 			model,
 			{
 				system: SYSTEM_PROMPT,
@@ -423,8 +644,20 @@ export const cvmateBuildRecommendationsService = {
 					selectionItems,
 				}),
 			},
-			cvmateBuildAiRecommendationOutputSchema,
+			cvmateBuildAiRecommendationProviderOutputSchema,
 			{
+				maxOutputTokens: RECOMMENDATIONS_MAX_OUTPUT_TOKENS,
+				...(provider.provider === "groq" &&
+				(provider.model === "openai/gpt-oss-120b" ||
+					provider.model === "openai/gpt-oss-20b")
+					? {
+							providerOptions: {
+								groq: {
+									reasoningEffort: "low",
+								},
+							},
+						}
+					: {}),
 				onUsage: (usage) =>
 					cvmateAiUsageService.record({
 						userId: input.userId,
@@ -439,7 +672,13 @@ export const cvmateBuildRecommendationsService = {
 			},
 		);
 
-		const recommendations = validateAndExpandRecommendations(output, selectionItems);
+		const output = resolvePromptAliases(
+rawOutput,
+selectionItems,
+jobOffer.requirements,
+);
+
+const recommendations = validateAndExpandRecommendations(output, selectionItems);
 
 		const detectedGaps = resolveGapRequirements(output, jobOffer.requirements, existingGaps);
 
@@ -520,7 +759,8 @@ export const cvmateBuildRecommendationsService = {
 };
 
 export const __testables = {
-	buildPrompt,
+buildPrompt,
+resolvePromptAliases,
 	parseJobOfferSnapshot,
 	resolveGapRequirements,
 	resolveGapSuggestions,

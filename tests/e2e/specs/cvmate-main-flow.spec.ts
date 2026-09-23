@@ -283,3 +283,102 @@ test("CVMate reports a missing AI provider without advancing the offer flow", as
 	await expect(page.getByRole("heading", { name: "Project Coordinator", exact: true })).toHaveCount(0);
 	await expect(page).toHaveURL(/\/dashboard\/cvmate\/create$/);
 });
+
+test("CVMate can create and preview a CV manually without a job offer or AI", async ({ authPage: page }) => {
+	test.setTimeout(120_000);
+
+	await page.goto("/dashboard/cvmate/profile");
+	await page.getByPlaceholder("Company", { exact: true }).first().fill("Manual Company");
+	await page.getByPlaceholder("Job title", { exact: true }).first().fill("Manual Specialist");
+	await page.getByRole("button", { name: "Add employment", exact: true }).first().click();
+	await expect(page.getByText("Manual Specialist", { exact: true }).last()).toBeVisible();
+
+	await page.goto("/dashboard/cvmate/create");
+	await page.getByRole("button", { name: "Create CV manually without AI", exact: true }).click();
+
+	const selectionSection = page
+		.getByRole("heading", { name: "Choose CV content", exact: true })
+		.locator("xpath=ancestor::section[1]");
+
+	await expect(selectionSection).toBeVisible();
+	await expect(page.getByRole("heading", { name: "Gaps", exact: true })).toHaveCount(0);
+	await expect(page.getByText("AI suggestion", { exact: true })).toHaveCount(0);
+
+	const manualEmployment = selectionSection.getByText(/Manual Specialist.*Manual Company/).last();
+	await expect(manualEmployment).toBeVisible();
+	const manualRow = manualEmployment.locator("xpath=ancestor::div[.//input[@type='checkbox']][1]");
+	const manualCheckbox = manualRow.locator('input[type="checkbox"]');
+	await expect(manualCheckbox).not.toBeChecked();
+	await manualCheckbox.click();
+	await expect(manualCheckbox).toBeChecked();
+
+	const previewButton = page.getByRole("button", { name: "Preview CV", exact: true });
+	await expect(previewButton).toBeEnabled();
+	await previewButton.click();
+
+	const preview = page.getByTestId("cvmate-preview");
+	await expect(preview).toBeVisible({ timeout: 30_000 });
+	await expect(page.getByRole("button", { name: "Open in CV editor", exact: true })).toBeEnabled();
+});
+
+test("CVMate volunteer period supports from, to and current state", async ({ authPage: page }) => {
+	test.setTimeout(120_000);
+
+	await page.goto("/dashboard/cvmate/profile");
+
+	const volunteerSection = page
+		.getByRole("heading", { name: "Volunteer work", exact: true })
+		.locator("xpath=ancestor::section[1]");
+
+	await volunteerSection.getByLabel("Organization", { exact: true }).first().fill("Open Hands");
+	await volunteerSection.getByLabel("Role", { exact: true }).first().fill("Coordinator");
+	await volunteerSection.getByLabel("From date", { exact: true }).first().fill("2022");
+	await volunteerSection.getByLabel("To date", { exact: true }).first().fill("2024-06");
+	await volunteerSection.getByRole("button", { name: "Add", exact: true }).click();
+
+	await expect(volunteerSection.getByText("Open Hands", { exact: true })).toBeVisible();
+	await expect(volunteerSection.getByText(/2022.*2024-06/)).toBeVisible();
+
+	await volunteerSection.getByRole("button", { name: "Edit", exact: true }).click();
+
+	const currentCheckbox = volunteerSection.getByLabel("Currently", { exact: true }).last();
+	const editEndDate = volunteerSection.getByLabel("To date", { exact: true }).last();
+
+	await currentCheckbox.click();
+	await expect(currentCheckbox).toBeChecked();
+	await expect(editEndDate).toBeDisabled();
+
+	await volunteerSection.getByRole("button", { name: "Save changes", exact: true }).click();
+
+	await expect(volunteerSection.getByText(/2022.*Currently/)).toBeVisible();
+});
+
+test("CVMate blocks private job-offer URLs without leaving the create flow", async ({ authPage: page }) => {
+	test.setTimeout(120_000);
+
+	const stub = await startCvmateAiStub();
+
+	try {
+		await provisionCvmateAiProvider(page.request, stub.baseURL);
+		await page.goto("/dashboard/cvmate/create");
+
+		const offerUrl = page.locator("#cvmate-job-offer-url");
+		await expect(offerUrl).toBeVisible();
+		await offerUrl.fill("http://127.0.0.1:3000/private");
+
+		const offerForm = offerUrl.locator("xpath=ancestor::form");
+		await offerForm.locator('button[type="submit"]').click();
+
+		await expect(
+			page.getByText(
+				"The job-offer page could not be read automatically. Paste the offer text or attach a PDF/image instead.",
+				{ exact: true },
+			),
+		).toBeVisible();
+
+		await expect(page).toHaveURL(/\/dashboard\/cvmate\/create$/);
+		await expect(offerUrl).toBeVisible();
+	} finally {
+		await stub.close();
+	}
+});

@@ -46,6 +46,58 @@ describe("generateJson usage capture", () => {
 		expect(onUsage).toHaveBeenCalledWith(usage);
 	});
 
+	it("forwards an explicit maxOutputTokens budget", async () => {
+		mocks.generateText.mockResolvedValue({
+			text: '{"value":"ok"}',
+			usage: {
+				inputTokens: 10,
+				outputTokens: 5,
+				totalTokens: 15,
+			},
+		} as never);
+
+		await generateJson(
+			{} as never,
+			{ prompt: "test" },
+			z.object({ value: z.string() }),
+			{ maxOutputTokens: 2048 },
+		);
+
+		expect(mocks.generateText).toHaveBeenCalledWith(
+			expect.objectContaining({ maxOutputTokens: 2048 }),
+		);
+	});
+
+	it("forwards providerOptions to generateText", async () => {
+		mocks.generateText.mockResolvedValue({
+			text: '{"value":"ok"}',
+			usage: {
+				inputTokens: 10,
+				outputTokens: 5,
+				totalTokens: 15,
+			},
+		} as never);
+
+		const providerOptions = {
+			groq: {
+				reasoningEffort: "low",
+			},
+		};
+
+		await generateJson(
+			{} as never,
+			{ prompt: "test" },
+			z.object({ value: z.string() }),
+			{ providerOptions },
+		);
+
+		expect(mocks.generateText).toHaveBeenCalledWith(
+			expect.objectContaining({
+				providerOptions,
+			}),
+		);
+	});
+
 	it("reports usage even when the provider response cannot be parsed", async () => {
 		const usage = {
 			inputTokens: 40,

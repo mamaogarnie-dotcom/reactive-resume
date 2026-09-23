@@ -31,21 +31,21 @@ expect(count('<Input\n')).toBeGreaterThanOrEqual(1);
 });
 
 it("uses branded workflow surfaces and no 12px normal UI text", () => {
-expect(count("rounded-xl border bg-card p-5")).toBe(8);
+expect(count("rounded-xl border bg-card p-5")).toBe(10);
 expect(count("rounded-lg border bg-card p-3")).toBe(1);
 expect(count("text-xs")).toBe(0);
 });
 
 it("preserves the native content-selection checkbox intentionally", () => {
-expect(count('type="checkbox"')).toBe(1);
+expect(count('type="checkbox"')).toBe(2);
 });
 
 it("preserves the audited Create CV behavior signatures", () => {
 expect(count("cvmateJobOffer.create.call")).toBe(1);
 expect(count("cvmateJobOffer.uploadAsset.call")).toBe(1);
 expect(count("cvmateJobOffer.analyze.call")).toBe(1);
-expect(count("cvmateBuild.create.call")).toBe(1);
-expect(count("cvmateBuild.updateSelectionItem.call")).toBe(4);
+expect(count("cvmateBuild.create.call")).toBe(2);
+expect(count("cvmateBuild.updateSelectionItem.call")).toBe(7);
 expect(count("cvmateBuild.updateGeneratedContentFinalText.call")).toBe(1);
 expect(count("window.location.assign")).toBe(1);
 

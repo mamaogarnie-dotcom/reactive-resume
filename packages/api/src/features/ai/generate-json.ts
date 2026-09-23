@@ -11,6 +11,8 @@ export type GenerateJsonPrompt = {
 };
 
 export type GenerateJsonOptions = {
+	maxOutputTokens?: number;
+	providerOptions?: Parameters<typeof generateText>[0]["providerOptions"];
 	onUsage?: (usage: AiTokenUsage) => void | Promise<void>;
 };
 
@@ -33,6 +35,8 @@ export async function generateJson<T>(
 	const result = await generateText({
 		model,
 		...(system ? { system } : {}),
+		...(options.maxOutputTokens !== undefined ? { maxOutputTokens: options.maxOutputTokens } : {}),
+		...(options.providerOptions !== undefined ? { providerOptions: options.providerOptions } : {}),
 		messages: [{ role: "user", content: prompt }],
 	});
 

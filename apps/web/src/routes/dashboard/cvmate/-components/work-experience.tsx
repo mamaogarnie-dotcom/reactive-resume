@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
 import { orpc } from "@/libs/orpc/client";
+import { FlexibleDateInput } from "./flexible-date-input";
 
 export function WorkExperienceSection() {
 	const [company, setCompany] = useState("");
@@ -198,41 +199,43 @@ export function WorkExperienceSection() {
 						onChange={(event) => setJobTitle(event.target.value)}
 					/>
 					<Input
-						className="w-full"
+						className="w-full md:col-span-2"
 						aria-label={t`Location`}
 						placeholder={t`Location`}
 						value={location}
 						onChange={(event) => setLocation(event.target.value)}
 					/>
-					<Input
-						className="w-full"
-						aria-label={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+				</div>
+
+				<div className="flex flex-col gap-3 md:flex-row md:items-center">
+					<FlexibleDateInput
+						className="w-full md:w-72"
+						ariaLabel={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						value={startDate}
-						onChange={(event) => setStartDate(event.target.value)}
+						onChange={setStartDate}
 					/>
-					<Input
-						className="w-full"
-						aria-label={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+					<FlexibleDateInput
+						className="w-full md:w-72"
+						ariaLabel={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 						value={endDate}
 						disabled={isCurrent}
-						onChange={(event) => setEndDate(event.target.value)}
+						onChange={setEndDate}
 					/>
+					<label className="flex shrink-0 items-center gap-2 text-base">
+						<input
+							type="checkbox"
+							className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
+							checked={isCurrent}
+							onChange={(event) => {
+								setIsCurrent(event.target.checked);
+								if (event.target.checked) setEndDate("");
+							}}
+						/>
+						<Trans>I currently work here</Trans>
+					</label>
 				</div>
-
-				<label className="flex items-center gap-2 text-base">
-					<input
-						type="checkbox"
-						className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
-						checked={isCurrent}
-						onChange={(event) => {
-							setIsCurrent(event.target.checked);
-							if (event.target.checked) setEndDate("");
-						}}
-					/>
-					<Trans>I currently work here</Trans>
-				</label>
 
 				<Button type="submit" className="w-fit" disabled={!canCreate || createEmployment.isPending}>
 					{createEmployment.isPending ? <Trans>Adding...</Trans> : <Trans>Add employment</Trans>}
@@ -278,46 +281,56 @@ export function WorkExperienceSection() {
 										onChange={(event) => setEditJobTitle(event.target.value)}
 									/>
 									<Input
-										className="w-full"
+										className="w-full md:col-span-2"
 										aria-label={t`Location`}
 										placeholder={t`Location`}
 										value={editLocation}
 										onChange={(event) => setEditLocation(event.target.value)}
 									/>
-									<Input
-										className="w-full"
-										aria-label={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
+								</div>
+
+								<div className="flex flex-col gap-3 md:flex-row md:items-center">
+									<FlexibleDateInput
+										className="w-full md:w-72"
+										ariaLabel={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										placeholder={t`Start date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										value={editStartDate}
-										onChange={(event) => setEditStartDate(event.target.value)}
+										onChange={setEditStartDate}
 									/>
-									<Input
-										className="w-full"
-										aria-label={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
+									<FlexibleDateInput
+										className="w-full md:w-72"
+										ariaLabel={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										placeholder={t`End date: YYYY, YYYY-MM or YYYY-MM-DD`}
 										value={editEndDate}
 										disabled={editIsCurrent}
-										onChange={(event) => setEditEndDate(event.target.value)}
+										onChange={setEditEndDate}
 									/>
+									<label className="flex shrink-0 items-center gap-2 text-base">
+										<input
+											type="checkbox"
+											className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
+											checked={editIsCurrent}
+											onChange={(event) => {
+												setEditIsCurrent(event.target.checked);
+												if (event.target.checked) setEditEndDate("");
+											}}
+										/>
+										<Trans>I currently work here</Trans>
+									</label>
 								</div>
 
-								<label className="flex items-center gap-2 text-base">
-									<input
-										type="checkbox"
-										className="size-4 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
-										checked={editIsCurrent}
-										onChange={(event) => {
-											setEditIsCurrent(event.target.checked);
-											if (event.target.checked) setEditEndDate("");
-										}}
-									/>
-									<Trans>I currently work here</Trans>
-								</label>
-
-								<div className="flex flex-wrap gap-2">
+								<div className="flex flex-wrap justify-end gap-2">
 									<Button
 										type="button"
 										variant="outline"
+										size="sm"
+										disabled={updateEmployment.isPending}
+										onClick={() => setEditingId(null)}
+									>
+										<Trans>Cancel</Trans>
+									</Button>
+									<Button
+										type="button"
 										size="sm"
 										disabled={!canUpdate || updateEmployment.isPending}
 										onClick={() =>
@@ -332,16 +345,7 @@ export function WorkExperienceSection() {
 											})
 										}
 									>
-										{updateEmployment.isPending ? <Trans>Saving...</Trans> : <Trans>Save</Trans>}
-									</Button>
-									<Button
-										type="button"
-										variant="outline"
-										size="sm"
-										disabled={updateEmployment.isPending}
-										onClick={() => setEditingId(null)}
-									>
-										<Trans>Cancel</Trans>
+										{updateEmployment.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
 									</Button>
 								</div>
 							</div>

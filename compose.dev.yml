@@ -16,6 +16,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
       S3_ENDPOINT: http://seaweedfs:8333
       REDIS_URL: redis://redis:6379
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
       CHOKIDAR_USEPOLLING: "true"
     ports:
       - "127.0.0.1:3000:3000"

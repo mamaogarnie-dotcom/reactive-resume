@@ -448,6 +448,85 @@ expect(dbMock.transaction).toHaveBeenCalledTimes(1);
 expect(getJobOfferByIdMock).not.toHaveBeenCalled();
 	});
 
+	it("selects exactly one education record by default when creating a build", async () => {
+		const { values } = mockInsert();
+		const education = {
+			id: "education-1",
+			masterProfileId: "profile-1",
+			institution: "University of Wroclaw",
+			fieldOfStudy: "Biology",
+			specialization: null,
+			degree: "MSc",
+			startDate: "2005",
+			endDate: "2010",
+			description: null,
+			sortOrder: 0,
+			createdAt: new Date("2026-09-01T00:00:00.000Z"),
+			updatedAt: new Date("2026-09-01T00:00:00.000Z"),
+		};
+
+		getCurrentProfileMock.mockResolvedValue({ ...masterProfile, education: [education] });
+		generateIdMock
+			.mockReturnValueOnce("generated-build-id")
+			.mockReturnValueOnce("selection-employment-id")
+			.mockReturnValueOnce("selection-fact-id")
+			.mockReturnValueOnce("selection-education-id");
+
+		await cvmateBuildService.create({ userId: "user-1" });
+
+		expect(values).toHaveBeenNthCalledWith(
+			2,
+			expect.arrayContaining([
+				expect.objectContaining({
+					sourceType: "education",
+					sourceId: "education-1",
+					selected: true,
+				}),
+			]),
+		);
+	});
+
+	it("does not auto-select multiple education records when creating a build", async () => {
+		const { values } = mockInsert();
+		const education = {
+			id: "education-1",
+			masterProfileId: "profile-1",
+			institution: "University of Wroclaw",
+			fieldOfStudy: "Biology",
+			specialization: null,
+			degree: "MSc",
+			startDate: "2005",
+			endDate: "2010",
+			description: null,
+			sortOrder: 0,
+			createdAt: new Date("2026-09-01T00:00:00.000Z"),
+			updatedAt: new Date("2026-09-01T00:00:00.000Z"),
+		};
+
+		getCurrentProfileMock.mockResolvedValue({
+			...masterProfile,
+			education: [
+				education,
+				{ ...education, id: "education-2", institution: "Second University", sortOrder: 1 },
+			],
+		});
+		generateIdMock
+			.mockReturnValueOnce("generated-build-id")
+			.mockReturnValueOnce("selection-employment-id")
+			.mockReturnValueOnce("selection-fact-id")
+			.mockReturnValueOnce("selection-education-1-id")
+			.mockReturnValueOnce("selection-education-2-id");
+
+		await cvmateBuildService.create({ userId: "user-1" });
+
+		expect(values).toHaveBeenNthCalledWith(
+			2,
+			expect.arrayContaining([
+				expect.objectContaining({ sourceType: "education", sourceId: "education-1", selected: false }),
+				expect.objectContaining({ sourceType: "education", sourceId: "education-2", selected: false }),
+			]),
+		);
+	});
 	it("stores a snapshot of an owned job offer", async () => {
 		const { values } = mockInsert();
 

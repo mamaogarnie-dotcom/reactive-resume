@@ -13,6 +13,7 @@ import { aiProvidersService } from "../ai-providers/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
 import { getStorageService } from "../storage/service";
 import { cvmateJobOfferService } from "./service";
+import { fetchJobOfferTextFromUrl } from "./url-fetch";
 
 const MAX_JOB_OFFER_TEXT_CHARS = 50_000;
 const MAX_REQUIREMENTS = 80;
@@ -414,17 +415,21 @@ async function analyzeOwnedOffer(input: {
 		userId: input.userId,
 	});
 
-	const rawText = offer.rawText?.trim() ?? "";
+	const pastedText = offer.rawText?.trim() ?? "";
+	const sourceUrl = offer.sourceUrl?.trim() ?? "";
 
-	if (!rawText && offer.assets.length === 0) {
+	if (!pastedText && !sourceUrl && offer.assets.length === 0) {
 		throw new ORPCError("BAD_REQUEST", {
-			message: "This job offer does not contain text or files to analyze.",
+			message: "This job offer does not contain text, a link, or files to analyze.",
 		});
 	}
 
 	const provider = await resolveProvider(input.userId, input.aiProviderId);
 
 	try {
+		const fetchedText = sourceUrl ? await fetchJobOfferTextFromUrl(sourceUrl) : "";
+		const separator = pastedText && fetchedText ? "\n\n--- LINKED JOB OFFER ---\n\n" : "";
+		const rawText = `${pastedText}${separator}${fetchedText}`.slice(0, MAX_JOB_OFFER_TEXT_CHARS);
 		const assets = await loadOfferAssets(offer.assets);
 
 		const analysis = await analyzeJobOfferSources({

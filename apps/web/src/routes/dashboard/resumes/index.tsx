@@ -17,6 +17,7 @@ import { ResumeVersionHistory } from "@/features/resume/version-history";
 import { getOrpcErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { DashboardHeader } from "../-components/header";
+import { selectActiveDrafts } from "./-active-drafts";
 
 type SortOption = "lastUpdatedAt" | "createdAt" | "name";
 const tabSchema = z.enum(["all", "ready", "draft", "favorites", "trash"]);
@@ -56,6 +57,7 @@ function RouteComponent() {
 		orpc.resume.list.queryOptions({ input: { tags, sort } }),
 	);
 	const { data: documents, isLoading: documentsLoading } = useQuery(orpc.cvmateBuild.listDocuments.queryOptions());
+	const { data: builds, isLoading: buildsLoading } = useQuery(orpc.cvmateBuild.list.queryOptions());
 
 	const updateDocumentMutation = useMutation({
 		mutationFn: (input: { id: string; status?: "draft" | "ready"; isFavorite?: boolean; trashed?: boolean }) =>
@@ -103,16 +105,42 @@ function RouteComponent() {
 			});
 	}, [documents, resumes, search, tab]);
 
+	const resumableActiveDrafts = useMemo(
+		() =>
+			selectActiveDrafts({
+				builds: builds ?? [],
+				documents: documents ?? [],
+				tab: "all",
+				search: "",
+				tags: [],
+				sort,
+			}),
+		[builds, documents, sort],
+	);
+
+	const visibleActiveDrafts = useMemo(
+		() =>
+			selectActiveDrafts({
+				builds: builds ?? [],
+				documents: documents ?? [],
+				tab,
+				search,
+				tags,
+				sort,
+			}),
+		[builds, documents, search, sort, tab, tags],
+	);
+
 	const counts = useMemo(() => {
 		const list = documents ?? [];
 		return {
-			all: list.filter((document) => document.trashedAt === null).length,
+			all: list.filter((document) => document.trashedAt === null).length + resumableActiveDrafts.length,
 			ready: list.filter((document) => document.trashedAt === null && document.status === "ready").length,
-			draft: list.filter((document) => document.trashedAt === null && document.status === "draft").length,
+			draft: list.filter((document) => document.trashedAt === null && document.status === "draft").length + resumableActiveDrafts.length,
 			favorites: list.filter((document) => document.trashedAt === null && document.isFavorite).length,
 			trash: list.filter((document) => document.trashedAt !== null).length,
 		};
-	}, [documents]);
+	}, [documents, resumableActiveDrafts]);
 
 	const tagOptions = useMemo(() => {
 		if (!allTags) return [];
@@ -128,7 +156,7 @@ function RouteComponent() {
 		[i18n],
 	);
 
-	const isLoading = resumesLoading || documentsLoading;
+	const isLoading = resumesLoading || documentsLoading || buildsLoading;
 
 	return (
 		<div className="space-y-4">
@@ -267,7 +295,7 @@ function RouteComponent() {
 				<div className="rounded-xl border border-dashed bg-card p-8 text-center text-muted-foreground">
 					<Trans>Loading your CVs…</Trans>
 				</div>
-			) : rows.length === 0 ? (
+			) : rows.length === 0 && visibleActiveDrafts.length === 0 ? (
 				<div className="rounded-xl border border-dashed bg-card p-8 text-center">
 					<p className="font-medium">
 						{tab === "trash" ? <Trans>Trash is empty</Trans> : <Trans>No CVs in this view</Trans>}
@@ -282,6 +310,45 @@ function RouteComponent() {
 				</div>
 			) : (
 				<div className="space-y-2">
+					{visibleActiveDrafts.map(({ build, name }) => (
+						<div
+							key={`build-${build.id}`}
+							className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-center"
+						>
+							<div className="min-w-0 flex-1">
+								<div className="flex flex-wrap items-center gap-2">
+									<span className="truncate font-medium">{name}</span>
+									<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
+										<Trans>Draft</Trans>
+									</span>
+								</div>
+
+								<p className="mt-1 text-muted-foreground text-sm">
+									<Trans>Last updated</Trans>{" "}
+									{Intl.DateTimeFormat(i18n.locale, {
+										dateStyle: "medium",
+										timeStyle: "short",
+									}).format(build.updatedAt)}
+								</p>
+							</div>
+
+							<div className="flex flex-wrap gap-2">
+								<Button
+									size="sm"
+									nativeButton={false}
+									render={
+										<Link
+											to="/dashboard/cvmate/create"
+											search={{ buildId: build.id }}
+										/>
+									}
+								>
+									<Trans>Continue CV</Trans>
+								</Button>
+							</div>
+						</div>
+					))}
+
 					{rows.map(({ resume, document }) => {
 						const isTrashed = document.trashedAt !== null;
 						const isPending = updateDocumentMutation.isPending;

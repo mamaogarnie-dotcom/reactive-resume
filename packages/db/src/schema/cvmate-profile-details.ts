@@ -100,6 +100,9 @@ export const cvmateVolunteer = pg.pgTable(
 		organization: pg.text("organization"),
 		role: pg.text("role"),
 		date: pg.text("date"),
+		startDate: pg.text("start_date"),
+		endDate: pg.text("end_date"),
+		isCurrent: pg.boolean("is_current").notNull().default(false),
 		description: pg.text("description"),
 		sortOrder: pg.integer("sort_order").notNull().default(0),
 		createdAt: pg.timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -107,7 +110,7 @@ export const cvmateVolunteer = pg.pgTable(
 	},
 	(t) => [
 		pg.index().on(t.masterProfileId, t.sortOrder),
-		pg.check("cvmate_volunteer_not_empty", sql`${hasText(t.organization)} OR ${hasText(t.role)} OR ${hasText(t.date)} OR ${hasText(t.description)}`),
+		pg.check("cvmate_volunteer_not_empty", sql`${hasText(t.organization)} OR ${hasText(t.role)} OR ${hasText(t.date)} OR ${hasText(t.startDate)} OR ${hasText(t.endDate)} OR ${hasText(t.description)}`),
 	],
 );
 

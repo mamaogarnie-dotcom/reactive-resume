@@ -1,9 +1,10 @@
 import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { FileTextIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { templateSchema } from "@reactive-resume/schema/templates";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
@@ -11,11 +12,14 @@ import { Separator } from "@reactive-resume/ui/components/separator";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
 import { resolveCvLanguage } from "@reactive-resume/utils/locale";
 import { ResumePreview } from "@/features/resume/preview/preview";
+import { useConfirm } from "@/hooks/use-confirm";
 import { getOrpcErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { DashboardHeader } from "../-components/header";
+import { cvmateCreateSearchSchema, parseResumableJobOffer, resumeRouteGuardState, resumeStepTargetId, shouldRestoreBuildPreview, shouldWarnMissingEducation, type CvmateResumeStep, type ResumableJobOffer } from "./create-resume";
 
 export const Route = createFileRoute("/dashboard/cvmate/create")({
+	validateSearch: cvmateCreateSearchSchema,
 	component: RouteComponent,
 });
 
@@ -190,8 +194,16 @@ function selectionCompletenessWarning(item: SelectionItem): string | null {
 }
 
 function RouteComponent() {
+	const { i18n } = useLingui();
+	const navigate = useNavigate({ from: "/dashboard/cvmate/create" });
+	const confirm = useConfirm();
+	const { buildId: searchBuildId } = Route.useSearch();
+	const restoredBuildRef = useRef<string | null>(null);
+	const previousSearchBuildIdRef = useRef<string | undefined>(searchBuildId);
 	const [rawText, setRawText] = useState("");
+	const [sourceUrl, setSourceUrl] = useState("");
 	const [asset, setAsset] = useState<File | null>(null);
+	const [manualMode, setManualMode] = useState(false);
 	const [buildId, setBuildId] = useState<string | null>(null);
 	const [selectionItems, setSelectionItems] = useState<SelectionItem[]>([]);
 	const [gaps, setGaps] = useState<Gap[]>([]);
@@ -201,11 +213,92 @@ function RouteComponent() {
 	const [gapEvidenceDrafts, setGapEvidenceDrafts] = useState<Record<string, GapEvidenceDraft>>({});
 	const [gapSuggestions, setGapSuggestions] = useState<GapSuggestion[]>([]);
 	const [previewResult, setPreviewResult] = useState<BuildPreview | null>(null);
+	const [restoredOffer, setRestoredOffer] = useState<ResumableJobOffer | null>(null);
+	const [resumeStepToScroll, setResumeStepToScroll] = useState<CvmateResumeStep | null>(null);
+
+	const setBuildIdInUrl = (id: string | undefined) =>
+		navigate({
+			replace: true,
+			search: id ? { buildId: id } : {},
+		});
+
+	const restoreBuild = useMutation({
+		mutationFn: async (id: string) => {
+			const build = await orpc.cvmateBuild.getById.call({ id });
+
+			if (build.status !== "active") throw new Error(t`Only an active CV build can be resumed here.`);
+
+			const [restoredSelectionItems, restoredGaps, restoredGeneratedContent] = await Promise.all([
+				orpc.cvmateBuild.listSelectionItems.call({ cvBuildId: id }),
+				orpc.cvmateBuild.listGaps.call({ cvBuildId: id }),
+				orpc.cvmateBuild.listGeneratedContent.call({ cvBuildId: id }),
+			]);
+
+			const offer = build.jobOfferId === null ? null : parseResumableJobOffer(build.jobOfferSnapshot);
+
+			if (build.jobOfferId !== null && offer === null) {
+				throw new Error(t`The saved job-offer snapshot for this CV build is invalid.`);
+			}
+
+			if (offer !== null && offer.id !== build.jobOfferId) {
+				throw new Error(t`The saved job-offer snapshot does not match this CV build.`);
+			}
+
+			const restoredPreview = shouldRestoreBuildPreview(build.currentStep)
+				? await orpc.cvmateBuild.preview.call({ id })
+				: null;
+
+			return {
+				id,
+				build,
+				offer,
+				selectionItems: restoredSelectionItems,
+				gaps: restoredGaps,
+				generatedContent: restoredGeneratedContent,
+				previewResult: restoredPreview,
+			};
+		},
+		onSuccess: (result) => {
+			if (restoredBuildRef.current !== result.id) return;
+			setBuildId(result.id);
+			setManualMode(result.build.jobOfferId === null);
+			setRestoredOffer(result.offer);
+			setSelectionItems(result.selectionItems);
+			setGaps(result.gaps);
+			setGeneratedContent(result.generatedContent);
+			setGapSuggestions([]);
+			setPreviewResult(result.previewResult);
+			setResumeStepToScroll(result.build.currentStep);
+		},
+	});
+
+
+	useEffect(() => {
+		if (!resumeStepToScroll) return;
+
+		const timeoutId = window.setTimeout(() => {
+			const target = document.getElementById(resumeStepTargetId(resumeStepToScroll));
+			if (!target) return;
+
+			target.scrollIntoView({ block: "start", behavior: "auto" });
+			setResumeStepToScroll(null);
+		}, 0);
+
+		return () => window.clearTimeout(timeoutId);
+	}, [resumeStepToScroll, selectionItems.length, gaps.length, generatedContent.length, previewResult]);
+
+	const persistBuildStep = async (id: string, currentStep: CvmateResumeStep) => {
+		await orpc.cvmateBuild.update.call({ id, currentStep });
+	};
 
 	const analyzeOffer = useMutation({
 		mutationFn: async () => {
 			const text = rawText.trim();
-			const id = await orpc.cvmateJobOffer.create.call(text.length > 0 ? { rawText: text } : {});
+			const url = sourceUrl.trim();
+			const id = await orpc.cvmateJobOffer.create.call({
+				...(text.length > 0 ? { rawText: text } : {}),
+				...(url.length > 0 ? { sourceUrl: url } : {}),
+			});
 
 			let cleanupOnFailure = true;
 
@@ -228,18 +321,63 @@ function RouteComponent() {
 		},
 	});
 
+	const activeOffer = analyzeOffer.data ?? restoredOffer;
+
+	const startManualCv = useMutation({
+		mutationFn: async () => {
+			const id = await orpc.cvmateBuild.create.call({
+				jobOfferId: null,
+				targetLanguage: resolveCvLanguage(i18n.locale),
+			});
+			let cleanupOnFailure = true;
+
+			try {
+				const initialItems = await orpc.cvmateBuild.listSelectionItems.call({
+					cvBuildId: id,
+				});
+
+				if (initialItems.length === 0) {
+					throw new Error(t`Your Master Profile does not contain any content that can be selected for this CV.`);
+				}
+
+				await persistBuildStep(id, "selection");
+				cleanupOnFailure = false;
+				return { id, initialItems };
+			} catch (error) {
+				if (cleanupOnFailure) {
+					await orpc.cvmateBuild.delete.call({ id }).catch(() => undefined);
+				}
+				throw error;
+			}
+		},
+		onSuccess: ({ id, initialItems }) => {
+			setManualMode(true);
+			setBuildId(id);
+			restoredBuildRef.current = id;
+			setRestoredOffer(null);
+			void setBuildIdInUrl(id);
+			setSelectionItems(initialItems);
+			setGaps([]);
+			setGeneratedContent([]);
+			setGapSuggestions([]);
+			setPreviewResult(null);
+		},
+	});
+
 	const recommendContent = useMutation({
 		mutationFn: async () => {
-			if (!analyzeOffer.data) throw new Error(t`Analyze the job offer before creating a CV.`);
+			if (!activeOffer) throw new Error(t`Analyze the job offer before creating a CV.`);
 
 			let id = buildId;
 
 			if (!id) {
 				id = await orpc.cvmateBuild.create.call({
-					jobOfferId: analyzeOffer.data.id,
-					targetLanguage: resolveCvLanguage(analyzeOffer.data.language),
+					jobOfferId: activeOffer.id,
+					targetLanguage: resolveCvLanguage(activeOffer.language),
 				});
 				setBuildId(id);
+				restoredBuildRef.current = id;
+				void setBuildIdInUrl(id);
 			}
 
 			const initialItems = await orpc.cvmateBuild.listSelectionItems.call({
@@ -254,6 +392,7 @@ function RouteComponent() {
 			const result = await orpc.cvmateBuild.generateRecommendations.call({
 				id,
 			});
+			await persistBuildStep(id, "selection");
 			return { id, ...result };
 		},
 		onSuccess: (result) => {
@@ -657,7 +796,12 @@ function RouteComponent() {
 		},
 	});
 	const dismissGap = useMutation({
-		mutationFn: (id: string) => orpc.cvmateBuild.updateGap.call({ id, status: "dismissed" }),
+		mutationFn: async (id: string) => {
+			if (!buildId) throw new Error(t`Start creating the CV before generating tailored content.`);
+			const updated = await orpc.cvmateBuild.updateGap.call({ id, status: "dismissed" });
+			await persistBuildStep(buildId, "gaps");
+			return updated;
+		},
 		onSuccess: (updated) => {
 			setGaps((items) => items.map((item) => (item.id === updated.id ? updated : item)));
 			setGapSuggestions((items) => items.filter((item) => item.gapId !== updated.id));
@@ -665,12 +809,14 @@ function RouteComponent() {
 	});
 
 	const previewCv = useMutation({
-		mutationFn: () => {
+		mutationFn: async () => {
 			if (!buildId) {
 				throw new Error(t`Start creating the CV before opening the editor.`);
 			}
 
-			return orpc.cvmateBuild.preview.call({ id: buildId });
+			const result = await orpc.cvmateBuild.preview.call({ id: buildId });
+			await persistBuildStep(buildId, "preview");
+			return result;
 		},
 		onSuccess: (result) => {
 			setPreviewResult(result);
@@ -702,6 +848,7 @@ function RouteComponent() {
 				id: buildId,
 			});
 
+			await persistBuildStep(buildId, "review");
 			return result.generatedContent;
 		},
 		onMutate: () => {
@@ -713,6 +860,25 @@ function RouteComponent() {
 		},
 	});
 
+	const confirmEducationOmission = async () => {
+		if (!shouldWarnMissingEducation(selectionItems)) return true;
+
+		return confirm(t`Your profile contains education, but none is selected for this CV.`, {
+			description: t`Go back and select education, or consciously continue without it.`,
+			confirmText: t`Continue without education`,
+			cancelText: t`Back and select education`,
+		});
+	};
+
+	const handlePreviewCv = async () => {
+		if (!(await confirmEducationOmission())) return;
+		previewCv.mutate();
+	};
+
+	const handleGenerateTailoredContent = async () => {
+		if (!(await confirmEducationOmission())) return;
+		generateTailoredContent.mutate();
+	};
 	const saveGeneratedContent = useMutation({
 		mutationFn: (input: { id: string; finalText: string | null }) =>
 			orpc.cvmateBuild.updateGeneratedContentFinalText.call(input),
@@ -727,15 +893,74 @@ function RouteComponent() {
 		mutationFn: async () => {
 			if (!buildId) throw new Error(t`Start creating the CV before opening the editor.`);
 
-			return orpc.cvmateBuild.materialize.call({ id: buildId });
+			const result = await orpc.cvmateBuild.materialize.call({ id: buildId });
+			await persistBuildStep(buildId, "editor");
+			return result;
 		},
 		onSuccess: (result) => {
 			window.location.assign(`/builder/${result.resumeId}`);
 		},
 	});
 
+	useEffect(() => {
+		const previousSearchBuildId = previousSearchBuildIdRef.current;
+		previousSearchBuildIdRef.current = searchBuildId;
+
+		if (!searchBuildId) {
+			restoredBuildRef.current = null;
+
+			if (previousSearchBuildId !== undefined) {
+				setRawText("");
+				setSourceUrl("");
+				setAsset(null);
+				setManualMode(false);
+				setBuildId(null);
+				setRestoredOffer(null);
+				setResumeStepToScroll(null);
+				setSelectionItems([]);
+				setGaps([]);
+				setGeneratedContent([]);
+				setQuickFactTextByEmployment({});
+				setInlineEmploymentDraft(EMPTY_INLINE_EMPLOYMENT);
+				setGapEvidenceDrafts({});
+				setGapSuggestions([]);
+				setPreviewResult(null);
+				restoreBuild.reset();
+				analyzeOffer.reset();
+				startManualCv.reset();
+				recommendContent.reset();
+				updateSelection.reset();
+				quickAddEmployment.reset();
+				quickAddResponsibility.reset();
+				resolveGapWithEvidence.reset();
+				selectRecommended.reset();
+				dismissGap.reset();
+				previewCv.reset();
+				updateDesignSettings.reset();
+				generateTailoredContent.reset();
+				saveGeneratedContent.reset();
+				materializeCv.reset();
+			}
+
+			return;
+		}
+
+		if (buildId === searchBuildId || restoredBuildRef.current === searchBuildId) return;
+
+		restoreBuild.reset();
+		restoredBuildRef.current = searchBuildId;
+		restoreBuild.mutate(searchBuildId);
+	}, [buildId, searchBuildId]);
+
+	const resumeRouteState = resumeRouteGuardState({
+		searchBuildId,
+		localBuildId: buildId,
+		previousSearchBuildId: previousSearchBuildIdRef.current,
+		restoreAttemptId: restoreBuild.variables,
+		restoreIsError: restoreBuild.isError,
+	});
 	const groupedRequirements = useMemo(() => {
-		const initial: Record<RequirementCategory, NonNullable<typeof analyzeOffer.data>["requirements"]> = {
+		const initial: Record<RequirementCategory, NonNullable<typeof activeOffer>["requirements"]> = {
 			required: [],
 			preferred: [],
 			responsibility: [],
@@ -743,12 +968,12 @@ function RouteComponent() {
 			other: [],
 		};
 
-		for (const requirement of analyzeOffer.data?.requirements ?? []) {
+		for (const requirement of activeOffer?.requirements ?? []) {
 			initial[requirement.category].push(requirement);
 		}
 
 		return initial;
-	}, [analyzeOffer.data]);
+	}, [activeOffer]);
 
 	const childrenByParent = useMemo(() => {
 		const map = new Map<string, SelectionItem[]>();
@@ -774,8 +999,10 @@ function RouteComponent() {
 			(item.kind === "experience_fact" && item.selectionItemId !== null && selectedIds.has(item.selectionItemId)),
 	);
 	const hasTailoredContent = visibleGeneratedContent.some((item) => item.kind === "professional_summary");
+	const showCvReview =
+		hasTailoredContent || (manualMode && (previewResult !== null || previewCv.isPending || previewCv.isError));
 
-	const canAnalyze = rawText.trim().length > 0 || asset !== null;
+	const canAnalyze = rawText.trim().length > 0 || sourceUrl.trim().length > 0 || asset !== null;
 	const canQuickAddEmployment = [
 		inlineEmploymentDraft.company,
 		inlineEmploymentDraft.jobTitle,
@@ -792,8 +1019,14 @@ function RouteComponent() {
 
 	const reset = () => {
 		setRawText("");
+		setSourceUrl("");
 		setAsset(null);
+		setManualMode(false);
 		setBuildId(null);
+		restoredBuildRef.current = null;
+		setRestoredOffer(null);
+		setResumeStepToScroll(null);
+		void setBuildIdInUrl(undefined);
 		setSelectionItems([]);
 		setGaps([]);
 		setGeneratedContent([]);
@@ -802,7 +1035,9 @@ function RouteComponent() {
 		setGapEvidenceDrafts({});
 		setGapSuggestions([]);
 		setPreviewResult(null);
+		restoreBuild.reset();
 		analyzeOffer.reset();
+		startManualCv.reset();
 		recommendContent.reset();
 		updateSelection.reset();
 		quickAddEmployment.reset();
@@ -931,12 +1166,52 @@ function RouteComponent() {
 					</h2>
 					<p className="text-muted-foreground text-sm">
 						<Trans>
-							Paste the job offer or attach a PDF/image. 1story will analyze it before building your tailored CV.
+							Paste the job offer, paste a link, or attach a PDF/image. 1story will analyze it before building your
+							tailored CV.
 						</Trans>
 					</p>
 				</div>
 
-				{!analyzeOffer.data ? (
+				{resumeRouteState === "loading" || resumeRouteState === "clearing" ? (
+					<div className="rounded-xl border border-dashed bg-card p-8 text-center text-muted-foreground">
+						<Trans>Loading saved CV...</Trans>
+					</div>
+				) : resumeRouteState === "error" ? (
+					<div className="space-y-4 rounded-xl border bg-card p-5">
+						<div className="space-y-1">
+							<h3 className="font-medium">
+								<Trans>This CV could not be resumed</Trans>
+							</h3>
+							<p className="text-muted-foreground text-sm">
+								{getOrpcErrorMessage(restoreBuild.error, {
+									fallback: t`The saved CV could not be loaded. It may no longer exist or you may not have access to it.`,
+								})}
+							</p>
+						</div>
+
+						<div className="flex flex-wrap gap-2">
+							<Button
+								type="button"
+								onClick={() => {
+									if (!searchBuildId) return;
+									restoreBuild.reset();
+									restoredBuildRef.current = searchBuildId;
+									restoreBuild.mutate(searchBuildId);
+								}}
+							>
+								<Trans>Try again</Trans>
+							</Button>
+
+							<Button type="button" variant="outline" onClick={() => void setBuildIdInUrl(undefined)}>
+								<Trans>Create a new CV</Trans>
+							</Button>
+
+							<Button type="button" variant="outline" onClick={() => void navigate({ to: "/dashboard/resumes" })}>
+								<Trans>Back to My CVs</Trans>
+							</Button>
+						</div>
+					</div>
+				) : !activeOffer && !manualMode ? (
 					<form
 						className="space-y-5 rounded-xl border bg-card p-5"
 						onSubmit={(event) => {
@@ -959,6 +1234,28 @@ function RouteComponent() {
 						</div>
 
 						<div className="space-y-2">
+							<label className="font-medium text-sm" htmlFor="cvmate-job-offer-url">
+								<Trans>Or paste a link to the job offer</Trans>
+							</label>
+							<Input
+								id="cvmate-job-offer-url"
+								type="url"
+								inputMode="url"
+								autoComplete="url"
+								placeholder="https://..."
+								value={sourceUrl}
+								disabled={analyzeOffer.isPending}
+								onChange={(event) => setSourceUrl(event.target.value)}
+							/>
+							<p className="text-muted-foreground text-sm">
+								<Trans>
+									1story will securely read the public page. If the site blocks automatic access, paste the offer text
+									or attach a file instead.
+								</Trans>
+							</p>
+						</div>
+
+						<div className="space-y-2">
 							<label className="font-medium text-sm" htmlFor="cvmate-job-offer-file">
 								<Trans>Or attach a file</Trans>
 							</label>
@@ -975,10 +1272,46 @@ function RouteComponent() {
 							</p>
 						</div>
 
+						<div className="flex flex-col gap-3 rounded-lg border border-dashed bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+							<div className="space-y-1">
+								<p className="font-medium text-sm">
+									<Trans>Create a CV without a job offer or AI</Trans>
+								</p>
+								<p className="text-muted-foreground text-sm">
+									<Trans>
+										Skip the job offer and choose the CV content yourself from your Master Profile. No AI will be used.
+									</Trans>
+								</p>
+							</div>
+							<Button
+								type="button"
+								variant="outline"
+								className="shrink-0"
+								disabled={startManualCv.isPending || analyzeOffer.isPending}
+								onClick={() => startManualCv.mutate()}
+							>
+								{startManualCv.isPending ? (
+									<Trans>Starting manual CV...</Trans>
+								) : (
+									<Trans>Create CV manually without AI</Trans>
+								)}
+							</Button>
+						</div>
+
+						{startManualCv.isError ? (
+							<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+								{getOrpcErrorMessage(startManualCv.error, {
+									fallback: t`Could not start a manual CV.`,
+								})}
+							</div>
+						) : null}
+
 						{analyzeOffer.isError ? (
 							<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
 								{getOrpcErrorMessage(analyzeOffer.error, {
-									fallback: t`The job offer could not be analyzed.`,
+									fallback: sourceUrl.trim()
+										? t`The job-offer page could not be read automatically. Paste the offer text or attach a PDF/image instead.`
+										: t`The job offer could not be analyzed.`,
 								})}
 							</div>
 						) : null}
@@ -991,58 +1324,81 @@ function RouteComponent() {
 					</form>
 				) : (
 					<div className="space-y-6">
-						<div className="rounded-xl border bg-card p-5">
-							<div className="flex flex-wrap items-start justify-between gap-4">
-								<div className="space-y-1">
-									<h3 className="font-medium text-base">{analyzeOffer.data.roleTitle ?? t`Analyzed job offer`}</h3>
-									<p className="text-muted-foreground text-sm">
-										{[analyzeOffer.data.companyName, analyzeOffer.data.location].filter(Boolean).join(" Â· ") ||
-											t`Analysis completed`}
-									</p>
+						{activeOffer ? (
+							<>
+								<div className="rounded-xl border bg-card p-5">
+									<div className="flex flex-wrap items-start justify-between gap-4">
+										<div className="space-y-1">
+											<h3 className="font-medium text-base">{activeOffer.roleTitle ?? t`Analyzed job offer`}</h3>
+											<p className="text-muted-foreground text-sm">
+												{[activeOffer.companyName, activeOffer.location].filter(Boolean).join(" Â· ") ||
+													t`Analysis completed`}
+											</p>
+										</div>
+										<Button type="button" variant="outline" onClick={reset}>
+											<Trans>Analyze another offer</Trans>
+										</Button>
+									</div>
 								</div>
-								<Button type="button" variant="outline" onClick={reset}>
-									<Trans>Analyze another offer</Trans>
-								</Button>
+
+								<div className="grid gap-4 lg:grid-cols-2">
+									{(["required", "preferred", "responsibility", "keyword", "other"] as RequirementCategory[]).map(
+										(category) => {
+											const requirements = groupedRequirements[category];
+											if (requirements.length === 0) return null;
+
+											return (
+												<section key={category} className="rounded-xl border bg-card p-5">
+													<div className="mb-3 flex items-center justify-between gap-3">
+														<h3 className="font-medium text-sm">{categoryTitle(category)}</h3>
+														<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
+															{requirements.length}
+														</span>
+													</div>
+													<ul className="space-y-2">
+														{requirements.map((requirement) => (
+															<li key={requirement.id} className="rounded-md bg-muted/40 px-3 py-2 text-sm">
+																<div className="flex items-start justify-between gap-3">
+																	<span>{requirement.text}</span>
+																	<span className="shrink-0 text-muted-foreground text-sm">
+																		{priorityLabel(requirement.priority)}
+																	</span>
+																</div>
+															</li>
+														))}
+													</ul>
+												</section>
+											);
+										},
+									)}
+								</div>
+
+								{activeOffer.requirements.length === 0 ? (
+									<div className="rounded-xl border bg-card p-5 text-muted-foreground text-sm">
+										<Trans>Analysis completed, but no structured requirements were extracted.</Trans>
+									</div>
+								) : null}
+							</>
+						) : (
+							<div className="rounded-xl border bg-card p-5">
+								<div className="flex flex-wrap items-start justify-between gap-4">
+									<div className="space-y-1">
+										<h3 className="font-medium text-base">
+											<Trans>Manual CV</Trans>
+										</h3>
+										<p className="text-muted-foreground text-sm">
+											<Trans>
+												Choose the information from your Master Profile that you want to include. This path does not use
+												AI.
+											</Trans>
+										</p>
+									</div>
+									<Button type="button" variant="outline" onClick={reset}>
+										<Trans>Back to job offer</Trans>
+									</Button>
+								</div>
 							</div>
-						</div>
-
-						<div className="grid gap-4 lg:grid-cols-2">
-							{(["required", "preferred", "responsibility", "keyword", "other"] as RequirementCategory[]).map(
-								(category) => {
-									const requirements = groupedRequirements[category];
-									if (requirements.length === 0) return null;
-
-									return (
-										<section key={category} className="rounded-xl border bg-card p-5">
-											<div className="mb-3 flex items-center justify-between gap-3">
-												<h3 className="font-medium text-sm">{categoryTitle(category)}</h3>
-												<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
-													{requirements.length}
-												</span>
-											</div>
-											<ul className="space-y-2">
-												{requirements.map((requirement) => (
-													<li key={requirement.id} className="rounded-md bg-muted/40 px-3 py-2 text-sm">
-														<div className="flex items-start justify-between gap-3">
-															<span>{requirement.text}</span>
-															<span className="shrink-0 text-muted-foreground text-sm">
-																{priorityLabel(requirement.priority)}
-															</span>
-														</div>
-													</li>
-												))}
-											</ul>
-										</section>
-									);
-								},
-							)}
-						</div>
-
-						{analyzeOffer.data.requirements.length === 0 ? (
-							<div className="rounded-xl border bg-card p-5 text-muted-foreground text-sm">
-								<Trans>Analysis completed, but no structured requirements were extracted.</Trans>
-							</div>
-						) : null}
+						)}
 
 						{selectionItems.length === 0 ? (
 							<div className="rounded-xl border bg-card p-5">
@@ -1079,22 +1435,31 @@ function RouteComponent() {
 							</div>
 						) : (
 							<>
-								<section className="space-y-4 rounded-xl border bg-card p-5">
+								<section id="cvmate-step-selection" className="scroll-mt-6 space-y-4 rounded-xl border bg-card p-5">
 									<div className="flex flex-wrap items-start justify-between gap-4">
 										<div className="space-y-1">
 											<h3 className="font-medium">
 												<Trans>Choose CV content</Trans>
-											</h3>
+											</h3>{" "}
 											<p className="text-muted-foreground text-sm">
-												<Trans>
-													AI recommendations are suggestions only. You decide what is included in the final CV.
-												</Trans>
+												{manualMode ? (
+													<Trans>
+														Choose the information from your Master Profile that you want to include in this CV. No AI
+														will be used.
+													</Trans>
+												) : (
+													<Trans>
+														AI recommendations are suggestions only. You decide what is included in the final CV.
+													</Trans>
+												)}
 											</p>
 										</div>
 										<div className="flex flex-wrap gap-2 text-muted-foreground text-sm">
-											<span className="rounded-full bg-muted px-2 py-1">
-												{recommendedCount} <Trans>recommended</Trans>
-											</span>
+											{!manualMode ? (
+												<span className="rounded-full bg-muted px-2 py-1">
+													{recommendedCount} <Trans>recommended</Trans>
+												</span>
+											) : null}
 											<span className="rounded-full bg-muted px-2 py-1">
 												{selectedCount} <Trans>selected</Trans>
 											</span>
@@ -1275,7 +1640,7 @@ function RouteComponent() {
 									) : null}
 								</section>
 
-								<section className="space-y-4 rounded-xl border bg-card p-5">
+								<section id="cvmate-step-gaps" className={manualMode ? "hidden" : "scroll-mt-6 space-y-4 rounded-xl border bg-card p-5"}>
 									<div className="space-y-1">
 										<h3 className="font-medium">
 											<Trans>Gaps</Trans>
@@ -1494,42 +1859,60 @@ function RouteComponent() {
 								</section>
 
 								<div className="space-y-3">
-									{generateTailoredContent.isError ? (
-										<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
-											{getOrpcErrorMessage(generateTailoredContent.error, {
-												fallback: t`Tailored CV content could not be generated.`,
-											})}
+									{manualMode ? (
+										<div className="flex justify-end">
+											<Button
+												type="button"
+												disabled={selectedCount === 0 || previewCv.isPending}
+												onClick={() => void handlePreviewCv()}
+											>
+												{previewCv.isPending ? <Trans>Preparing CV...</Trans> : <Trans>Preview CV</Trans>}
+											</Button>
 										</div>
-									) : null}
+									) : (
+										<>
+											{generateTailoredContent.isError ? (
+												<div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-destructive text-sm">
+													{getOrpcErrorMessage(generateTailoredContent.error, {
+														fallback: t`Tailored CV content could not be generated.`,
+													})}
+												</div>
+											) : null}
 
-									<div className="flex justify-end">
-										<Button
-											type="button"
-											disabled={selectedCount === 0 || generateTailoredContent.isPending}
-											onClick={() => generateTailoredContent.mutate()}
-										>
-											{generateTailoredContent.isPending ? (
-												<Trans>Generating tailored content...</Trans>
-											) : hasTailoredContent ? (
-												<Trans>Regenerate tailored content</Trans>
-											) : (
-												<Trans>Continue to tailored content</Trans>
-											)}
-										</Button>
-									</div>
+											<div className="flex justify-end">
+												<Button
+													type="button"
+													disabled={selectedCount === 0 || generateTailoredContent.isPending}
+													onClick={() => void handleGenerateTailoredContent()}
+												>
+													{generateTailoredContent.isPending ? (
+														<Trans>Generating tailored content...</Trans>
+													) : hasTailoredContent ? (
+														<Trans>Regenerate tailored content</Trans>
+													) : (
+														<Trans>Continue to tailored content</Trans>
+													)}
+												</Button>
+											</div>
+										</>
+									)}
 								</div>
 
-								{hasTailoredContent ? (
-									<section className="space-y-5 rounded-xl border bg-card p-5">
+								{showCvReview ? (
+									<section id="cvmate-step-review" className="scroll-mt-6 space-y-5 rounded-xl border bg-card p-5">
 										<div className="space-y-1">
 											<h3 className="font-medium">
-												<Trans>Tailored CV content</Trans>
+												{manualMode ? <Trans>Manual CV</Trans> : <Trans>Tailored CV content</Trans>}
 											</h3>
 											<p className="text-muted-foreground text-sm">
-												<Trans>
-													Review the AI wording before opening the CV editor. Your edits are saved as final text and
-													preserved when AI content is regenerated.
-												</Trans>
+												{manualMode ? (
+													<Trans>Preview the content you selected before opening the CV editor.</Trans>
+												) : (
+													<Trans>
+														Review the AI wording before opening the CV editor. Your edits are saved as final text and
+														preserved when AI content is regenerated.
+													</Trans>
+												)}
 											</p>
 										</div>
 
@@ -1590,7 +1973,7 @@ function RouteComponent() {
 											</div>
 										) : null}
 
-										<div className="space-y-4 border-t pt-5">
+										<div id="cvmate-step-preview" className="scroll-mt-6 space-y-4 border-t pt-5">
 											<div className="flex flex-wrap items-center justify-between gap-3">
 												<h3 className="font-medium">
 													<Trans>Preview</Trans>
