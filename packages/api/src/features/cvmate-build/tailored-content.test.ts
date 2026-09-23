@@ -218,6 +218,31 @@ describe("tailored content prompt safeguards", () => {
 		expect(__testables.SYSTEM_PROMPT).toContain("Never invent, infer, embellish");
 		expect(__testables.SYSTEM_PROMPT).toContain("using ONLY that fact's own supplied");
 		expect(__testables.SYSTEM_PROMPT).toContain("Do not use external knowledge");
+		expect(__testables.SYSTEM_PROMPT).toContain("Do not mechanically list every selected item");
+		expect(__testables.SYSTEM_PROMPT).toContain("Do not write in first person or third person");
+		expect(__testables.SYSTEM_PROMPT).toContain("Do not assume or express the candidate's gender");
+		expect(__testables.SYSTEM_PROMPT).toContain(
+			"For Polish professional summaries, use impersonal or nominal CV wording.",
+		);
+		expect(__testables.SYSTEM_PROMPT).toContain(
+			'Do not describe the candidate with personal third-person wording such as',
+		);
+		expect(__testables.SYSTEM_PROMPT).toContain("unsupported qualitative evaluations");
+		expect(__testables.SYSTEM_PROMPT).toContain(
+			"Before returning JSON, perform a mandatory final qualitative-language",
+		);
+		expect(__testables.SYSTEM_PROMPT).toContain(
+			'never as "proficient in MS Office"',
+		);
+		expect(__testables.SYSTEM_PROMPT).toContain(
+			'A restricted qualitative word is never required for good CV style',
+		);
+		expect(__testables.SYSTEM_PROMPT).toContain("Preserve every numeric value");
+		expect(__testables.SYSTEM_PROMPT).toContain("core domain");
+		expect(__testables.SYSTEM_PROMPT).toContain("Never omit directly matching domain/process evidence");
+		expect(__testables.SYSTEM_PROMPT).toContain("factual claims, not stylistic polish");
+		expect(__testables.SYSTEM_PROMPT).toContain("Do not merge words from separate evidence items");
+		expect(__testables.PROMPT_VERSION).toBe("cvmate-tailored-content-v9");
 	});
 });
 
@@ -254,6 +279,532 @@ describe("tailored content output validation", () => {
 	});
 });
 
+	it("enforces compact schema limits for summary and experience rewrites", () => {
+		expect(
+			cvmateBuildAiTailoredContentOutputSchema.safeParse({
+				professionalSummary: "x".repeat(701),
+				experienceFacts: [],
+			}).success,
+		).toBe(false);
+
+		expect(
+			cvmateBuildAiTailoredContentOutputSchema.safeParse({
+				professionalSummary: "Compact summary.",
+				experienceFacts: [
+					{
+						selectionItemId: "selection-fact",
+						text: "x".repeat(321),
+					},
+				],
+			}).success,
+		).toBe(false);
+	});
+
+	it("preserves all source numbers and rejects invented numbers in experience rewrites", () => {
+		const quantifiedFact = {
+			...factSelection,
+			id: "selection-quantified",
+			sourceId: "fact-quantified",
+			sourceTextSnapshot:
+				"Prepared 483 offers resulting in contracts worth 2,89 mln PLN.",
+			sourceDataSnapshot: {
+				text: "Prepared 483 offers resulting in contracts worth 2,89 mln PLN.",
+			},
+		};
+
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary: "Relevant administrative experience.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-quantified",
+							text:
+								"Prepared 483 offers leading to contracts worth 2,89 mln PLN.",
+						},
+					],
+				},
+				[{ ...quantifiedFact, recommended: false }] as never,
+			),
+		).not.toThrow();
+
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary: "Relevant administrative experience.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-quantified",
+							text: "Prepared offers leading to contracts worth 2,89 mln PLN.",
+						},
+					],
+				},
+				[{ ...quantifiedFact, recommended: false }] as never,
+			),
+		).toThrow("preserve every numeric value");
+
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary: "Relevant administrative experience.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-quantified",
+							text:
+								"Prepared 483 offers leading to 99 contracts worth 2,89 mln PLN.",
+						},
+					],
+				},
+				[{ ...quantifiedFact, recommended: false }] as never,
+			),
+		).toThrow("must not add numeric values");
+	});
+
+	it("rejects multiline or pre-bulleted tailored text", () => {
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary: "Line one.\nLine two.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-fact",
+							text: "Coordinated a multinational production team.",
+						},
+					],
+				},
+				[factSelection] as never,
+			),
+		).toThrow("single paragraph");
+
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary: "Compact summary.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-fact",
+							text: "- Coordinated a multinational production team.",
+						},
+					],
+				},
+				[factSelection] as never,
+			),
+		).toThrow("single bullet-ready line");
+	});
+
+	it("enforces neutral impersonal wording for Polish professional summaries", () => {
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary:
+						"Posiada doswiadczenie administracyjne i przygotowywal dokumentacje.",
+					experienceFacts: [],
+				},
+				[] as never,
+				"pl",
+			),
+		).toThrow("neutral impersonal Polish wording");
+
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary:
+						"Doswiadczenie w administracji, przygotowywaniu dokumentacji i koordynacji terminow.",
+					experienceFacts: [],
+				},
+				[] as never,
+				"pl",
+			),
+		).not.toThrow();
+	});
+
+	it("rejects common Polish gendered past-tense summary forms", () => {
+		for (const summary of [
+			"Prowadzila korespondencje z kontrahentami.",
+			"Monitorowal terminy i dokumentacje.",
+			"Koordynowala wiele projektow jednoczesnie.",
+		]) {
+			expect(() =>
+				__testables.validateOutput(
+					{ professionalSummary: summary, experienceFacts: [] },
+					[] as never,
+					"pl",
+				),
+			).toThrow("neutral impersonal Polish wording");
+		}
+	});
+	it("accepts an overlong raw provider summary, trims only at sentence boundaries, and enforces the final 700-character schema", () => {
+		const firstSentence = `${"A".repeat(390)}.`;
+		const secondSentence = `${"B".repeat(390)}.`;
+		const rawSummary = `${firstSentence} ${secondSentence}`;
+
+		const rawOutput = __testables.rawOutputSchema.parse({
+			professionalSummary: rawSummary,
+			experienceFacts: [],
+		});
+
+		expect(rawOutput.professionalSummary.length).toBeGreaterThan(700);
+		expect(() =>
+			cvmateBuildAiTailoredContentOutputSchema.parse(rawOutput),
+		).toThrow();
+
+		const sanitized = __testables.sanitizeTailoredOutput(
+			rawOutput,
+			[] as never,
+		);
+
+		expect(sanitized.professionalSummary).toBe(firstSentence);
+		expect(sanitized.professionalSummary.length).toBeLessThanOrEqual(700);
+		expect(sanitized.professionalSummary.endsWith(".")).toBe(true);
+		expect(() =>
+			cvmateBuildAiTailoredContentOutputSchema.parse(sanitized),
+		).not.toThrow();
+	});
+
+	it("reapplies the quantified summary anchor after overlong-summary sentence trimming removes it", () => {
+		const quantifiedProject = {
+			id: "project-overlong-anchor",
+			sourceType: "project",
+			selected: true,
+			recommended: true,
+			recommendationReason: "Direct match.",
+			sortOrder: 10,
+			parentSelectionItemId: null,
+			sourceTextSnapshot:
+				"purchase of 3 investment apartments; coordination of renovation work",
+			sourceDataSnapshot: {},
+		};
+		const firstSentence = `${"A".repeat(620)}.`;
+		const anchorSentence =
+			"Experience includes purchase of 3 investment apartments.";
+		const rawOutput = __testables.rawOutputSchema.parse({
+			professionalSummary: `${firstSentence} ${anchorSentence}`,
+			experienceFacts: [],
+		});
+
+		const sanitized = __testables.sanitizeTailoredOutput(
+			rawOutput,
+			[quantifiedProject] as never,
+		);
+
+		expect(sanitized.professionalSummary.length).toBeLessThanOrEqual(700);
+		expect(sanitized.professionalSummary).toContain("3");
+		expect(sanitized.professionalSummary).toContain(
+			"purchase of 3 investment apartments",
+		);
+		expect(() =>
+			cvmateBuildAiTailoredContentOutputSchema.parse(sanitized),
+		).not.toThrow();
+	});
+	it("adds a selected recommended quantified anchor when the AI summary omits its numeric scope", () => {
+		const quantifiedProject = {
+			id: "project-quantified",
+			sourceType: "project",
+			selected: true,
+			recommended: true,
+			recommendationReason: "Direct match to a required domain process.",
+			sortOrder: 40,
+			parentSelectionItemId: null,
+			sourceTextSnapshot:
+				"purchase of 3 investment apartments; coordination of renovation work",
+			sourceDataSnapshot: {},
+		};
+
+		const sanitized = __testables.sanitizeTailoredOutput(
+			{
+				professionalSummary:
+					"Administrative coordination and document management experience.",
+				experienceFacts: [],
+			},
+			[quantifiedProject] as never,
+		);
+
+		expect(sanitized.professionalSummary).toContain(
+			"purchase of 3 investment apartments",
+		);
+		expect(sanitized.professionalSummary).toContain(
+			"Administrative coordination and document management experience.",
+		);
+	});
+
+	it("does not force numeric evidence that is not recommended", () => {
+		const nonRecommendedProject = {
+			id: "project-not-recommended",
+			sourceType: "project",
+			selected: true,
+			recommended: false,
+			recommendationReason: null,
+			sortOrder: 40,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "purchase of 3 investment apartments",
+			sourceDataSnapshot: {},
+		};
+
+		const summary =
+			"Administrative coordination and document management experience.";
+		const sanitized = __testables.sanitizeTailoredOutput(
+			{
+				professionalSummary: summary,
+				experienceFacts: [],
+			},
+			[nonRecommendedProject] as never,
+		);
+
+		expect(sanitized.professionalSummary).toBe(summary);
+	});
+
+	it("chooses the earliest selected recommended quantified non-employment anchor deterministically", () => {
+		const later = {
+			id: "later-project",
+			sourceType: "project",
+			selected: true,
+			recommended: true,
+			recommendationReason: "Relevant project.",
+			sortOrder: 40,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "delivered 8 project stages",
+			sourceDataSnapshot: {},
+		};
+		const earlier = {
+			id: "earlier-fact",
+			sourceType: "experience_fact",
+			selected: true,
+			recommended: true,
+			recommendationReason: "Relevant measurable responsibility.",
+			sortOrder: 9,
+			parentSelectionItemId: "employment-1",
+			sourceTextSnapshot: "handled 5 parallel cases",
+			sourceDataSnapshot: {},
+		};
+		const employment = {
+			id: "employment-1",
+			sourceType: "employment",
+			selected: true,
+			recommended: true,
+			recommendationReason: "Relevant employer context.",
+			sortOrder: 0,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "managed a team of 27 people",
+			sourceDataSnapshot: {},
+		};
+
+		const anchor = __testables.selectQuantifiedSummaryAnchor(
+			[later, earlier, employment] as never,
+		);
+
+		expect(anchor?.id).toBe("earlier-fact");
+	});
+
+	it("validates that the summary retains numeric scope from the selected recommended anchor", () => {
+		const quantifiedProject = {
+			id: "project-quantified-validation",
+			sourceType: "project",
+			selected: true,
+			recommended: true,
+			recommendationReason: "Direct match.",
+			sortOrder: 10,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "purchase of 3 investment apartments",
+			sourceDataSnapshot: {},
+		};
+
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary:
+						"Experience in property purchase and sales processes.",
+					experienceFacts: [],
+				},
+				[quantifiedProject] as never,
+				"en",
+			),
+		).toThrow(/omitted quantified scope/i);
+	});
+	it("drops only summary sentences that contain unsupported qualitative upgrades", () => {
+		const sanitized = __testables.sanitizeTailoredOutput(
+			{
+				professionalSummary:
+					"Practical experience in property sales. Proficient use of MS Office.",
+				experienceFacts: [],
+			},
+			[
+				{
+					sourceTextSnapshot:
+						"practical knowledge of the property purchase and sales process",
+					sourceDataSnapshot: {},
+				},
+			] as never,
+		);
+
+		expect(sanitized.professionalSummary).toBe(
+			"Practical experience in property sales.",
+		);
+	});
+
+	it("falls back to the selected source fact when a rewrite adds unsupported qualitative strength", () => {
+		const sourceFact = {
+			...factSelection,
+			sourceTextSnapshot: "coordination of project deadlines",
+		};
+
+		const sanitized = __testables.sanitizeTailoredOutput(
+			{
+				professionalSummary: "Project coordination experience.",
+				experienceFacts: [
+					{
+						selectionItemId: sourceFact.id,
+						text: "Highly effective coordination of project deadlines.",
+					},
+				],
+			},
+			[sourceFact] as never,
+		);
+
+		expect(sanitized.experienceFacts[0]?.text).toBe(
+			"coordination of project deadlines",
+		);
+	});
+
+	it("preserves qualitative wording when the selected evidence explicitly supports it", () => {
+		const supported = {
+			...factSelection,
+			sourceTextSnapshot: "successful coordination of project deadlines",
+		};
+
+		const sanitized = __testables.sanitizeTailoredOutput(
+			{
+				professionalSummary: "Successful coordination experience.",
+				experienceFacts: [
+					{
+						selectionItemId: supported.id,
+						text: "Successfully coordinated project deadlines.",
+					},
+				],
+			},
+			[supported] as never,
+		);
+
+		expect(sanitized.professionalSummary).toBe(
+			"Successful coordination experience.",
+		);
+		expect(sanitized.experienceFacts[0]?.text).toBe(
+			"Successfully coordinated project deadlines.",
+		);
+	});
+	it("rejects unsupported qualitative upgrades in summary and fact rewrites", () => {
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary:
+						"Successful coordination with highly effective documentation control.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-fact",
+							text: "Successfully coordinated a multinational production team.",
+						},
+					],
+				},
+				[employmentSelection, factSelection] as never,
+			),
+		).toThrow("unsupported qualitative upgrade");
+	});
+
+	it("allows a qualitative claim only when selected evidence explicitly supports it", () => {
+		const supportedFact = {
+			...factSelection,
+			sourceTextSnapshot:
+				"Successfully coordinated a multinational production team.",
+			sourceDataSnapshot: {
+				text: "Successfully coordinated a multinational production team.",
+			},
+		};
+
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary:
+						"Successfully coordinated a multinational production team.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-fact",
+							text:
+								"Successfully coordinated a multinational production team.",
+						},
+					],
+				},
+				[employmentSelection, supportedFact] as never,
+			),
+		).not.toThrow();
+	});
+
+	it("rejects invented numbers in the professional summary", () => {
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalSummary:
+						"Coordinated documentation for 99 projects.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-fact",
+							text: "Coordinated a multinational production team.",
+						},
+					],
+				},
+				[employmentSelection, factSelection] as never,
+			),
+		).toThrow("professional summary must not add numeric values");
+	});
+	it("projects only semantically required job and candidate evidence into the AI prompt", () => {
+		const prompt = __testables.buildPrompt({
+			jobOffer: {
+				roleTitle: "Office Specialist",
+				companyName: "Example",
+				location: "Wroclaw",
+				language: "pl",
+				requirements: [
+					{
+						id: "REQUIREMENT_TECHNICAL_ID_MUST_NOT_BE_SENT",
+						jobOfferId: "JOB_OFFER_ID_MUST_NOT_BE_SENT",
+						category: "required",
+						priority: "critical",
+						text: "Coordinate property sale documentation",
+						sourceText: "RAW_REQUIREMENT_SOURCE_MUST_NOT_BE_SENT",
+						isUserEdited: false,
+						sortOrder: 7,
+						createdAt: "2026-01-01T00:00:00.000Z",
+						updatedAt: "2026-01-02T00:00:00.000Z",
+					},
+				],
+			},
+			selectionItems: [
+				{
+					id: "selection-project",
+					parentSelectionItemId: null,
+					sourceType: "project",
+					sourceTextSnapshot: "Purchased, renovated and sold 3 apartments.",
+					sourceDataSnapshot: {
+						text: "CANDIDATE_SOURCE_DATA_DUPLICATE_MUST_NOT_BE_SENT",
+						internalMetadata: "INTERNAL_METADATA_MUST_NOT_BE_SENT",
+					},
+				},
+			],
+			targetLanguage: "pl",
+		} as never);
+
+		expect(prompt).toContain('"text":"Coordinate property sale documentation"');
+		expect(prompt).toContain('"category":"required"');
+		expect(prompt).toContain('"priority":"critical"');
+		expect(prompt).toContain('"id":"selection-project"');
+		expect(prompt).toContain(
+			'"sourceTextSnapshot":"Purchased, renovated and sold 3 apartments."',
+		);
+		expect(prompt).not.toContain("REQUIREMENT_TECHNICAL_ID_MUST_NOT_BE_SENT");
+		expect(prompt).not.toContain("JOB_OFFER_ID_MUST_NOT_BE_SENT");
+		expect(prompt).not.toContain("RAW_REQUIREMENT_SOURCE_MUST_NOT_BE_SENT");
+		expect(prompt).not.toContain("CANDIDATE_SOURCE_DATA_DUPLICATE_MUST_NOT_BE_SENT");
+		expect(prompt).not.toContain("INTERNAL_METADATA_MUST_NOT_BE_SENT");
+		expect(prompt).not.toContain('"sourceDataSnapshot"');
+	});
 describe("cvmateBuildTailoredContentService.generate", () => {
 	it("uses only selected items and inserts summary plus selected experience fact content", async () => {
 		const { values } = createTransactionMocks();
@@ -264,6 +815,14 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 		});
 
 		expect(generateJsonMock).toHaveBeenCalledTimes(1);
+
+		const aiOptions = generateJsonMock.mock.calls[0]?.[3] as Record<string, unknown>;
+		expect(aiOptions).toEqual(
+			expect.objectContaining({
+				maxOutputTokens: 2048,
+			}),
+		);
+		expect(aiOptions).not.toHaveProperty("providerOptions");
 
 		const aiPrompt = generateJsonMock.mock.calls[0]?.[1]?.prompt as string;
 		expect(aiPrompt).toContain("selection-fact");
@@ -298,6 +857,31 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 			id: "provider-1",
 			userId: "user-1",
 		});
+	});
+	it("uses medium Groq reasoning for GPT-OSS tailored content", async () => {
+		getDefaultRunnableMock.mockResolvedValueOnce({
+			...provider,
+			provider: "groq",
+			model: "openai/gpt-oss-120b",
+		});
+
+		await cvmateBuildTailoredContentService.generate({
+			id: "build-1",
+			userId: "user-1",
+		});
+
+		const aiOptions = generateJsonMock.mock.calls[0]?.[3] as Record<string, unknown>;
+
+		expect(aiOptions).toEqual(
+			expect.objectContaining({
+				maxOutputTokens: 2048,
+				providerOptions: {
+					groq: {
+						reasoningEffort: "medium",
+					},
+				},
+			}),
+		);
 	});
 
 	it("updates existing generated rows without overwriting user finalText", async () => {
