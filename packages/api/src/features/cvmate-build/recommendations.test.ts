@@ -570,6 +570,188 @@ typeof __testables.resolvePromptAliases
 ).toThrow();
 });
 });
+
+describe("quality coverage policy", () => {
+	it("supplements a second relevant employment and preserves quantified impact", () => {
+		const baseEmployment = selectionItems[0];
+		const baseFact = selectionItems[1];
+
+		if (!baseEmployment || !baseFact) throw new Error("Missing base selection fixtures.");
+
+		const qualityItems = [
+			{
+				...baseEmployment,
+				id: "employment-a",
+				sourceId: "employment-source-a",
+				sourceTextSnapshot: "Administration - Alpha",
+				sourceDataSnapshot: {
+					company: "Alpha",
+					jobTitle: "Administration",
+				},
+				sortOrder: 0,
+			},
+			{
+				...baseFact,
+				id: "fact-a",
+				sourceId: "fact-source-a",
+				parentSelectionItemId: "employment-a",
+				sourceTextSnapshot: "Managed documentation and deadlines.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Managed documentation and deadlines.",
+				},
+				sortOrder: 1,
+			},
+			{
+				...baseEmployment,
+				id: "employment-b",
+				sourceId: "employment-source-b",
+				sourceTextSnapshot: "Operations - Beta",
+				sourceDataSnapshot: {
+					company: "Beta",
+					jobTitle: "Operations",
+				},
+				sortOrder: 2,
+			},
+			{
+				...baseFact,
+				id: "fact-b-relevant",
+				sourceId: "fact-source-b-relevant",
+				parentSelectionItemId: "employment-b",
+				sourceTextSnapshot: "Managed client documentation and administrative deadlines.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Managed client documentation and administrative deadlines.",
+				},
+				sortOrder: 3,
+			},
+			{
+				...baseFact,
+				id: "fact-b-impact",
+				sourceId: "fact-source-b-impact",
+				parentSelectionItemId: "employment-b",
+				sourceTextSnapshot: "Prepared 483 offers and contracts worth PLN 2.89 million.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Prepared 483 offers and contracts worth PLN 2.89 million.",
+				},
+				sortOrder: 4,
+			},
+			{
+				...baseEmployment,
+				id: "employment-c",
+				sourceId: "employment-source-c",
+				sourceTextSnapshot: "Production - Gamma",
+				sourceDataSnapshot: {
+					company: "Gamma",
+					jobTitle: "Production",
+				},
+				sortOrder: 5,
+			},
+			{
+				...baseFact,
+				id: "fact-c-impact",
+				sourceId: "fact-source-c-impact",
+				parentSelectionItemId: "employment-c",
+				sourceTextSnapshot: "Managed 27 production workers.",
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Managed 27 production workers.",
+				},
+				sortOrder: 6,
+			},
+		] as Parameters<typeof __testables.applyQualityCoveragePolicy>[1];
+
+		const qualityRequirements = [
+			{
+				id: "req-docs",
+				category: "responsibility" as const,
+				priority: "important" as const,
+				sourceText: null,
+				text: "Manage administrative documentation and deadlines",
+			},
+			{
+				id: "req-client",
+				category: "required" as const,
+				priority: "critical" as const,
+				sourceText: null,
+				text: "Communicate with clients and public offices",
+			},
+		];
+
+		const result = __testables.applyQualityCoveragePolicy(
+			new Map([
+				["employment-a", "Manage administrative documentation and deadlines"],
+				["fact-a", "Manage administrative documentation and deadlines"],
+			]),
+			qualityItems,
+			qualityRequirements,
+		);
+
+		expect(result.has("employment-a")).toBe(true);
+		expect(result.has("employment-b")).toBe(true);
+		expect(result.has("fact-b-relevant")).toBe(true);
+		expect(result.has("fact-b-impact")).toBe(true);
+		expect(result.has("employment-c")).toBe(false);
+		expect(result.has("fact-c-impact")).toBe(false);
+	});
+
+	it("supplements relevant standalone competencies but leaves irrelevant items alone", () => {
+		const baseItem = selectionItems[2];
+		if (!baseItem) throw new Error("Missing base selection fixture.");
+
+		const qualityItems = [
+			{
+				...baseItem,
+				id: "competency-docs",
+				sourceType: "profile_list_item",
+				sourceId: "competency-docs-source",
+				sourceTextSnapshot: "Document workflow and deadline control",
+				sourceDataSnapshot: {
+					kind: "competency",
+					value: "Document workflow and deadline control",
+				},
+				sortOrder: 0,
+			},
+			{
+				...baseItem,
+				id: "competency-unrelated",
+				sourceType: "profile_list_item",
+				sourceId: "competency-unrelated-source",
+				sourceTextSnapshot: "Landscape photography",
+				sourceDataSnapshot: {
+					kind: "competency",
+					value: "Landscape photography",
+				},
+				sortOrder: 1,
+			},
+		] as Parameters<typeof __testables.applyQualityCoveragePolicy>[1];
+
+		const result = __testables.applyQualityCoveragePolicy(
+			new Map(),
+			qualityItems,
+			[
+				{
+					id: "req-docs",
+					category: "required",
+					priority: "critical",
+					sourceText: null,
+					text: "Document workflow and deadline control",
+				},
+			],
+		);
+
+		expect(result.has("competency-docs")).toBe(true);
+		expect(result.has("competency-unrelated")).toBe(false);
+	});
+
+	it("tells the provider to optimize recall, diversity and quantified evidence", () => {
+		expect(__testables.SYSTEM_PROMPT).toContain("Optimize for high recall");
+		expect(__testables.SYSTEM_PROMPT).toContain("evidence diversity across employers");
+		expect(__testables.SYSTEM_PROMPT).toContain("quantified evidence");
+	});
+});
+
 describe("cvmateBuildRecommendationsService.generate", () => {
 	it("updates recommendation fields only and replaces only open detected gaps", async () => {
 		const tx = createTransactionMock();
@@ -598,7 +780,7 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 
 		expect(generateJsonMock).toHaveBeenCalledOnce();
 		expect(generateJsonMock.mock.calls[0]?.[3]).toMatchObject({
-			maxOutputTokens: 2048,
+			maxOutputTokens: 4096,
 			onUsage: expect.any(Function),
 		});
 		expect(generateJsonMock.mock.calls[0]?.[3]).not.toHaveProperty("providerOptions");
@@ -673,7 +855,7 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 
 		expect(generateJsonMock).toHaveBeenCalledOnce();
 		expect(generateJsonMock.mock.calls[0]?.[3]).toMatchObject({
-			maxOutputTokens: 2048,
+			maxOutputTokens: 4096,
 			providerOptions: {
 				groq: {
 					reasoningEffort: "low",

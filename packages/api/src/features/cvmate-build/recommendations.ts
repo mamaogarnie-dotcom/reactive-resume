@@ -15,7 +15,11 @@ const MAX_RECOMMENDATIONS = 500;
 const MAX_GAPS = 100;
 const MAX_GAP_SUGGESTIONS = 100;
 const MAX_MATCHED_REQUIREMENTS_PER_RECOMMENDATION = 4;
-const RECOMMENDATIONS_MAX_OUTPUT_TOKENS = 2048;
+const RECOMMENDATIONS_MAX_OUTPUT_TOKENS = 4096;
+const QUALITY_TARGET_EMPLOYMENTS = 2;
+const QUALITY_TARGET_FACTS_PER_EMPLOYMENT = 3;
+const QUALITY_TARGET_PROFILE_ITEMS = 5;
+const QUALITY_TARGET_PROJECTS = 1;
 
 const TECHNICAL_SOURCE_DATA_KEYS = new Set(["id", "masterProfileId", "createdAt", "updatedAt", "sortOrder"]);
 
@@ -115,6 +119,16 @@ Security and factuality rules:
 - A job title alone is not proof that the candidate performed a specific duty.
 - Recommend an item only when that item's supplied snapshot gives reasonable
   evidence that it is relevant to the supplied job requirements.
+- Optimize for high recall: return every candidate item with direct, reasonable
+  evidence for at least one supplied requirement, not only the strongest match.
+- Preserve evidence diversity across employers and projects when more than one
+  source contains relevant evidence.
+- Prefer concrete outcomes and quantified evidence when they strengthen an
+  otherwise relevant employment or project, even when the wording does not
+  mirror the job-offer text.
+- Do not suppress a relevant item merely because another item supports the same
+  requirement; the application applies deterministic coverage and quality
+  ranking after this step.
 - Return only selectionItemId values present in CANDIDATE_ITEMS.
 - For every recommendation return between 1 and 4 requirementIds from
   REQUIREMENTS that are directly supported by that candidate item.
@@ -427,6 +441,315 @@ requirement.text,
 : {}),
 };
 }
+
+type QualityScoredItem = {
+	item: SelectionItem;
+	score: number;
+	requirementIds: string[];
+	hasQuantifiedImpact: boolean;
+};
+
+const QUALITY_STOP_WORDS = new Set([
+	"about",
+	"after",
+	"also",
+	"and",
+	"candidate",
+	"company",
+	"from",
+	"into",
+	"job",
+	"more",
+	"oraz",
+	"other",
+	"pracy",
+	"przez",
+	"role",
+	"that",
+	"this",
+	"using",
+	"with",
+	"your",
+]);
+
+function foldQualityText(value: string): string {
+	return value
+		.normalize("NFKD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.toLowerCase();
+}
+
+function qualityTokenStems(value: string): Set<string> {
+	const tokens = foldQualityText(value).match(/[a-z0-9]+/g) ?? [];
+
+	return new Set(
+		tokens
+			.filter((token) => token.length >= 4 && !QUALITY_STOP_WORDS.has(token))
+			.map((token) => (token.length > 6 ? token.slice(0, 6) : token)),
+	);
+}
+
+function qualityCandidateText(item: SelectionItem): string {
+	return [
+		item.sourceTextSnapshot ?? "",
+		JSON.stringify(compactSourceData(item.sourceDataSnapshot)),
+	].join(" ");
+}
+
+function qualityRequirementWeight(requirement: JobRequirementSnapshot): number {
+	const priorityWeight =
+		requirement.priority === "critical" ? 6 : requirement.priority === "important" ? 3 : 1;
+	const categoryWeight =
+		requirement.category === "required"
+			? 4
+			: requirement.category === "preferred"
+				? 3
+				: requirement.category === "responsibility"
+					? 2
+					: requirement.category === "keyword"
+						? 1
+						: 0;
+
+	return priorityWeight + categoryWeight;
+}
+
+function hasQuantifiedImpactEvidence(value: string): boolean {
+	const normalized = foldQualityText(value);
+
+	return (
+		/\b\d+(?:[.,]\d+)?\b/.test(normalized) ||
+		/%/.test(normalized) ||
+		/\b(?:pln|zl|tys|mln|million|milion|thousand|tysiac)\b/.test(normalized)
+	);
+}
+
+function scoreQualityItem(
+	item: SelectionItem,
+	requirements: JobRequirementSnapshot[],
+): QualityScoredItem {
+	const candidateText = qualityCandidateText(item);
+	const candidateTokens = qualityTokenStems(candidateText);
+	const requirementIds: string[] = [];
+	let score = 0;
+
+	for (const requirement of requirements) {
+		const requirementTokens = qualityTokenStems(
+			[requirement.text, requirement.sourceText ?? ""].join(" "),
+		);
+		let shared = 0;
+
+		for (const token of candidateTokens) {
+			if (requirementTokens.has(token)) shared += 1;
+		}
+
+		if (shared === 0) continue;
+
+		requirementIds.push(requirement.id);
+		score += qualityRequirementWeight(requirement) * Math.min(shared, 3);
+	}
+
+	const hasQuantifiedImpact = hasQuantifiedImpactEvidence(candidateText);
+
+	if (hasQuantifiedImpact && requirementIds.length > 0) {
+		score += 5;
+	}
+
+	return {
+		item,
+		score,
+		requirementIds,
+		hasQuantifiedImpact,
+	};
+}
+
+function qualityReason(
+	scored: QualityScoredItem,
+	requirements: JobRequirementSnapshot[],
+	fallbackReason?: string | null,
+): string {
+	const requirementById = new Map(
+		requirements.map((requirement) => [requirement.id, requirement] as const),
+	);
+	const reason = scored.requirementIds
+		.map((id) => requirementById.get(id)?.text)
+		.filter((value): value is string => Boolean(value))
+		.slice(0, 2)
+		.join(" | ");
+
+	if (reason) return reason.slice(0, 500);
+	if (fallbackReason) return fallbackReason.slice(0, 500);
+
+	return scored.hasQuantifiedImpact
+		? "Quantified result from a relevant employment entry."
+		: "Relevant supporting evidence from a covered CV section.";
+}
+
+function applyQualityCoveragePolicy(
+	baseRecommendations: Map<string, string>,
+	selectionItems: SelectionItem[],
+	requirements: JobRequirementSnapshot[],
+): Map<string, string> {
+	const recommendations = new Map(baseRecommendations);
+	const itemsById = new Map(selectionItems.map((item) => [item.id, item] as const));
+	const scoredById = new Map(
+		selectionItems.map((item) => {
+			const scored = scoreQualityItem(item, requirements);
+			return [item.id, scored] as const;
+		}),
+	);
+
+	const factsByEmploymentId = new Map<string, QualityScoredItem[]>();
+
+	for (const item of selectionItems) {
+		if (item.sourceType !== "experience_fact" || !item.parentSelectionItemId) continue;
+
+		const parent = itemsById.get(item.parentSelectionItemId);
+		if (parent?.sourceType !== "employment") continue;
+
+		const scored = scoredById.get(item.id);
+		if (!scored) continue;
+
+		const current = factsByEmploymentId.get(parent.id) ?? [];
+		current.push(scored);
+		factsByEmploymentId.set(parent.id, current);
+	}
+
+	const employmentGroups = selectionItems
+		.filter((item) => item.sourceType === "employment")
+		.map((employment) => {
+			const parentScore = scoredById.get(employment.id);
+			const facts = [...(factsByEmploymentId.get(employment.id) ?? [])].sort(
+				(a, b) => b.score - a.score || a.item.sortOrder - b.item.sortOrder,
+			);
+			const supportingScore = facts
+				.filter((fact) => fact.score > 0)
+				.slice(0, QUALITY_TARGET_FACTS_PER_EMPLOYMENT)
+				.reduce((sum, fact) => sum + fact.score, 0);
+
+			return {
+				employment,
+				facts,
+				score: (parentScore?.score ?? 0) + supportingScore,
+			};
+		})
+		.filter((group) => group.score > 0)
+		.sort((a, b) => b.score - a.score || a.employment.sortOrder - b.employment.sortOrder);
+
+	let recommendedEmploymentCount = selectionItems.filter(
+		(item) => item.sourceType === "employment" && recommendations.has(item.id),
+	).length;
+
+	for (const group of employmentGroups) {
+		if (recommendedEmploymentCount >= QUALITY_TARGET_EMPLOYMENTS) break;
+		if (recommendations.has(group.employment.id)) continue;
+
+		const bestEvidence = group.facts.find((fact) => fact.score > 0);
+		const parentScore = scoredById.get(group.employment.id);
+		const reasonSource = bestEvidence ?? parentScore;
+
+		if (!reasonSource) continue;
+
+		recommendations.set(
+			group.employment.id,
+			qualityReason(reasonSource, requirements),
+		);
+		recommendedEmploymentCount += 1;
+	}
+
+	const coveredEmploymentIds = new Set(
+		selectionItems
+			.filter((item) => item.sourceType === "employment" && recommendations.has(item.id))
+			.map((item) => item.id),
+	);
+
+	for (const employmentId of coveredEmploymentIds) {
+		const facts = [...(factsByEmploymentId.get(employmentId) ?? [])].sort(
+			(a, b) => b.score - a.score || a.item.sortOrder - b.item.sortOrder,
+		);
+		let recommendedFactCount = facts.filter((fact) =>
+			recommendations.has(fact.item.id),
+		).length;
+
+		for (const fact of facts) {
+			if (recommendedFactCount >= QUALITY_TARGET_FACTS_PER_EMPLOYMENT) break;
+			if (fact.score <= 0 || recommendations.has(fact.item.id)) continue;
+
+			recommendations.set(
+				fact.item.id,
+				qualityReason(
+					fact,
+					requirements,
+					recommendations.get(employmentId),
+				),
+			);
+			recommendedFactCount += 1;
+		}
+
+		const alreadyHasQuantifiedImpact = facts.some(
+			(fact) => fact.hasQuantifiedImpact && recommendations.has(fact.item.id),
+		);
+
+		if (!alreadyHasQuantifiedImpact) {
+			const impactFact = facts
+				.filter((fact) => fact.hasQuantifiedImpact)
+				.sort(
+					(a, b) =>
+						b.score - a.score ||
+						a.item.sortOrder - b.item.sortOrder,
+				)[0];
+
+			if (impactFact) {
+				recommendations.set(
+					impactFact.item.id,
+					qualityReason(
+						impactFact,
+						requirements,
+						recommendations.get(employmentId),
+					),
+				);
+			}
+		}
+	}
+
+	const supplementStandalone = (
+		sourceType: string,
+		targetCount: number,
+	) => {
+		let currentCount = selectionItems.filter(
+			(item) => item.sourceType === sourceType && recommendations.has(item.id),
+		).length;
+
+		if (currentCount >= targetCount) return;
+
+		const candidates = selectionItems
+			.filter((item) => item.sourceType === sourceType)
+			.map((item) => scoredById.get(item.id))
+			.filter((item): item is QualityScoredItem => Boolean(item))
+			.filter((item) => item.score > 0)
+			.sort(
+				(a, b) =>
+					b.score - a.score ||
+					a.item.sortOrder - b.item.sortOrder,
+			);
+
+		for (const candidate of candidates) {
+			if (currentCount >= targetCount) break;
+			if (recommendations.has(candidate.item.id)) continue;
+
+			recommendations.set(
+				candidate.item.id,
+				qualityReason(candidate, requirements),
+			);
+			currentCount += 1;
+		}
+	};
+
+	supplementStandalone("profile_list_item", QUALITY_TARGET_PROFILE_ITEMS);
+	supplementStandalone("project", QUALITY_TARGET_PROJECTS);
+
+	return recommendations;
+}
+
 function validateAndExpandRecommendations(
 	output: z.infer<typeof cvmateBuildAiRecommendationOutputSchema>,
 	selectionItems: SelectionItem[],
@@ -678,7 +1001,12 @@ selectionItems,
 jobOffer.requirements,
 );
 
-const recommendations = validateAndExpandRecommendations(output, selectionItems);
+const aiRecommendations = validateAndExpandRecommendations(output, selectionItems);
+		const recommendations = applyQualityCoveragePolicy(
+			aiRecommendations,
+			selectionItems,
+			jobOffer.requirements,
+		);
 
 		const detectedGaps = resolveGapRequirements(output, jobOffer.requirements, existingGaps);
 
@@ -765,5 +1093,8 @@ resolvePromptAliases,
 	resolveGapRequirements,
 	resolveGapSuggestions,
 	validateAndExpandRecommendations,
+	applyQualityCoveragePolicy,
+	scoreQualityItem,
+	hasQuantifiedImpactEvidence,
 	SYSTEM_PROMPT,
 };
