@@ -11,7 +11,7 @@ import { createResumeDataFromCvmate } from "./resume-adapter";
 import { cvmateBuildService } from "./service";
 
 const recommendedCvmateDesignSettings = {
-	template: "onyx",
+	template: "lapras",
 	primaryColor: "#4E6B35",
 	textColor: "#1F2937",
 	backgroundColor: "#FFFFFF",

@@ -929,7 +929,7 @@ describe("createResumeDataFromCvmate", () => {
 		);
 	});
 
-	it("applies generated content, summary, LinkedIn and profile photo to canonical resume data", () => {
+	it("applies generated content and summary while MASTER ATS suppresses a selected profile photo", () => {
 		const result = createResumeDataFromCvmate({
 			profile: {
 				...masterProfile,
@@ -1069,8 +1069,8 @@ describe("createResumeDataFromCvmate", () => {
 			},
 		]);
 
-		expect(result.picture.hidden).toBe(false);
-		expect(result.picture.url).toContain("uploads/user-1/profile/photo.jpg");
+		expect(result.picture.hidden).toBe(true);
+		expect(result.picture.url).toBe("");
 	});
 
 	it("rejects multiple selected profile photos", () => {
@@ -1112,5 +1112,37 @@ describe("createResumeDataFromCvmate", () => {
 				targetLanguage: "en-US",
 			}),
 		).toThrow();
+	});
+
+	it("enforces the MASTER ATS structural contract while preserving the selected visual template and colors", () => {
+		const result = createResumeDataFromCvmate({
+			profile: masterProfile,
+			selectionItems: [],
+			generatedContent: [],
+			targetLanguage: "pl",
+			designSettings: {
+				template: "pikachu",
+				primaryColor: "#734A75",
+				textColor: "#1F2937",
+				backgroundColor: "#FFFFFF",
+			},
+		});
+
+		expect(result.metadata.template).toBe("pikachu");
+		expect(result.metadata.design.colors).toEqual({
+			primary: "rgba(115, 74, 117, 1)",
+			text: "rgba(31, 41, 55, 1)",
+			background: "rgba(255, 255, 255, 1)",
+		});
+		expect(result.picture.hidden).toBe(true);
+		expect(result.picture.url).toBe("");
+		expect(result.metadata.layout.pages).toHaveLength(1);
+		expect(result.metadata.layout.pages[0]).toMatchObject({
+			fullWidth: true,
+			sidebar: [],
+		});
+		expect(result.metadata.layout.pages[0]?.main.length).toBeGreaterThan(0);
+		expect(new Set(result.metadata.layout.pages[0]?.main).size).toBe(result.metadata.layout.pages[0]?.main.length);
+		expect(Object.values(result.sections).every((section) => section.icon === "")).toBe(true);
 	});
 });

@@ -290,6 +290,30 @@ function hexColorToRgba(hexColor: string): string {
 
 	return `rgba(${red}, ${green}, ${blue}, 1)`;
 }
+function applyMasterAtsContract(data: ReturnType<typeof createResumeData>): void {
+	data.picture.hidden = true;
+	data.picture.url = "";
+
+	const orderedSectionIds = data.metadata.layout.pages.flatMap((page) => [...page.main, ...page.sidebar]);
+	const uniqueSectionIds = [...new Set(orderedSectionIds)];
+
+	data.metadata.layout.pages = [
+		{
+			fullWidth: true,
+			main: uniqueSectionIds,
+			sidebar: [],
+		},
+	];
+
+	for (const section of Object.values(data.sections)) {
+		section.icon = "";
+	}
+
+	for (const section of data.customSections) {
+		section.icon = "";
+	}
+}
+
 export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 	const locale = resolveResumeLocale(input.targetLanguage);
 	const data = createResumeData({ locale });
@@ -629,6 +653,9 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 		firstPage.main.push(id);
 	}
+
+	applyMasterAtsContract(data);
+
 
 	return parseWritableResumeData(data);
 }
