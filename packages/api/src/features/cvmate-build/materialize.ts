@@ -7,6 +7,7 @@ import { defaultLocale, isLocale } from "@reactive-resume/utils/locale";
 import { cvmateBuildIdentitySnapshotSchema } from "../../dto/cvmate-build";
 import { cvmateBuildDesignSettingsSchema } from "../../dto/cvmate-build-materialize";
 import { resumeService } from "../resume/service";
+import { evaluateFinalCvQuality } from "./final-quality-gate";
 import { createResumeDataFromCvmate } from "./resume-adapter";
 import { cvmateBuildService } from "./service";
 
@@ -93,6 +94,8 @@ async function prepareResumeData(input: { id: string; userId: string }) {
 		build,
 		data,
 		designSettings,
+		selectionItems,
+		generatedContent,
 		usesRecommendation: build.designSettings === null,
 	};
 }
@@ -134,20 +137,45 @@ async function selectDensityProfile(data: PreparedResumeData) {
 }
 export const cvmateBuildMaterializeService = {
 	preview: async (input: { id: string; userId: string }) => {
-		const { data: preparedData, designSettings, usesRecommendation } = await prepareResumeData(input);
+		const {
+			data: preparedData,
+			designSettings,
+			selectionItems,
+			generatedContent,
+			usesRecommendation,
+		} = await prepareResumeData(input);
 		const { data, pageMetrics } = await selectDensityProfile(preparedData);
+		const qualityGate = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems,
+			generatedContent,
+		});
 
 		return {
 			data,
 			designSettings,
 			pageMetrics,
+			qualityGate,
 			usesRecommendation,
 		};
 	},
 
 	materialize: async (input: { id: string; userId: string }) => {
-		const { build, data: preparedData } = await prepareResumeData(input);
-		const { data } = await selectDensityProfile(preparedData);
+		const { build, data: preparedData, selectionItems, generatedContent } = await prepareResumeData(input);
+		const { data, pageMetrics } = await selectDensityProfile(preparedData);
+		const qualityGate = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems,
+			generatedContent,
+		});
+
+		if (qualityGate.status === "blocked") {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "Final CV quality gate blocked materialization.",
+			});
+		}
 
 		const locale = isLocale(data.metadata.page.locale) ? data.metadata.page.locale : defaultLocale;
 

@@ -20,6 +20,7 @@ const resumeServiceMock = vi.hoisted(() => ({
 const adapterMock = vi.hoisted(() => vi.fn());
 
 const pdfMetricsMock = vi.hoisted(() => vi.fn());
+const qualityGateMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@reactive-resume/db/client", () => ({ db: dbMock }));
 
@@ -71,6 +72,10 @@ vi.mock("@reactive-resume/pdf/server", () => ({
 	createResumePdfMetrics: pdfMetricsMock,
 }));
 
+vi.mock("./final-quality-gate", () => ({
+	evaluateFinalCvQuality: qualityGateMock,
+}));
+
 const { cvmateBuildMaterializeService } = await import("./materialize");
 
 const build = {
@@ -100,6 +105,19 @@ const frozenProfile = {
 
 const selectionItems = [{ id: "selection-1" }];
 const generatedContent = [{ id: "generated-1" }];
+
+const cleanQualityGate = {
+	status: "pass",
+	findings: [],
+	dimensions: {
+		coverage: "pass",
+		grammar: "pass",
+		dedup: "pass",
+		achievementsNumbers: "pass",
+		masterAts: "pass",
+		density: "pass",
+	},
+};
 
 const resumeData = {
 	metadata: {
@@ -169,6 +187,7 @@ beforeEach(() => {
 		actualPageCount: 1,
 		lastPageTextUtilization: 0.72,
 	});
+	qualityGateMock.mockReturnValue(cleanQualityGate);
 	resumeServiceMock.create.mockResolvedValue("resume-1");
 	resumeServiceMock.update.mockResolvedValue(undefined);
 });
@@ -202,6 +221,7 @@ describe("cvmateBuildMaterializeService.preview", () => {
 				actualPageCount: 1,
 				lastPageTextUtilization: 0.72,
 			},
+			qualityGate: cleanQualityGate,
 			usesRecommendation: true,
 		});
 
@@ -298,6 +318,46 @@ it("rejects compact typography when it does not reduce the physical page count",
 	expect(resumeData.metadata.typography.body.fontSize).toBe(originalFontSize);
 	expect(resumeData.metadata.typography.body.lineHeight).toBe(originalLineHeight);
 });
+
+it("exposes the exact shared final quality gate report after density selection", async () => {
+	const blockedQualityGate = {
+		...cleanQualityGate,
+		status: "blocked",
+		findings: [
+			{
+				code: "MASTER_ATS_NOT_FULL_WIDTH",
+				dimension: "master_ats",
+				severity: "blocking",
+				message: "MASTER ATS requires a full-width layout.",
+			},
+		],
+		dimensions: {
+			...cleanQualityGate.dimensions,
+			masterAts: "blocked",
+		},
+	};
+
+	qualityGateMock.mockReturnValueOnce(blockedQualityGate);
+
+	const result = await cvmateBuildMaterializeService.preview({
+		id: "build-1",
+		userId: "user-1",
+	});
+
+	expect(result.qualityGate).toBe(blockedQualityGate);
+	expect(qualityGateMock).toHaveBeenCalledWith({
+		data: resumeData,
+		pageMetrics: {
+			actualPageCount: 1,
+			lastPageTextUtilization: 0.72,
+		},
+		selectionItems,
+		generatedContent,
+	});
+	expect(resumeServiceMock.create).not.toHaveBeenCalled();
+	expect(resumeServiceMock.update).not.toHaveBeenCalled();
+});
+
 describe("cvmateBuildMaterializeService.materialize", () => {
 	it("creates a Reactive Resume and 1story document on first materialization", async () => {
 		mockDocumentSelect([]);
@@ -400,6 +460,90 @@ describe("cvmateBuildMaterializeService.materialize", () => {
 		expect(resumeData.metadata.typography.body.fontSize).toBe(originalFontSize);
 		expect(resumeData.metadata.typography.body.lineHeight).toBe(originalLineHeight);
 	});
+
+	it("persists the evaluated data when the final quality gate contains warnings only", async () => {
+		const warningQualityGate = {
+			...cleanQualityGate,
+			status: "warning",
+			findings: [
+				{
+					code: "DUPLICATE_FINAL_NARRATIVE_TEXT",
+					dimension: "dedup",
+					severity: "warning",
+					message: "Duplicate narrative text.",
+				},
+			],
+			dimensions: {
+				...cleanQualityGate.dimensions,
+				dedup: "warning",
+			},
+		};
+
+		qualityGateMock.mockReturnValueOnce(warningQualityGate);
+		mockDocumentSelect([]);
+
+		const document = {
+			...existingDocument,
+			id: "document-warning",
+		};
+
+		mockDocumentInsert(document);
+
+		await cvmateBuildMaterializeService.materialize({
+			id: "build-1",
+			userId: "user-1",
+		});
+
+		expect(resumeServiceMock.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: resumeData,
+			}),
+		);
+		expect(qualityGateMock).toHaveBeenCalledWith({
+			data: resumeData,
+			pageMetrics: {
+				actualPageCount: 1,
+				lastPageTextUtilization: 0.72,
+			},
+			selectionItems,
+			generatedContent,
+		});
+	});
+
+	it("refuses persistence when the shared final quality gate is blocked", async () => {
+		qualityGateMock.mockReturnValueOnce({
+			...cleanQualityGate,
+			status: "blocked",
+			findings: [
+				{
+					code: "MASTER_ATS_SIDEBAR_NOT_EMPTY",
+					dimension: "master_ats",
+					severity: "blocking",
+					message: "MASTER ATS requires an empty sidebar.",
+				},
+			],
+			dimensions: {
+				...cleanQualityGate.dimensions,
+				masterAts: "blocked",
+			},
+		});
+
+		await expect(
+			cvmateBuildMaterializeService.materialize({
+				id: "build-1",
+				userId: "user-1",
+			}),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+
+		expect(dbMock.select).not.toHaveBeenCalled();
+		expect(dbMock.insert).not.toHaveBeenCalled();
+		expect(dbMock.update).not.toHaveBeenCalled();
+		expect(resumeServiceMock.create).not.toHaveBeenCalled();
+		expect(resumeServiceMock.update).not.toHaveBeenCalled();
+	});
+
 	it("updates the existing Reactive Resume instead of creating another document", async () => {
 		mockDocumentSelect([existingDocument]);
 		const { set } = mockDocumentUpdate();

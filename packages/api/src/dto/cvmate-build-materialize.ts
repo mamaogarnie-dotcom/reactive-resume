@@ -20,6 +20,42 @@ export const cvmateBuildPageMetricsSchema = z.object({
 
 export type CvmateBuildPageMetrics = z.infer<typeof cvmateBuildPageMetricsSchema>;
 
+export const cvmateBuildQualityGateStatusSchema = z.enum(["pass", "warning", "blocked"]);
+export const cvmateBuildQualityGateFindingSeveritySchema = z.enum(["warning", "blocking"]);
+export const cvmateBuildQualityGateFindingDimensionSchema = z.enum([
+	"coverage",
+	"grammar",
+	"dedup",
+	"achievements_numbers",
+	"master_ats",
+	"density",
+]);
+export const cvmateBuildQualityGateDimensionStatusSchema = z.enum(["pass", "warning", "blocked"]);
+
+export const cvmateBuildQualityGateFindingSchema = z.object({
+	code: z.string().trim().min(1),
+	dimension: cvmateBuildQualityGateFindingDimensionSchema,
+	severity: cvmateBuildQualityGateFindingSeveritySchema,
+	message: z.string().trim().min(1),
+	selectionItemId: z.string().trim().min(1).optional(),
+	resumeItemId: z.string().trim().min(1).optional(),
+	path: z.string().trim().min(1).optional(),
+});
+
+export const cvmateBuildQualityGateSchema = z.object({
+	status: cvmateBuildQualityGateStatusSchema,
+	findings: z.array(cvmateBuildQualityGateFindingSchema),
+	dimensions: z.object({
+		coverage: cvmateBuildQualityGateDimensionStatusSchema,
+		grammar: cvmateBuildQualityGateDimensionStatusSchema,
+		dedup: cvmateBuildQualityGateDimensionStatusSchema,
+		achievementsNumbers: cvmateBuildQualityGateDimensionStatusSchema,
+		masterAts: cvmateBuildQualityGateDimensionStatusSchema,
+		density: cvmateBuildQualityGateDimensionStatusSchema,
+	}),
+});
+
+export type CvmateBuildQualityGate = z.infer<typeof cvmateBuildQualityGateSchema>;
 export const cvmateBuildMaterializeDto = {
 	preview: {
 		input: z.object({
@@ -29,6 +65,7 @@ export const cvmateBuildMaterializeDto = {
 			data: resumeDataSchema,
 			designSettings: cvmateBuildDesignSettingsSchema,
 			pageMetrics: cvmateBuildPageMetricsSchema,
+			qualityGate: cvmateBuildQualityGateSchema,
 			usesRecommendation: z.boolean(),
 		}),
 	},
