@@ -264,6 +264,83 @@ function formatCvDate(value: string | null): string {
 	return trimmed;
 }
 
+const locationMinorWords = new Set([
+	"am",
+	"an",
+	"and",
+	"da",
+	"das",
+	"de",
+	"del",
+	"di",
+	"do",
+	"dos",
+	"du",
+	"in",
+	"la",
+	"le",
+	"nad",
+	"of",
+	"on",
+	"pod",
+	"the",
+	"van",
+	"von",
+]);
+
+function formatLocationPart(part: string, preserveShortUppercase: boolean, isFirstWord: boolean): string {
+	const letters = part.match(/\p{L}/gu)?.join("") ?? "";
+	if (!letters) return part;
+
+	const lowerLetters = letters.toLowerCase();
+	const upperLetters = letters.toUpperCase();
+	const isAllLower = letters === lowerLetters;
+	const isAllUpper = letters === upperLetters;
+
+	if (!isAllLower && !isAllUpper) return part;
+	if (isAllUpper && letters.length <= 3) return part;
+
+	if (preserveShortUppercase && isAllLower && letters.length >= 2 && letters.length <= 3) {
+		return part.toUpperCase();
+	}
+
+	if (!isFirstWord && isAllLower && locationMinorWords.has(lowerLetters)) {
+		return part.toLowerCase();
+	}
+
+	const normalized = part.toLowerCase();
+	return normalized.replace(/\p{L}/u, (letter) => letter.toUpperCase());
+}
+
+function formatLocationWord(word: string, isFirstWord: boolean, preserveShortUppercase: boolean): string {
+	return word
+		.split("-")
+		.map((part, index) => formatLocationPart(part, preserveShortUppercase, isFirstWord && index === 0))
+		.join("-");
+}
+
+function formatCvLocation(value: string | null): string {
+	if (!value) return "";
+
+	const trimmed = value.trim();
+	if (!trimmed) return "";
+
+	const segments = trimmed
+		.split(",")
+		.map((segment) => segment.trim().replace(/\s+/g, " "))
+		.filter(Boolean);
+
+	return segments
+		.map((segment, segmentIndex) => {
+			const words = segment.split(" ");
+			const preserveShortUppercase = segmentIndex > 0 && words.length === 1;
+
+			return words
+				.map((word, wordIndex) => formatLocationWord(word, wordIndex === 0, preserveShortUppercase))
+				.join(" ");
+		})
+		.join(", ");
+}
 function formatPeriod(startDate: string | null, endDate: string | null): string {
 	const formattedStart = formatCvDate(startDate);
 	const formattedEnd = formatCvDate(endDate);
@@ -376,6 +453,7 @@ function applyMasterAtsContract(data: ReturnType<typeof createResumeData>): void
 
 export const __testables = {
 	formatCvDate,
+	formatCvLocation,
 	formatPeriod,
 	formatEmploymentPeriod,
 };
@@ -406,7 +484,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 	data.basics.headline = "";
 	data.basics.email = profile.email ?? "";
 	data.basics.phone = profile.phone ?? "";
-	data.basics.location = profile.location ?? "";
+	data.basics.location = formatCvLocation(profile.location);
 
 	if (profile.websiteUrl) {
 		data.basics.website = {
@@ -471,7 +549,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 					hidden: false,
 					company: snapshot.company,
 					position: snapshot.jobTitle ?? "",
-					location: snapshot.location ?? "",
+					location: formatCvLocation(snapshot.location),
 					period: formatEmploymentPeriod(snapshot.startDate, snapshot.endDate, snapshot.isCurrent, locale),
 					website: itemWebsite(),
 					description: listHtml(facts),

@@ -1168,3 +1168,27 @@ describe("professional CV date formatting", () => {
 		expect(__testables.formatEmploymentPeriod("2023-01", null, true, "en-US" as never)).toBe("01.2023 - Present");
 	});
 });
+
+describe("professional CV location formatting", () => {
+	it("normalizes obvious casing, whitespace, and comma spacing", () => {
+		expect(__testables.formatCvLocation(null)).toBe("");
+		expect(__testables.formatCvLocation("   ")).toBe("");
+		expect(__testables.formatCvLocation("  wroclaw  ")).toBe("Wroclaw");
+		expect(__testables.formatCvLocation("new york")).toBe("New York");
+		expect(__testables.formatCvLocation("london, uk")).toBe("London, UK");
+		expect(__testables.formatCvLocation("  seattle ,  WA  ")).toBe("Seattle, WA");
+		expect(__testables.formatCvLocation("LONDON")).toBe("London");
+		expect(__testables.formatCvLocation("ROME")).toBe("Rome");
+		expect(__testables.formatCvLocation("NYC")).toBe("NYC");
+		expect(__testables.formatCvLocation("Remote")).toBe("Remote");
+		expect(__testables.formatCvLocation("bielsko-biala")).toBe("Bielsko-Biala");
+		expect(__testables.formatCvLocation("frankfurt am main")).toBe("Frankfurt am Main");
+	});
+
+	it("preserves established mixed-case names and does not transliterate them", () => {
+		expect(__testables.formatCvLocation("Wroclaw")).toBe("Wroclaw");
+		expect(__testables.formatCvLocation("Wroc\u0142aw")).toBe("Wroc\u0142aw");
+		expect(__testables.formatCvLocation("McLean, VA")).toBe("McLean, VA");
+		expect(__testables.formatCvLocation("Rio de Janeiro, Brazil")).toBe("Rio de Janeiro, Brazil");
+	});
+});
