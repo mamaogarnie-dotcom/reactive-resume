@@ -214,9 +214,62 @@ function listHtml(values: string[]): string {
 	return `<ul>${values.map((value) => `<li>${escapeHtml(value)}</li>`).join("")}</ul>`;
 }
 
+function formatCvDate(value: string | null): string {
+	if (!value) return "";
+
+	const trimmed = value.trim();
+	if (!trimmed) return "";
+
+	if (/^\d{4}$/.test(trimmed)) return trimmed;
+
+	const yearMonth = /^(\d{4})-(\d{2})$/.exec(trimmed);
+	if (yearMonth) {
+		const year = yearMonth[1] ?? "";
+		const month = yearMonth[2] ?? "";
+		const monthNumber = Number(month);
+
+		if (monthNumber >= 1 && monthNumber <= 12) {
+			return `${month}.${year}`;
+		}
+
+		return trimmed;
+	}
+
+	const fullDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+	if (fullDate) {
+		const year = fullDate[1] ?? "";
+		const month = fullDate[2] ?? "";
+		const day = fullDate[3] ?? "";
+		const yearNumber = Number(year);
+		const monthNumber = Number(month);
+		const dayNumber = Number(day);
+		const parsed = new Date(Date.UTC(yearNumber, monthNumber - 1, dayNumber));
+
+		const isValid =
+			monthNumber >= 1 &&
+			monthNumber <= 12 &&
+			dayNumber >= 1 &&
+			dayNumber <= 31 &&
+			parsed.getUTCFullYear() === yearNumber &&
+			parsed.getUTCMonth() === monthNumber - 1 &&
+			parsed.getUTCDate() === dayNumber;
+
+		if (isValid) {
+			return `${day}.${month}.${year}`;
+		}
+
+		return trimmed;
+	}
+
+	return trimmed;
+}
+
 function formatPeriod(startDate: string | null, endDate: string | null): string {
-	if (startDate && endDate) return `${startDate} - ${endDate}`;
-	return startDate ?? endDate ?? "";
+	const formattedStart = formatCvDate(startDate);
+	const formattedEnd = formatCvDate(endDate);
+
+	if (formattedStart && formattedEnd) return `${formattedStart} - ${formattedEnd}`;
+	return formattedStart || formattedEnd;
 }
 
 function formatEmploymentPeriod(
@@ -228,7 +281,9 @@ function formatEmploymentPeriod(
 	if (!isCurrent) return formatPeriod(startDate, endDate);
 
 	const present = locale.toLowerCase().startsWith("pl") ? "Obecnie" : "Present";
-	return startDate ? `${startDate} - ${present}` : present;
+	const formattedStart = formatCvDate(startDate);
+
+	return formattedStart ? `${formattedStart} - ${present}` : present;
 }
 
 function joinNonEmpty(values: Array<string | null>, separator: string): string {
@@ -318,6 +373,12 @@ function applyMasterAtsContract(data: ReturnType<typeof createResumeData>): void
 		section.icon = "";
 	}
 }
+
+export const __testables = {
+	formatCvDate,
+	formatPeriod,
+	formatEmploymentPeriod,
+};
 
 export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 	const locale = resolveResumeLocale(input.targetLanguage);
@@ -466,7 +527,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 					hidden: false,
 					title: snapshot.name,
 					issuer: snapshot.issuingOrganization ?? "",
-					date: snapshot.issueDate ?? "",
+					date: formatCvDate(snapshot.issueDate),
 					website: itemWebsite(snapshot.credentialUrl ?? ""),
 					description: paragraphHtml(snapshot.description),
 				});
@@ -517,7 +578,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 					hidden: false,
 					title: snapshot.name,
 					awarder: snapshot.organizer ?? "",
-					date: snapshot.date ?? "",
+					date: formatCvDate(snapshot.date),
 					website: itemWebsite(),
 					description: paragraphHtml(snapshot.description),
 				});
@@ -549,7 +610,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 					hidden: false,
 					title: snapshot.name,
 					issuer: "",
-					date: snapshot.date ?? "",
+					date: formatCvDate(snapshot.date),
 					website: itemWebsite(),
 					description: paragraphHtml(snapshot.description),
 				});
@@ -585,7 +646,12 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 
 			case "course": {
 				const snapshot = courseSnapshotSchema.parse(selection.sourceDataSnapshot);
-				const content = paragraphsHtml([snapshot.name, snapshot.organizer, snapshot.date, snapshot.description]);
+				const content = paragraphsHtml([
+					snapshot.name,
+					snapshot.organizer,
+					formatCvDate(snapshot.date),
+					snapshot.description,
+				]);
 
 				if (!content) break;
 
@@ -617,7 +683,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 				const content = paragraphsHtml([
 					snapshot.title,
 					snapshot.subtitle,
-					snapshot.date,
+					formatCvDate(snapshot.date),
 					snapshot.description,
 					snapshot.url,
 				]);
@@ -660,7 +726,6 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 	}
 
 	applyMasterAtsContract(data);
-
 
 	return parseWritableResumeData(data);
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createResumeDataFromCvmate } from "./resume-adapter";
+import { __testables, createResumeDataFromCvmate } from "./resume-adapter";
 
 const now = new Date("2026-09-10T12:00:00.000Z");
 
@@ -576,7 +576,7 @@ describe("createResumeDataFromCvmate", () => {
 				hidden: false,
 				title: "Project Management",
 				issuer: "PM Academy",
-				date: "2025-06",
+				date: "06.2025",
 				description: "<p>Advanced course</p>",
 			}),
 			expect.objectContaining({
@@ -703,7 +703,7 @@ describe("createResumeDataFromCvmate", () => {
 				company: "Bioarbor",
 				position: "Project Coordinator",
 				location: "Wroclaw",
-				period: "2023-01 - 2025-06",
+				period: "01.2023 - 06.2025",
 				description: "<ul><li>Prepared public procurement offers</li><li>Coordinated client communication</li></ul>",
 				roles: [],
 			}),
@@ -1144,5 +1144,27 @@ describe("createResumeDataFromCvmate", () => {
 		expect(result.metadata.layout.pages[0]?.main.length).toBeGreaterThan(0);
 		expect(new Set(result.metadata.layout.pages[0]?.main).size).toBe(result.metadata.layout.pages[0]?.main.length);
 		expect(Object.values(result.sections).every((section) => section.icon === "")).toBe(true);
+	});
+});
+
+describe("professional CV date formatting", () => {
+	it("formats canonical CV dates without leaking raw YYYY-MM values", () => {
+		expect(__testables.formatCvDate("2023")).toBe("2023");
+		expect(__testables.formatCvDate("2023-01")).toBe("01.2023");
+		expect(__testables.formatCvDate("2023-01-15")).toBe("15.01.2023");
+		expect(__testables.formatCvDate("2023-13")).toBe("2023-13");
+		expect(__testables.formatCvDate("2023-02-31")).toBe("2023-02-31");
+		expect(__testables.formatCvDate("Spring 2023")).toBe("Spring 2023");
+	});
+
+	it("formats CV date ranges consistently", () => {
+		expect(__testables.formatPeriod("2023-01", "2025-06")).toBe("01.2023 - 06.2025");
+		expect(__testables.formatPeriod("2023", "2025")).toBe("2023 - 2025");
+		expect(__testables.formatPeriod("2023-01", null)).toBe("01.2023");
+	});
+
+	it("formats current employment start dates while preserving localized Present labels", () => {
+		expect(__testables.formatEmploymentPeriod("2023-01", null, true, "pl-PL" as never)).toBe("01.2023 - Obecnie");
+		expect(__testables.formatEmploymentPeriod("2023-01", null, true, "en-US" as never)).toBe("01.2023 - Present");
 	});
 });
