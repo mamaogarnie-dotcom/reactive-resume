@@ -17,24 +17,18 @@ const MAX_GAP_SUGGESTIONS = 100;
 const MAX_MATCHED_REQUIREMENTS_PER_RECOMMENDATION = 4;
 const RECOMMENDATIONS_MAX_OUTPUT_TOKENS = 4096;
 const QUALITY_TARGET_EMPLOYMENTS = 2;
-const QUALITY_TARGET_FACTS_PER_EMPLOYMENT = 3;
+const QUALITY_TARGET_FACTS_PER_EMPLOYMENT = 4;
 const QUALITY_TARGET_PROFILE_ITEMS = 5;
 const QUALITY_TARGET_PROJECTS = 1;
 
 const RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS = 3;
 const RECOMMENDATION_BUDGET_OPTIONAL_EMPLOYMENT_MIN_RATIO = 0.7;
-const RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT = 3;
+const RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT = 4;
 const RECOMMENDATION_BUDGET_MAX_PROFILE_ITEMS = 5;
 const RECOMMENDATION_BUDGET_MAX_PROJECTS = 1;
 const RECOMMENDATION_BUDGET_MAX_EDUCATION = 1;
 const RECOMMENDATION_BUDGET_MAX_VOLUNTEER = 1;
-const RECOMMENDATION_BUDGET_MAX_TOTAL =
-	RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS +
-	RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS * RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT +
-	RECOMMENDATION_BUDGET_MAX_PROFILE_ITEMS +
-	RECOMMENDATION_BUDGET_MAX_PROJECTS +
-	RECOMMENDATION_BUDGET_MAX_EDUCATION +
-	RECOMMENDATION_BUDGET_MAX_VOLUNTEER;
+const RECOMMENDATION_BUDGET_MAX_TOTAL = 20;
 
 const TECHNICAL_SOURCE_DATA_KEYS = new Set(["id", "masterProfileId", "createdAt", "updatedAt", "sortOrder"]);
 
@@ -613,136 +607,268 @@ function quantifiedImpactSignature(item: SelectionItem): string | null {
 }
 
 function applyRecommendationBudgetPolicy(
-	baseRecommendations: Map<string, string>,
-	selectionItems: SelectionItem[],
-	requirements: JobRequirementSnapshot[],
+baseRecommendations: Map<string, string>,
+selectionItems: SelectionItem[],
+requirements: JobRequirementSnapshot[],
 ): Map<string, string> {
-	const budgeted = new Map<string, string>();
-	const scoredById = new Map(
-		selectionItems.map((item) => [item.id, scoreQualityItem(item, requirements)] as const),
-	);
+const budgeted = new Map<string, string>();
+const scoredById = new Map(
+selectionItems.map((item) => [item.id, scoreQualityItem(item, requirements)] as const),
+);
 
-	const compareScored = (a: QualityScoredItem, b: QualityScoredItem) =>
-		b.score - a.score ||
-		Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
-		a.item.sortOrder - b.item.sortOrder;
-	const rankedEmploymentGroups = selectionItems
-		.filter(
-			(item) =>
-				item.sourceType === "employment" &&
-				baseRecommendations.has(item.id),
-		)
-		.map((employment) => {
-			const facts = selectionItems
-				.filter(
-					(item) =>
-						item.sourceType === "experience_fact" &&
-						item.parentSelectionItemId === employment.id &&
-						baseRecommendations.has(item.id),
-				)
-				.map((item) => scoredById.get(item.id))
-				.filter((item): item is QualityScoredItem => Boolean(item))
-				.sort(compareScored);
+const compareScored = (a: QualityScoredItem, b: QualityScoredItem) =>
+b.score - a.score ||
+Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
+a.item.sortOrder - b.item.sortOrder;
 
-			const employmentScore = scoredById.get(employment.id)?.score ?? 0;
-			const supportingScore = facts
-				.slice(0, RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT)
-				.reduce((sum, fact) => sum + fact.score, 0);
+const rankedEmploymentGroups = selectionItems
+.filter(
+(item) =>
+item.sourceType === "employment" &&
+baseRecommendations.has(item.id),
+)
+.map((employment) => {
+const facts = selectionItems
+.filter(
+(item) =>
+item.sourceType === "experience_fact" &&
+item.parentSelectionItemId === employment.id &&
+baseRecommendations.has(item.id),
+)
+.map((item) => scoredById.get(item.id))
+.filter((item): item is QualityScoredItem => Boolean(item))
+.sort(compareScored);
 
-			return {
-				employment,
-				facts,
-				score: employmentScore + supportingScore,
-			};
-		})
-		.sort(
-			(a, b) =>
-				b.score - a.score ||
-				a.employment.sortOrder - b.employment.sortOrder,
-		)
-		;
+const employmentScore = scoredById.get(employment.id)?.score ?? 0;
+const supportingScore = facts
+.slice(0, RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT)
+.reduce((sum, fact) => sum + fact.score, 0);
 
-	const minimumCoveredEmploymentScore =
-		rankedEmploymentGroups[QUALITY_TARGET_EMPLOYMENTS - 1]?.score ?? 0;
-	const optionalEmploymentThreshold =
-		minimumCoveredEmploymentScore *
-		RECOMMENDATION_BUDGET_OPTIONAL_EMPLOYMENT_MIN_RATIO;
+return {
+employment,
+facts,
+score: employmentScore + supportingScore,
+};
+})
+.sort(
+(a, b) =>
+b.score - a.score ||
+a.employment.sortOrder - b.employment.sortOrder,
+);
 
-	const recommendedEmploymentGroups = rankedEmploymentGroups
-		.filter(
-			(group, index) =>
-				index < QUALITY_TARGET_EMPLOYMENTS ||
-				(minimumCoveredEmploymentScore > 0 &&
-					group.score >= optionalEmploymentThreshold),
-		)
-		.slice(0, RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS);
+const minimumCoveredEmploymentScore =
+rankedEmploymentGroups[QUALITY_TARGET_EMPLOYMENTS - 1]?.score ?? 0;
 
-	for (const group of recommendedEmploymentGroups) {
-		const employmentReason = baseRecommendations.get(group.employment.id);
-		if (employmentReason) {
-			budgeted.set(group.employment.id, employmentReason);
-		}
+const optionalEmploymentThreshold =
+minimumCoveredEmploymentScore *
+RECOMMENDATION_BUDGET_OPTIONAL_EMPLOYMENT_MIN_RATIO;
 
-		const selectedFacts: QualityScoredItem[] = [];
-		const usedImpactSignatures = new Set<string>();
+const recommendedEmploymentGroups = rankedEmploymentGroups
+.filter(
+(group, index) =>
+index < QUALITY_TARGET_EMPLOYMENTS ||
+(minimumCoveredEmploymentScore > 0 &&
+group.score >= optionalEmploymentThreshold),
+)
+.slice(0, RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS);
 
-		const bestImpact = group.facts
-			.filter((fact) => fact.hasQuantifiedImpact && fact.score > 0)
-			.sort(compareScored)[0];
+const addEmploymentGroup = (
+group: (typeof recommendedEmploymentGroups)[number],
+) => {
+const employmentReason =
+baseRecommendations.get(group.employment.id);
 
-		if (bestImpact) {
-			selectedFacts.push(bestImpact);
-			const signature = quantifiedImpactSignature(bestImpact.item);
-			if (signature) usedImpactSignatures.add(signature);
-		}
+if (employmentReason) {
+budgeted.set(
+group.employment.id,
+employmentReason,
+);
+}
 
-		for (const fact of group.facts) {
-			if (selectedFacts.length >= RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT) break;
-			if (selectedFacts.some((selected) => selected.item.id === fact.item.id)) continue;
+const selectedFacts: QualityScoredItem[] = [];
+const usedImpactSignatures = new Set<string>();
+const usedRequirementIds = new Set<string>();
 
-			if (fact.hasQuantifiedImpact) {
-				const signature = quantifiedImpactSignature(fact.item);
-				if (signature && usedImpactSignatures.has(signature)) continue;
-				if (signature) usedImpactSignatures.add(signature);
-			}
+const selectFact = (fact: QualityScoredItem) => {
+if (
+selectedFacts.length >=
+RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT
+) {
+return false;
+}
 
-			selectedFacts.push(fact);
-		}
+if (
+selectedFacts.some(
+(selected) =>
+selected.item.id === fact.item.id,
+)
+) {
+return false;
+}
 
-		for (const fact of selectedFacts) {
-			const reason = baseRecommendations.get(fact.item.id);
-			if (reason) {
-				budgeted.set(fact.item.id, reason);
-			}
-		}
-	}
+if (fact.hasQuantifiedImpact) {
+const signature =
+quantifiedImpactSignature(fact.item);
 
-	const addStandalone = (sourceType: SelectionItem["sourceType"], limit: number) => {
-		const candidates = selectionItems
-			.filter(
-				(item) =>
-					item.sourceType === sourceType &&
-					baseRecommendations.has(item.id),
-			)
-			.map((item) => scoredById.get(item.id))
-			.filter((item): item is QualityScoredItem => Boolean(item))
-			.sort(compareScored)
-			.slice(0, limit);
+if (
+signature &&
+usedImpactSignatures.has(signature)
+) {
+return false;
+}
 
-		for (const candidate of candidates) {
-			const reason = baseRecommendations.get(candidate.item.id);
-			if (reason) {
-				budgeted.set(candidate.item.id, reason);
-			}
-		}
-	};
+if (signature) {
+usedImpactSignatures.add(signature);
+}
+}
 
-	addStandalone("profile_list_item", RECOMMENDATION_BUDGET_MAX_PROFILE_ITEMS);
-	addStandalone("project", RECOMMENDATION_BUDGET_MAX_PROJECTS);
-	addStandalone("education", RECOMMENDATION_BUDGET_MAX_EDUCATION);
-	addStandalone("volunteer", RECOMMENDATION_BUDGET_MAX_VOLUNTEER);
+selectedFacts.push(fact);
 
-	return new Map([...budgeted.entries()].slice(0, RECOMMENDATION_BUDGET_MAX_TOTAL));
+for (const requirementId of fact.requirementIds) {
+usedRequirementIds.add(requirementId);
+}
+
+return true;
+};
+
+const bestImpact = group.facts
+.filter(
+(fact) =>
+fact.hasQuantifiedImpact &&
+fact.score > 0,
+)
+.sort(compareScored)[0];
+
+if (bestImpact) {
+selectFact(bestImpact);
+}
+
+for (const fact of group.facts) {
+if (
+selectedFacts.length >=
+RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT
+) {
+break;
+}
+
+const addsRequirementCoverage =
+fact.requirementIds.some(
+(requirementId) =>
+!usedRequirementIds.has(requirementId),
+);
+
+if (!addsRequirementCoverage) {
+continue;
+}
+
+selectFact(fact);
+}
+
+for (const fact of group.facts) {
+if (
+selectedFacts.length >=
+RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT
+) {
+break;
+}
+
+selectFact(fact);
+}
+
+for (const fact of selectedFacts) {
+const reason =
+baseRecommendations.get(fact.item.id);
+
+if (reason) {
+budgeted.set(
+fact.item.id,
+reason,
+);
+}
+}
+};
+
+const addStandalone = (
+sourceType: SelectionItem["sourceType"],
+limit: number,
+) => {
+const candidates = selectionItems
+.filter(
+(item) =>
+item.sourceType === sourceType &&
+baseRecommendations.has(item.id),
+)
+.map((item) => scoredById.get(item.id))
+.filter((item): item is QualityScoredItem => Boolean(item))
+.sort(compareScored)
+.slice(0, limit);
+
+for (const candidate of candidates) {
+const reason =
+baseRecommendations.get(candidate.item.id);
+
+if (reason) {
+budgeted.set(
+candidate.item.id,
+reason,
+);
+}
+}
+};
+
+const coreEmploymentGroups =
+recommendedEmploymentGroups.slice(
+0,
+QUALITY_TARGET_EMPLOYMENTS,
+);
+
+const optionalEmploymentGroups =
+recommendedEmploymentGroups.slice(
+QUALITY_TARGET_EMPLOYMENTS,
+);
+
+for (const group of coreEmploymentGroups) {
+addEmploymentGroup(group);
+}
+
+addStandalone(
+"profile_list_item",
+RECOMMENDATION_BUDGET_MAX_PROFILE_ITEMS,
+);
+
+addStandalone(
+"project",
+RECOMMENDATION_BUDGET_MAX_PROJECTS,
+);
+
+addStandalone(
+"education",
+RECOMMENDATION_BUDGET_MAX_EDUCATION,
+);
+
+addStandalone(
+"volunteer",
+RECOMMENDATION_BUDGET_MAX_VOLUNTEER,
+);
+
+for (const group of optionalEmploymentGroups) {
+const availableSlots =
+RECOMMENDATION_BUDGET_MAX_TOTAL -
+budgeted.size;
+
+if (availableSlots < 2) {
+break;
+}
+
+addEmploymentGroup(group);
+}
+
+return new Map(
+[...budgeted.entries()].slice(
+0,
+RECOMMENDATION_BUDGET_MAX_TOTAL,
+),
+);
 }
 
 function applyQualityCoveragePolicy(
@@ -872,41 +998,72 @@ function applyQualityCoveragePolicy(
 		}
 	}
 
-	const supplementStandalone = (
-		sourceType: string,
-		targetCount: number,
-	) => {
-		let currentCount = selectionItems.filter(
-			(item) => item.sourceType === sourceType && recommendations.has(item.id),
-		).length;
+const supplementStandalone = (
+sourceType: SelectionItem["sourceType"],
+targetCount: number,
+allowZeroScore = false,
+) => {
+let currentCount = selectionItems.filter(
+(item) =>
+item.sourceType === sourceType &&
+recommendations.has(item.id),
+).length;
 
-		if (currentCount >= targetCount) return;
+if (currentCount >= targetCount) return;
 
-		const candidates = selectionItems
-			.filter((item) => item.sourceType === sourceType)
-			.map((item) => scoredById.get(item.id))
-			.filter((item): item is QualityScoredItem => Boolean(item))
-			.filter((item) => item.score > 0)
-			.sort(
-				(a, b) =>
-					b.score - a.score ||
-					a.item.sortOrder - b.item.sortOrder,
-			);
+const candidates = selectionItems
+.filter(
+(item) =>
+item.sourceType === sourceType &&
+(sourceType !== "education" ||
+(item.sourceTextSnapshot ?? "").trim().length > 0),
+)
+.map((item) => scoredById.get(item.id))
+.filter((item): item is QualityScoredItem => Boolean(item))
+.filter(
+(item) =>
+allowZeroScore ||
+item.score > 0,
+)
+.sort(
+(a, b) =>
+b.score - a.score ||
+a.item.sortOrder - b.item.sortOrder,
+);
 
-		for (const candidate of candidates) {
-			if (currentCount >= targetCount) break;
-			if (recommendations.has(candidate.item.id)) continue;
+for (const candidate of candidates) {
+if (currentCount >= targetCount) break;
+if (recommendations.has(candidate.item.id)) continue;
 
-			recommendations.set(
-				candidate.item.id,
-				qualityReason(candidate, requirements),
-			);
-			currentCount += 1;
-		}
-	};
-	supplementStandalone("profile_list_item", QUALITY_TARGET_PROFILE_ITEMS);
-	supplementStandalone("project", QUALITY_TARGET_PROJECTS);
+const reason =
+candidate.score > 0
+? qualityReason(candidate, requirements)
+: "Available education retained for CV completeness.";
 
+recommendations.set(
+candidate.item.id,
+reason,
+);
+
+currentCount += 1;
+}
+};
+
+supplementStandalone(
+"profile_list_item",
+QUALITY_TARGET_PROFILE_ITEMS,
+);
+
+supplementStandalone(
+"project",
+QUALITY_TARGET_PROJECTS,
+);
+
+supplementStandalone(
+"education",
+RECOMMENDATION_BUDGET_MAX_EDUCATION,
+true,
+);
 	return applyRecommendationBudgetPolicy(
 		recommendations,
 		selectionItems,

@@ -1214,7 +1214,7 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 			const factIds = [...result.keys()].filter((id) =>
 				id.startsWith(`budget-fact-${employmentIndex}-`),
 			);
-			expect(factIds).toHaveLength(3);
+			expect(factIds).toHaveLength(employmentIndex < 2 ? 4 : 1);
 			expect(result.has(`budget-fact-${employmentIndex}-impact`)).toBe(true);
 		}
 
@@ -1373,4 +1373,185 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 		expect(providerMock.getDefaultRunnable).not.toHaveBeenCalled();
 		expect(generateJsonMock).not.toHaveBeenCalled();
 	});
+});
+
+describe("stage 9 recommendation completeness", () => {
+it("retains one available education item for cv completeness even without lexical overlap", () => {
+const baseEmployment = selectionItems[0];
+const baseFact = selectionItems[1];
+
+if (!baseEmployment || !baseFact) {
+throw new Error("Missing base selection fixtures.");
+}
+
+const educationItem = {
+...baseEmployment,
+id: "stage9-education",
+sourceType: "education",
+sourceId: "stage9-education-source",
+parentSelectionItemId: null,
+sourceTextSnapshot: "University of Opole | Master | Biology",
+sourceDataSnapshot: {
+institution: "University of Opole",
+degree: "Master",
+fieldOfStudy: "Biology",
+},
+selected: false,
+recommended: false,
+recommendationReason: null,
+sortOrder: 100,
+};
+
+const items = [
+baseEmployment,
+baseFact,
+educationItem,
+] as unknown as Parameters<
+typeof __testables.applyQualityCoveragePolicy
+>[1];
+
+const result =
+__testables.applyQualityCoveragePolicy(
+new Map([
+[
+baseEmployment.id,
+"Office administration",
+],
+[
+baseFact.id,
+"Office administration",
+],
+]),
+items,
+[
+{
+id: "stage9-admin-req",
+category: "required",
+priority: "critical",
+sourceText: null,
+text: "Office administration and document workflow",
+},
+],
+);
+
+expect(result.has("stage9-education")).toBe(true);
+expect(result.get("stage9-education")).toBe(
+"Available education retained for CV completeness.",
+);
+});
+
+it("prefers requirement diversity while preserving quantified impact within four facts", () => {
+const baseEmployment = selectionItems[0];
+
+if (!baseEmployment) {
+throw new Error("Missing base employment fixture.");
+}
+
+const employment = {
+...baseEmployment,
+id: "stage9-diverse-employment",
+sourceId: "stage9-diverse-employment-source",
+sourceTextSnapshot:
+"Office administration, document workflow and supplier coordination",
+sourceDataSnapshot: {
+company: "Example",
+jobTitle: "Office administration",
+},
+selected: false,
+recommended: false,
+recommendationReason: null,
+sortOrder: 0,
+};
+
+const fact = (
+id: string,
+text: string,
+sortOrder: number,
+) => ({
+...baseEmployment,
+id,
+sourceType: "experience_fact",
+sourceId: `${id}-source`,
+parentSelectionItemId: employment.id,
+sourceTextSnapshot: text,
+sourceDataSnapshot: {
+kind: "responsibility",
+text,
+},
+selected: false,
+recommended: false,
+recommendationReason: null,
+sortOrder,
+});
+
+const items = [
+employment,
+fact(
+"stage9-fact-impact",
+"Prepared 483 offers and contracts worth PLN 2.89 million.",
+1,
+),
+fact(
+"stage9-fact-docs-a",
+"Prepared documents, applications, contracts and offers.",
+2,
+),
+fact(
+"stage9-fact-docs-b",
+"Coordinated documents, applications, contracts and offers.",
+3,
+),
+fact(
+"stage9-fact-docs-c",
+"Managed documents, applications, contracts and offers.",
+4,
+),
+fact(
+"stage9-fact-vendors",
+"Coordinated suppliers.",
+5,
+),
+] as unknown as Parameters<
+typeof __testables.applyRecommendationBudgetPolicy
+>[1];
+
+const recommendations = new Map(
+items.map((item) => [
+item.id,
+`reason-${item.id}`,
+]),
+);
+
+const result =
+__testables.applyRecommendationBudgetPolicy(
+recommendations,
+items,
+[
+{
+id: "stage9-docs-req",
+category: "required",
+priority: "critical",
+sourceText: null,
+text: "Documents applications contracts offers",
+},
+{
+id: "stage9-vendor-req",
+category: "required",
+priority: "critical",
+sourceText: null,
+text: "Suppliers",
+},
+],
+);
+
+const selectedFacts = [...result.keys()].filter(
+(id) => id.startsWith("stage9-fact-"),
+);
+
+expect(selectedFacts).toHaveLength(4);
+expect(result.has("stage9-fact-impact")).toBe(true);
+expect(result.has("stage9-fact-vendors")).toBe(true);
+expect(result.has("stage9-fact-docs-c")).toBe(false);
+expect(result.size).toBeLessThanOrEqual(20);
+});
 });
