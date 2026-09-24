@@ -97,11 +97,45 @@ async function prepareResumeData(input: { id: string; userId: string }) {
 	};
 }
 
+const densityUnderfillThreshold = 0.2;
+const compactDensityBodyFontSize = 9.5;
+const compactDensityBodyLineHeight = 1.4;
+
+type PreparedResumeData = ReturnType<typeof createResumeDataFromCvmate>;
+
+async function selectDensityProfile(data: PreparedResumeData) {
+	const { createResumePdfMetrics } = await import("@reactive-resume/pdf/server");
+	const baselineMetrics = await createResumePdfMetrics({ data });
+
+	if (baselineMetrics.actualPageCount <= 1 || baselineMetrics.lastPageTextUtilization >= densityUnderfillThreshold) {
+		return {
+			data,
+			pageMetrics: baselineMetrics,
+		};
+	}
+
+	const compactData = structuredClone(data);
+	compactData.metadata.typography.body.fontSize = compactDensityBodyFontSize;
+	compactData.metadata.typography.body.lineHeight = compactDensityBodyLineHeight;
+
+	const compactMetrics = await createResumePdfMetrics({ data: compactData });
+
+	if (compactMetrics.actualPageCount < baselineMetrics.actualPageCount) {
+		return {
+			data: compactData,
+			pageMetrics: compactMetrics,
+		};
+	}
+
+	return {
+		data,
+		pageMetrics: baselineMetrics,
+	};
+}
 export const cvmateBuildMaterializeService = {
 	preview: async (input: { id: string; userId: string }) => {
-		const { data, designSettings, usesRecommendation } = await prepareResumeData(input);
-		const { createResumePdfMetrics } = await import("@reactive-resume/pdf/server");
-		const pageMetrics = await createResumePdfMetrics({ data });
+		const { data: preparedData, designSettings, usesRecommendation } = await prepareResumeData(input);
+		const { data, pageMetrics } = await selectDensityProfile(preparedData);
 
 		return {
 			data,
@@ -112,7 +146,8 @@ export const cvmateBuildMaterializeService = {
 	},
 
 	materialize: async (input: { id: string; userId: string }) => {
-		const { build, data } = await prepareResumeData(input);
+		const { build, data: preparedData } = await prepareResumeData(input);
+		const { data } = await selectDensityProfile(preparedData);
 
 		const locale = isLocale(data.metadata.page.locale) ? data.metadata.page.locale : defaultLocale;
 

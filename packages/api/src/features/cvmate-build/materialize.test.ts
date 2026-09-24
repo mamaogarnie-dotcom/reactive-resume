@@ -105,6 +105,14 @@ const resumeData = {
 	metadata: {
 		page: {
 			locale: "pl-PL",
+			marginX: 14,
+			marginY: 12,
+		},
+		typography: {
+			body: {
+				fontSize: 10,
+				lineHeight: 1.5,
+			},
 		},
 	},
 };
@@ -207,6 +215,89 @@ describe("cvmateBuildMaterializeService.preview", () => {
 		expect(dbMock.update).not.toHaveBeenCalled();
 	});
 });
+
+it("adopts compact typography only when an underfilled fallback removes a physical page", async () => {
+	const originalFontSize = resumeData.metadata.typography.body.fontSize;
+	const originalLineHeight = resumeData.metadata.typography.body.lineHeight;
+
+	pdfMetricsMock
+		.mockResolvedValueOnce({
+			actualPageCount: 4,
+			lastPageTextUtilization: 0.19,
+		})
+		.mockResolvedValueOnce({
+			actualPageCount: 3,
+			lastPageTextUtilization: 0.833,
+		});
+
+	const result = await cvmateBuildMaterializeService.preview({
+		id: "build-1",
+		userId: "user-1",
+	});
+
+	expect(pdfMetricsMock).toHaveBeenCalledTimes(2);
+	expect(result.data).not.toBe(resumeData);
+	expect(result.data.metadata.typography.body.fontSize).toBe(9.5);
+	expect(result.data.metadata.typography.body.lineHeight).toBe(1.4);
+	expect(result.data.metadata.page.marginX).toBe(resumeData.metadata.page.marginX);
+	expect(result.data.metadata.page.marginY).toBe(resumeData.metadata.page.marginY);
+	expect(result.pageMetrics).toEqual({
+		actualPageCount: 3,
+		lastPageTextUtilization: 0.833,
+	});
+	expect(pdfMetricsMock).toHaveBeenNthCalledWith(1, {
+		data: resumeData,
+	});
+	expect(pdfMetricsMock).toHaveBeenNthCalledWith(2, {
+		data: result.data,
+	});
+	expect(resumeData.metadata.typography.body.fontSize).toBe(originalFontSize);
+	expect(resumeData.metadata.typography.body.lineHeight).toBe(originalLineHeight);
+});
+
+it("rejects compact typography when it does not reduce the physical page count", async () => {
+	const originalFontSize = resumeData.metadata.typography.body.fontSize;
+	const originalLineHeight = resumeData.metadata.typography.body.lineHeight;
+
+	pdfMetricsMock
+		.mockResolvedValueOnce({
+			actualPageCount: 4,
+			lastPageTextUtilization: 0.1,
+		})
+		.mockResolvedValueOnce({
+			actualPageCount: 4,
+			lastPageTextUtilization: 0.9,
+		});
+
+	const result = await cvmateBuildMaterializeService.preview({
+		id: "build-1",
+		userId: "user-1",
+	});
+
+	expect(pdfMetricsMock).toHaveBeenCalledTimes(2);
+	expect(result.data).toBe(resumeData);
+	expect(result.pageMetrics).toEqual({
+		actualPageCount: 4,
+		lastPageTextUtilization: 0.1,
+	});
+	expect(pdfMetricsMock).toHaveBeenNthCalledWith(1, {
+		data: resumeData,
+	});
+	expect(pdfMetricsMock).toHaveBeenNthCalledWith(2, {
+		data: expect.objectContaining({
+			metadata: expect.objectContaining({
+				typography: expect.objectContaining({
+					body: expect.objectContaining({
+						fontSize: 9.5,
+						lineHeight: 1.4,
+					}),
+				}),
+			}),
+		}),
+	});
+	expect(resumeData.metadata.typography.body.fontSize).toBe(originalFontSize);
+	expect(resumeData.metadata.typography.body.lineHeight).toBe(originalLineHeight);
+});
 describe("cvmateBuildMaterializeService.materialize", () => {
 	it("creates a Reactive Resume and 1story document on first materialization", async () => {
 		mockDocumentSelect([]);
@@ -259,6 +350,56 @@ describe("cvmateBuildMaterializeService.materialize", () => {
 		});
 	});
 
+	it("persists the same compact typography selected by the rendered density policy", async () => {
+		mockDocumentSelect([]);
+
+		const document = {
+			...existingDocument,
+			id: "document-density",
+		};
+
+		mockDocumentInsert(document);
+
+		const originalFontSize = resumeData.metadata.typography.body.fontSize;
+		const originalLineHeight = resumeData.metadata.typography.body.lineHeight;
+
+		pdfMetricsMock
+			.mockResolvedValueOnce({
+				actualPageCount: 4,
+				lastPageTextUtilization: 0.19,
+			})
+			.mockResolvedValueOnce({
+				actualPageCount: 3,
+				lastPageTextUtilization: 0.833,
+			});
+
+		await cvmateBuildMaterializeService.materialize({
+			id: "build-1",
+			userId: "user-1",
+		});
+
+		expect(pdfMetricsMock).toHaveBeenCalledTimes(2);
+		expect(resumeServiceMock.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					metadata: expect.objectContaining({
+						page: expect.objectContaining({
+							marginX: resumeData.metadata.page.marginX,
+							marginY: resumeData.metadata.page.marginY,
+						}),
+						typography: expect.objectContaining({
+							body: expect.objectContaining({
+								fontSize: 9.5,
+								lineHeight: 1.4,
+							}),
+						}),
+					}),
+				}),
+			}),
+		);
+		expect(resumeData.metadata.typography.body.fontSize).toBe(originalFontSize);
+		expect(resumeData.metadata.typography.body.lineHeight).toBe(originalLineHeight);
+	});
 	it("updates the existing Reactive Resume instead of creating another document", async () => {
 		mockDocumentSelect([existingDocument]);
 		const { set } = mockDocumentUpdate();
