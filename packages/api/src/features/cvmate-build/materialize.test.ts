@@ -19,6 +19,8 @@ const resumeServiceMock = vi.hoisted(() => ({
 
 const adapterMock = vi.hoisted(() => vi.fn());
 
+const pdfMetricsMock = vi.hoisted(() => vi.fn());
+
 vi.mock("@reactive-resume/db/client", () => ({ db: dbMock }));
 
 vi.mock("@reactive-resume/db/schema", () => ({
@@ -53,7 +55,6 @@ vi.mock("drizzle-orm", () => ({
 	eq: (...args: unknown[]) => args,
 }));
 
-
 vi.mock("../resume/service", () => ({
 	resumeService: resumeServiceMock,
 }));
@@ -64,6 +65,10 @@ vi.mock("./service", () => ({
 
 vi.mock("./resume-adapter", () => ({
 	createResumeDataFromCvmate: adapterMock,
+}));
+
+vi.mock("@reactive-resume/pdf/server", () => ({
+	createResumePdfMetrics: pdfMetricsMock,
 }));
 
 const { cvmateBuildMaterializeService } = await import("./materialize");
@@ -152,6 +157,10 @@ beforeEach(() => {
 	buildServiceMock.listSelectionItems.mockResolvedValue(selectionItems);
 	buildServiceMock.listGeneratedContent.mockResolvedValue(generatedContent);
 	adapterMock.mockReturnValue(resumeData);
+	pdfMetricsMock.mockResolvedValue({
+		actualPageCount: 1,
+		lastPageTextUtilization: 0.72,
+	});
 	resumeServiceMock.create.mockResolvedValue("resume-1");
 	resumeServiceMock.update.mockResolvedValue(undefined);
 });
@@ -181,9 +190,16 @@ describe("cvmateBuildMaterializeService.preview", () => {
 		expect(result).toEqual({
 			data: resumeData,
 			designSettings: recommendedDesignSettings,
+			pageMetrics: {
+				actualPageCount: 1,
+				lastPageTextUtilization: 0.72,
+			},
 			usesRecommendation: true,
 		});
 
+		expect(pdfMetricsMock).toHaveBeenCalledWith({
+			data: resumeData,
+		});
 		expect(resumeServiceMock.create).not.toHaveBeenCalled();
 		expect(resumeServiceMock.update).not.toHaveBeenCalled();
 		expect(dbMock.select).not.toHaveBeenCalled();
@@ -306,7 +322,6 @@ describe("cvmateBuildMaterializeService.materialize", () => {
 			}),
 		);
 	});
-
 
 	it("keeps the frozen identity valid after the source Master Profile is deleted", async () => {
 		buildServiceMock.getById.mockResolvedValueOnce({

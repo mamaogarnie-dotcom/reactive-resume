@@ -13,6 +13,13 @@ export const cvmateBuildDesignSettingsSchema = z.object({
 
 export type CvmateBuildDesignSettings = z.infer<typeof cvmateBuildDesignSettingsSchema>;
 
+export const cvmateBuildPageMetricsSchema = z.object({
+	actualPageCount: z.number().int().positive(),
+	lastPageTextUtilization: z.number().min(0).max(1),
+});
+
+export type CvmateBuildPageMetrics = z.infer<typeof cvmateBuildPageMetricsSchema>;
+
 export const cvmateBuildMaterializeDto = {
 	preview: {
 		input: z.object({
@@ -21,6 +28,7 @@ export const cvmateBuildMaterializeDto = {
 		output: z.object({
 			data: resumeDataSchema,
 			designSettings: cvmateBuildDesignSettingsSchema,
+			pageMetrics: cvmateBuildPageMetricsSchema,
 			usesRecommendation: z.boolean(),
 		}),
 	},

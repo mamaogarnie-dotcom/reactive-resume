@@ -1,10 +1,10 @@
-import { cvmateBuildIdentitySnapshotSchema } from "../../dto/cvmate-build";
 import type { CvmateBuildDesignSettings } from "../../dto/cvmate-build-materialize";
 import { ORPCError } from "@orpc/client";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { defaultLocale, isLocale } from "@reactive-resume/utils/locale";
+import { cvmateBuildIdentitySnapshotSchema } from "../../dto/cvmate-build";
 import { cvmateBuildDesignSettingsSchema } from "../../dto/cvmate-build-materialize";
 import { resumeService } from "../resume/service";
 import { createResumeDataFromCvmate } from "./resume-adapter";
@@ -47,16 +47,10 @@ function resolveDesignSettings(value: Record<string, unknown> | null): CvmateBui
 	return parsed.data;
 }
 
-function resolveIdentitySnapshot(
-	value: Record<string, unknown> | null,
-	masterProfileId: string | null,
-) {
+function resolveIdentitySnapshot(value: Record<string, unknown> | null, masterProfileId: string | null) {
 	const parsed = cvmateBuildIdentitySnapshotSchema.safeParse(value);
 
-	if (
-		!parsed.success ||
-		(masterProfileId !== null && parsed.data.id !== masterProfileId)
-	) {
+	if (!parsed.success || (masterProfileId !== null && parsed.data.id !== masterProfileId)) {
 		throw new ORPCError("BAD_REQUEST", {
 			message: "This CV build does not contain a valid frozen candidate identity.",
 			...(!parsed.success ? { cause: parsed.error } : {}),
@@ -72,10 +66,7 @@ async function prepareResumeData(input: { id: string; userId: string }) {
 		userId: input.userId,
 	});
 
-	const identity = resolveIdentitySnapshot(
-		build.identitySnapshot,
-		build.masterProfileId,
-	);
+	const identity = resolveIdentitySnapshot(build.identitySnapshot, build.masterProfileId);
 
 	const [selectionItems, generatedContent] = await Promise.all([
 		cvmateBuildService.listSelectionItems({
@@ -109,10 +100,13 @@ async function prepareResumeData(input: { id: string; userId: string }) {
 export const cvmateBuildMaterializeService = {
 	preview: async (input: { id: string; userId: string }) => {
 		const { data, designSettings, usesRecommendation } = await prepareResumeData(input);
+		const { createResumePdfMetrics } = await import("@reactive-resume/pdf/server");
+		const pageMetrics = await createResumePdfMetrics({ data });
 
 		return {
 			data,
 			designSettings,
+			pageMetrics,
 			usesRecommendation,
 		};
 	},

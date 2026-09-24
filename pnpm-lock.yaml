@@ -1243,6 +1243,9 @@ importers:
       node-html-parser:
         specifier: ^9.0.3
         version: 9.0.3
+      pdfjs-dist:
+        specifier: 6.3.289
+        version: 6.3.289
       phosphor-icons-react-pdf:
         specifier: ^0.1.3
         version: 0.1.3(@react-pdf/renderer@4.9.0(react@19.2.8))(react@19.2.8)
@@ -1268,9 +1271,6 @@ importers:
       '@typescript/native-preview':
         specifier: 7.0.0-dev.20260707.2
         version: 7.0.0-dev.20260707.2
-      pdfjs-dist:
-        specifier: 6.3.289
-        version: 6.3.289
       pixelmatch:
         specifier: ^7.2.0
         version: 7.2.0
