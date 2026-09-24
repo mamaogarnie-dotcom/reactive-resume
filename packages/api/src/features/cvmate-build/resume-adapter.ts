@@ -427,7 +427,49 @@ function hexColorToRgba(hexColor: string): string {
 
 	return `rgba(${red}, ${green}, ${blue}, 1)`;
 }
-function applyMasterAtsContract(data: ReturnType<typeof createResumeData>): void {
+function orderSelectionsByRelevance<T extends { recommended: boolean; sortOrder: number }>(items: T[]): T[] {
+	return [...items].sort((a, b) => Number(b.recommended) - Number(a.recommended) || a.sortOrder - b.sortOrder);
+}
+function collectRecommendedSectionIds(
+	data: ReturnType<typeof createResumeData>,
+	selectionItems: CvmateResumeAdapterInput["selectionItems"],
+): Set<string> {
+	const recommendedSelectionIds = new Set(
+		selectionItems.filter((item) => item.selected && item.recommended).map((item) => item.id),
+	);
+	const recommendedSectionIds = new Set<string>();
+
+	for (const [sectionId, section] of Object.entries(data.sections)) {
+		if (!("items" in section) || !Array.isArray(section.items)) continue;
+
+		if (section.items.some((item) => recommendedSelectionIds.has(item.id))) {
+			recommendedSectionIds.add(sectionId);
+		}
+	}
+
+	for (const section of data.customSections) {
+		if (section.items.some((item) => recommendedSelectionIds.has(item.id))) {
+			recommendedSectionIds.add(section.id);
+		}
+	}
+
+	return recommendedSectionIds;
+}
+
+function orderSectionIdsByRelevance(sectionIds: string[], recommendedSectionIds: ReadonlySet<string>): string[] {
+	const pinnedSummary = sectionIds.filter((sectionId) => sectionId === "summary");
+	const remaining = sectionIds.filter((sectionId) => sectionId !== "summary");
+
+	return [
+		...pinnedSummary,
+		...remaining.filter((sectionId) => recommendedSectionIds.has(sectionId)),
+		...remaining.filter((sectionId) => !recommendedSectionIds.has(sectionId)),
+	];
+}
+function applyMasterAtsContract(
+	data: ReturnType<typeof createResumeData>,
+	selectionItems: CvmateResumeAdapterInput["selectionItems"],
+): void {
 	data.picture.hidden = true;
 	data.picture.url = "";
 
@@ -437,7 +479,7 @@ function applyMasterAtsContract(data: ReturnType<typeof createResumeData>): void
 	data.metadata.layout.pages = [
 		{
 			fullWidth: true,
-			main: uniqueSectionIds,
+			main: orderSectionIdsByRelevance(uniqueSectionIds, collectRecommendedSectionIds(data, selectionItems)),
 			sidebar: [],
 		},
 	];
@@ -454,6 +496,8 @@ function applyMasterAtsContract(data: ReturnType<typeof createResumeData>): void
 export const __testables = {
 	formatCvDate,
 	formatCvLocation,
+	orderSelectionsByRelevance,
+	orderSectionIdsByRelevance,
 	formatPeriod,
 	formatEmploymentPeriod,
 };
@@ -469,7 +513,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 	}
 
 	const profile = input.profile.profile;
-	const selectedItems = input.selectionItems.filter((selection) => selection.selected);
+	const selectedItems = orderSelectionsByRelevance(input.selectionItems.filter((selection) => selection.selected));
 	const selectedById = new Map(selectedItems.map((selection) => [selection.id, selection]));
 	const summaryGroups = new Map<string, SummaryGroup>();
 	const selectedPhotos = selectedItems.filter((selection) => selection.sourceType === "profile_photo");
@@ -803,7 +847,7 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 		firstPage.main.push(id);
 	}
 
-	applyMasterAtsContract(data);
+	applyMasterAtsContract(data, selectedItems);
 
 	return parseWritableResumeData(data);
 }

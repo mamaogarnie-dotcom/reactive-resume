@@ -1192,3 +1192,38 @@ describe("professional CV location formatting", () => {
 		expect(__testables.formatCvLocation("Rio de Janeiro, Brazil")).toBe("Rio de Janeiro, Brazil");
 	});
 });
+
+describe("relevance-driven CV item ordering", () => {
+	it("puts recommended items first and preserves sort order inside each relevance tier", () => {
+		const ordered = __testables.orderSelectionsByRelevance([
+			{ id: "manual-first", recommended: false, sortOrder: 0 },
+			{ id: "recommended-later", recommended: true, sortOrder: 5 },
+			{ id: "recommended-first", recommended: true, sortOrder: 2 },
+			{ id: "manual-later", recommended: false, sortOrder: 4 },
+		]);
+
+		expect(ordered.map((item) => item.id)).toEqual([
+			"recommended-first",
+			"recommended-later",
+			"manual-first",
+			"manual-later",
+		]);
+	});
+});
+
+describe("relevance-driven CV section ordering", () => {
+	it("pins summary first, promotes recommended sections, and preserves stable order inside tiers", () => {
+		const ordered = __testables.orderSectionIdsByRelevance(
+			["summary", "experience", "education", "skills", "projects", "languages"],
+			new Set(["skills", "projects"]),
+		);
+
+		expect(ordered).toEqual(["summary", "skills", "projects", "experience", "education", "languages"]);
+	});
+
+	it("preserves the original section order when no section has recommended content", () => {
+		const original = ["summary", "experience", "education", "skills"];
+
+		expect(__testables.orderSectionIdsByRelevance(original, new Set())).toEqual(original);
+	});
+});
