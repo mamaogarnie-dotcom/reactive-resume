@@ -40,6 +40,17 @@ const cvmateSelectionSourceTypeSchema = z.enum([
 const jsonObjectSchema = z.record(z.string(), z.unknown());
 const nullableTrimmedStringSchema = z.string().trim().min(1).nullable();
 
+export const cvmateBuildIdentitySnapshotSchema = z.object({
+	id: z.string(),
+	firstName: z.string().nullable(),
+	lastName: z.string().nullable(),
+	email: z.string().nullable(),
+	phone: z.string().nullable(),
+	location: z.string().nullable(),
+	linkedinUrl: z.string().nullable(),
+	websiteUrl: z.string().nullable(),
+});
+
 const cvmateBuildSchema = createSelectSchema(schema.cvmateCvBuild, {
 	id: z.string(),
 	userId: z.string(),
@@ -49,6 +60,7 @@ const cvmateBuildSchema = createSelectSchema(schema.cvmateCvBuild, {
 	status: cvmateBuildStatusSchema,
 	targetLanguage: z.string().nullable(),
 	jobOfferSnapshot: jsonObjectSchema.nullable(),
+	identitySnapshot: cvmateBuildIdentitySnapshotSchema.nullable(),
 	designSettings: jsonObjectSchema.nullable(),
 	completedAt: z.date().nullable(),
 	createdAt: z.date(),

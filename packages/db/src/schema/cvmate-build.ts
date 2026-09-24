@@ -26,6 +26,17 @@ export type CvmateGapOrigin = "detected" | "user";
 export type CvmateGapStatus = "open" | "resolved" | "dismissed";
 export type CvmateGeneratedContentKind = "professional_summary" | "experience_fact" | "section_title" | "other";
 
+export type CvmateBuildIdentitySnapshot = {
+	id: string;
+	firstName: string | null;
+	lastName: string | null;
+	email: string | null;
+	phone: string | null;
+	location: string | null;
+	linkedinUrl: string | null;
+	websiteUrl: string | null;
+};
+
 export const cvmateCvBuild = pg.pgTable(
 	"cvmate_cv_build",
 	{
@@ -37,6 +48,7 @@ export const cvmateCvBuild = pg.pgTable(
 		status: pg.text("status").$type<CvmateBuildStatus>().notNull().default("active"),
 		targetLanguage: pg.text("target_language"),
 		jobOfferSnapshot: pg.jsonb("job_offer_snapshot").$type<Record<string, unknown>>(),
+		identitySnapshot: pg.jsonb("identity_snapshot").$type<CvmateBuildIdentitySnapshot>(),
 		designSettings: pg.jsonb("design_settings").$type<Record<string, unknown>>(),
 		completedAt: pg.timestamp("completed_at", { withTimezone: true }),
 		createdAt: pg.timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

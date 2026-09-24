@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/client";
 import { db } from "@reactive-resume/db/client";
 import type {
+	CvmateBuildIdentitySnapshot,
 	CvmateBuildStatus,
 	CvmateBuildStep,
 	CvmateGapStatus,
@@ -156,6 +157,30 @@ async function getJobOfferSnapshot(jobOfferId: string, userId: string) {
 	});
 
 	return structuredClone(offer) as Record<string, unknown>;
+}
+
+function getIdentitySnapshot(profile: CurrentProfile): CvmateBuildIdentitySnapshot {
+	const {
+		id,
+		firstName,
+		lastName,
+		email,
+		phone,
+		location,
+		linkedinUrl,
+		websiteUrl,
+	} = profile.profile;
+
+	return structuredClone({
+		id,
+		firstName,
+		lastName,
+		email,
+		phone,
+		location,
+		linkedinUrl,
+		websiteUrl,
+	});
 }
 
 function validateCompletionState(
@@ -701,6 +726,7 @@ export const cvmateBuildService = {
 				? null
 				: await getJobOfferSnapshot(jobOfferId, input.userId);
 
+		const identitySnapshot = getIdentitySnapshot(profile);
 		const targetLanguage = resolveCvLanguage(input.targetLanguage);
 		const selectionItems = buildInitialSelectionItems(
 			profile,
@@ -715,6 +741,7 @@ export const cvmateBuildService = {
 				masterProfileId: profile.profile.id,
 				jobOfferId,
 				jobOfferSnapshot,
+				identitySnapshot,
 				targetLanguage,
 				designSettings: input.designSettings ?? null,
 			});

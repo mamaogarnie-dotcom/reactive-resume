@@ -31,8 +31,13 @@ type CvmateMasterProfileAggregate = z.infer<typeof cvmateMasterProfileAggregateS
 type CvmateSelectionItem = z.infer<typeof cvmateSelectionItemSchema>;
 type CvmateGeneratedContent = z.infer<typeof cvmateGeneratedContentSchema>;
 
+type CvmateCandidateIdentity = Pick<
+	CvmateMasterProfileAggregate["profile"],
+	"id" | "firstName" | "lastName" | "email" | "phone" | "location" | "linkedinUrl" | "websiteUrl"
+>;
+
 type CvmateResumeAdapterInput = {
-	profile: CvmateMasterProfileAggregate;
+	profile: { profile: CvmateCandidateIdentity };
 	selectionItems: CvmateSelectionItem[];
 	generatedContent: CvmateGeneratedContent[];
 	targetLanguage: string | null;

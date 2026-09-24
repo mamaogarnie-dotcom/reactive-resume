@@ -12,8 +12,6 @@ const buildServiceMock = vi.hoisted(() => ({
 	listGeneratedContent: vi.fn(),
 }));
 
-const getCurrentProfileMock = vi.hoisted(() => vi.fn());
-
 const resumeServiceMock = vi.hoisted(() => ({
 	create: vi.fn(),
 	update: vi.fn(),
@@ -32,17 +30,29 @@ vi.mock("@reactive-resume/db/schema", () => ({
 	},
 }));
 
+vi.mock("../../dto/cvmate-build", async () => {
+	const { z } = await import("zod");
+
+	return {
+		cvmateBuildIdentitySnapshotSchema: z.object({
+			id: z.string(),
+			firstName: z.string().nullable(),
+			lastName: z.string().nullable(),
+			email: z.string().nullable(),
+			phone: z.string().nullable(),
+			location: z.string().nullable(),
+			linkedinUrl: z.string().nullable(),
+			websiteUrl: z.string().nullable(),
+		}),
+	};
+});
+
 vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => args,
 	desc: (value: unknown) => value,
 	eq: (...args: unknown[]) => args,
 }));
 
-vi.mock("../cvmate-profile/service", () => ({
-	cvmateProfileService: {
-		getCurrent: getCurrentProfileMock,
-	},
-}));
 
 vi.mock("../resume/service", () => ({
 	resumeService: resumeServiceMock,
@@ -67,12 +77,20 @@ const build = {
 		roleTitle: "Operations Manager",
 		companyName: "Acme",
 	},
+	identitySnapshot: {
+		id: "profile-1",
+		firstName: "Aga",
+		lastName: "Nowak",
+		email: "aga@example.com",
+		phone: "+48 500 600 700",
+		location: "Wroclaw",
+		linkedinUrl: "https://www.linkedin.com/in/aga-nowak",
+		websiteUrl: "https://example.com",
+	},
 };
 
-const profile = {
-	profile: {
-		id: "profile-1",
-	},
+const frozenProfile = {
+	profile: build.identitySnapshot,
 };
 
 const selectionItems = [{ id: "selection-1" }];
@@ -133,7 +151,6 @@ beforeEach(() => {
 	buildServiceMock.getById.mockResolvedValue(build);
 	buildServiceMock.listSelectionItems.mockResolvedValue(selectionItems);
 	buildServiceMock.listGeneratedContent.mockResolvedValue(generatedContent);
-	getCurrentProfileMock.mockResolvedValue(profile);
 	adapterMock.mockReturnValue(resumeData);
 	resumeServiceMock.create.mockResolvedValue("resume-1");
 	resumeServiceMock.update.mockResolvedValue(undefined);
@@ -147,14 +164,14 @@ describe("cvmateBuildMaterializeService.preview", () => {
 		});
 
 		const recommendedDesignSettings = {
-			template: "onyx",
+			template: "lapras",
 			primaryColor: "#4E6B35",
 			textColor: "#1F2937",
 			backgroundColor: "#FFFFFF",
 		};
 
 		expect(adapterMock).toHaveBeenCalledWith({
-			profile,
+			profile: frozenProfile,
 			selectionItems,
 			generatedContent,
 			targetLanguage: "pl",
@@ -191,12 +208,12 @@ describe("cvmateBuildMaterializeService.materialize", () => {
 		});
 
 		expect(adapterMock).toHaveBeenCalledWith({
-			profile,
+			profile: frozenProfile,
 			selectionItems,
 			generatedContent,
 			targetLanguage: "pl",
 			designSettings: {
-				template: "onyx",
+				template: "lapras",
 				primaryColor: "#4E6B35",
 				textColor: "#1F2937",
 				backgroundColor: "#FFFFFF",
@@ -256,11 +273,10 @@ describe("cvmateBuildMaterializeService.materialize", () => {
 		});
 	});
 
-	it("rejects materialization when the build Master Profile is unavailable", async () => {
-		getCurrentProfileMock.mockResolvedValue({
-			profile: {
-				id: "profile-other",
-			},
+	it("rejects materialization when the frozen candidate identity is missing", async () => {
+		buildServiceMock.getById.mockResolvedValueOnce({
+			...build,
+			identitySnapshot: null,
 		});
 
 		await expect(
@@ -276,5 +292,37 @@ describe("cvmateBuildMaterializeService.materialize", () => {
 		expect(resumeServiceMock.create).not.toHaveBeenCalled();
 		expect(resumeServiceMock.update).not.toHaveBeenCalled();
 		expect(dbMock.insert).not.toHaveBeenCalled();
+	});
+
+	it("uses the frozen build identity without reading the current Master Profile", async () => {
+		await cvmateBuildMaterializeService.preview({
+			id: "build-1",
+			userId: "user-1",
+		});
+
+		expect(adapterMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				profile: frozenProfile,
+			}),
+		);
+	});
+
+
+	it("keeps the frozen identity valid after the source Master Profile is deleted", async () => {
+		buildServiceMock.getById.mockResolvedValueOnce({
+			...build,
+			masterProfileId: null,
+		});
+
+		await cvmateBuildMaterializeService.preview({
+			id: "build-1",
+			userId: "user-1",
+		});
+
+		expect(adapterMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				profile: frozenProfile,
+			}),
+		);
 	});
 });
