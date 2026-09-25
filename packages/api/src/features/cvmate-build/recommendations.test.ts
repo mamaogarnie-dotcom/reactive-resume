@@ -487,6 +487,94 @@ expect(prompt).not.toContain("master-1");
 });
 
 describe("prompt alias resolution", () => {
+it("tolerates provider requirement overmatch and caps derived reason coverage to four", () => {
+	const requirements = [
+		...jobOfferSnapshot.requirements,
+		{
+			id: "req-3",
+			category: "responsibility",
+			priority: "important",
+			text: "Requirement Three",
+			sourceText: null,
+		},
+		{
+			id: "req-4",
+			category: "preferred",
+			priority: "additional",
+			text: "Requirement Four",
+			sourceText: null,
+		},
+		{
+			id: "req-5",
+			category: "keyword",
+			priority: "additional",
+			text: "Requirement Five",
+			sourceText: null,
+		},
+	] as Parameters<typeof __testables.resolvePromptAliases>[2];
+
+	const providerOutput = cvmateBuildAiRecommendationProviderOutputSchema.parse({
+		recommendations: [
+			{
+				selectionItemId: "s2",
+				requirementIds: ["r1", "r2", "r3", "r4", "r5"],
+			},
+		],
+		gapRequirementIds: [],
+	});
+
+	const output = __testables.resolvePromptAliases(
+		providerOutput,
+		selectionItems,
+		requirements,
+	);
+
+	const reason = output.recommendations[0]?.reason ?? "";
+
+	expect(reason).toContain(requirements[0]?.text ?? "");
+	expect(reason).toContain(requirements[1]?.text ?? "");
+	expect(reason).toContain("Requirement Three");
+	expect(reason).toContain("Requirement Four");
+	expect(reason).not.toContain("Requirement Five");
+});
+
+it("rejects an unknown requirement alias even when it appears after four valid aliases", () => {
+	const requirements = [
+		...jobOfferSnapshot.requirements,
+		{
+			id: "req-3",
+			category: "responsibility",
+			priority: "important",
+			text: "Requirement Three",
+			sourceText: null,
+		},
+		{
+			id: "req-4",
+			category: "preferred",
+			priority: "additional",
+			text: "Requirement Four",
+			sourceText: null,
+		},
+	] as Parameters<typeof __testables.resolvePromptAliases>[2];
+
+	const providerOutput = cvmateBuildAiRecommendationProviderOutputSchema.parse({
+		recommendations: [
+			{
+				selectionItemId: "s2",
+				requirementIds: ["r1", "r2", "r3", "r4", "r999"],
+			},
+		],
+		gapRequirementIds: [],
+	});
+
+	expect(() =>
+		__testables.resolvePromptAliases(
+			providerOutput,
+			selectionItems,
+			requirements,
+		),
+	).toThrow();
+});
 it("maps aliases and derives display text from frozen requirements", () => {
 const output = __testables.resolvePromptAliases(
 {
