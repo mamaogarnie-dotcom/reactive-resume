@@ -998,6 +998,20 @@ describe("createResumeDataFromCvmate", () => {
 			],
 			generatedContent: [
 				{
+					id: "generated-headline-1",
+					cvBuildId: "build-1",
+					selectionItemId: null,
+					kind: "professional_headline",
+					sourceText: null,
+					sourceDataSnapshot: {},
+					aiText: "Administration | Process Coordination",
+					finalText: "ADMINISTRATION | PROCESS COORDINATION",
+					model: null,
+					promptVersion: null,
+					createdAt: new Date("2026-09-10T11:30:00.000Z"),
+					updatedAt: new Date("2026-09-10T11:30:00.000Z"),
+				},
+				{
 					id: "generated-summary-1",
 					cvBuildId: "build-1",
 					selectionItemId: null,
@@ -1043,6 +1057,7 @@ describe("createResumeDataFromCvmate", () => {
 			targetLanguage: "en-US",
 		});
 
+		expect(result.basics.headline).toBe("ADMINISTRATION | PROCESS COORDINATION");
 		expect(result.summary.content).toBe("<p>Experienced coordinator &amp; project specialist</p>");
 
 		expect(result.sections.experience.items).toEqual([

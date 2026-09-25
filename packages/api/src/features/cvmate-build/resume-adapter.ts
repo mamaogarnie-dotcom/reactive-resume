@@ -525,7 +525,8 @@ export function createResumeDataFromCvmate(input: CvmateResumeAdapterInput) {
 	}
 
 	data.basics.name = joinName(profile.firstName, profile.lastName);
-	data.basics.headline = "";
+	const professionalHeadline = latestGeneratedContent(input.generatedContent, "professional_headline", null);
+	data.basics.headline = resolveGeneratedText(professionalHeadline, null) ?? "";
 	data.basics.email = profile.email ?? "";
 	data.basics.phone = profile.phone ?? "";
 	data.basics.location = formatCvLocation(profile.location);

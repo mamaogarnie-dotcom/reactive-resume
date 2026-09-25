@@ -24,7 +24,7 @@ export type CvmateSelectionSourceType =
 	| "custom_section_item";
 export type CvmateGapOrigin = "detected" | "user";
 export type CvmateGapStatus = "open" | "resolved" | "dismissed";
-export type CvmateGeneratedContentKind = "professional_summary" | "experience_fact" | "section_title" | "other";
+export type CvmateGeneratedContentKind = "professional_headline" | "professional_summary" | "experience_fact" | "section_title" | "other";
 
 export type CvmateBuildIdentitySnapshot = {
 	id: string;

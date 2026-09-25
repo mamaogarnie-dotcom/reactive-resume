@@ -12,9 +12,10 @@ import { aiProvidersService } from "../ai-providers/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
 import { cvmateBuildService } from "./service";
 
-const PROMPT_VERSION = "cvmate-tailored-content-v9";
+const PROMPT_VERSION = "cvmate-tailored-content-v10";
 const MAX_EXPERIENCE_FACTS = 500;
 const TAILORED_CONTENT_MAX_OUTPUT_TOKENS = 2048;
+const PROFESSIONAL_HEADLINE_MAX_CHARACTERS = 160;
 const PROFESSIONAL_SUMMARY_MAX_CHARACTERS = 700;
 const RAW_PROVIDER_PROFESSIONAL_SUMMARY_MAX_CHARACTERS = 2000;
 const EXPERIENCE_FACT_MAX_CHARACTERS = 320;
@@ -46,6 +47,7 @@ const jobOfferSnapshotSchema = z
 	.passthrough();
 
 export const cvmateBuildAiTailoredContentOutputSchema = z.object({
+	professionalHeadline: z.string().trim().min(1).max(PROFESSIONAL_HEADLINE_MAX_CHARACTERS).optional(),
 	professionalSummary: z.string().trim().min(1).max(PROFESSIONAL_SUMMARY_MAX_CHARACTERS),
 	experienceFacts: z
 		.array(
@@ -59,6 +61,7 @@ export const cvmateBuildAiTailoredContentOutputSchema = z.object({
 
 const cvmateBuildAiTailoredContentRawOutputSchema =
 	cvmateBuildAiTailoredContentOutputSchema.extend({
+		professionalHeadline: z.string().trim().min(1).max(PROFESSIONAL_HEADLINE_MAX_CHARACTERS),
 		professionalSummary: z
 			.string()
 			.trim()
@@ -203,8 +206,18 @@ Experience-fact writing rules:
 - Do not add qualitative strength, proficiency, success, effectiveness, or
   degree that is absent from that fact's own source text.
 
+Professional-headline writing rules:
+- Return one concise, single-line professional headline grounded only in the selected candidate evidence.
+- Use 1 to 4 short role-domain or functional phrases. Separate multiple phrases with " | ".
+- Let the job offer rank which supported domains to emphasize, but never copy an unsupported target-role identity.
+- Do not invent seniority, expertise, proficiency, sector identity, or qualifications that are absent from selected evidence.
+- Prefer transferable functions and domains over employer names, slogans, generic adjectives, or personality claims.
+- Do not use first-person or third-person personal wording and do not imply gender.
+- Keep the headline within 160 characters and do not use a line break.
+
 Return JSON only:
 {
+  "professionalHeadline": "...",
   "professionalSummary": "...",
   "experienceFacts": [
     {
@@ -620,6 +633,7 @@ function sanitizeTailoredOutput(
 	);
 
 	return {
+		professionalHeadline: output.professionalHeadline,
 		professionalSummary: ensureQuantifiedSummaryAnchorCoverage(
 			lengthSafeSummary,
 			selectionItems,
@@ -748,11 +762,62 @@ function validateExperienceFactRewrite(
 	);
 }
 
+function validateProfessionalHeadline(
+	headline: string,
+	selectionItems: SelectionItem[],
+	targetLanguage: string | null,
+) {
+	if (!headline.trim() || headline.length > PROFESSIONAL_HEADLINE_MAX_CHARACTERS) {
+		throw new ORPCError("BAD_REQUEST", {
+			message: "The AI professional headline is empty or exceeds the allowed length.",
+		});
+	}
+
+	if (/[\r\n]/u.test(headline)) {
+		throw new ORPCError("BAD_REQUEST", {
+			message: "The AI professional headline must be a single line.",
+		});
+	}
+
+	const segments = headline
+		.split("|")
+		.map((segment) => segment.trim())
+		.filter(Boolean);
+
+	if (segments.length === 0 || segments.length > 4) {
+		throw new ORPCError("BAD_REQUEST", {
+			message: "The AI professional headline must contain between one and four concise phrases.",
+		});
+	}
+
+	validateNoUnsupportedQualitativeUpgrades(
+		selectedEvidenceText(selectionItems),
+		headline,
+		"professional headline",
+	);
+
+	if (targetLanguage === "pl") {
+		const normalized = normalizeQualitativeText(headline);
+
+		for (const [, pattern] of POLISH_PERSONAL_SUMMARY_PATTERNS) {
+			if (pattern.test(normalized)) {
+				throw new ORPCError("BAD_REQUEST", {
+					message: "The AI professional headline must use neutral nominal Polish wording.",
+				});
+			}
+		}
+	}
+}
+
 function validateOutput(
 	output: TailoredOutput,
 	selectionItems: SelectionItem[],
 	targetLanguage: string | null = null,
 ) {
+	if (output.professionalHeadline) {
+		validateProfessionalHeadline(output.professionalHeadline, selectionItems, targetLanguage);
+	}
+
 	validateProfessionalSummary(
 		output.professionalSummary,
 		selectionItems,
@@ -810,7 +875,7 @@ function validateOutput(
 
 function latestExistingGeneratedContent(
 	items: GeneratedContent[],
-	kind: "professional_summary" | "experience_fact",
+	kind: "professional_headline" | "professional_summary" | "experience_fact",
 	selectionItemId: string | null,
 ) {
 	return items
@@ -935,6 +1000,12 @@ export const cvmateBuildTailoredContentService = {
 			sanitizeTailoredOutput(output, selectedItems),
 		);
 
+		if (!sanitizedOutput.professionalHeadline) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "The AI omitted the professional headline.",
+			});
+		}
+
 		validateOutput(
 			sanitizedOutput,
 			selectedItems,
@@ -961,12 +1032,19 @@ export const cvmateBuildTailoredContentService = {
 		};
 
 		const targets: Array<{
-			kind: "professional_summary" | "experience_fact";
+			kind: "professional_headline" | "professional_summary" | "experience_fact";
 			selectionItemId: string | null;
 			sourceText: string | null;
 			sourceDataSnapshot: Record<string, unknown>;
 			aiText: string;
 		}> = [
+			{
+				kind: "professional_headline",
+				selectionItemId: null,
+				sourceText: null,
+				sourceDataSnapshot: {},
+				aiText: sanitizedOutput.professionalHeadline,
+			},
 			{
 				kind: "professional_summary",
 				selectionItemId: null,

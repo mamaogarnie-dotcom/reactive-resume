@@ -17,7 +17,7 @@ const cvmateBuildStatusSchema = z.enum(["active", "completed", "abandoned"]);
 const cvmateGapOriginSchema = z.enum(["detected", "user"]);
 const cvmateGapStatusSchema = z.enum(["open", "resolved", "dismissed"]);
 const cvmateRequirementPrioritySchema = z.enum(["critical", "important", "additional"]);
-const cvmateGeneratedContentKindSchema = z.enum(["professional_summary", "experience_fact", "section_title", "other"]);
+const cvmateGeneratedContentKindSchema = z.enum(["professional_headline", "professional_summary", "experience_fact", "section_title", "other"]);
 
 const cvmateSelectionSourceTypeSchema = z.enum([
 	"employment",

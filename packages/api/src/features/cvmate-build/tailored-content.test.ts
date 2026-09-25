@@ -169,6 +169,7 @@ beforeEach(() => {
 	createTransactionMocks();
 
 	generateJsonMock.mockResolvedValue({
+		professionalHeadline: "PRODUCTION | TEAM COORDINATION",
 		professionalSummary: "Operations professional with production team coordination experience.",
 		experienceFacts: [
 			{
@@ -200,6 +201,61 @@ describe("cvmateBuildAiTailoredContentOutputSchema", () => {
 				},
 			],
 		});
+	});
+});
+
+describe("targeted professional headline v10", () => {
+	it("requires professionalHeadline in the raw provider contract", () => {
+		expect(
+			__testables.rawOutputSchema.safeParse({
+				professionalSummary: "Compact summary.",
+				experienceFacts: [],
+			}).success,
+		).toBe(false);
+
+		expect(
+			__testables.rawOutputSchema.safeParse({
+				professionalHeadline: "PRODUCTION | TEAM COORDINATION",
+				professionalSummary: "Compact summary.",
+				experienceFacts: [],
+			}).success,
+		).toBe(true);
+	});
+
+	it("rejects multiline professional headlines and accepts neutral single-line phrases", () => {
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalHeadline: "PRODUCTION | TEAM COORDINATION",
+					professionalSummary: "Production operations experience.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-fact",
+							text: "Coordinated a multinational production team.",
+						},
+					],
+				},
+				[employmentSelection, factSelection] as never,
+				"en",
+			),
+		).not.toThrow();
+
+		expect(() =>
+			__testables.validateOutput(
+				{
+					professionalHeadline: "PRODUCTION\nTEAM COORDINATION",
+					professionalSummary: "Production operations experience.",
+					experienceFacts: [
+						{
+							selectionItemId: "selection-fact",
+							text: "Coordinated a multinational production team.",
+						},
+					],
+				},
+				[employmentSelection, factSelection] as never,
+				"en",
+			),
+		).toThrow("single line");
 	});
 });
 
@@ -242,7 +298,9 @@ describe("tailored content prompt safeguards", () => {
 		expect(__testables.SYSTEM_PROMPT).toContain("Never omit directly matching domain/process evidence");
 		expect(__testables.SYSTEM_PROMPT).toContain("factual claims, not stylistic polish");
 		expect(__testables.SYSTEM_PROMPT).toContain("Do not merge words from separate evidence items");
-		expect(__testables.PROMPT_VERSION).toBe("cvmate-tailored-content-v9");
+		expect(__testables.SYSTEM_PROMPT).toContain("Professional-headline writing rules:");
+		expect(__testables.SYSTEM_PROMPT).toContain("professionalHeadline");
+		expect(__testables.PROMPT_VERSION).toBe("cvmate-tailored-content-v10");
 	});
 });
 
@@ -439,6 +497,7 @@ describe("tailored content output validation", () => {
 		const rawSummary = `${firstSentence} ${secondSentence}`;
 
 		const rawOutput = __testables.rawOutputSchema.parse({
+			professionalHeadline: "PRODUCTION | TEAM COORDINATION",
 			professionalSummary: rawSummary,
 			experienceFacts: [],
 		});
@@ -478,6 +537,7 @@ describe("tailored content output validation", () => {
 		const anchorSentence =
 			"Experience includes purchase of 3 investment apartments.";
 		const rawOutput = __testables.rawOutputSchema.parse({
+			professionalHeadline: "REAL ESTATE | PROCESS COORDINATION",
 			professionalSummary: `${firstSentence} ${anchorSentence}`,
 			experienceFacts: [],
 		});
@@ -831,10 +891,19 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 		expect(values).toHaveBeenCalledTimes(1);
 
 		const inserted = values.mock.calls[0]?.[0] as Array<Record<string, unknown>>;
-		expect(inserted).toHaveLength(2);
+		expect(inserted).toHaveLength(3);
 
 		expect(inserted).toEqual(
 			expect.arrayContaining([
+				expect.objectContaining({
+					cvBuildId: "build-1",
+					selectionItemId: null,
+					kind: "professional_headline",
+					aiText: "PRODUCTION | TEAM COORDINATION",
+					finalText: null,
+					model: "test-model",
+					promptVersion: __testables.PROMPT_VERSION,
+				}),
 				expect.objectContaining({
 					cvBuildId: "build-1",
 					selectionItemId: null,
@@ -885,6 +954,21 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 	});
 
 	it("updates existing generated rows without overwriting user finalText", async () => {
+		const existingHeadline = {
+			id: "headline-existing",
+			cvBuildId: "build-1",
+			selectionItemId: null,
+			kind: "professional_headline",
+			sourceText: null,
+			sourceDataSnapshot: {},
+			aiText: "Old AI headline",
+			finalText: "User-approved headline",
+			model: "old-model",
+			promptVersion: "old",
+			createdAt: new Date("2026-09-10T19:00:00.000Z"),
+			updatedAt: new Date("2026-09-10T19:00:00.000Z"),
+		};
+
 		const existingSummary = {
 			id: "summary-existing",
 			cvBuildId: "build-1",
@@ -917,8 +1001,8 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 
 		buildServiceMock.listGeneratedContent.mockReset();
 		buildServiceMock.listGeneratedContent
-			.mockResolvedValueOnce([existingSummary, existingFact])
-			.mockResolvedValueOnce([existingSummary, existingFact]);
+			.mockResolvedValueOnce([existingHeadline, existingSummary, existingFact])
+			.mockResolvedValueOnce([existingHeadline, existingSummary, existingFact]);
 
 		const { set, values } = createTransactionMocks();
 
@@ -927,7 +1011,7 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 			userId: "user-1",
 		});
 
-		expect(set).toHaveBeenCalledTimes(2);
+		expect(set).toHaveBeenCalledTimes(3);
 
 		for (const [updates] of set.mock.calls) {
 			expect(updates).not.toHaveProperty("finalText");
