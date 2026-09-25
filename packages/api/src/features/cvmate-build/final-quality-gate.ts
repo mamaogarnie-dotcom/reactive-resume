@@ -13,6 +13,7 @@ type NarrativeFragment = {
 };
 
 const DEDUP_MINIMUM_NORMALIZED_LENGTH = 24;
+const PROFESSIONAL_COMPLETENESS_UNDERFILL_THRESHOLD = 0.7;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -222,6 +223,66 @@ export function evaluateFinalCvQuality(input: {
 		.filter(Boolean)
 		.join(" ");
 
+	if (!data.basics.headline.trim()) {
+		findings.push(
+			finding(
+				"coverage",
+				"warning",
+				"MISSING_PROFESSIONAL_HEADLINE",
+				"The final CV does not contain a professional headline.",
+				{ path: "basics.headline" },
+			),
+		);
+	}
+
+	const educationAvailable = selectionItems.some((item) => item.sourceType === "education");
+	const educationRendered = data.sections.education.items.some(
+		(item) => !item.hidden && item.school.trim().length > 0,
+	);
+
+	if (educationAvailable && !educationRendered) {
+		findings.push(
+			finding(
+				"coverage",
+				"warning",
+				"AVAILABLE_EDUCATION_NOT_RENDERED",
+				"Education is available in the frozen CV build inventory but no visible education item is rendered.",
+				{ path: "sections.education.items" },
+			),
+		);
+	}
+
+	const languageAvailable = selectionItems.some((item) => item.sourceType === "language");
+	const languageRendered = data.sections.languages.items.some(
+		(item) => !item.hidden && item.language.trim().length > 0,
+	);
+
+	if (languageAvailable && !languageRendered) {
+		findings.push(
+			finding(
+				"coverage",
+				"warning",
+				"AVAILABLE_LANGUAGE_NOT_RENDERED",
+				"Language information is available in the frozen CV build inventory but no visible language item is rendered.",
+				{ path: "sections.languages.items" },
+			),
+		);
+	}
+
+	if (
+		input.pageMetrics.actualPageCount === 1 &&
+		input.pageMetrics.lastPageTextUtilization < PROFESSIONAL_COMPLETENESS_UNDERFILL_THRESHOLD
+	) {
+		findings.push(
+			finding(
+				"density",
+				"warning",
+				"ONE_PAGE_UNDERFILLED",
+				"The final one-page CV uses less than 70% of the available page text area.",
+				{ path: "pageMetrics.lastPageTextUtilization" },
+			),
+		);
+	}
 	for (const item of selectionItems) {
 		if (!item.selected || !item.recommended) continue;
 		if (item.sourceType === "profile_photo" || item.sourceType === "clause") continue;
@@ -411,7 +472,7 @@ export function evaluateFinalCvQuality(input: {
 		dedup: dimensionStatus(findings, "dedup"),
 		achievementsNumbers: dimensionStatus(findings, "achievements_numbers"),
 		masterAts: dimensionStatus(findings, "master_ats"),
-		density: "pass",
+		density: dimensionStatus(findings, "density"),
 	} satisfies CvmateBuildQualityGate["dimensions"];
 
 	const status = findings.some((item) => item.severity === "blocking")

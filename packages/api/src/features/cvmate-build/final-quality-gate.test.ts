@@ -7,6 +7,7 @@ function createData() {
 
 	data.picture.hidden = true;
 	data.picture.url = "";
+	data.basics.headline = "OPERATIONS | ADMINISTRATION";
 	data.summary.content = "<p>Operations coordinator with measurable project experience.</p>";
 	data.metadata.layout.pages = [
 		{
@@ -334,5 +335,214 @@ describe("evaluateFinalCvQuality", () => {
 		});
 
 		expect(result.findings.some((finding) => finding.code === "SELECTED_NUMERIC_EVIDENCE_NOT_PRESERVED")).toBe(false);
+	});
+	it("warns when the professional headline is missing", () => {
+		const data = createData();
+		data.basics.headline = "   ";
+
+		const result = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems: [],
+			generatedContent: [],
+		});
+
+		expect(result.findings).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					code: "MISSING_PROFESSIONAL_HEADLINE",
+					dimension: "coverage",
+					severity: "warning",
+					path: "basics.headline",
+				}),
+			]),
+		);
+		expect(result.dimensions.coverage).toBe("warning");
+	});
+
+	it("warns once when education is available but not rendered", () => {
+		const data = createData();
+
+		const result = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems: [
+				{
+					id: "education-available-1",
+					selected: false,
+					recommended: false,
+					sourceType: "education",
+					sourceTextSnapshot: "University One | Master | Biology",
+					parentSelectionItemId: null,
+				},
+				{
+					id: "education-available-2",
+					selected: false,
+					recommended: false,
+					sourceType: "education",
+					sourceTextSnapshot: "University Two | Postgraduate",
+					parentSelectionItemId: null,
+				},
+			] as never,
+			generatedContent: [],
+		});
+
+		const findings = result.findings.filter(
+			(finding) => finding.code === "AVAILABLE_EDUCATION_NOT_RENDERED",
+		);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]).toEqual(
+			expect.objectContaining({
+				dimension: "coverage",
+				severity: "warning",
+				path: "sections.education.items",
+			}),
+		);
+		expect(result.dimensions.coverage).toBe("warning");
+	});
+
+	it("warns once when language is available but not rendered", () => {
+		const data = createData();
+
+		const result = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems: [
+				{
+					id: "language-available-1",
+					selected: false,
+					recommended: false,
+					sourceType: "language",
+					sourceTextSnapshot: "English | B2",
+					parentSelectionItemId: null,
+				},
+				{
+					id: "language-available-2",
+					selected: false,
+					recommended: false,
+					sourceType: "language",
+					sourceTextSnapshot: "German | A2",
+					parentSelectionItemId: null,
+				},
+			] as never,
+			generatedContent: [],
+		});
+
+		const findings = result.findings.filter(
+			(finding) => finding.code === "AVAILABLE_LANGUAGE_NOT_RENDERED",
+		);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]).toEqual(
+			expect.objectContaining({
+				dimension: "coverage",
+				severity: "warning",
+				path: "sections.languages.items",
+			}),
+		);
+		expect(result.dimensions.coverage).toBe("warning");
+	});
+
+	it("passes completeness coverage when available education and language are rendered", () => {
+		const data = createData();
+		data.sections.education.items = [
+			{
+				id: "education-rendered",
+				hidden: false,
+				school: "University of Opole",
+				degree: "Master",
+				area: "Biology",
+				grade: "",
+				location: "",
+				period: "",
+				website: { url: "", label: "" },
+				description: "",
+			},
+		] as never;
+		data.sections.languages.items = [
+			{
+				id: "language-rendered",
+				hidden: false,
+				language: "English",
+				fluency: "B2",
+				level: 0,
+			},
+		] as never;
+
+		const result = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems: [
+				{
+					id: "education-available",
+					selected: false,
+					recommended: false,
+					sourceType: "education",
+					sourceTextSnapshot: "University of Opole | Master | Biology",
+					parentSelectionItemId: null,
+				},
+				{
+					id: "language-available",
+					selected: false,
+					recommended: false,
+					sourceType: "language",
+					sourceTextSnapshot: "English | B2",
+					parentSelectionItemId: null,
+				},
+			] as never,
+			generatedContent: [],
+		});
+
+		expect(
+			result.findings.some((finding) => finding.code === "AVAILABLE_EDUCATION_NOT_RENDERED"),
+		).toBe(false);
+		expect(
+			result.findings.some((finding) => finding.code === "AVAILABLE_LANGUAGE_NOT_RENDERED"),
+		).toBe(false);
+		expect(result.dimensions.coverage).toBe("pass");
+	});
+
+	it("warns only for one-page utilization below 0.70", () => {
+		const data = createData();
+
+		const underfilled = evaluateFinalCvQuality({
+			data,
+			pageMetrics: { actualPageCount: 1, lastPageTextUtilization: 0.699 },
+			selectionItems: [],
+			generatedContent: [],
+		});
+
+		expect(underfilled.findings).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					code: "ONE_PAGE_UNDERFILLED",
+					dimension: "density",
+					severity: "warning",
+					path: "pageMetrics.lastPageTextUtilization",
+				}),
+			]),
+		);
+		expect(underfilled.dimensions.density).toBe("warning");
+
+		const boundary = evaluateFinalCvQuality({
+			data,
+			pageMetrics: { actualPageCount: 1, lastPageTextUtilization: 0.7 },
+			selectionItems: [],
+			generatedContent: [],
+		});
+
+		expect(boundary.findings.some((finding) => finding.code === "ONE_PAGE_UNDERFILLED")).toBe(false);
+		expect(boundary.dimensions.density).toBe("pass");
+
+		const multiPage = evaluateFinalCvQuality({
+			data,
+			pageMetrics: { actualPageCount: 2, lastPageTextUtilization: 0.1 },
+			selectionItems: [],
+			generatedContent: [],
+		});
+
+		expect(multiPage.findings.some((finding) => finding.code === "ONE_PAGE_UNDERFILLED")).toBe(false);
+		expect(multiPage.dimensions.density).toBe("pass");
 	});
 });
