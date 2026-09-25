@@ -520,7 +520,7 @@ describe("tailored content output validation", () => {
 		).not.toThrow();
 	});
 
-	it("reapplies the quantified summary anchor after overlong-summary sentence trimming removes it", () => {
+	it("does not reapply a quantified source after summary trimming removes it", () => {
 		const quantifiedProject = {
 			id: "project-overlong-anchor",
 			sourceType: "project",
@@ -533,7 +533,7 @@ describe("tailored content output validation", () => {
 				"purchase of 3 investment apartments; coordination of renovation work",
 			sourceDataSnapshot: {},
 		};
-		const firstSentence = `${"A".repeat(620)}.`;
+		const firstSentence = `${"A".repeat(660)}.`;
 		const anchorSentence =
 			"Experience includes purchase of 3 investment apartments.";
 		const rawOutput = __testables.rawOutputSchema.parse({
@@ -547,16 +547,16 @@ describe("tailored content output validation", () => {
 			[quantifiedProject] as never,
 		);
 
-		expect(sanitized.professionalSummary.length).toBeLessThanOrEqual(700);
-		expect(sanitized.professionalSummary).toContain("3");
-		expect(sanitized.professionalSummary).toContain(
+		expect(sanitized.professionalSummary).toBe(firstSentence);
+		expect(sanitized.professionalSummary).not.toContain(
 			"purchase of 3 investment apartments",
 		);
 		expect(() =>
 			cvmateBuildAiTailoredContentOutputSchema.parse(sanitized),
 		).not.toThrow();
 	});
-	it("adds a selected recommended quantified anchor when the AI summary omits its numeric scope", () => {
+
+	it("does not copy a quantified source into the summary when AI omits it", () => {
 		const quantifiedProject = {
 			id: "project-quantified",
 			sourceType: "project",
@@ -569,21 +569,20 @@ describe("tailored content output validation", () => {
 				"purchase of 3 investment apartments; coordination of renovation work",
 			sourceDataSnapshot: {},
 		};
+		const summary =
+			"Administrative coordination and document management experience.";
 
 		const sanitized = __testables.sanitizeTailoredOutput(
 			{
-				professionalSummary:
-					"Administrative coordination and document management experience.",
+				professionalSummary: summary,
 				experienceFacts: [],
 			},
 			[quantifiedProject] as never,
 		);
 
-		expect(sanitized.professionalSummary).toContain(
+		expect(sanitized.professionalSummary).toBe(summary);
+		expect(sanitized.professionalSummary).not.toContain(
 			"purchase of 3 investment apartments",
-		);
-		expect(sanitized.professionalSummary).toContain(
-			"Administrative coordination and document management experience.",
 		);
 	});
 
@@ -655,7 +654,38 @@ describe("tailored content output validation", () => {
 		expect(anchor?.id).toBe("earlier-fact");
 	});
 
-	it("validates that the summary retains numeric scope from the selected recommended anchor", () => {
+	it("does not choose an unselected quantified item as the summary prompt anchor", () => {
+		const unselectedEarlier = {
+			id: "unselected-quantified",
+			sourceType: "project",
+			selected: false,
+			recommended: true,
+			recommendationReason: "Would otherwise rank first.",
+			sortOrder: 1,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "handled 99 parallel cases",
+			sourceDataSnapshot: {},
+		};
+		const selectedLater = {
+			id: "selected-quantified",
+			sourceType: "project",
+			selected: true,
+			recommended: true,
+			recommendationReason: "Selected measurable evidence.",
+			sortOrder: 20,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "delivered 8 project stages",
+			sourceDataSnapshot: {},
+		};
+
+		const anchor = __testables.selectQuantifiedSummaryAnchor(
+			[unselectedEarlier, selectedLater] as never,
+		);
+
+		expect(anchor?.id).toBe("selected-quantified");
+	});
+
+	it("allows a professional summary to omit quantified scope that remains in selected evidence", () => {
 		const quantifiedProject = {
 			id: "project-quantified-validation",
 			sourceType: "project",
@@ -678,8 +708,9 @@ describe("tailored content output validation", () => {
 				[quantifiedProject] as never,
 				"en",
 			),
-		).toThrow(/omitted quantified scope/i);
+		).not.toThrow();
 	});
+
 	it("drops only summary sentences that contain unsupported qualitative upgrades", () => {
 		const sanitized = __testables.sanitizeTailoredOutput(
 			{

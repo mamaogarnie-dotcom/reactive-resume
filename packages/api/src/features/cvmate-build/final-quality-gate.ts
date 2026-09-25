@@ -126,6 +126,45 @@ function collectNarrativeFragments(data: ResumeData): NarrativeFragment[] {
 	return fragments;
 }
 
+function splitSummarySentences(value: string): string[] {
+	return htmlToText(value)
+		.split(/(?:\r?\n)+|(?<=[.!?])\s+/u)
+		.map((sentence) => sentence.trim())
+		.filter(Boolean);
+}
+
+function collectDedupNarrativeUnits(
+	fragments: NarrativeFragment[],
+): NarrativeFragment[] {
+	const units: NarrativeFragment[] = [];
+
+	for (const fragment of fragments) {
+		if (fragment.path === "summary.content") {
+			for (const sentence of splitSummarySentences(fragment.text)) {
+				units.push({
+					...fragment,
+					text: sentence,
+				});
+			}
+			continue;
+		}
+
+		const atomicParts = htmlToText(fragment.text)
+			.split(/\r?\n+/u)
+			.map((part) => part.trim())
+			.filter(Boolean);
+
+		for (const part of atomicParts) {
+			units.push({
+				...fragment,
+				text: part,
+			});
+		}
+	}
+
+	return units;
+}
+
 function latestGeneratedSelectionText(generatedContent: GeneratedContent[], selectionItemId: string): string | null {
 	for (let index = generatedContent.length - 1; index >= 0; index -= 1) {
 		const item = generatedContent[index];
@@ -175,6 +214,7 @@ export function evaluateFinalCvQuality(input: {
 	const findings: CvmateBuildQualityGate["findings"] = [];
 	const { data, selectionItems, generatedContent } = input;
 	const fragments = collectNarrativeFragments(data);
+	const dedupUnits = collectDedupNarrativeUnits(fragments);
 	const renderedIds = collectResumeItemIds(data);
 
 	const normalizedNarrative = fragments
@@ -243,7 +283,7 @@ export function evaluateFinalCvQuality(input: {
 
 	const firstFragmentByNormalizedText = new Map<string, NarrativeFragment>();
 
-	for (const fragment of fragments) {
+	for (const fragment of dedupUnits) {
 		const normalized = normalizeNarrative(fragment.text);
 
 		if (normalized.length < DEDUP_MINIMUM_NORMALIZED_LENGTH) continue;
@@ -389,6 +429,7 @@ export function evaluateFinalCvQuality(input: {
 
 export const __testables = {
 	collectNarrativeFragments,
+	collectDedupNarrativeUnits,
 	normalizeNarrative,
 	numericTokens,
 };

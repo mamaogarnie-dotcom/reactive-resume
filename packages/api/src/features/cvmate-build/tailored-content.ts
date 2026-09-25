@@ -180,6 +180,11 @@ Professional-summary writing rules:
   relevant to critical and required job-offer requirements.
 - Do not mechanically list every selected item and do not repeat the same claim
   in several sentences.
+- Treat the professional summary as synthesis, not as a second copy of detailed
+  CV bullets or section entries.
+- Do not copy an experience fact, project description, or other selected
+  narrative item verbatim into the professional summary. If quantified scope is
+  useful, integrate it naturally in different summary wording.
 - Use neutral CV voice. Do not write in first person or third person.
 - Do not assume or express the candidate's gender.
 - For Polish professional summaries, use impersonal or nominal CV wording.
@@ -284,6 +289,7 @@ function selectQuantifiedSummaryAnchor(
 		[...selectionItems]
 			.filter(
 				(item) =>
+					item.selected === true &&
 					item.recommended === true &&
 					item.sourceType !== "employment" &&
 					numericTokens(item.sourceTextSnapshot).size > 0,
@@ -505,114 +511,6 @@ function sanitizeExperienceFactQualitativeUpgrade(
 	return fallback ? fallback : generatedText;
 }
 
-function containsAllNumericTokens(
-	generatedText: string,
-	sourceText: string | null,
-): boolean {
-	const sourceNumbers = numericTokens(sourceText);
-	if (sourceNumbers.size === 0) return true;
-
-	const generatedNumbers = numericTokens(generatedText);
-	return [...sourceNumbers].every((token) => generatedNumbers.has(token));
-}
-
-function quantifiedAnchorFallbackText(anchor: SelectionItem): string | null {
-	const sourceText = anchor.sourceTextSnapshot?.trim();
-	if (!sourceText) return null;
-
-	const requiredNumbers = numericTokens(sourceText);
-	if (requiredNumbers.size === 0) return null;
-
-	const segments = sourceText
-		.split(/[;\n]+/u)
-		.map((segment) => segment.trim())
-		.filter(Boolean);
-
-	const selectedSegments: string[] = [];
-	const covered = new Set<string>();
-
-	for (const segment of segments) {
-		const segmentNumbers = numericTokens(segment);
-		const contributes = [...requiredNumbers].some(
-			(token) => !covered.has(token) && segmentNumbers.has(token),
-		);
-
-		if (!contributes) continue;
-
-		selectedSegments.push(segment);
-		for (const token of segmentNumbers) {
-			if (requiredNumbers.has(token)) covered.add(token);
-		}
-
-		if ([...requiredNumbers].every((token) => covered.has(token))) break;
-	}
-
-	if (![...requiredNumbers].every((token) => covered.has(token))) return null;
-
-	return `${selectedSegments
-		.join("; ")
-		.replace(/[.;,\s]+$/u, "")
-		.trim()}.`;
-}
-
-function prependSummaryAnchorWithinLimit(
-	summary: string,
-	anchorText: string,
-): string {
-	const normalizedAnchor = anchorText.trim();
-	if (!normalizedAnchor) return summary;
-	if (normalizedAnchor.length > PROFESSIONAL_SUMMARY_MAX_CHARACTERS) {
-		return summary;
-	}
-
-	const generatedSentences =
-		summary.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ??
-		[];
-
-	let result = normalizedAnchor;
-
-	for (const sentence of generatedSentences) {
-		if (!sentence) continue;
-		const candidate = `${result} ${sentence}`.trim();
-		if (candidate.length > PROFESSIONAL_SUMMARY_MAX_CHARACTERS) break;
-		result = candidate;
-	}
-
-	return result;
-}
-
-function ensureQuantifiedSummaryAnchorCoverage(
-	summary: string,
-	selectionItems: SelectionItem[],
-): string {
-	const anchor = selectQuantifiedSummaryAnchor(selectionItems);
-	if (!anchor) return summary;
-
-	if (containsAllNumericTokens(summary, anchor.sourceTextSnapshot)) {
-		return summary;
-	}
-
-	const fallback = quantifiedAnchorFallbackText(anchor);
-	if (!fallback) return summary;
-
-	return prependSummaryAnchorWithinLimit(summary, fallback);
-}
-
-function validateQuantifiedSummaryAnchorCoverage(
-	summary: string,
-	selectionItems: SelectionItem[],
-) {
-	const anchor = selectQuantifiedSummaryAnchor(selectionItems);
-	if (!anchor) return;
-
-	if (!containsAllNumericTokens(summary, anchor.sourceTextSnapshot)) {
-		throw new ORPCError("BAD_REQUEST", {
-			message:
-				"The AI professional summary omitted quantified scope from selected recommended evidence.",
-		});
-	}
-}
-
 function sanitizeTailoredOutput(
 	output: TailoredOutput,
 	selectionItems: SelectionItem[],
@@ -634,10 +532,7 @@ function sanitizeTailoredOutput(
 
 	return {
 		professionalHeadline: output.professionalHeadline,
-		professionalSummary: ensureQuantifiedSummaryAnchorCoverage(
-			lengthSafeSummary,
-			selectionItems,
-		),
+		professionalSummary: lengthSafeSummary,
 		experienceFacts: output.experienceFacts.map((item) => {
 			const sourceItem = eligible.get(item.selectionItemId);
 
@@ -712,7 +607,6 @@ function validateProfessionalSummary(
 		summary,
 		"professional summary",
 	);
-	validateQuantifiedSummaryAnchorCoverage(summary, selectionItems);
 
 	validateNoUnsupportedQualitativeUpgrades(
 		evidenceText,

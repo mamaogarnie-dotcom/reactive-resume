@@ -158,6 +158,87 @@ describe("evaluateFinalCvQuality", () => {
 		expect(result.findings.some((finding) => finding.code === "DUPLICATE_FINAL_NARRATIVE_TEXT")).toBe(false);
 	});
 
+	it("warns when a professional-summary sentence duplicates one rendered list item", () => {
+		const data = createData();
+		const repeated =
+			"Prepared 483 offers resulting in contracts worth 2,89 mln PLN.";
+
+		data.summary.content = `<p>${repeated} Administrative coordination and document management experience.</p>`;
+		data.customSections = [
+			{
+				id: "custom-cross-section-dedup",
+				type: "summary",
+				title: "Selected achievements",
+				icon: "",
+				hidden: false,
+				columns: 1,
+				items: [
+					{
+						id: "cross-section-item",
+						hidden: false,
+						content: `<ul><li>${repeated}</li><li>Maintained document circulation.</li></ul>`,
+					},
+				],
+			},
+		] as never;
+
+		const result = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems: [],
+			generatedContent: [],
+		});
+
+		expect(result.dimensions.dedup).toBe("warning");
+		expect(result.findings).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					code: "DUPLICATE_FINAL_NARRATIVE_TEXT",
+					dimension: "dedup",
+					severity: "warning",
+				}),
+			]),
+		);
+	});
+
+	it("does not use semantic similarity for cross-section dedup", () => {
+		const data = createData();
+
+		data.summary.content =
+			"<p>Coordinated 483 offers with contracts valued at 2,89 mln PLN.</p>";
+		data.customSections = [
+			{
+				id: "custom-cross-section-paraphrase",
+				type: "summary",
+				title: "Selected achievements",
+				icon: "",
+				hidden: false,
+				columns: 1,
+				items: [
+					{
+						id: "paraphrased-item",
+						hidden: false,
+						content:
+							"<p>Prepared 483 offers resulting in contracts worth 2,89 mln PLN.</p>",
+					},
+				],
+			},
+		] as never;
+
+		const result = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems: [],
+			generatedContent: [],
+		});
+
+		expect(
+			result.findings.some(
+				(finding) => finding.code === "DUPLICATE_FINAL_NARRATIVE_TEXT",
+			),
+		).toBe(false);
+	});
+
 	it("warns when selected child numeric evidence is missing from its mapped final parent", () => {
 		const data = createData();
 		data.sections.experience.items = [
