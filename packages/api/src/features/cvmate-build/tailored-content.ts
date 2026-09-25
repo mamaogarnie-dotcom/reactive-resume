@@ -871,7 +871,7 @@ export const cvmateBuildTailoredContentService = {
 					? {
 							providerOptions: {
 								groq: {
-									reasoningEffort: "medium",
+									reasoningEffort: "low",
 								},
 							},
 						}
