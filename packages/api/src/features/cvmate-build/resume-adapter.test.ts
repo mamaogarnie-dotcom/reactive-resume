@@ -1227,18 +1227,46 @@ describe("relevance-driven CV item ordering", () => {
 });
 
 describe("relevance-driven CV section ordering", () => {
-	it("pins summary first, promotes recommended sections, and preserves stable order inside tiers", () => {
+	it("pins summary first, promotes direct matches, and preserves stable order inside each tier", () => {
 		const ordered = __testables.orderSectionIdsByRelevance(
 			["summary", "experience", "education", "skills", "projects", "languages"],
-			new Set(["skills", "projects"]),
+			new Map([
+				["education", 1],
+				["skills", 2],
+				["projects", 2],
+			]),
 		);
 
-		expect(ordered).toEqual(["summary", "skills", "projects", "experience", "education", "languages"]);
+		expect(ordered).toEqual(["summary", "skills", "projects", "education", "experience", "languages"]);
+	});
+
+	it("demotes completeness-only recommendations below directly matched recommended sections", () => {
+		const ordered = __testables.orderSectionIdsByRelevance(
+			["summary", "education", "experience", "projects", "skills"],
+			new Map([
+				["education", 1],
+				["experience", 2],
+				["projects", 2],
+				["skills", 2],
+			]),
+		);
+
+		expect(ordered).toEqual(["summary", "experience", "projects", "skills", "education"]);
 	});
 
 	it("preserves the original section order when no section has recommended content", () => {
 		const original = ["summary", "experience", "education", "skills"];
 
-		expect(__testables.orderSectionIdsByRelevance(original, new Set())).toEqual(original);
+		expect(__testables.orderSectionIdsByRelevance(original, new Map())).toEqual(original);
+	});
+
+	it("recognizes the internal CV completeness recommendation reason without treating direct matches as completeness", () => {
+		expect(__testables.isCompletenessOnlyRecommendationReason("Available education retained for CV completeness.")).toBe(
+			true,
+		);
+		expect(__testables.isCompletenessOnlyRecommendationReason("Matched a critical property-process requirement.")).toBe(
+			false,
+		);
+		expect(__testables.isCompletenessOnlyRecommendationReason(null)).toBe(false);
 	});
 });

@@ -430,42 +430,68 @@ function hexColorToRgba(hexColor: string): string {
 function orderSelectionsByRelevance<T extends { recommended: boolean; sortOrder: number }>(items: T[]): T[] {
 	return [...items].sort((a, b) => Number(b.recommended) - Number(a.recommended) || a.sortOrder - b.sortOrder);
 }
-function collectRecommendedSectionIds(
+type SectionRelevanceTier = 0 | 1 | 2;
+
+function isCompletenessOnlyRecommendationReason(reason: string | null): boolean {
+	return (reason ?? "").trim().toLocaleLowerCase().includes("retained for cv completeness");
+}
+
+function selectionSectionRelevanceTier(item: CvmateSelectionItem): SectionRelevanceTier {
+	if (!item.selected || !item.recommended) return 0;
+	return isCompletenessOnlyRecommendationReason(item.recommendationReason) ? 1 : 2;
+}
+
+function collectSectionRelevanceTiers(
 	data: ReturnType<typeof createResumeData>,
 	selectionItems: CvmateResumeAdapterInput["selectionItems"],
-): Set<string> {
-	const recommendedSelectionIds = new Set(
-		selectionItems.filter((item) => item.selected && item.recommended).map((item) => item.id),
+): Map<string, SectionRelevanceTier> {
+	const selectionTiers = new Map(
+		selectionItems.map((item) => [item.id, selectionSectionRelevanceTier(item)] as const),
 	);
-	const recommendedSectionIds = new Set<string>();
+	const sectionTiers = new Map<string, SectionRelevanceTier>();
+
+	const registerSection = (sectionId: string, items: ReadonlyArray<{ id: string }>) => {
+		let tier: SectionRelevanceTier = 0;
+
+		for (const item of items) {
+			const itemTier = selectionTiers.get(item.id) ?? 0;
+			if (itemTier > tier) tier = itemTier;
+			if (tier === 2) break;
+		}
+
+		if (tier > 0) sectionTiers.set(sectionId, tier);
+	};
 
 	for (const [sectionId, section] of Object.entries(data.sections)) {
 		if (!("items" in section) || !Array.isArray(section.items)) continue;
-
-		if (section.items.some((item) => recommendedSelectionIds.has(item.id))) {
-			recommendedSectionIds.add(sectionId);
-		}
+		registerSection(sectionId, section.items);
 	}
 
 	for (const section of data.customSections) {
-		if (section.items.some((item) => recommendedSelectionIds.has(item.id))) {
-			recommendedSectionIds.add(section.id);
-		}
+		registerSection(section.id, section.items);
 	}
 
-	return recommendedSectionIds;
+	return sectionTiers;
 }
 
-function orderSectionIdsByRelevance(sectionIds: string[], recommendedSectionIds: ReadonlySet<string>): string[] {
+function orderSectionIdsByRelevance(
+	sectionIds: string[],
+	sectionRelevanceTiers: ReadonlyMap<string, SectionRelevanceTier>,
+): string[] {
 	const pinnedSummary = sectionIds.filter((sectionId) => sectionId === "summary");
 	const remaining = sectionIds.filter((sectionId) => sectionId !== "summary");
+	const originalOrder = new Map(remaining.map((sectionId, index) => [sectionId, index] as const));
 
 	return [
 		...pinnedSummary,
-		...remaining.filter((sectionId) => recommendedSectionIds.has(sectionId)),
-		...remaining.filter((sectionId) => !recommendedSectionIds.has(sectionId)),
+		...remaining.sort(
+			(a, b) =>
+				(sectionRelevanceTiers.get(b) ?? 0) - (sectionRelevanceTiers.get(a) ?? 0) ||
+				(originalOrder.get(a) ?? 0) - (originalOrder.get(b) ?? 0),
+		),
 	];
 }
+
 function applyMasterAtsContract(
 	data: ReturnType<typeof createResumeData>,
 	selectionItems: CvmateResumeAdapterInput["selectionItems"],
@@ -479,7 +505,7 @@ function applyMasterAtsContract(
 	data.metadata.layout.pages = [
 		{
 			fullWidth: true,
-			main: orderSectionIdsByRelevance(uniqueSectionIds, collectRecommendedSectionIds(data, selectionItems)),
+			main: orderSectionIdsByRelevance(uniqueSectionIds, collectSectionRelevanceTiers(data, selectionItems)),
 			sidebar: [],
 		},
 	];
@@ -498,6 +524,7 @@ export const __testables = {
 	formatCvLocation,
 	orderSelectionsByRelevance,
 	orderSectionIdsByRelevance,
+	isCompletenessOnlyRecommendationReason,
 	formatPeriod,
 	formatEmploymentPeriod,
 };
