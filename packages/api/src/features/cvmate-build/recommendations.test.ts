@@ -1643,3 +1643,151 @@ expect(result.has("stage9-fact-docs-c")).toBe(false);
 expect(result.size).toBeLessThanOrEqual(20);
 });
 });
+
+describe("stage 9 c6 recommendation evidence pool", () => {
+	it("enriches a full employment pool with new requirement evidence before the four-fact budget", () => {
+		const baseEmployment = selectionItems[0];
+		const baseFact = selectionItems[1];
+
+		if (!baseEmployment || !baseFact) {
+			throw new Error("Missing base selection fixtures.");
+		}
+
+		type Selection = Parameters<typeof __testables.applyQualityCoveragePolicy>[1][number];
+		type Requirements = Parameters<typeof __testables.applyQualityCoveragePolicy>[2];
+
+		const employment = {
+			...baseEmployment,
+			id: "c6-employment",
+			sourceId: "c6-employment-source",
+			parentSelectionItemId: null,
+			sourceType: "employment",
+			sourceTextSnapshot: "Administrative documentation coordination",
+			sourceDataSnapshot: {
+				company: "Example",
+				jobTitle: "Administrative Coordinator",
+			},
+			recommended: false,
+			selected: false,
+			recommendationReason: null,
+			sortOrder: 0,
+		} as Selection;
+
+		const fact = (id: string, text: string, sortOrder: number): Selection =>
+			({
+				...baseFact,
+				id,
+				sourceId: `${id}-source`,
+				parentSelectionItemId: employment.id,
+				sourceType: "experience_fact",
+				sourceTextSnapshot: text,
+				sourceDataSnapshot: { text },
+				recommended: false,
+				selected: false,
+				recommendationReason: null,
+				sortOrder,
+			}) as Selection;
+
+		const facts = [
+			fact("c6-fact-impact", "Administrative documentation for 120 contracts", 1),
+			fact("c6-fact-doc-a", "Administrative documentation workflow", 2),
+			fact("c6-fact-doc-b", "Administrative documentation records", 3),
+			fact("c6-fact-doc-c", "Administrative documentation tracking", 4),
+			fact("c6-fact-client", "Client communication and service", 5),
+		];
+
+		const requirements = [
+			{
+				id: "c6-req-doc",
+				category: "responsibility",
+				priority: "important",
+				sourceText: "Administrative documentation",
+				text: "Administrative documentation",
+			},
+			{
+				id: "c6-req-client",
+				category: "required",
+				priority: "critical",
+				sourceText: "Client communication",
+				text: "Client communication",
+			},
+		] as Requirements;
+
+		const initial = new Map<string, string>([
+			[employment.id, "Administrative documentation"],
+			...facts.slice(0, 4).map((item) => [item.id, "Administrative documentation"] as const),
+		]);
+
+		const result = __testables.applyQualityCoveragePolicy(initial, [employment, ...facts], requirements);
+		const factIds = [...result.keys()].filter((id) => id.startsWith("c6-fact-"));
+
+		expect(factIds).toHaveLength(4);
+		expect(factIds).toContain("c6-fact-impact");
+		expect(factIds).toContain("c6-fact-client");
+	});
+
+	it("protects an explicit important ATS keyword without increasing the five-item profile budget", () => {
+		const baseItem = selectionItems[0];
+
+		if (!baseItem) {
+			throw new Error("Missing base selection fixture.");
+		}
+
+		type Selection = Parameters<typeof __testables.applyQualityCoveragePolicy>[1][number];
+		type Requirements = Parameters<typeof __testables.applyQualityCoveragePolicy>[2];
+
+		const profileItem = (id: string, text: string, sortOrder: number): Selection =>
+			({
+				...baseItem,
+				id,
+				sourceId: `${id}-source`,
+				parentSelectionItemId: null,
+				sourceType: "profile_list_item",
+				sourceTextSnapshot: text,
+				sourceDataSnapshot: {
+					kind: "competency",
+					value: text,
+				},
+				recommended: false,
+				selected: false,
+				recommendationReason: null,
+				sortOrder,
+			}) as Selection;
+
+		const profileItems = [
+			profileItem("c6-profile-a", "Organization workflow", 0),
+			profileItem("c6-profile-b", "Organization planning", 1),
+			profileItem("c6-profile-c", "Organization coordination", 2),
+			profileItem("c6-profile-d", "Organization scheduling", 3),
+			profileItem("c6-profile-e", "Organization records", 4),
+			profileItem("c6-profile-ms-office", "Microsoft Office Word Excel Outlook", 5),
+		];
+
+		const requirements = [
+			{
+				id: "c6-req-organization",
+				category: "required",
+				priority: "important",
+				sourceText: "Organization",
+				text: "Organization",
+			},
+			{
+				id: "c6-req-ms-office",
+				category: "keyword",
+				priority: "important",
+				sourceText: "Microsoft Office",
+				text: "Microsoft Office",
+			},
+		] as Requirements;
+
+		const initial = new Map<string, string>(
+			profileItems.slice(0, 5).map((item) => [item.id, "Organization"] as const),
+		);
+
+		const result = __testables.applyQualityCoveragePolicy(initial, profileItems, requirements);
+		const profileIds = [...result.keys()].filter((id) => id.startsWith("c6-profile-"));
+
+		expect(profileIds).toHaveLength(5);
+		expect(profileIds).toContain("c6-profile-ms-office");
+	});
+});

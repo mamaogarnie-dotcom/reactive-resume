@@ -616,6 +616,18 @@ const scoredById = new Map(
 selectionItems.map((item) => [item.id, scoreQualityItem(item, requirements)] as const),
 );
 
+const importantKeywordRequirementIds = new Set(
+requirements
+.filter(
+(requirement) =>
+requirement.category === "keyword" &&
+(requirement.priority === "critical" || requirement.priority === "important"),
+)
+.map((requirement) => requirement.id),
+);
+const importantKeywordMatchCount = (item: QualityScoredItem) =>
+item.requirementIds.filter((requirementId) => importantKeywordRequirementIds.has(requirementId)).length;
+
 const compareScored = (a: QualityScoredItem, b: QualityScoredItem) =>
 b.score - a.score ||
 Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
@@ -800,7 +812,11 @@ baseRecommendations.has(item.id),
 )
 .map((item) => scoredById.get(item.id))
 .filter((item): item is QualityScoredItem => Boolean(item))
-.sort(compareScored)
+.sort((a, b) =>
+sourceType === "profile_list_item"
+? importantKeywordMatchCount(b) - importantKeywordMatchCount(a) || compareScored(a, b)
+: compareScored(a, b),
+)
 .slice(0, limit);
 
 for (const candidate of candidates) {
@@ -998,6 +1014,37 @@ function applyQualityCoveragePolicy(
 		}
 	}
 
+// C6: expose omitted facts that add requirement coverage before the hard budget trims the pool.
+for (const employmentId of coveredEmploymentIds) {
+const facts = [...(factsByEmploymentId.get(employmentId) ?? [])].sort(
+(a, b) => b.score - a.score || a.item.sortOrder - b.item.sortOrder,
+);
+const coveredRequirementIds = new Set(
+facts
+.filter((fact) => recommendations.has(fact.item.id))
+.flatMap((fact) => fact.requirementIds),
+);
+
+for (const fact of facts) {
+if (fact.score <= 0 || recommendations.has(fact.item.id)) continue;
+
+const uncoveredRequirementIds = fact.requirementIds.filter(
+(requirementId) => !coveredRequirementIds.has(requirementId),
+);
+
+if (uncoveredRequirementIds.length === 0) continue;
+
+recommendations.set(
+fact.item.id,
+qualityReason(fact, requirements, recommendations.get(employmentId)),
+);
+
+for (const requirementId of uncoveredRequirementIds) {
+coveredRequirementIds.add(requirementId);
+}
+}
+}
+
 const supplementStandalone = (
 sourceType: SelectionItem["sourceType"],
 targetCount: number,
@@ -1053,6 +1100,33 @@ supplementStandalone(
 "profile_list_item",
 QUALITY_TARGET_PROFILE_ITEMS,
 );
+
+// C6: explicit important ATS keywords may enter the pre-budget pool even when the normal target is full.
+const protectedKeywordRequirementIds = requirements
+.filter(
+(requirement) =>
+requirement.category === "keyword" &&
+(requirement.priority === "critical" || requirement.priority === "important"),
+)
+.map((requirement) => requirement.id);
+
+for (const requirementId of protectedKeywordRequirementIds) {
+const candidate = selectionItems
+.filter((item) => item.sourceType === "profile_list_item")
+.map((item) => scoredById.get(item.id))
+.filter((item): item is QualityScoredItem => Boolean(item))
+.filter((item) => item.score > 0 && item.requirementIds.includes(requirementId))
+.sort(
+(a, b) =>
+b.score - a.score ||
+Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
+a.item.sortOrder - b.item.sortOrder,
+)[0];
+
+if (!candidate || recommendations.has(candidate.item.id)) continue;
+
+recommendations.set(candidate.item.id, qualityReason(candidate, requirements));
+}
 
 supplementStandalone(
 "project",
