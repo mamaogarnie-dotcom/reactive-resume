@@ -1791,3 +1791,126 @@ describe("stage 9 c6 recommendation evidence pool", () => {
 		expect(profileIds).toContain("c6-profile-ms-office");
 	});
 });
+describe("residual exact-evidence reconciliation", () => {
+	it("suppresses only an exact candidate-evidence gap and keeps a partial compound gap", () => {
+		const requirements = [
+			{
+				id: "req-exact",
+				category: "required",
+				priority: "important",
+				sourceText: null,
+				text: "Accuracy, responsibility and good work organization.",
+			},
+			{
+				id: "req-partial",
+				category: "required",
+				priority: "important",
+				sourceText: null,
+				text: "Engagement and independent work organization.",
+			},
+		];
+
+		const selectionItems = [
+			{
+				id: "profile-exact",
+				sourceType: "profile_list_item",
+				sourceId: "profile-exact",
+				parentSelectionItemId: null,
+				sourceTextSnapshot: "Accuracy, responsibility and good work organization.",
+				sourceDataSnapshot: {},
+				recommended: false,
+				selected: false,
+				recommendationReason: null,
+				sortOrder: 1,
+			},
+			{
+				id: "profile-partial",
+				sourceType: "profile_list_item",
+				sourceId: "profile-partial",
+				parentSelectionItemId: null,
+				sourceTextSnapshot: "Independent work organization.",
+				sourceDataSnapshot: {},
+				recommended: false,
+				selected: false,
+				recommendationReason: null,
+				sortOrder: 2,
+			},
+		];
+
+		const gaps = __testables.resolveGapRequirements(
+			{
+				recommendations: [],
+				gapRequirementIds: ["req-exact", "req-partial"],
+			},
+			requirements as never,
+			[],
+			selectionItems as never,
+		);
+
+		expect(gaps.map((requirement) => requirement.id)).toEqual(["req-partial"]);
+	});
+
+	it("protects an exact important required profile item inside the existing five-item budget", () => {
+		const requirements = [
+			{
+				id: "req-exact",
+				category: "required",
+				priority: "important",
+				sourceText: null,
+				text: "Accuracy, responsibility and good work organization.",
+			},
+			{
+				id: "req-docs",
+				category: "required",
+				priority: "important",
+				sourceText: null,
+				text: "Document handling and Microsoft Office.",
+			},
+			{
+				id: "req-office",
+				category: "keyword",
+				priority: "important",
+				sourceText: null,
+				text: "Microsoft Office",
+			},
+		];
+
+		const genericItems = Array.from({ length: 5 }, (_, index) => ({
+			id: `generic-${index + 1}`,
+			sourceType: "profile_list_item",
+			sourceId: `generic-${index + 1}`,
+			parentSelectionItemId: null,
+			sourceTextSnapshot: `Microsoft Office document handling item ${index + 1}`,
+			sourceDataSnapshot: {},
+			recommended: true,
+			selected: false,
+			recommendationReason: "Provider evidence",
+			sortOrder: index + 1,
+		}));
+		const exactItem = {
+			id: "profile-exact-required",
+			sourceType: "profile_list_item",
+			sourceId: "profile-exact-required",
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "Accuracy, responsibility and good work organization.",
+			sourceDataSnapshot: {},
+			recommended: false,
+			selected: false,
+			recommendationReason: null,
+			sortOrder: 99,
+		};
+		const baseRecommendations = new Map(
+			genericItems.map((item) => [item.id, "Provider evidence"] as const),
+		);
+
+		const result = __testables.applyQualityCoveragePolicy(
+			baseRecommendations,
+			[...genericItems, exactItem] as never,
+			requirements as never,
+		);
+
+		expect(result.size).toBe(5);
+		expect(result.has(exactItem.id)).toBe(true);
+		expect(genericItems.filter((item) => result.has(item.id))).toHaveLength(4);
+	});
+});

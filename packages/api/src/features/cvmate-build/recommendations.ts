@@ -179,6 +179,36 @@ function normalizeText(value: string): string {
 	return value.trim().toLocaleLowerCase().replace(/\s+/g, " ");
 }
 
+function isProtectedDirectRequirement(requirement: JobRequirementSnapshot): boolean {
+	return (
+		(requirement.category === "required" || requirement.category === "preferred") &&
+		(requirement.priority === "critical" || requirement.priority === "important")
+	);
+}
+
+function selectionItemHasExactRequirementText(
+	item: SelectionItem,
+	requirement: JobRequirementSnapshot,
+): boolean {
+	const normalizedRequirement = normalizeText(requirement.text);
+
+	return (
+		normalizeText(item.sourceTextSnapshot ?? "") === normalizedRequirement ||
+		sourceDataContainsExactText(item.sourceDataSnapshot, requirement.text)
+	);
+}
+
+function countExactProtectedRequirementMatches(
+	item: SelectionItem,
+	requirements: JobRequirementSnapshot[],
+): number {
+	return requirements.filter(
+		(requirement) =>
+			isProtectedDirectRequirement(requirement) &&
+			selectionItemHasExactRequirementText(item, requirement),
+	).length;
+}
+
 function parseJobOfferSnapshot(value: unknown) {
 	if (!value) {
 		throw new ORPCError("BAD_REQUEST", {
@@ -616,6 +646,9 @@ const scoredById = new Map(
 selectionItems.map((item) => [item.id, scoreQualityItem(item, requirements)] as const),
 );
 
+const exactProtectedRequirementMatchCount = (item: QualityScoredItem) =>
+	countExactProtectedRequirementMatches(item.item, requirements);
+
 const importantKeywordRequirementIds = new Set(
 requirements
 .filter(
@@ -814,8 +847,10 @@ baseRecommendations.has(item.id),
 .filter((item): item is QualityScoredItem => Boolean(item))
 .sort((a, b) =>
 sourceType === "profile_list_item"
-? importantKeywordMatchCount(b) - importantKeywordMatchCount(a) || compareScored(a, b)
-: compareScored(a, b),
+				? exactProtectedRequirementMatchCount(b) - exactProtectedRequirementMatchCount(a) ||
+					importantKeywordMatchCount(b) - importantKeywordMatchCount(a) ||
+					compareScored(a, b)
+				: compareScored(a, b),
 )
 .slice(0, limit);
 
@@ -1101,6 +1136,30 @@ supplementStandalone(
 QUALITY_TARGET_PROFILE_ITEMS,
 );
 
+const protectedDirectRequirements = requirements.filter(isProtectedDirectRequirement);
+
+for (const requirement of protectedDirectRequirements) {
+	const candidate = selectionItems
+		.filter((item) => item.sourceType === "profile_list_item")
+		.map((item) => scoredById.get(item.id))
+		.filter((item): item is QualityScoredItem => Boolean(item))
+		.filter(
+			(item) =>
+				item.score > 0 &&
+				selectionItemHasExactRequirementText(item.item, requirement),
+		)
+		.sort(
+			(a, b) =>
+				b.score - a.score ||
+				Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
+				a.item.sortOrder - b.item.sortOrder,
+		)[0];
+
+	if (!candidate || recommendations.has(candidate.item.id)) continue;
+
+	recommendations.set(candidate.item.id, qualityReason(candidate, requirements));
+}
+
 // C6: explicit important ATS keywords may enter the pre-budget pool even when the normal target is full.
 const protectedKeywordRequirementIds = requirements
 .filter(
@@ -1198,6 +1257,7 @@ function resolveGapRequirements(
 	output: z.infer<typeof cvmateBuildAiRecommendationOutputSchema>,
 	requirements: JobRequirementSnapshot[],
 	existingGaps: Gap[],
+	selectionItems: SelectionItem[] = [],
 ) {
 	const eligibleRequirements = new Map(
 		requirements
@@ -1227,6 +1287,10 @@ function resolveGapRequirements(
 		seen.add(requirement.id);
 
 		if (preservedDetectedGapTexts.has(normalizeText(requirement.text))) {
+			continue;
+		}
+
+if (selectionItems.some((item) => selectionItemHasExactRequirementText(item, requirement))) {
 			continue;
 		}
 
@@ -1403,9 +1467,27 @@ const aiRecommendations = validateAndExpandRecommendations(output, selectionItem
 			jobOffer.requirements,
 		);
 
-		const detectedGaps = resolveGapRequirements(output, jobOffer.requirements, existingGaps);
+		const detectedGaps = resolveGapRequirements(
+			output,
+			jobOffer.requirements,
+			existingGaps,
+			selectionItems,
+		);
+		const detectedGapRequirementIds = new Set(
+			detectedGaps.map((requirement) => requirement.id),
+		);
+		const reconciledOutput = {
+			...output,
+			...(output.gapSuggestions
+				? {
+						gapSuggestions: output.gapSuggestions.filter((suggestion) =>
+							detectedGapRequirementIds.has(suggestion.requirementId),
+						),
+					}
+				: {}),
+		};
 
-		validateGapSuggestionsBeforeMutation(output, detectedGaps);
+		validateGapSuggestionsBeforeMutation(reconciledOutput, detectedGaps);
 
 		await db.transaction(async (tx) => {
 			for (const item of selectionItems) {
@@ -1471,7 +1553,7 @@ const aiRecommendations = validateAndExpandRecommendations(output, selectionItem
 			}),
 		]);
 
-		const gapSuggestions = resolveGapSuggestions(output, detectedGaps, updatedGaps);
+		const gapSuggestions = resolveGapSuggestions(reconciledOutput, detectedGaps, updatedGaps);
 
 		return {
 			selectionItems: updatedSelectionItems,
