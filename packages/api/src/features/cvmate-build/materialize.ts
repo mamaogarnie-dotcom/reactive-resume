@@ -138,6 +138,7 @@ async function selectDensityProfile(data: PreparedResumeData) {
 export const cvmateBuildMaterializeService = {
 	preview: async (input: { id: string; userId: string }) => {
 		const {
+			build,
 			data: preparedData,
 			designSettings,
 			selectionItems,
@@ -150,6 +151,7 @@ export const cvmateBuildMaterializeService = {
 			pageMetrics,
 			selectionItems,
 			generatedContent,
+			jobOfferSnapshot: build.jobOfferSnapshot,
 		});
 
 		return {
@@ -169,6 +171,7 @@ export const cvmateBuildMaterializeService = {
 			pageMetrics,
 			selectionItems,
 			generatedContent,
+			jobOfferSnapshot: build.jobOfferSnapshot,
 		});
 
 		if (qualityGate.status === "blocked") {

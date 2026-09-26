@@ -545,4 +545,131 @@ describe("evaluateFinalCvQuality", () => {
 		expect(multiPage.findings.some((finding) => finding.code === "ONE_PAGE_UNDERFILLED")).toBe(false);
 		expect(multiPage.dimensions.density).toBe("pass");
 	});
+	it("warns when a supported critical target term is missing from the professional headline", () => {
+		const data = createData();
+		data.basics.headline = "DOCUMENTATION COORDINATION | DEADLINE MANAGEMENT";
+
+		const result = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems: [
+				{
+					id: "project-property",
+					selected: true,
+					recommended: true,
+					sourceType: "project",
+					sourceTextSnapshot: "Managed commercial property preparation and property sale.",
+					parentSelectionItemId: null,
+				},
+			] as never,
+			generatedContent: [],
+			jobOfferSnapshot: {
+				requirements: [
+					{
+						id: "critical-property",
+						priority: "critical",
+						category: "required",
+						text: "Experience in commercial property transactions and property sale processes.",
+					},
+				],
+			},
+		});
+
+		expect(result.findings).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					code: "HEADLINE_MISSES_SUPPORTED_CRITICAL_REQUIREMENT_TERM",
+					dimension: "coverage",
+					severity: "warning",
+					path: "basics.headline",
+				}),
+			]),
+		);
+	});
+
+	it("accepts a headline that contains a candidate-supported critical target term", () => {
+		const data = createData();
+		data.basics.headline = "COMMERCIAL PROPERTY | DOCUMENTATION COORDINATION";
+
+		const result = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems: [
+				{
+					id: "project-property",
+					selected: true,
+					recommended: true,
+					sourceType: "project",
+					sourceTextSnapshot: "Managed commercial property preparation and property sale.",
+					parentSelectionItemId: null,
+				},
+			] as never,
+			generatedContent: [],
+			jobOfferSnapshot: {
+				requirements: [
+					{
+						id: "critical-property",
+						priority: "critical",
+						category: "required",
+						text: "Experience in commercial property transactions and property sale processes.",
+					},
+				],
+			},
+		});
+
+		expect(
+			result.findings.some(
+				(finding) => finding.code === "HEADLINE_MISSES_SUPPORTED_CRITICAL_REQUIREMENT_TERM",
+			),
+		).toBe(false);
+	});
+
+	it("warns when available evidence for a critical requirement was not selected", () => {
+		const data = createData();
+
+		const result = evaluateFinalCvQuality({
+			data,
+			pageMetrics,
+			selectionItems: [
+				{
+					id: "available-procurement",
+					selected: false,
+					recommended: false,
+					sourceType: "experience_fact",
+					sourceTextSnapshot: "Managed enterprise procurement compliance documentation.",
+					parentSelectionItemId: "employment-1",
+				},
+				{
+					id: "selected-unrelated",
+					selected: true,
+					recommended: true,
+					sourceType: "profile_list_item",
+					sourceTextSnapshot: "Client communication and scheduling.",
+					parentSelectionItemId: null,
+				},
+			] as never,
+			generatedContent: [],
+			jobOfferSnapshot: {
+				requirements: [
+					{
+						id: "critical-procurement",
+						priority: "critical",
+						category: "required",
+						text: "Enterprise procurement compliance experience.",
+					},
+				],
+			},
+		});
+
+		expect(result.findings).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					code: "SUPPORTED_CRITICAL_REQUIREMENT_NOT_SELECTED",
+					dimension: "coverage",
+					severity: "warning",
+				}),
+			]),
+		);
+	});
+
 });

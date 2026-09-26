@@ -353,6 +353,7 @@ it("exposes the exact shared final quality gate report after density selection",
 		},
 		selectionItems,
 		generatedContent,
+		jobOfferSnapshot: build.jobOfferSnapshot,
 	});
 	expect(resumeServiceMock.create).not.toHaveBeenCalled();
 	expect(resumeServiceMock.update).not.toHaveBeenCalled();
@@ -507,6 +508,7 @@ describe("cvmateBuildMaterializeService.materialize", () => {
 			},
 			selectionItems,
 			generatedContent,
+			jobOfferSnapshot: build.jobOfferSnapshot,
 		});
 	});
 

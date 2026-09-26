@@ -53,6 +53,104 @@ function numericTokens(value: string | null): Set<string> {
 	return new Set([...value.normalize("NFKC").matchAll(/\d+(?:[.,]\d+)?/gu)].map((match) => match[0].replace(",", ".")));
 }
 
+const TARGET_TERM_MINIMUM_LENGTH = 7;
+const GENERIC_TARGET_TERMS = new Set([
+	"ability",
+	"experience",
+	"knowledge",
+	"professional",
+	"required",
+	"requirement",
+	"skills",
+	"working",
+	"do\u015bwiadczenie",
+	"znajomo\u015b\u0107",
+	"umiej\u0119tno\u015b\u0107",
+	"podstawowych",
+	"zwi\u0105zanych",
+	"wymagane",
+]);
+
+function targetTerms(value: string): Set<string> {
+	return new Set(
+		normalizeNarrative(value)
+			.split(/[^\p{L}\p{N}]+/gu)
+			.filter(
+				(token) =>
+					token.length >= TARGET_TERM_MINIMUM_LENGTH &&
+					!GENERIC_TARGET_TERMS.has(token),
+			),
+	);
+}
+
+function jobRequirementRecords(jobOfferSnapshot: Record<string, unknown> | null): Record<string, unknown>[] {
+	const requirements = jobOfferSnapshot?.requirements;
+	return Array.isArray(requirements) ? requirements.filter(isRecord) : [];
+}
+
+function criticalRequirementTexts(jobOfferSnapshot: Record<string, unknown> | null): string[] {
+	return jobRequirementRecords(jobOfferSnapshot)
+		.filter((requirement) => requirement.priority === "critical")
+		.map((requirement) => (typeof requirement.text === "string" ? requirement.text.trim() : ""))
+		.filter(Boolean);
+}
+
+function evidenceTerms(selectionItems: SelectionItem[]): Set<string> {
+	const terms = new Set<string>();
+
+	for (const item of selectionItems) {
+		const text = item.sourceTextSnapshot ?? "";
+		for (const token of targetTerms(text)) terms.add(token);
+	}
+
+	return terms;
+}
+
+function overlappingTerms(requirementText: string, evidence: ReadonlySet<string>): Set<string> {
+	return new Set([...targetTerms(requirementText)].filter((token) => evidence.has(token)));
+}
+
+function selectedRecommendedEvidence(selectionItems: SelectionItem[]): SelectionItem[] {
+	return selectionItems.filter(
+		(item) =>
+			item.selected &&
+			item.recommended &&
+			item.sourceType !== "profile_photo" &&
+			item.sourceType !== "clause",
+	);
+}
+
+function supportedCriticalHeadlineTerms(
+	jobOfferSnapshot: Record<string, unknown> | null,
+	selectionItems: SelectionItem[],
+): Set<string> {
+	const selectedEvidence = evidenceTerms(selectedRecommendedEvidence(selectionItems));
+	const supported = new Set<string>();
+
+	for (const requirementText of criticalRequirementTexts(jobOfferSnapshot)) {
+		for (const token of overlappingTerms(requirementText, selectedEvidence)) {
+			supported.add(token);
+		}
+	}
+
+	return supported;
+}
+
+function hasSupportedCriticalRequirementSelection(
+	requirementText: string,
+	selectionItems: SelectionItem[],
+): boolean {
+	const selectedEvidence = evidenceTerms(selectedRecommendedEvidence(selectionItems));
+	return overlappingTerms(requirementText, selectedEvidence).size > 0;
+}
+
+function hasAvailableCriticalRequirementEvidence(
+	requirementText: string,
+	selectionItems: SelectionItem[],
+): boolean {
+	return overlappingTerms(requirementText, evidenceTerms(selectionItems)).size > 0;
+}
+
 function collectResumeItemIds(value: unknown, ids = new Set<string>()): Set<string> {
 	if (Array.isArray(value)) {
 		for (const item of value) collectResumeItemIds(item, ids);
@@ -211,9 +309,10 @@ export function evaluateFinalCvQuality(input: {
 	pageMetrics: CvmateBuildPageMetrics;
 	selectionItems: SelectionItem[];
 	generatedContent: GeneratedContent[];
+	jobOfferSnapshot?: Record<string, unknown> | null;
 }): CvmateBuildQualityGate {
 	const findings: CvmateBuildQualityGate["findings"] = [];
-	const { data, selectionItems, generatedContent } = input;
+	const { data, selectionItems, generatedContent, jobOfferSnapshot = null } = input;
 	const fragments = collectNarrativeFragments(data);
 	const dedupUnits = collectDedupNarrativeUnits(fragments);
 	const renderedIds = collectResumeItemIds(data);
@@ -231,6 +330,42 @@ export function evaluateFinalCvQuality(input: {
 				"MISSING_PROFESSIONAL_HEADLINE",
 				"The final CV does not contain a professional headline.",
 				{ path: "basics.headline" },
+			),
+		);
+	}
+
+	const supportedHeadlineTerms = supportedCriticalHeadlineTerms(jobOfferSnapshot, selectionItems);
+
+	if (supportedHeadlineTerms.size > 0) {
+		const headlineTerms = targetTerms(data.basics.headline);
+		const hasSupportedTargetTerm = [...supportedHeadlineTerms].some((token) => headlineTerms.has(token));
+
+		if (!hasSupportedTargetTerm) {
+			findings.push(
+				finding(
+					"coverage",
+					"warning",
+					"HEADLINE_MISSES_SUPPORTED_CRITICAL_REQUIREMENT_TERM",
+					"The professional headline does not include any candidate-supported term from a critical job requirement.",
+					{ path: "basics.headline" },
+				),
+			);
+		}
+	}
+
+	const uncoveredCriticalRequirement = criticalRequirementTexts(jobOfferSnapshot).find(
+		(requirementText) =>
+			hasAvailableCriticalRequirementEvidence(requirementText, selectionItems) &&
+			!hasSupportedCriticalRequirementSelection(requirementText, selectionItems),
+	);
+
+	if (uncoveredCriticalRequirement) {
+		findings.push(
+			finding(
+				"coverage",
+				"warning",
+				"SUPPORTED_CRITICAL_REQUIREMENT_NOT_SELECTED",
+				"Candidate evidence exists for a critical job requirement but no selected recommended item covers it.",
 			),
 		);
 	}
@@ -493,4 +628,9 @@ export const __testables = {
 	collectDedupNarrativeUnits,
 	normalizeNarrative,
 	numericTokens,
+	targetTerms,
+	criticalRequirementTexts,
+	supportedCriticalHeadlineTerms,
+	hasAvailableCriticalRequirementEvidence,
+	hasSupportedCriticalRequirementSelection,
 };
