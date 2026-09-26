@@ -1082,3 +1082,117 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 		expect(generateJsonMock).not.toHaveBeenCalled();
 	});
 });
+
+describe("summary source attribution guard", () => {
+	it("separates quantified employment evidence from unrelated real-estate domain evidence", () => {
+		const employment = {
+			id: "fundacja-employment",
+			sourceType: "employment",
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "administrative and project coordination",
+			sortOrder: 0,
+		};
+		const quantifiedFact = {
+			id: "fundacja-quantified",
+			sourceType: "experience_fact",
+			parentSelectionItemId: employment.id,
+			sourceTextSnapshot:
+				"66 offers and applications -> contracts worth about 720 thousand PLN.",
+			sortOrder: 1,
+		};
+		const siblingFact = {
+			id: "fundacja-documents",
+			sourceType: "experience_fact",
+			parentSelectionItemId: employment.id,
+			sourceTextSnapshot: "coordination of documentation and deadlines",
+			sortOrder: 2,
+		};
+		const propertyEvidence = {
+			id: "property-project",
+			sourceType: "project",
+			parentSelectionItemId: null,
+			sourceTextSnapshot:
+				"practical knowledge of the purchase, preparation and sale of real estate",
+			sortOrder: 40,
+		};
+		const unsafeSummary =
+			"Experience coordinating documentation and deadlines in real-estate projects, including 66 offers and applications leading to contracts worth about 720 thousand PLN. Practical knowledge of the real-estate process.";
+
+		const sanitized =
+			__testables.sanitizeProfessionalSummarySourceAttribution(
+				unsafeSummary,
+				[
+					employment,
+					quantifiedFact,
+					siblingFact,
+					propertyEvidence,
+				] as never,
+			);
+
+		expect(sanitized).toContain(quantifiedFact.sourceTextSnapshot);
+		expect(sanitized).toContain(
+			"Practical knowledge of the real-estate process.",
+		);
+		expect(sanitized).not.toContain(
+			"real-estate projects, including 66 offers",
+		);
+	});
+
+	it("keeps quantified wording when borrowed context stays inside the same employment group", () => {
+		const employment = {
+			id: "employment-same-group",
+			sourceType: "employment",
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "administrative and project coordination",
+			sortOrder: 0,
+		};
+		const quantifiedFact = {
+			id: "quantified-same-group",
+			sourceType: "experience_fact",
+			parentSelectionItemId: employment.id,
+			sourceTextSnapshot:
+				"66 offers and applications -> contracts worth about 720 thousand PLN.",
+			sortOrder: 1,
+		};
+		const siblingFact = {
+			id: "documents-same-group",
+			sourceType: "experience_fact",
+			parentSelectionItemId: employment.id,
+			sourceTextSnapshot: "coordination of documentation and deadlines",
+			sortOrder: 2,
+		};
+		const summary =
+			"Coordination of documentation and deadlines included 66 offers and applications leading to contracts worth about 720 thousand PLN.";
+
+		const sanitized =
+			__testables.sanitizeProfessionalSummarySourceAttribution(
+				summary,
+				[employment, quantifiedFact, siblingFact] as never,
+			);
+
+		expect(sanitized).toBe(summary);
+	});
+
+	it("does not inject quantified evidence when the AI summary omits numbers", () => {
+		const quantifiedFact = {
+			id: "quantified-omitted",
+			sourceType: "experience_fact",
+			parentSelectionItemId: "employment-omitted",
+			sourceTextSnapshot:
+				"66 offers and applications -> contracts worth about 720 thousand PLN.",
+			sortOrder: 1,
+		};
+		const summary =
+			"Administrative coordination and document management experience.";
+
+		const sanitized =
+			__testables.sanitizeProfessionalSummarySourceAttribution(
+				summary,
+				[quantifiedFact] as never,
+			);
+
+		expect(sanitized).toBe(summary);
+		expect(sanitized).not.toContain("66");
+		expect(sanitized).not.toContain("720");
+	});
+});

@@ -485,6 +485,186 @@ function validateNoUnsupportedQualitativeUpgrades(
 	}
 }
 
+const SUMMARY_ATTRIBUTION_MIN_TOKEN_LENGTH = 6;
+const SUMMARY_ATTRIBUTION_GENERIC_TOKENS = new Set([
+	"candidate",
+	"doswiadczenie",
+	"doswiadczenia",
+	"experience",
+	"professional",
+	"summary",
+]);
+
+function normalizeSummaryAttributionWord(value: string): string {
+	return value
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.toLocaleLowerCase()
+		.replace(/\u0142/g, "l")
+		.replace(/[^a-z0-9]/g, "");
+}
+
+function summaryAttributionTokens(value: string | null): Set<string> {
+	if (!value) return new Set();
+
+	return new Set(
+		value
+			.split(/[^\p{L}\p{N}]+/gu)
+			.map(normalizeSummaryAttributionWord)
+			.filter(
+				(token) =>
+					token.length >= SUMMARY_ATTRIBUTION_MIN_TOKEN_LENGTH &&
+					!/\d/.test(token) &&
+					!SUMMARY_ATTRIBUTION_GENERIC_TOKENS.has(token),
+			),
+	);
+}
+
+function summaryAttributionTokensRelated(left: string, right: string): boolean {
+	if (left === right) return true;
+
+	const shorterLength = Math.min(left.length, right.length);
+	if (shorterLength < SUMMARY_ATTRIBUTION_MIN_TOKEN_LENGTH) return false;
+
+	return left.startsWith(right) || right.startsWith(left);
+}
+
+function summaryAttributionGroup(
+	sourceItem: SelectionItem,
+	selectionItems: SelectionItem[],
+): SelectionItem[] {
+	const parentId = sourceItem.parentSelectionItemId;
+
+	if (parentId) {
+		return selectionItems.filter(
+			(item) =>
+				item.id === parentId ||
+				item.id === sourceItem.id ||
+				item.parentSelectionItemId === parentId,
+		);
+	}
+
+	if (sourceItem.sourceType === "employment") {
+		return selectionItems.filter(
+			(item) =>
+				item.id === sourceItem.id ||
+				item.parentSelectionItemId === sourceItem.id,
+		);
+	}
+
+	return [sourceItem];
+}
+
+function summaryNumericSourceCandidates(
+	sentence: string,
+	selectionItems: SelectionItem[],
+): SelectionItem[] {
+	const sentenceNumbers = numericTokens(sentence);
+	if (sentenceNumbers.size === 0) return [];
+
+	return selectionItems.filter((item) => {
+		const sourceNumbers = numericTokens(item.sourceTextSnapshot);
+
+		return [...sentenceNumbers].every((token) => sourceNumbers.has(token));
+	});
+}
+
+function summarySentenceBorrowsOutsideSourceGroup(
+	sentence: string,
+	sourceItem: SelectionItem,
+	selectionItems: SelectionItem[],
+): boolean {
+	const sourceGroup = summaryAttributionGroup(sourceItem, selectionItems);
+	const sourceGroupIds = new Set(sourceGroup.map((item) => item.id));
+	const sourceTokens = new Set(
+		sourceGroup.flatMap((item) => [
+			...summaryAttributionTokens(item.sourceTextSnapshot),
+		]),
+	);
+	const outsideTokens = new Set(
+		selectionItems
+			.filter((item) => !sourceGroupIds.has(item.id))
+			.flatMap((item) => [
+				...summaryAttributionTokens(item.sourceTextSnapshot),
+			]),
+	);
+	const sentenceTokens = summaryAttributionTokens(sentence);
+
+	return [...sentenceTokens].some((sentenceToken) => {
+		const appearsOutside = [...outsideTokens].some((outsideToken) =>
+			summaryAttributionTokensRelated(sentenceToken, outsideToken),
+		);
+		if (!appearsOutside) return false;
+
+		const appearsInside = [...sourceTokens].some((sourceToken) =>
+			summaryAttributionTokensRelated(sentenceToken, sourceToken),
+		);
+
+		return !appearsInside;
+	});
+}
+
+function sourceTextAsSummarySentence(value: string | null): string {
+	const compact = value?.trim().replace(/\s+/g, " ") ?? "";
+	if (!compact) return "";
+
+	return /[.!?]$/u.test(compact) ? compact : `${compact}.`;
+}
+
+function sanitizeProfessionalSummarySourceAttribution(
+	summary: string,
+	selectionItems: SelectionItem[],
+): string {
+	const sentences =
+		summary.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ??
+		[];
+	const safeSentences: string[] = [];
+
+	for (const sentence of sentences) {
+		const sentenceNumbers = numericTokens(sentence);
+
+		if (sentenceNumbers.size === 0) {
+			safeSentences.push(sentence);
+			continue;
+		}
+
+		const candidates = summaryNumericSourceCandidates(sentence, selectionItems);
+
+		if (candidates.length === 0) {
+			continue;
+		}
+
+		const safeCandidate = candidates.find(
+			(candidate) =>
+				!summarySentenceBorrowsOutsideSourceGroup(
+					sentence,
+					candidate,
+					selectionItems,
+				),
+		);
+
+		if (safeCandidate) {
+			safeSentences.push(sentence);
+			continue;
+		}
+
+		const fallbackCandidate = [...candidates].sort((left, right) => {
+			const sortOrderDifference =
+				(left.sortOrder ?? Number.MAX_SAFE_INTEGER) -
+				(right.sortOrder ?? Number.MAX_SAFE_INTEGER);
+			if (sortOrderDifference !== 0) return sortOrderDifference;
+
+			return left.id.localeCompare(right.id);
+		})[0];
+		const fallback = sourceTextAsSummarySentence(
+			fallbackCandidate?.sourceTextSnapshot ?? null,
+		);
+
+		if (fallback) safeSentences.push(fallback);
+	}
+
+	return safeSentences.join(" ").trim();
+}
 function sanitizeProfessionalSummaryQualitativeUpgrades(
 	summary: string,
 	selectionItems: SelectionItem[],
@@ -533,8 +713,13 @@ function sanitizeTailoredOutput(
 			output.professionalSummary,
 			selectionItems,
 		);
+	const sourceAttributionSafeSummary =
+		sanitizeProfessionalSummarySourceAttribution(
+			qualitativeSafeSummary,
+			selectionItems,
+		);
 	const lengthSafeSummary = trimProfessionalSummaryToLimit(
-		qualitativeSafeSummary,
+		sourceAttributionSafeSummary,
 	);
 
 	return {
@@ -1047,6 +1232,7 @@ export const __testables = {
 	rawOutputSchema: cvmateBuildAiTailoredContentRawOutputSchema,
 	trimProfessionalSummaryToLimit,
 	selectQuantifiedSummaryAnchor,
+	 sanitizeProfessionalSummarySourceAttribution,
 	 sanitizeTailoredOutput,
 	buildPrompt,
 	latestExistingGeneratedContent,
