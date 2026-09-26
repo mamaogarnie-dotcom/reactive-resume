@@ -204,7 +204,7 @@ describe("cvmateBuildAiTailoredContentOutputSchema", () => {
 	});
 });
 
-describe("targeted professional headline v10", () => {
+describe("targeted professional headline v11", () => {
 	it("requires professionalHeadline in the raw provider contract", () => {
 		expect(
 			__testables.rawOutputSchema.safeParse({
@@ -300,7 +300,19 @@ describe("tailored content prompt safeguards", () => {
 		expect(__testables.SYSTEM_PROMPT).toContain("Do not merge words from separate evidence items");
 		expect(__testables.SYSTEM_PROMPT).toContain("Professional-headline writing rules:");
 		expect(__testables.SYSTEM_PROMPT).toContain("professionalHeadline");
-		expect(__testables.PROMPT_VERSION).toBe("cvmate-tailored-content-v10");
+		expect(__testables.SYSTEM_PROMPT).toContain(
+			"When a critical or required domain is explicitly supported by selected evidence",
+		);
+expect(__testables.SYSTEM_PROMPT).toContain(
+			"Do not satisfy a domain-specific target using only generic process phrases",
+		);
+expect(__testables.SYSTEM_PROMPT).toContain(
+			"do not recast unrelated employment as work inside that sector",
+		);
+expect(__testables.SYSTEM_PROMPT).toContain(
+			"strongest supported combination of target domain and target function",
+		);
+expect(__testables.PROMPT_VERSION).toBe("cvmate-tailored-content-v11");
 	});
 });
 

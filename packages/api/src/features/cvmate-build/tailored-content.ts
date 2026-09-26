@@ -12,7 +12,7 @@ import { aiProvidersService } from "../ai-providers/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
 import { cvmateBuildService } from "./service";
 
-const PROMPT_VERSION = "cvmate-tailored-content-v10";
+const PROMPT_VERSION = "cvmate-tailored-content-v11";
 const MAX_EXPERIENCE_FACTS = 500;
 const TAILORED_CONTENT_MAX_OUTPUT_TOKENS = 2048;
 const PROFESSIONAL_HEADLINE_MAX_CHARACTERS = 160;
@@ -176,6 +176,9 @@ Professional-summary writing rules:
   tools or traits when both are available.
 - Use software tools or generic traits only when they remain among the strongest
   evidence after critical/required domain and process evidence is covered.
+- Lead with the strongest supported combination of target domain and target function from critical and required job-offer requirements.
+- If domain evidence comes from a project or only part of the selected history, state it as project or process experience and do not recast unrelated employment as work inside that sector.
+- Preserve breadth when selected evidence supports several distinct role-relevant dimensions such as domain/process, administration/documentation, institutions/clients, and quantified outcomes.
 - Prioritize the strongest 3 to 5 selected evidence points that are most
   relevant to critical and required job-offer requirements.
 - Do not mechanically list every selected item and do not repeat the same claim
@@ -214,7 +217,11 @@ Experience-fact writing rules:
 Professional-headline writing rules:
 - Return one concise, single-line professional headline grounded only in the selected candidate evidence.
 - Use 1 to 4 short role-domain or functional phrases. Separate multiple phrases with " | ".
-- Let the job offer rank which supported domains to emphasize, but never copy an unsupported target-role identity.
+- Rank headline phrases by job-offer priority: critical and required domain/function signals first, then important responsibilities.
+- When a critical or required domain is explicitly supported by selected evidence, the headline MUST name that domain explicitly instead of describing only generic tasks.
+- When a high-priority function is explicitly supported by selected evidence, include that function alongside the supported domain when space allows.
+- Do not satisfy a domain-specific target using only generic process phrases such as documentation, deadlines, coordination, service, or communication when a supported domain term is available.
+- Use exact or naturally inflected domain/function terminology shared by the job offer and selected evidence; never copy an unsupported target-role identity.
 - Do not invent seniority, expertise, proficiency, sector identity, or qualifications that are absent from selected evidence.
 - Prefer transferable functions and domains over employer names, slogans, generic adjectives, or personality claims.
 - Do not use first-person or third-person personal wording and do not imply gender.
