@@ -54,9 +54,10 @@ vi.mock("../ai-providers/service", () => ({
 	aiProvidersService: providerMock,
 }));
 
-vi.mock("../ai/generate-json", () => ({
-	generateJson: generateJsonMock,
-}));
+vi.mock("../ai/generate-json", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("../ai/generate-json")>();
+	return { ...actual, generateJson: generateJsonMock };
+});
 
 vi.mock("../ai/service", () => ({
 	getModel: getModelMock,

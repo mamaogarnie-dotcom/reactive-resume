@@ -125,3 +125,33 @@ describe("generateJson usage capture", () => {
 		expect(onUsage).toHaveBeenCalledWith(usage);
 	});
 });
+
+describe("generateJson malformed JSON recovery", () => {
+	it("repairs a missing comma between array items before schema validation", async () => {
+		mocks.generateText.mockReset();
+		mocks.generateText.mockResolvedValue({
+			text: "{\"items\":[{\"value\":\"one\"} {\"value\":\"two\"}]}",
+			usage: { inputTokens: 10, outputTokens: 10, totalTokens: 20 },
+		} as never);
+
+		await expect(
+			generateJson(
+				{} as never,
+				{ prompt: "test" },
+				z.object({ items: z.array(z.object({ value: z.string() })) }),
+			),
+		).resolves.toEqual({ items: [{ value: "one" }, { value: "two" }] });
+	});
+
+	it("keeps schema validation after syntax repair", async () => {
+		mocks.generateText.mockReset();
+		mocks.generateText.mockResolvedValue({
+			text: "{\"value\":123,}",
+			usage: { inputTokens: 10, outputTokens: 5, totalTokens: 15 },
+		} as never);
+
+		await expect(
+			generateJson({} as never, { prompt: "test" }, z.object({ value: z.string() })),
+		).rejects.toThrow();
+	});
+});

@@ -7,7 +7,8 @@ import type { ModelMessage } from "ai";
 import { generateText } from "ai";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
-import { type AiTokenUsage, generateJson } from "../ai/generate-json";
+import type { AiTokenUsage } from "../ai/generate-json";
+import { generateJson, parseJsonWithRepair } from "../ai/generate-json";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
@@ -195,7 +196,7 @@ function parseAnalysisResponse(text: string): CvmateJobOfferAnalysisOutput {
 
 	try {
 		return cvmateJobOfferAnalysisOutputSchema.parse(
-			JSON.parse(candidate.slice(start, end + 1)),
+			parseJsonWithRepair(candidate.slice(start, end + 1)),
 		);
 	} catch (error) {
 		throw new ORPCError("BAD_REQUEST", {

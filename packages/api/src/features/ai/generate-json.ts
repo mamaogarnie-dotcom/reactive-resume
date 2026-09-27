@@ -1,7 +1,8 @@
-import { ORPCError } from "@orpc/client";
 import type { LanguageModel, LanguageModelUsage } from "ai";
-import { generateText } from "ai";
 import type { z } from "zod";
+import { ORPCError } from "@orpc/client";
+import { generateText } from "ai";
+import { jsonrepair } from "jsonrepair";
 
 export type AiTokenUsage = LanguageModelUsage;
 
@@ -26,6 +27,13 @@ export type GenerateJsonOptions = {
  * Usage is emitted immediately after the provider responds, before JSON parsing/validation,
  * because malformed provider output still incurred AI cost.
  */
+export function parseJsonWithRepair(value: string): unknown {
+	try {
+		return JSON.parse(value);
+	} catch {
+		return JSON.parse(jsonrepair(value));
+	}
+}
 export async function generateJson<T>(
 	model: LanguageModel,
 	{ system, prompt }: GenerateJsonPrompt,
@@ -55,5 +63,5 @@ export async function generateJson<T>(
 		});
 	}
 
-	return schema.parse(JSON.parse(candidate.slice(start, end + 1)));
+	return schema.parse(parseJsonWithRepair(candidate.slice(start, end + 1)));
 }
