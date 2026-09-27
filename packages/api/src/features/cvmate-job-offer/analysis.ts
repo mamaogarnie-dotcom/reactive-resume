@@ -111,6 +111,11 @@ Return:
   form such as "pl" or "en" when clear, otherwise null
 - requirements: concise atomic items
 
+Language consistency:
+- requirement.text must be written in the same natural language as the job advertisement
+- never translate a requirement sentence into another language
+- preserve standard product names, acronyms, technologies, and established technical terms in their conventional form
+
 Requirement categories:
 - required: mandatory candidate requirement
 - preferred: optional / nice-to-have requirement
@@ -123,6 +128,12 @@ Priorities:
 - critical: clearly mandatory or central to the role
 - important: materially relevant
 - additional: secondary / nice-to-have
+
+Deterministic category defaults:
+- required items must use critical
+- preferred items must use additional
+- keyword items must use additional
+- responsibility items should normally use important; use critical only when the advertisement clearly makes the responsibility central or primary
 
 For every requirement:
 - text must be a concise normalized statement
@@ -330,6 +341,42 @@ function normalizedRequirementKey(text: string): string {
 	return text.trim().toLocaleLowerCase().replace(/\s+/g, " ");
 }
 
+function normalizedRequirementPhrase(text: string): string {
+	return text
+		.normalize("NFKD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.toLocaleLowerCase()
+		.replace(/[^\p{L}\p{N}]+/gu, " ")
+		.trim()
+		.replace(/\s+/g, " ");
+}
+
+function containsNormalizedRequirementPhrase(haystack: string, needle: string): boolean {
+	const normalizedHaystack = normalizedRequirementPhrase(haystack);
+	const normalizedNeedle = normalizedRequirementPhrase(needle);
+
+	if (!normalizedHaystack || !normalizedNeedle) return false;
+
+	return ` ${normalizedHaystack} `.includes(` ${normalizedNeedle} `);
+}
+
+function normalizeRequirementPolicy(
+	requirements: CvmateJobOfferAnalysisOutput["requirements"],
+): CvmateJobOfferAnalysisOutput["requirements"] {
+	return requirements.map((requirement) => {
+		let priority = requirement.priority;
+
+		if (requirement.category === "required") priority = "critical";
+		if (requirement.category === "preferred" || requirement.category === "keyword") {
+			priority = "additional";
+		}
+
+		return priority === requirement.priority
+			? requirement
+			: { ...requirement, priority };
+	});
+}
+
 function dedupeRequirements(
 	requirements: CvmateJobOfferAnalysisOutput["requirements"],
 	existingManualTexts: string[] = [],
@@ -338,10 +385,26 @@ function dedupeRequirements(
 		existingManualTexts.map((text) => normalizedRequirementKey(text)),
 	);
 
+	const representedNonKeywordTexts = [
+		...existingManualTexts,
+		...requirements
+			.filter((requirement) => requirement.category !== "keyword")
+			.map((requirement) => requirement.text),
+	];
+
 	return requirements.filter((requirement) => {
 		const key = normalizedRequirementKey(requirement.text);
 
 		if (seen.has(key)) return false;
+
+		if (
+			requirement.category === "keyword" &&
+			representedNonKeywordTexts.some((text) =>
+				containsNormalizedRequirementPhrase(text, requirement.text),
+			)
+		) {
+			return false;
+		}
 
 		seen.add(key);
 		return true;
@@ -457,7 +520,7 @@ async function analyzeOwnedOffer(input: {
 			.map((requirement) => requirement.text);
 
 		const requirements = dedupeRequirements(
-			analysis.requirements,
+			normalizeRequirementPolicy(analysis.requirements),
 			manualRequirementTexts,
 		);
 
@@ -535,6 +598,7 @@ export const __testables = {
 	buildPrompt,
 	buildSourceMessages,
 	dedupeRequirements,
+	normalizeRequirementPolicy,
 	parseAnalysisResponse,
 	SYSTEM_PROMPT,
 };
