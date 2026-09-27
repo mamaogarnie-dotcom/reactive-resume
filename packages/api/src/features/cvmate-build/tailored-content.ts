@@ -611,6 +611,32 @@ function sourceTextAsSummarySentence(value: string | null): string {
 	return /[.!?]$/u.test(compact) ? compact : `${compact}.`;
 }
 
+function summaryBoundaryTokens(value: string): string[] {
+	return value.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+}
+
+function isShortRepeatedSentenceBoundaryFragment(
+	previousSentence: string,
+	currentSentence: string,
+): boolean {
+	const previousTokens = summaryBoundaryTokens(previousSentence);
+	const currentTokens = summaryBoundaryTokens(currentSentence);
+
+	if (
+		previousTokens.length === 0 ||
+		currentTokens.length === 0 ||
+		currentTokens.length > 2 ||
+		numericTokens(previousSentence).size === 0 ||
+		numericTokens(currentSentence).size > 0
+	) {
+		return false;
+	}
+
+	return (
+		previousTokens[previousTokens.length - 1] ===
+		currentTokens[0]
+	);
+}
 function sanitizeProfessionalSummarySourceAttribution(
 	summary: string,
 	selectionItems: SelectionItem[],
@@ -624,7 +650,17 @@ function sanitizeProfessionalSummarySourceAttribution(
 		const sentenceNumbers = numericTokens(sentence);
 
 		if (sentenceNumbers.size === 0) {
-			safeSentences.push(sentence);
+			const previousSentence = safeSentences[safeSentences.length - 1] ?? "";
+
+			if (
+				!isShortRepeatedSentenceBoundaryFragment(
+					previousSentence,
+					sentence,
+				)
+			) {
+				safeSentences.push(sentence);
+			}
+
 			continue;
 		}
 

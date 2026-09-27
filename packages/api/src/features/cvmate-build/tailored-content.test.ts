@@ -1196,3 +1196,35 @@ describe("summary source attribution guard", () => {
 		expect(sanitized).not.toContain("720");
 	});
 });
+
+describe("summary repeated boundary fragment guard", () => {
+	it("drops a short repeated currency boundary fragment after a quantified sentence", () => {
+		const quantifiedFact = {
+			id: "bioarbor-quantified-boundary",
+			sourceType: "experience_fact",
+			parentSelectionItemId: "bioarbor-employment-boundary",
+			sourceTextSnapshot:
+				"483 prepared offers -> contracts worth about 2,89 mln z\u0142.",
+			sortOrder: 1,
+		};
+		const malformedSummary =
+			"483 prepared offers -> contracts worth about 2,89 mln z\u0142. z\u0142 finansowania. Property process experience.";
+		const safeSummary =
+			"483 prepared offers -> contracts worth about 2,89 mln z\u0142. Property process experience.";
+
+		const sanitizedMalformed =
+			__testables.sanitizeProfessionalSummarySourceAttribution(
+				malformedSummary,
+				[quantifiedFact] as never,
+			);
+		const sanitizedSafe =
+			__testables.sanitizeProfessionalSummarySourceAttribution(
+				safeSummary,
+				[quantifiedFact] as never,
+			);
+
+		expect(sanitizedMalformed).toBe(safeSummary);
+		expect(sanitizedMalformed).not.toContain("z\u0142 finansowania.");
+		expect(sanitizedSafe).toBe(safeSummary);
+	});
+});

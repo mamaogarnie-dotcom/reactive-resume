@@ -673,3 +673,47 @@ describe("evaluateFinalCvQuality", () => {
 	});
 
 });
+
+describe("final quality gate repeated sentence-boundary fragment", () => {
+	it("warns on a short repeated sentence-boundary fragment after quantified text", () => {
+		const malformed = createData();
+		malformed.summary.content =
+			"<p>483 prepared offers -> contracts worth about 2,89 mln z\u0142. z\u0142 finansowania.</p>";
+
+		const malformedResult = evaluateFinalCvQuality({
+			data: malformed,
+			pageMetrics,
+			selectionItems: [],
+			generatedContent: [],
+		});
+
+		expect(malformedResult.findings).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					code: "REPEATED_SENTENCE_BOUNDARY_FRAGMENT",
+					dimension: "grammar",
+					severity: "warning",
+				}),
+			]),
+		);
+		expect(malformedResult.dimensions.grammar).toBe("warning");
+
+		const safe = createData();
+		safe.summary.content =
+			"<p>483 prepared offers -> contracts worth about 2,89 mln z\u0142. Property experience.</p>";
+
+		const safeResult = evaluateFinalCvQuality({
+			data: safe,
+			pageMetrics,
+			selectionItems: [],
+			generatedContent: [],
+		});
+
+		expect(
+			safeResult.findings.some(
+				(finding) =>
+					finding.code === "REPEATED_SENTENCE_BOUNDARY_FRAGMENT",
+			),
+		).toBe(false);
+	});
+});

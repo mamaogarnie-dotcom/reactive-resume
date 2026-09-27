@@ -475,6 +475,39 @@ export function evaluateFinalCvQuality(input: {
 				),
 			);
 		}
+
+		const sentences =
+			plainText.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ??
+			[];
+
+		for (let index = 1; index < sentences.length; index += 1) {
+			const previousSentence = sentences[index - 1] ?? "";
+			const currentSentence = sentences[index] ?? "";
+			const previousTokens =
+				previousSentence.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+			const currentTokens =
+				currentSentence.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+			const repeatedBoundaryFragment =
+				numericTokens(previousSentence).size > 0 &&
+				numericTokens(currentSentence).size === 0 &&
+				currentTokens.length > 0 &&
+				currentTokens.length <= 2 &&
+				previousTokens.length > 0 &&
+				previousTokens[previousTokens.length - 1] === currentTokens[0];
+
+			if (!repeatedBoundaryFragment) continue;
+
+			findings.push(
+				finding(
+					"grammar",
+					"warning",
+					"REPEATED_SENTENCE_BOUNDARY_FRAGMENT",
+					"A final narrative field contains a short repeated sentence-boundary fragment after quantified text.",
+					{ path: fragment.path, ...(fragment.resumeItemId ? { resumeItemId: fragment.resumeItemId } : {}) },
+				),
+			);
+			break;
+		}
 	}
 
 	const firstFragmentByNormalizedText = new Map<string, NarrativeFragment>();
