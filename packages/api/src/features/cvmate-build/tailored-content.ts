@@ -12,7 +12,7 @@ import { aiProvidersService } from "../ai-providers/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
 import { cvmateBuildService } from "./service";
 
-const PROMPT_VERSION = "cvmate-tailored-content-v11";
+const PROMPT_VERSION = "cvmate-tailored-content-v12";
 const MAX_EXPERIENCE_FACTS = 500;
 const TAILORED_CONTENT_MAX_OUTPUT_TOKENS = 2048;
 const PROFESSIONAL_HEADLINE_MAX_CHARACTERS = 160;
@@ -105,8 +105,13 @@ Security and factuality rules:
   snapshot. Do not borrow facts from another selection item.
 - Preserve every numeric value present in an experience fact. Never add,
   estimate, round, expand, or replace a number with a different number.
-- You may improve grammar, clarity, concision, action wording, and relevance
-  while preserving the exact factual meaning.
+- For each experience fact, produce either a substantively improved CV-ready
+  rewrite or preserve the source wording unchanged when it is already concise
+  and professional.
+- A substantive rewrite must materially improve clarity, concision, action/result
+  framing, or target-role relevance while preserving the exact factual meaning.
+- Do not make cosmetic-only edits such as capitalization, punctuation, swapping
+  conjunctions, or trivial word-order changes.
 - The professional summary may combine facts from the supplied SELECTED
   candidate items, but every claim must be directly supported by those items.
 - Ignore presentation-only or legal content when writing the professional
@@ -720,17 +725,49 @@ function sanitizeProfessionalSummaryQualitativeUpgrades(
 	return safeSentences.join(" ").trim();
 }
 
+const COSMETIC_REWRITE_CONNECTORS = new Set(["i", "oraz", "and"]);
+
+function experienceFactSubstantiveSignature(value: string | null): string {
+	const normalized =
+		value
+			?.normalize("NFD")
+			.replace(/[\u0300-\u036f]/g, "")
+			.toLocaleLowerCase()
+			.replace(/\u0142/g, "l")
+			.match(/[a-z0-9]+/g) ?? [];
+
+	return normalized
+		.filter((token) => !COSMETIC_REWRITE_CONNECTORS.has(token))
+		.sort()
+		.join(" ");
+}
+
+function isCosmeticExperienceFactRewrite(
+	sourceText: string | null,
+	generatedText: string,
+): boolean {
+	const sourceSignature = experienceFactSubstantiveSignature(sourceText);
+	const generatedSignature = experienceFactSubstantiveSignature(generatedText);
+
+	return Boolean(sourceSignature) && sourceSignature === generatedSignature;
+}
+
 function sanitizeExperienceFactQualitativeUpgrade(
 	sourceText: string | null,
 	generatedText: string,
 ): string {
+	const fallback = sourceText?.trim();
+
+	if (fallback && isCosmeticExperienceFactRewrite(fallback, generatedText)) {
+		return fallback;
+	}
+
 	if (
 		unsupportedQualitativeUpgradeTokens(sourceText, generatedText).size === 0
 	) {
 		return generatedText;
 	}
 
-	const fallback = sourceText?.trim();
 	return fallback ? fallback : generatedText;
 }
 
@@ -1099,7 +1136,7 @@ export const cvmateBuildTailoredContentService = {
 					? {
 							providerOptions: {
 								groq: {
-									reasoningEffort: "low",
+									reasoningEffort: "medium",
 								},
 							},
 						}

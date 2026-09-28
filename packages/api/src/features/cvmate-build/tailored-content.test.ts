@@ -204,7 +204,7 @@ describe("cvmateBuildAiTailoredContentOutputSchema", () => {
 	});
 });
 
-describe("targeted professional headline v11", () => {
+describe("targeted professional headline v12", () => {
 	it("requires professionalHeadline in the raw provider contract", () => {
 		expect(
 			__testables.rawOutputSchema.safeParse({
@@ -294,6 +294,8 @@ describe("tailored content prompt safeguards", () => {
 			'A restricted qualitative word is never required for good CV style',
 		);
 		expect(__testables.SYSTEM_PROMPT).toContain("Preserve every numeric value");
+		expect(__testables.SYSTEM_PROMPT).toContain("substantively improved CV-ready");
+		expect(__testables.SYSTEM_PROMPT).toContain("Do not make cosmetic-only edits");
 		expect(__testables.SYSTEM_PROMPT).toContain("core domain");
 		expect(__testables.SYSTEM_PROMPT).toContain("Never omit directly matching domain/process evidence");
 		expect(__testables.SYSTEM_PROMPT).toContain("factual claims, not stylistic polish");
@@ -312,7 +314,7 @@ expect(__testables.SYSTEM_PROMPT).toContain(
 expect(__testables.SYSTEM_PROMPT).toContain(
 			"strongest supported combination of target domain and target function",
 		);
-expect(__testables.PROMPT_VERSION).toBe("cvmate-tailored-content-v11");
+expect(__testables.PROMPT_VERSION).toBe("cvmate-tailored-content-v12");
 	});
 });
 
@@ -970,7 +972,7 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 			userId: "user-1",
 		});
 	});
-	it("uses low Groq reasoning for GPT-OSS tailored content", async () => {
+	it("uses medium Groq reasoning for GPT-OSS tailored content", async () => {
 		getDefaultRunnableMock.mockResolvedValueOnce({
 			...provider,
 			provider: "groq",
@@ -989,7 +991,7 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 				maxOutputTokens: 2048,
 				providerOptions: {
 					groq: {
-						reasoningEffort: "low",
+						reasoningEffort: "medium",
 					},
 				},
 			}),
@@ -1226,5 +1228,78 @@ describe("summary repeated boundary fragment guard", () => {
 		expect(sanitizedMalformed).toBe(safeSummary);
 		expect(sanitizedMalformed).not.toContain("z\u0142 finansowania.");
 		expect(sanitizedSafe).toBe(safeSummary);
+	});
+});
+describe("experience rewrite substantive quality guard v12", () => {
+	it("falls back to source wording for cosmetic-only edits", () => {
+		const fact = {
+			id: "selection-cosmetic-v12",
+			sourceType: "experience_fact",
+			selected: true,
+			recommended: true,
+			recommendationReason: "Direct match.",
+			sortOrder: 9,
+			parentSelectionItemId: null,
+			sourceTextSnapshot:
+				"monitorowanie terminow, dokumentacji i realizacji ustalen",
+			sourceDataSnapshot: {},
+		};
+
+		const rawOutput = __testables.rawOutputSchema.parse({
+			professionalHeadline: "Koordynacja dokumentacji",
+			professionalSummary: "Doswiadczenie w koordynacji dokumentacji.",
+			experienceFacts: [
+				{
+					selectionItemId: "selection-cosmetic-v12",
+					text:
+						"Monitorowanie terminow, dokumentacji oraz realizacji ustalen.",
+				},
+			],
+		});
+
+		const sanitized = __testables.sanitizeTailoredOutput(
+			rawOutput,
+			[fact] as never,
+		);
+
+		expect(sanitized.experienceFacts[0]?.text).toBe(
+			fact.sourceTextSnapshot,
+		);
+	});
+
+	it("keeps a substantively reframed rewrite with the same factual meaning", () => {
+		const fact = {
+			id: "selection-substantive-v12",
+			sourceType: "experience_fact",
+			selected: true,
+			recommended: true,
+			recommendationReason: "Direct match.",
+			sortOrder: 9,
+			parentSelectionItemId: null,
+			sourceTextSnapshot:
+				"monitorowanie terminow, dokumentacji i realizacji ustalen",
+			sourceDataSnapshot: {},
+		};
+
+		const rewrite =
+			"Kontrola terminow i dokumentacji oraz monitorowanie realizacji ustalen.";
+
+		const rawOutput = __testables.rawOutputSchema.parse({
+			professionalHeadline: "Koordynacja dokumentacji",
+			professionalSummary: "Doswiadczenie w koordynacji dokumentacji.",
+			experienceFacts: [
+				{
+					selectionItemId: "selection-substantive-v12",
+					text: rewrite,
+				},
+			],
+		});
+
+		const sanitized = __testables.sanitizeTailoredOutput(
+			rawOutput,
+			[fact] as never,
+		);
+
+		expect(sanitized.experienceFacts[0]?.text).toBe(rewrite);
 	});
 });
