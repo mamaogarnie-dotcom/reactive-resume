@@ -399,8 +399,12 @@ function dedupeRequirements(
 
 		if (
 			requirement.category === "keyword" &&
-			representedNonKeywordTexts.some((text) =>
-				containsNormalizedRequirementPhrase(text, requirement.text),
+			representedNonKeywordTexts.some(
+				(text) =>
+					containsNormalizedRequirementPhrase(text, requirement.text) ||
+					(requirement.sourceText
+						? containsNormalizedRequirementPhrase(text, requirement.sourceText)
+						: false),
 			)
 		) {
 			return false;

@@ -645,6 +645,26 @@ describe("analysis helpers", () => {
 		]);
 	});
 
+	it("drops an expanded keyword when its source text is already represented by a richer requirement", () => {
+		const result = __testables.dedupeRequirements([
+			{
+				category: "responsibility",
+				priority: "important",
+				sourceText: "monitorowanie wska\u017anik\xf3w OEE, jako\u015bci i strat oraz reagowanie na odchylenia",
+				text: "Monitorowanie wska\u017anik\xf3w OEE, jako\u015bci i strat oraz reagowanie na odchylenia",
+			},
+			{
+				category: "keyword",
+				priority: "additional",
+				sourceText: "monitorowanie wska\u017anik\xf3w OEE",
+				text: "OEE (Overall Equipment Effectiveness) jako kluczowy wska\u017anik produkcyjny",
+			},
+		]);
+
+		expect(result.map((requirement) => requirement.text)).toEqual([
+			"Monitorowanie wska\u017anik\xf3w OEE, jako\u015bci i strat oraz reagowanie na odchylenia",
+		]);
+	});
 	it("normalizes deterministic category priority defaults", () => {
 		const result = __testables.normalizeRequirementPolicy([
 			{
