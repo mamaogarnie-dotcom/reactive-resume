@@ -15,6 +15,7 @@ import { cvmateBuildService } from "./service";
 const PROMPT_VERSION = "cvmate-tailored-content-v12";
 const MAX_EXPERIENCE_FACTS = 500;
 const TAILORED_CONTENT_MAX_OUTPUT_TOKENS = 2048;
+const TAILORED_CONTENT_GPT_OSS_MAX_OUTPUT_TOKENS = 4096;
 const PROFESSIONAL_HEADLINE_MAX_CHARACTERS = 160;
 const PROFESSIONAL_SUMMARY_MAX_CHARACTERS = 700;
 const RAW_PROVIDER_PROFESSIONAL_SUMMARY_MAX_CHARACTERS = 2000;
@@ -1110,6 +1111,9 @@ export const cvmateBuildTailoredContentService = {
 		validateSelectedHierarchy(selectedItems);
 
 		const provider = await resolveProvider(input.userId, input.aiProviderId);
+		const isGroqGptOss =
+			provider.provider === "groq" &&
+			provider.model.toLowerCase().includes("gpt-oss");
 
 		const model = getModel({
 			provider: provider.provider,
@@ -1130,9 +1134,10 @@ export const cvmateBuildTailoredContentService = {
 			},
 			cvmateBuildAiTailoredContentRawOutputSchema,
 			{
-				maxOutputTokens: TAILORED_CONTENT_MAX_OUTPUT_TOKENS,
-				...(provider.provider === "groq" &&
-				provider.model.toLowerCase().includes("gpt-oss")
+				maxOutputTokens: isGroqGptOss
+					? TAILORED_CONTENT_GPT_OSS_MAX_OUTPUT_TOKENS
+					: TAILORED_CONTENT_MAX_OUTPUT_TOKENS,
+				...(isGroqGptOss
 					? {
 							providerOptions: {
 								groq: {

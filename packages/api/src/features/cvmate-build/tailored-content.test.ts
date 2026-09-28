@@ -972,7 +972,7 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 			userId: "user-1",
 		});
 	});
-	it("uses medium Groq reasoning for GPT-OSS tailored content", async () => {
+	it("uses medium Groq reasoning with expanded output budget for GPT-OSS tailored content", async () => {
 		getDefaultRunnableMock.mockResolvedValueOnce({
 			...provider,
 			provider: "groq",
@@ -988,7 +988,7 @@ describe("cvmateBuildTailoredContentService.generate", () => {
 
 		expect(aiOptions).toEqual(
 			expect.objectContaining({
-				maxOutputTokens: 2048,
+				maxOutputTokens: 4096,
 				providerOptions: {
 					groq: {
 						reasoningEffort: "medium",
