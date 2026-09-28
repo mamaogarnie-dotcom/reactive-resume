@@ -4,6 +4,22 @@ import type { FormEvent } from "react";
 import { msg } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
+import {
+	BookOpenIcon,
+	BrainIcon,
+	CertificateIcon,
+	DesktopIcon,
+	FileTextIcon,
+	FolderOpenIcon,
+	GraduationCapIcon,
+	HandshakeIcon,
+	HeartIcon,
+	IdentificationCardIcon,
+	MedalIcon,
+	StarIcon,
+	TranslateIcon,
+	WrenchIcon,
+} from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -259,6 +275,25 @@ const listDefinitions: readonly {
 		placeholder: msg`Add an interest`,
 	},
 ];
+
+const detailedSectionIcons = {
+	project: FolderOpenIcon,
+	education: GraduationCapIcon,
+	course: BookOpenIcon,
+	certification: CertificateIcon,
+	volunteer: HeartIcon,
+	language: TranslateIcon,
+	award: MedalIcon,
+	reference: HandshakeIcon,
+	license: IdentificationCardIcon,
+};
+
+const listSectionIcons = {
+	competency: BrainIcon,
+	software: DesktopIcon,
+	tool: WrenchIcon,
+	interest: StarIcon,
+};
 
 function nullable(value: string | undefined) {
 	const trimmed = value?.trim() ?? "";
@@ -598,17 +633,26 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 
 	const hasCreateContent = Object.values(form).some((value) => value.trim().length > 0);
 	const hasEditContent = Object.values(editForm).some((value) => value.trim().length > 0);
+	const SectionIcon = detailedSectionIcons[definition.kind];
 
 	return (
 		<section
 			aria-labelledby={`master-profile-${definition.kind}`}
 			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 		>
-			<div>
-				<h2 id={`master-profile-${definition.kind}`} className="font-semibold text-foreground text-xl">
-					{i18n.t(definition.title)}
-				</h2>
-				<p className="text-muted-foreground text-sm">{i18n.t(definition.description)}</p>
+			<div className="flex items-start gap-3">
+				<div
+					aria-hidden="true"
+					className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-[#E2C5E7] text-[#A878AA]"
+				>
+					<SectionIcon className="size-4" />
+				</div>
+				<div>
+					<h2 id={`master-profile-${definition.kind}`} className="font-semibold text-foreground text-xl">
+						{i18n.t(definition.title)}
+					</h2>
+					<p className="text-muted-foreground text-sm">{i18n.t(definition.description)}</p>
+				</div>
 			</div>
 
 			<form
@@ -724,7 +768,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 								})()} <div className="flex flex-wrap gap-2 sm:shrink-0">
 									<Button
 										type="button"
-										variant="outline"
+										variant="edit"
 										size="sm"
 										onClick={() => {
 											setEditingId(item.id);
@@ -735,7 +779,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 									</Button>
 									<Button
 										type="button"
-										variant="outline"
+										variant="delete"
 										size="sm"
 										disabled={deleteMutation.isPending}
 										onClick={() => deleteMutation.mutate(item.id)}
@@ -793,15 +837,24 @@ function ListSection({
 			onSuccess: () => void profileQuery.refetch(),
 		}),
 	);
+	const SectionIcon = listSectionIcons[kind];
 
 	return (
 		<section
 			aria-labelledby={`master-profile-${kind}`}
 			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 		>
-			<h2 id={`master-profile-${kind}`} className="font-semibold text-foreground text-xl">
-				{i18n.t(title)}
-			</h2>
+			<div className="flex items-center gap-3">
+				<div
+					aria-hidden="true"
+					className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#E2C5E7] text-[#A878AA]"
+				>
+					<SectionIcon className="size-4" />
+				</div>
+				<h2 id={`master-profile-${kind}`} className="font-semibold text-foreground text-xl">
+					{i18n.t(title)}
+				</h2>
+			</div>
 			<form
 				className="flex flex-wrap gap-2"
 				onSubmit={(event) => {
@@ -828,12 +881,12 @@ function ListSection({
 				</Button>
 			</form>
 
-			<div className="flex flex-wrap gap-2">
+			<div className="space-y-2">
 				{items.map((item) =>
 					editingId === item.id ? (
 						<form
 							key={item.id}
-							className="flex flex-wrap gap-2"
+							className="flex w-full items-center gap-2"
 							onSubmit={(event) => {
 								event.preventDefault();
 								const trimmed = editValue.trim();
@@ -842,46 +895,48 @@ function ListSection({
 							}}
 						>
 							<Input
-								className="w-full"
+								className="min-w-0 flex-1"
 								aria-label={i18n.t(title)}
 								value={editValue}
 								onChange={(event) => setEditValue(event.target.value)}
 							/>
-							<Button type="submit" variant="outline" size="sm">
-								<Trans>Save</Trans>
-							</Button>
-							<Button type="button" variant="outline" size="sm" onClick={() => setEditingId(null)}>
-								<Trans>Cancel</Trans>
-							</Button>
+							<div className="ml-auto flex shrink-0 gap-2">
+								<Button type="submit" variant="outline" size="sm">
+									<Trans>Save</Trans>
+								</Button>
+								<Button type="button" variant="outline" size="sm" onClick={() => setEditingId(null)}>
+									<Trans>Cancel</Trans>
+								</Button>
+							</div>
 						</form>
 					) : (
 						<div
 							key={item.id}
-							className="flex items-center gap-1 rounded-input border border-border bg-muted px-2 py-1 text-sm"
+							className="flex w-full items-center gap-2 rounded-input border border-border bg-muted px-2 py-1 text-sm"
 						>
-							<span>{item.value}</span>
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								className="text-muted-foreground hover:text-foreground"
-								onClick={() => {
-									setEditingId(item.id);
-									setEditValue(item.value);
-								}}
-							>
-								<Trans>Edit</Trans>
-							</Button>
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								className="text-muted-foreground hover:text-destructive"
-								disabled={deleteMutation.isPending}
-								onClick={() => deleteMutation.mutate({ id: item.id })}
-							>
-								<Trans>Delete</Trans>
-							</Button>
+							<span className="min-w-0 flex-1">{item.value}</span>
+							<div className="ml-auto flex shrink-0 gap-2">
+								<Button
+									type="button"
+									variant="edit"
+									size="sm"
+									onClick={() => {
+										setEditingId(item.id);
+										setEditValue(item.value);
+									}}
+								>
+									<Trans>Edit</Trans>
+								</Button>
+								<Button
+									type="button"
+									variant="delete"
+									size="sm"
+									disabled={deleteMutation.isPending}
+									onClick={() => deleteMutation.mutate({ id: item.id })}
+								>
+									<Trans>Delete</Trans>
+								</Button>
+							</div>
 						</div>
 					),
 				)}
@@ -1033,16 +1088,24 @@ function ClausesSection() {
 			aria-labelledby="master-profile-recruitment-clauses"
 			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 		>
-			<div>
-				<h2 id="master-profile-recruitment-clauses" className="font-semibold text-foreground text-xl">
-					<Trans>Recruitment clauses</Trans>
-				</h2>
-				<p className="text-muted-foreground text-sm">
-					<Trans>
-						Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV
-						language.
-					</Trans>
-				</p>
+			<div className="flex items-start gap-3">
+				<div
+					aria-hidden="true"
+					className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-[#E2C5E7] text-[#A878AA]"
+				>
+					<FileTextIcon className="size-4" />
+				</div>
+				<div>
+					<h2 id="master-profile-recruitment-clauses" className="font-semibold text-foreground text-xl">
+						<Trans>Recruitment clauses</Trans>
+					</h2>
+					<p className="text-muted-foreground text-sm">
+						<Trans>
+							Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV
+							language.
+						</Trans>
+					</p>
+				</div>
 			</div>
 
 			<div className="space-y-2 rounded-card border border-border bg-muted p-4">

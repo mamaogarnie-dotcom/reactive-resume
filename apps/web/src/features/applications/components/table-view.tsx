@@ -154,12 +154,7 @@ export function ApplicationTable({ applications, onOpen, onEdit }: Props) {
 						<ArchiveIcon />
 						<Trans>Archive</Trans>
 					</Button>
-					<Button
-						size="sm"
-						variant="secondary"
-						className="h-7 text-destructive"
-						onClick={() => bulkDelete.mutate({ ids })}
-					>
+					<Button size="sm" variant="delete" className="h-7" onClick={() => bulkDelete.mutate({ ids })}>
 						<TrashIcon />
 						<Trans>Delete</Trans>
 					</Button>

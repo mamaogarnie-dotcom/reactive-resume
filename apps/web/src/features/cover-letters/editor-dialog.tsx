@@ -244,7 +244,7 @@ function CoverLetterActions({
 					</Button>
 					<Button
 						type="button"
-						variant="destructive"
+						variant="delete"
 						onClick={() =>
 							void run(async () => {
 								if (

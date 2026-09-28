@@ -138,7 +138,7 @@ export function ApplicationDetailSheet({ application, onOpenChange, onEdit }: Pr
 								{current.location ? ` · ${current.location}` : ""}
 							</div>
 						</div>
-						<Button size="sm" variant="outline" className="shrink-0" onClick={() => onEdit(current)}>
+						<Button size="sm" variant="edit" className="shrink-0" onClick={() => onEdit(current)}>
 							<PencilSimpleIcon />
 							<Trans>Edit</Trans>
 						</Button>
@@ -318,8 +318,8 @@ export function ApplicationDetailSheet({ application, onOpenChange, onEdit }: Pr
 					</Button>
 					<Button
 						size="sm"
-						variant="ghost"
-						className="ms-auto text-destructive"
+						variant="delete"
+						className="ms-auto"
 						disabled={remove.isPending}
 						onClick={async () => {
 							const confirmed = await confirm(t`Delete this application?`, {

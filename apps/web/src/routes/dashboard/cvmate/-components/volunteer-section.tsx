@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { HeartIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -98,13 +99,21 @@ export function VolunteerSection() {
 			aria-labelledby="master-profile-volunteer"
 			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 		>
-			<div>
-				<h2 id="master-profile-volunteer" className="font-semibold text-foreground text-xl">
-					<Trans>Volunteer work</Trans>
-				</h2>
-				<p className="text-muted-foreground text-sm">
-					<Trans>Volunteer roles that can be relevant to an application.</Trans>
-				</p>
+			<div className="flex items-start gap-3">
+				<div
+					aria-hidden="true"
+					className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-[#E2C5E7] text-[#A878AA]"
+				>
+					<HeartIcon className="size-4" />
+				</div>
+				<div>
+					<h2 id="master-profile-volunteer" className="font-semibold text-foreground text-xl">
+						<Trans>Volunteer work</Trans>
+					</h2>
+					<p className="text-muted-foreground text-sm">
+						<Trans>Volunteer roles that can be relevant to an application.</Trans>
+					</p>
+				</div>
 			</div>
 
 			<form
@@ -115,29 +124,35 @@ export function VolunteerSection() {
 				}}
 			>
 				<div className="grid gap-3 md:grid-cols-2">
-					<label className="space-y-1 text-sm">
-						<span className="font-medium"><Trans>Organization</Trans></span>
+					<div className="space-y-1 text-sm">
+						<span className="font-medium">
+							<Trans>Organization</Trans>
+						</span>
 						<Input
 							aria-label={t`Organization`}
 							value={organization}
 							disabled={createMutation.isPending}
 							onChange={(event) => setOrganization(event.target.value)}
 						/>
-					</label>
-					<label className="space-y-1 text-sm">
-						<span className="font-medium"><Trans>Role</Trans></span>
+					</div>
+					<div className="space-y-1 text-sm">
+						<span className="font-medium">
+							<Trans>Role</Trans>
+						</span>
 						<Input
 							aria-label={t`Role`}
 							value={role}
 							disabled={createMutation.isPending}
 							onChange={(event) => setRole(event.target.value)}
 						/>
-					</label>
+					</div>
 				</div>
 
 				<div className="flex flex-col gap-3 md:flex-row md:items-end">
-					<label className="w-full space-y-1 text-sm md:w-72">
-						<span className="font-medium"><Trans>From date</Trans></span>
+					<div className="w-full space-y-1 text-sm md:w-72">
+						<span className="font-medium">
+							<Trans>From date</Trans>
+						</span>
 						<FlexibleDateInput
 							ariaLabel={t`From date`}
 							placeholder={t`YYYY, YYYY-MM or YYYY-MM-DD`}
@@ -145,9 +160,11 @@ export function VolunteerSection() {
 							disabled={createMutation.isPending}
 							onChange={setStartDate}
 						/>
-					</label>
-					<label className="w-full space-y-1 text-sm md:w-72">
-						<span className="font-medium"><Trans>To date</Trans></span>
+					</div>
+					<div className="w-full space-y-1 text-sm md:w-72">
+						<span className="font-medium">
+							<Trans>To date</Trans>
+						</span>
 						<FlexibleDateInput
 							ariaLabel={t`To date`}
 							placeholder={t`YYYY, YYYY-MM or YYYY-MM-DD`}
@@ -155,7 +172,7 @@ export function VolunteerSection() {
 							disabled={createMutation.isPending || isCurrent}
 							onChange={setEndDate}
 						/>
-					</label>
+					</div>
 					<label className="flex shrink-0 items-center gap-2 pb-2 text-base">
 						<input
 							type="checkbox"
@@ -172,8 +189,10 @@ export function VolunteerSection() {
 					</label>
 				</div>
 
-				<label className="block space-y-1 text-sm">
-					<span className="font-medium"><Trans>Description</Trans></span>
+				<div className="block space-y-1 text-sm">
+					<span className="font-medium">
+						<Trans>Description</Trans>
+					</span>
 					<Textarea
 						className="min-h-24 resize-y"
 						aria-label={t`Description`}
@@ -181,7 +200,7 @@ export function VolunteerSection() {
 						disabled={createMutation.isPending}
 						onChange={(event) => setDescription(event.target.value)}
 					/>
-				</label>
+				</div>
 
 				<Button type="submit" className="w-fit" disabled={!hasCreateContent || createMutation.isPending}>
 					{createMutation.isPending ? <Trans>Adding...</Trans> : <Trans>Add</Trans>}
@@ -200,29 +219,35 @@ export function VolunteerSection() {
 						{editingId === item.id ? (
 							<div className="space-y-4">
 								<div className="grid gap-3 md:grid-cols-2">
-									<label className="space-y-1 text-sm">
-										<span className="font-medium"><Trans>Organization</Trans></span>
+									<div className="space-y-1 text-sm">
+										<span className="font-medium">
+											<Trans>Organization</Trans>
+										</span>
 										<Input
 											aria-label={t`Organization`}
 											value={editOrganization}
 											disabled={updateMutation.isPending}
 											onChange={(event) => setEditOrganization(event.target.value)}
 										/>
-									</label>
-									<label className="space-y-1 text-sm">
-										<span className="font-medium"><Trans>Role</Trans></span>
+									</div>
+									<div className="space-y-1 text-sm">
+										<span className="font-medium">
+											<Trans>Role</Trans>
+										</span>
 										<Input
 											aria-label={t`Role`}
 											value={editRole}
 											disabled={updateMutation.isPending}
 											onChange={(event) => setEditRole(event.target.value)}
 										/>
-									</label>
+									</div>
 								</div>
 
 								<div className="flex flex-col gap-3 md:flex-row md:items-end">
-									<label className="w-full space-y-1 text-sm md:w-72">
-										<span className="font-medium"><Trans>From date</Trans></span>
+									<div className="w-full space-y-1 text-sm md:w-72">
+										<span className="font-medium">
+											<Trans>From date</Trans>
+										</span>
 										<FlexibleDateInput
 											ariaLabel={t`From date`}
 											placeholder={t`YYYY, YYYY-MM or YYYY-MM-DD`}
@@ -230,9 +255,11 @@ export function VolunteerSection() {
 											disabled={updateMutation.isPending}
 											onChange={setEditStartDate}
 										/>
-									</label>
-									<label className="w-full space-y-1 text-sm md:w-72">
-										<span className="font-medium"><Trans>To date</Trans></span>
+									</div>
+									<div className="w-full space-y-1 text-sm md:w-72">
+										<span className="font-medium">
+											<Trans>To date</Trans>
+										</span>
 										<FlexibleDateInput
 											ariaLabel={t`To date`}
 											placeholder={t`YYYY, YYYY-MM or YYYY-MM-DD`}
@@ -240,7 +267,7 @@ export function VolunteerSection() {
 											disabled={updateMutation.isPending || editIsCurrent}
 											onChange={setEditEndDate}
 										/>
-									</label>
+									</div>
 									<label className="flex shrink-0 items-center gap-2 pb-2 text-base">
 										<input
 											type="checkbox"
@@ -257,8 +284,10 @@ export function VolunteerSection() {
 									</label>
 								</div>
 
-								<label className="block space-y-1 text-sm">
-									<span className="font-medium"><Trans>Description</Trans></span>
+								<div className="block space-y-1 text-sm">
+									<span className="font-medium">
+										<Trans>Description</Trans>
+									</span>
 									<Textarea
 										className="min-h-24 resize-y"
 										aria-label={t`Description`}
@@ -266,7 +295,7 @@ export function VolunteerSection() {
 										disabled={updateMutation.isPending}
 										onChange={(event) => setEditDescription(event.target.value)}
 									/>
-								</label>
+								</div>
 
 								<div className="flex flex-wrap justify-end gap-2">
 									<Button
@@ -302,7 +331,7 @@ export function VolunteerSection() {
 								<div className="flex flex-wrap gap-2 sm:shrink-0">
 									<Button
 										type="button"
-										variant="outline"
+										variant="edit"
 										size="sm"
 										onClick={() => {
 											setEditingId(item.id);
@@ -318,7 +347,7 @@ export function VolunteerSection() {
 									</Button>
 									<Button
 										type="button"
-										variant="outline"
+										variant="delete"
 										size="sm"
 										disabled={deleteMutation.isPending}
 										onClick={() => deleteMutation.mutate(item.id)}

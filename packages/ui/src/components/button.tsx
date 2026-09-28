@@ -8,15 +8,18 @@ const buttonVariants = cva(
 	{
 		variants: {
 			variant: {
-				default: "bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-pressed disabled:bg-disabled",
+				default:
+					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-pressed disabled:bg-disabled",
 				outline:
-					"border-control-border bg-transparent hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground disabled:border-border disabled:bg-disabled",
+					"border-control-border bg-transparent hover:bg-muted hover:text-foreground disabled:border-border disabled:bg-disabled aria-expanded:bg-muted aria-expanded:text-foreground",
 				secondary:
-					"bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground disabled:bg-disabled",
+					"bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:bg-disabled aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
 				ghost: "hover:bg-muted hover:text-foreground disabled:bg-transparent",
-				destructive:
-					"bg-destructive/10 text-destructive hover:bg-destructive/20 disabled:bg-disabled",
+				destructive: "bg-destructive/10 text-destructive hover:bg-destructive/20 disabled:bg-disabled",
 				link: "text-primary underline-offset-4 hover:underline disabled:bg-transparent",
+				edit: "border-primary/25 bg-transparent text-primary hover:bg-primary/5 hover:text-primary disabled:border-border disabled:bg-disabled",
+				delete:
+					"border-[#F2A37F] bg-[#FFF6F1] text-[#D76A3D] hover:border-[#E89066] hover:bg-[#FFF0E8] hover:text-[#D76A3D] disabled:border-border disabled:bg-disabled",
 			},
 			size: {
 				default: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-start]:ps-2 has-data-[icon=inline-end]:pe-2",
@@ -24,8 +27,7 @@ const buttonVariants = cva(
 				sm: "h-8 gap-1 px-2.5 text-sm has-data-[icon=inline-start]:ps-1.5 has-data-[icon=inline-end]:pe-1.5 [&_svg:not([class*='size-'])]:size-3.5",
 				lg: "h-10 gap-1.5 px-2.5 has-data-[icon=inline-start]:ps-2 has-data-[icon=inline-end]:pe-2",
 				icon: "size-9",
-				"icon-xs":
-					"size-7 [&_svg:not([class*='size-'])]:size-3",
+				"icon-xs": "size-7 [&_svg:not([class*='size-'])]:size-3",
 				"icon-sm": "size-8",
 				"icon-lg": "size-10",
 			},

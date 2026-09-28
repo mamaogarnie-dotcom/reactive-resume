@@ -257,7 +257,7 @@ const RoleFields = withForm({
 						<Trans>Reorder</Trans>
 					</Button>
 
-					<Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={onRemove}>
+					<Button size="sm" variant="delete" className="" onClick={onRemove}>
 						<TrashSimpleIcon />
 						<Trans>Remove</Trans>
 					</Button>

@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { ArrowDownIcon, ArrowUpIcon, BriefcaseIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -157,13 +158,21 @@ export function WorkExperienceSection() {
 			aria-labelledby="master-profile-work-experience"
 			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 		>
-			<div>
-				<h2 id="master-profile-work-experience" className="font-semibold text-foreground text-xl">
-					<Trans>Work experience</Trans>
-				</h2>
-				<p className="text-muted-foreground text-sm">
-					<Trans>Add roles that can later be used to create tailored resumes.</Trans>
-				</p>
+			<div className="flex items-start gap-3">
+				<div
+					aria-hidden="true"
+					className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-[#E2C5E7] text-[#A878AA]"
+				>
+					<BriefcaseIcon className="size-4" />
+				</div>
+				<div>
+					<h2 id="master-profile-work-experience" className="font-semibold text-foreground text-xl">
+						<Trans>Work experience</Trans>
+					</h2>
+					<p className="text-muted-foreground text-sm">
+						<Trans>Add roles that can later be used to create tailored resumes.</Trans>
+					</p>
+				</div>
 			</div>
 
 			<form
@@ -262,7 +271,10 @@ export function WorkExperienceSection() {
 				) : null}
 
 				{employments.map((employment) => (
-					<div key={employment.id} className="rounded-card border border-border bg-background p-4">
+					<div
+						key={employment.id}
+						className="rounded-card border border-border/80 bg-background p-4 transition-colors hover:border-primary/30"
+					>
 						{editingId === employment.id ? (
 							<div className="space-y-3">
 								<div className="grid gap-3 md:grid-cols-2">
@@ -352,15 +364,26 @@ export function WorkExperienceSection() {
 						) : (
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 								<div className="min-w-0 space-y-1">
-									<p className="font-medium">{employment.jobTitle || employment.company || t`Employment`}</p>
-									{employment.jobTitle && employment.company ? (
-										<p className="text-muted-foreground text-sm">{employment.company}</p>
-									) : null}
-									<p className="text-muted-foreground text-sm">
-										{employment.startDate || "?"} {" – "}
-										{employment.isCurrent ? t`Present` : employment.endDate || "?"}
+									<p className="font-semibold text-primary">
+										{employment.jobTitle || employment.company || t`Employment`}
 									</p>
-									{employment.location ? <p className="text-muted-foreground text-sm">{employment.location}</p> : null}
+									{employment.jobTitle && employment.company ? (
+										<p className="font-medium text-foreground/80 text-sm">{employment.company}</p>
+									) : null}
+									<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground text-sm">
+										<span>
+											{employment.startDate || "?"} {" - "}
+											{employment.isCurrent ? t`Present` : employment.endDate || "?"}
+										</span>
+										{employment.location ? (
+											<>
+												<span aria-hidden="true" className="text-[#A878AA]">
+													&bull;
+												</span>
+												<span>{employment.location}</span>
+											</>
+										) : null}
+									</div>
 								</div>
 								{!employment.company ? (
 									<p
@@ -374,8 +397,9 @@ export function WorkExperienceSection() {
 								<div className="flex flex-wrap gap-2 sm:shrink-0">
 									<Button
 										type="button"
-										variant="outline"
+										variant="edit"
 										size="sm"
+										className=""
 										onClick={() => {
 											setEditingId(employment.id);
 											setEditCompany(employment.company ?? "");
@@ -390,8 +414,9 @@ export function WorkExperienceSection() {
 									</Button>
 									<Button
 										type="button"
-										variant="outline"
+										variant="delete"
 										size="sm"
+										className=""
 										disabled={deleteEmployment.isPending}
 										onClick={() => deleteEmployment.mutate({ id: employment.id })}
 									>
@@ -409,7 +434,10 @@ export function WorkExperienceSection() {
 								if (!fact) return null;
 
 								return (
-									<div key={link.experienceFactId} className="mt-3 rounded-input bg-muted px-3 py-2">
+									<div
+										key={link.experienceFactId}
+										className="mt-3 rounded-input border border-border bg-card px-3 py-2 transition-colors hover:border-primary/25"
+									>
 										{editingFactId === fact.id ? (
 											<div className="flex flex-wrap gap-2">
 												<Input
@@ -447,76 +475,83 @@ export function WorkExperienceSection() {
 											</div>
 										) : (
 											<div className="flex flex-wrap items-start gap-2">
+												<span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-[#A878AA]" />
 												<p className="min-w-0 flex-1 text-sm">{fact.text}</p>
-												<Button
-													type="button"
-													variant="outline"
-													size="sm"
-													className="shrink-0"
-													disabled={index === 0 || reorderEmploymentFact.isPending}
-													onClick={() => {
-														const previous = links[index - 1];
-														if (!previous) return;
+												<div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5 border-[#EEE4F1] border-l pl-3">
+													<Button
+														type="button"
+														variant="outline"
+														size="icon-xs"
+														className="shrink-0"
+														aria-label={"Przesu\u0144 w g\u00f3r\u0119"}
+														title={"Przesu\u0144 w g\u00f3r\u0119"}
+														disabled={index === 0 || reorderEmploymentFact.isPending}
+														onClick={() => {
+															const previous = links[index - 1];
+															if (!previous) return;
 
-														reorderEmploymentFact.mutate({
-															employmentId: employment.id,
-															firstExperienceFactId: link.experienceFactId,
-															firstSortOrder: previous.sortOrder,
-															secondExperienceFactId: previous.experienceFactId,
-															secondSortOrder: link.sortOrder,
-														});
-													}}
-												>
-													<Trans>Up</Trans>
-												</Button>
-												<Button
-													type="button"
-													variant="outline"
-													size="sm"
-													className="shrink-0"
-													disabled={index === links.length - 1 || reorderEmploymentFact.isPending}
-													onClick={() => {
-														const next = links[index + 1];
-														if (!next) return;
+															reorderEmploymentFact.mutate({
+																employmentId: employment.id,
+																firstExperienceFactId: link.experienceFactId,
+																firstSortOrder: previous.sortOrder,
+																secondExperienceFactId: previous.experienceFactId,
+																secondSortOrder: link.sortOrder,
+															});
+														}}
+													>
+														<ArrowUpIcon aria-hidden="true" />
+													</Button>
+													<Button
+														type="button"
+														variant="outline"
+														size="icon-xs"
+														className="shrink-0"
+														aria-label={"Przesu\u0144 w d\u00f3\u0142"}
+														title={"Przesu\u0144 w d\u00f3\u0142"}
+														disabled={index === links.length - 1 || reorderEmploymentFact.isPending}
+														onClick={() => {
+															const next = links[index + 1];
+															if (!next) return;
 
-														reorderEmploymentFact.mutate({
-															employmentId: employment.id,
-															firstExperienceFactId: link.experienceFactId,
-															firstSortOrder: next.sortOrder,
-															secondExperienceFactId: next.experienceFactId,
-															secondSortOrder: link.sortOrder,
-														});
-													}}
-												>
-													<Trans>Down</Trans>
-												</Button>
-												<Button
-													type="button"
-													variant="outline"
-													size="sm"
-													className="shrink-0"
-													onClick={() => {
-														setEditingFactId(fact.id);
-														setEditFactText(fact.text);
-													}}
-												>
-													<Trans>Edit</Trans>
-												</Button>
-												<Button
-													type="button"
-													variant="outline"
-													size="sm"
-													className="shrink-0"
-													disabled={unlinkEmploymentFact.isPending}
-													onClick={() =>
-														unlinkEmploymentFact.mutate({
-															employmentId: employment.id,
-															experienceFactId: fact.id,
-														})
-													}
-												>
-													<Trans>Remove</Trans>
-												</Button>
+															reorderEmploymentFact.mutate({
+																employmentId: employment.id,
+																firstExperienceFactId: link.experienceFactId,
+																firstSortOrder: next.sortOrder,
+																secondExperienceFactId: next.experienceFactId,
+																secondSortOrder: link.sortOrder,
+															});
+														}}
+													>
+														<ArrowDownIcon aria-hidden="true" />
+													</Button>
+													<Button
+														type="button"
+														variant="edit"
+														size="xs"
+														className="shrink-0"
+														onClick={() => {
+															setEditingFactId(fact.id);
+															setEditFactText(fact.text);
+														}}
+													>
+														<Trans>Edit</Trans>
+													</Button>
+													<Button
+														type="button"
+														variant="delete"
+														size="xs"
+														className="shrink-0"
+														disabled={unlinkEmploymentFact.isPending}
+														onClick={() =>
+															unlinkEmploymentFact.mutate({
+																employmentId: employment.id,
+																experienceFactId: fact.id,
+															})
+														}
+													>
+														<Trans>Remove</Trans>
+													</Button>
+												</div>
 											</div>
 										)}
 									</div>
