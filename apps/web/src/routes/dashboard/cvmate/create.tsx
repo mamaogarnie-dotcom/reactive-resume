@@ -1161,10 +1161,10 @@ function RouteComponent() {
 
 			<div className="mx-auto max-w-5xl space-y-6">
 				<div className="space-y-1">
-					<h2 className="font-medium text-lg">
+					<h2 className="font-semibold text-[#3C4F27] text-xl">
 						<Trans>Job offer</Trans>
 					</h2>
-					<p className="text-muted-foreground text-sm">
+					<p className="text-[#65745A] text-sm">
 						<Trans>
 							Paste the job offer, paste a link, or attach a PDF/image. 1story will analyze it before building your
 							tailored CV.
@@ -1213,19 +1213,19 @@ function RouteComponent() {
 					</div>
 				) : !activeOffer && !manualMode ? (
 					<form
-						className="space-y-5 rounded-xl border bg-card p-5"
+						className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-5 sm:p-6"
 						onSubmit={(event) => {
 							event.preventDefault();
 							if (canAnalyze) analyzeOffer.mutate();
 						}}
 					>
 						<div className="space-y-2">
-							<label className="font-medium text-sm" htmlFor="cvmate-job-offer-text">
+							<label className="font-medium text-[#3C4F27] text-sm" htmlFor="cvmate-job-offer-text">
 								<Trans>Paste job offer</Trans>
 							</label>
 							<Textarea
 								id="cvmate-job-offer-text"
-								className="min-h-56 resize-y"
+								className="min-h-56 resize-y border-[#D9E3D2] bg-[#FCFDF9] text-[#3C4F27] placeholder:text-[#AAB5A1] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 								placeholder={t`Paste the complete job offer here...`}
 								value={rawText}
 								disabled={analyzeOffer.isPending}
@@ -1234,20 +1234,20 @@ function RouteComponent() {
 						</div>
 
 						<div className="space-y-2">
-							<label className="font-medium text-sm" htmlFor="cvmate-job-offer-url">
+							<label className="font-medium text-[#3C4F27] text-sm" htmlFor="cvmate-job-offer-url">
 								<Trans>Or paste a link to the job offer</Trans>
 							</label>
 							<Input
 								id="cvmate-job-offer-url"
 								type="url"
 								inputMode="url"
-								autoComplete="url"
+								autoComplete="url" className="border-[#D9E3D2] bg-[#FCFDF9] text-[#3C4F27] placeholder:text-[#AAB5A1] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 								placeholder="https://..."
 								value={sourceUrl}
 								disabled={analyzeOffer.isPending}
 								onChange={(event) => setSourceUrl(event.target.value)}
 							/>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-[#65745A] text-sm">
 								<Trans>
 									1story will securely read the public page. If the site blocks automatic access, paste the offer text
 									or attach a file instead.
@@ -1256,28 +1256,28 @@ function RouteComponent() {
 						</div>
 
 						<div className="space-y-2">
-							<label className="font-medium text-sm" htmlFor="cvmate-job-offer-file">
+							<label className="font-medium text-[#3C4F27] text-sm" htmlFor="cvmate-job-offer-file">
 								<Trans>Or attach a file</Trans>
 							</label>
 							<Input
 								id="cvmate-job-offer-file"
 								type="file"
-								className="h-auto py-2"
+								className="h-auto border-[#D9E3D2] bg-[#FCFDF9] py-2 text-[#3C4F27] file:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 								accept="application/pdf,image/jpeg,image/png,image/webp,image/gif"
 								disabled={analyzeOffer.isPending}
 								onChange={(event) => setAsset(event.target.files?.[0] ?? null)}
 							/>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-[#65745A] text-sm">
 								<Trans>PDF, JPEG, PNG, WebP or GIF, up to 10 MB.</Trans>
 							</p>
 						</div>
 
-						<div className="flex flex-col gap-3 rounded-lg border border-dashed bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex flex-col gap-3 rounded-card border border-[#E2C5E7] bg-[#FCFDF9] p-4 sm:flex-row sm:items-center sm:justify-between">
 							<div className="space-y-1">
-								<p className="font-medium text-sm">
+								<p className="font-semibold text-[#A878AA] text-sm">
 									<Trans>Create a CV without a job offer or AI</Trans>
 								</p>
-								<p className="text-muted-foreground text-sm">
+								<p className="text-[#65745A] text-sm">
 									<Trans>
 										Skip the job offer and choose the CV content yourself from your Master Profile. No AI will be used.
 									</Trans>
@@ -1286,7 +1286,7 @@ function RouteComponent() {
 							<Button
 								type="button"
 								variant="outline"
-								className="shrink-0"
+								className="shrink-0 border-[#E2C5E7] bg-white text-[#3C4F27] hover:border-[#A878AA] hover:bg-[#FCFDF9] hover:text-[#3C4F27] focus-visible:border-[#A878AA] focus-visible:ring-[rgba(168,120,170,0.18)]"
 								disabled={startManualCv.isPending || analyzeOffer.isPending}
 								onClick={() => startManualCv.mutate()}
 							>
@@ -1317,7 +1317,7 @@ function RouteComponent() {
 						) : null}
 
 						<div className="flex justify-end">
-							<Button type="submit" disabled={!canAnalyze || analyzeOffer.isPending}>
+							<Button type="submit" className="bg-[#3C4F27] text-white hover:bg-[#5E7B49] focus-visible:ring-[rgba(168,120,170,0.18)]" disabled={!canAnalyze || analyzeOffer.isPending}>
 								{analyzeOffer.isPending ? <Trans>Analyzing...</Trans> : <Trans>Save and analyze</Trans>}
 							</Button>
 						</div>
