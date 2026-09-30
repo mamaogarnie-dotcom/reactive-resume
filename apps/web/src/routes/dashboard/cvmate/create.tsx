@@ -1326,16 +1326,16 @@ function RouteComponent() {
 					<div className="space-y-6">
 						{activeOffer ? (
 							<>
-								<div className="rounded-xl border bg-card p-5">
+								<div className="rounded-xl border border-[#D9E3D2] bg-white p-5">
 									<div className="flex flex-wrap items-start justify-between gap-4">
 										<div className="space-y-1">
-											<h3 className="font-medium text-base">{activeOffer.roleTitle ?? t`Analyzed job offer`}</h3>
-											<p className="text-muted-foreground text-sm">
-												{[activeOffer.companyName, activeOffer.location].filter(Boolean).join(" Â· ") ||
+											<h3 className="font-semibold text-[#3C4F27] text-base">{activeOffer.roleTitle ?? t`Analyzed job offer`}</h3>
+											<p className="text-[#65745A] text-sm">
+												{[activeOffer.companyName, activeOffer.location].filter(Boolean).join(" \u00B7 ") ||
 													t`Analysis completed`}
 											</p>
 										</div>
-										<Button type="button" variant="outline" onClick={reset}>
+										<Button type="button" variant="outline" className="border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]" onClick={reset}>
 											<Trans>Analyze another offer</Trans>
 										</Button>
 									</div>
@@ -1348,19 +1348,19 @@ function RouteComponent() {
 											if (requirements.length === 0) return null;
 
 											return (
-												<section key={category} className="rounded-xl border bg-card p-5">
+												<section key={category} className="rounded-xl border border-[#E4EBDD] bg-white p-5">
 													<div className="mb-3 flex items-center justify-between gap-3">
-														<h3 className="font-medium text-sm">{categoryTitle(category)}</h3>
-														<span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-sm">
+														<h3 className="font-semibold text-[#3C4F27] text-sm">{categoryTitle(category)}</h3>
+														<span className="rounded-full border border-[#D9E3D2] bg-[#EEF3E8] px-2 py-0.5 text-[#65745A] text-sm">
 															{requirements.length}
 														</span>
 													</div>
 													<ul className="space-y-2">
 														{requirements.map((requirement) => (
-															<li key={requirement.id} className="rounded-md bg-muted/40 px-3 py-2 text-sm">
+															<li key={requirement.id} className="rounded-md border border-[#E4EBDD] bg-[#F8FAF5] px-3 py-2 text-sm">
 																<div className="flex items-start justify-between gap-3">
-																	<span>{requirement.text}</span>
-																	<span className="shrink-0 text-muted-foreground text-sm">
+																	<span className="text-[#3C4F27]">{requirement.text}</span>
+																	<span className="shrink-0 text-[#65745A] text-sm">
 																		{priorityLabel(requirement.priority)}
 																	</span>
 																</div>
@@ -1374,7 +1374,7 @@ function RouteComponent() {
 								</div>
 
 								{activeOffer.requirements.length === 0 ? (
-									<div className="rounded-xl border bg-card p-5 text-muted-foreground text-sm">
+									<div className="rounded-xl border border-[#E4EBDD] bg-[#F8FAF5] p-5 text-[#65745A] text-sm">
 										<Trans>Analysis completed, but no structured requirements were extracted.</Trans>
 									</div>
 								) : null}
