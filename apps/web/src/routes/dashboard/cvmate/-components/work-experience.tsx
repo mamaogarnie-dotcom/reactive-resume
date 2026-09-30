@@ -156,7 +156,7 @@ export function WorkExperienceSection() {
 	return (
 		<section
 			aria-labelledby="master-profile-work-experience"
-			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+			className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
 		>
 			<div className="flex items-start gap-3">
 				<div
@@ -166,17 +166,17 @@ export function WorkExperienceSection() {
 					<BriefcaseIcon className="size-4" />
 				</div>
 				<div>
-					<h2 id="master-profile-work-experience" className="font-semibold text-foreground text-xl">
+					<h2 id="master-profile-work-experience" className="font-semibold text-[#3C4F27] text-xl">
 						<Trans>Work experience</Trans>
 					</h2>
-					<p className="text-muted-foreground text-sm">
+					<p className="text-[#65745A] text-sm">
 						<Trans>Add roles that can later be used to create tailored resumes.</Trans>
 					</p>
 				</div>
 			</div>
 
 			<form
-				className="space-y-4 rounded-card border border-border bg-muted p-4"
+				className="space-y-4 rounded-card border border-[#D9E3D2] bg-[#F8FAF5] p-4"
 				onSubmit={(event) => {
 					event.preventDefault();
 					if (!canCreate) return;
@@ -259,13 +259,13 @@ export function WorkExperienceSection() {
 
 			<div className="space-y-3">
 				{profileQuery.isLoading ? (
-					<p className="text-muted-foreground text-sm">
+					<p className="text-[#65745A] text-sm">
 						<Trans>Loading experience...</Trans>
 					</p>
 				) : null}
 
 				{!profileQuery.isLoading && employments.length === 0 ? (
-					<p className="text-muted-foreground text-sm">
+					<p className="text-[#65745A] text-sm">
 						<Trans>No work experience has been added yet.</Trans>
 					</p>
 				) : null}
@@ -273,7 +273,7 @@ export function WorkExperienceSection() {
 				{employments.map((employment) => (
 					<div
 						key={employment.id}
-						className="rounded-card border border-border/80 bg-background p-4 transition-colors hover:border-primary/30"
+						className="rounded-card border border-[#D9E3D2] bg-[#FCFDF9] p-4 transition-colors hover:border-[#8FA27F] focus-within:border-[#8FA27F]"
 					>
 						{editingId === employment.id ? (
 							<div className="space-y-3">
@@ -364,20 +364,20 @@ export function WorkExperienceSection() {
 						) : (
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 								<div className="min-w-0 space-y-1">
-									<p className="font-semibold text-primary">
+									<p className="font-semibold text-[#3C4F27]">
 										{employment.jobTitle || employment.company || t`Employment`}
 									</p>
 									{employment.jobTitle && employment.company ? (
-										<p className="font-medium text-foreground/80 text-sm">{employment.company}</p>
+										<p className="font-medium text-[#65745A] text-sm">{employment.company}</p>
 									) : null}
-									<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground text-sm">
+									<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[#65745A] text-sm">
 										<span>
 											{employment.startDate || "?"} {" - "}
 											{employment.isCurrent ? t`Present` : employment.endDate || "?"}
 										</span>
 										{employment.location ? (
 											<>
-												<span aria-hidden="true" className="text-[#A878AA]">
+												<span aria-hidden="true" className="text-[#8FA27F]">
 													&bull;
 												</span>
 												<span>{employment.location}</span>
@@ -394,12 +394,12 @@ export function WorkExperienceSection() {
 										<Trans>Complete this employment before using it in a CV. Required field: Company.</Trans>
 									</p>
 								) : null}{" "}
-								<div className="flex flex-wrap gap-2 sm:shrink-0">
+								<div className="flex flex-wrap gap-1.5 sm:shrink-0 sm:pr-3">
 									<Button
 										type="button"
 										variant="edit"
 										size="sm"
-										className=""
+										className="min-w-[4.5rem] border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										onClick={() => {
 											setEditingId(employment.id);
 											setEditCompany(employment.company ?? "");
@@ -416,7 +416,7 @@ export function WorkExperienceSection() {
 										type="button"
 										variant="delete"
 										size="sm"
-										className=""
+										className="min-w-[4rem] border-[#E4A18D] bg-white text-[#B45E43] hover:border-[#C96C50] hover:bg-[#FFF2ED] hover:text-[#B45E43] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										disabled={deleteEmployment.isPending}
 										onClick={() => deleteEmployment.mutate({ id: employment.id })}
 									>
@@ -436,7 +436,7 @@ export function WorkExperienceSection() {
 								return (
 									<div
 										key={link.experienceFactId}
-										className="mt-3 rounded-input border border-border bg-card px-3 py-2 transition-colors hover:border-primary/25"
+										className="mt-3 rounded-input border border-[#E4EBDD] bg-white px-3 py-2 transition-colors hover:border-[#8FA27F] hover:bg-[#F1F5EC] focus-within:border-[#8FA27F] focus-within:bg-[#F3F6EF]"
 									>
 										{editingFactId === fact.id ? (
 											<div className="flex flex-wrap gap-2">
@@ -475,14 +475,14 @@ export function WorkExperienceSection() {
 											</div>
 										) : (
 											<div className="flex flex-wrap items-start gap-2">
-												<span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-[#A878AA]" />
+												<span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-[#5E7B49]" />
 												<p className="min-w-0 flex-1 text-sm">{fact.text}</p>
-												<div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5 border-[#EEE4F1] border-l pl-3">
+												<div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5 border-[#E1E8DA] border-l pl-3">
 													<Button
 														type="button"
 														variant="outline"
 														size="icon-xs"
-														className="shrink-0"
+														className="shrink-0 border-[#AAB99C] bg-[#F8FAF5] text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)] disabled:border-[#D9E2D2] disabled:bg-[#F8FAF5] disabled:text-[#AAB5A1] disabled:opacity-[0.55]"
 														aria-label={"Przesu\u0144 w g\u00f3r\u0119"}
 														title={"Przesu\u0144 w g\u00f3r\u0119"}
 														disabled={index === 0 || reorderEmploymentFact.isPending}
@@ -505,7 +505,7 @@ export function WorkExperienceSection() {
 														type="button"
 														variant="outline"
 														size="icon-xs"
-														className="shrink-0"
+														className="shrink-0 border-[#AAB99C] bg-[#F8FAF5] text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)] disabled:border-[#D9E2D2] disabled:bg-[#F8FAF5] disabled:text-[#AAB5A1] disabled:opacity-[0.55]"
 														aria-label={"Przesu\u0144 w d\u00f3\u0142"}
 														title={"Przesu\u0144 w d\u00f3\u0142"}
 														disabled={index === links.length - 1 || reorderEmploymentFact.isPending}
@@ -528,7 +528,7 @@ export function WorkExperienceSection() {
 														type="button"
 														variant="edit"
 														size="xs"
-														className="shrink-0"
+														className="min-w-[4.5rem] shrink-0 border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 														onClick={() => {
 															setEditingFactId(fact.id);
 															setEditFactText(fact.text);
@@ -540,7 +540,7 @@ export function WorkExperienceSection() {
 														type="button"
 														variant="delete"
 														size="xs"
-														className="shrink-0"
+														className="min-w-[4rem] shrink-0 border-[#E4A18D] bg-white text-[#B45E43] hover:border-[#C96C50] hover:bg-[#FFF2ED] hover:text-[#B45E43] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 														disabled={unlinkEmploymentFact.isPending}
 														onClick={() =>
 															unlinkEmploymentFact.mutate({
@@ -559,7 +559,7 @@ export function WorkExperienceSection() {
 							})}
 
 						<form
-							className="mt-3 flex flex-col gap-2 border-t pt-3 sm:flex-row"
+							className="mt-3 flex flex-col gap-2 border-[#E1E8DA] border-t pt-3 sm:flex-row"
 							onSubmit={(event) => {
 								event.preventDefault();
 
