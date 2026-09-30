@@ -8172,3 +8172,36 @@ msgstr "Kontynuuj bez wykształcenia"
 #: src/routes/dashboard/cvmate/create.tsx
 msgid "Back and select education"
 msgstr "Wróć i wybierz wykształcenie"
+
+msgid "Open beta"
+msgstr "Otwarta wersja beta"
+
+msgid "Email verification is disabled during beta. You may use a test address in a valid email format, such as tester123@example.com."
+msgstr "Weryfikacja adresu e-mail jest wyłączona w wersji beta. Możesz użyć testowego adresu w prawidłowym formacie, na przykład tester123@example.com."
+
+msgid "Check your email"
+msgstr "Sprawdź swoją skrzynkę e-mail"
+
+msgid "We sent you a link to verify your account."
+msgstr "Wysłaliśmy Ci link do weryfikacji konta."
+
+msgid "Email verification required"
+msgstr "Weryfikacja adresu e-mail jest wymagana"
+
+msgid "Open the verification link in your email to activate your account."
+msgstr "Otwórz link weryfikacyjny w wiadomości e-mail, aby aktywować konto."
+
+msgid "Account created"
+msgstr "Konto zostało utworzone"
+
+msgid "Your beta account is ready. You can continue without verifying your email."
+msgstr "Twoje konto beta jest gotowe. Możesz przejść dalej bez weryfikowania adresu e-mail."
+
+msgid "Using a test email?"
+msgstr "Używasz testowego adresu e-mail?"
+
+msgid "Password recovery will not work unless you can receive messages at this address."
+msgstr "Odzyskanie hasła nie będzie możliwe, jeśli nie możesz odbierać wiadomości pod tym adresem."
+
+msgid "Continue to dashboard"
+msgstr "Dalej do aplikacji"
