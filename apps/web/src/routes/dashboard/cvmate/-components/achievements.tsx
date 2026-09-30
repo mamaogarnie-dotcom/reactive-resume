@@ -49,7 +49,7 @@ export function AchievementsSection() {
 	return (
 		<section
 			aria-labelledby="master-profile-achievements"
-			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+			className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
 		>
 			<div className="flex items-start gap-3">
 				<div
@@ -59,10 +59,10 @@ export function AchievementsSection() {
 					<TrophyIcon className="size-4" />
 				</div>
 				<div className="space-y-1">
-					<h2 id="master-profile-achievements" className="font-semibold text-foreground text-xl">
+					<h2 id="master-profile-achievements" className="font-semibold text-[#3C4F27] text-xl">
 						<Trans>Achievements</Trans>
 					</h2>
-					<p className="text-muted-foreground text-sm">
+					<p className="text-[#65745A] text-sm">
 						<Trans>
 							Add concrete results, improvements, measurable impact, or other professional achievements worth using in a
 							tailored resume.
@@ -72,7 +72,7 @@ export function AchievementsSection() {
 			</div>
 
 			<form
-				className="flex flex-col gap-2 rounded-card border border-border bg-muted p-4 sm:flex-row"
+				className="flex flex-col gap-2 rounded-card border border-[#D9E3D2] bg-[#F8FAF5] p-4 sm:flex-row"
 				onSubmit={(event) => {
 					event.preventDefault();
 
@@ -97,7 +97,7 @@ export function AchievementsSection() {
 					type="submit"
 					variant="outline"
 					size="sm"
-					className="shrink-0"
+					className="shrink-0 border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 					disabled={!trimmedAchievement || createAchievement.isPending}
 				>
 					{createAchievement.isPending ? <Trans>Adding...</Trans> : <Trans>Add achievement</Trans>}
@@ -114,7 +114,7 @@ export function AchievementsSection() {
 			) : null}
 
 			{profileQuery.isLoading ? (
-				<p className="text-muted-foreground text-sm">
+				<p className="text-[#65745A] text-sm">
 					<Trans>Loading achievements...</Trans>
 				</p>
 			) : null}
@@ -129,7 +129,7 @@ export function AchievementsSection() {
 			) : null}
 
 			{!profileQuery.isLoading && !profileQuery.isError && achievements.length === 0 ? (
-				<p className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
+				<p className="rounded-input border border-[#E4EBDD] bg-[#F8FAF5] p-3 text-[#65745A] text-sm">
 					<Trans>No achievements added yet.</Trans>
 				</p>
 			) : null}
@@ -137,7 +137,7 @@ export function AchievementsSection() {
 			{achievements.length > 0 ? (
 				<div className="space-y-3">
 					{achievements.map((achievement) => (
-						<div key={achievement.id} className="rounded-card border border-border bg-background p-4">
+						<div key={achievement.id} className="rounded-card border border-[#E4EBDD] bg-white p-4 transition-colors hover:border-[#8FA27F] hover:bg-[#F1F5EC] focus-within:border-[#8FA27F] focus-within:bg-[#F3F6EF]">
 							{editingId === achievement.id ? (
 								<div className="flex flex-col gap-2 sm:flex-row">
 									<Input
@@ -180,13 +180,14 @@ export function AchievementsSection() {
 								</div>
 							) : (
 								<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-									<p className="min-w-0 flex-1 text-sm">{achievement.text}</p>
+									<div className="flex min-w-0 flex-1 items-start gap-2"><span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-[#5E7B49]" /><p className="min-w-0 flex-1 text-sm">{achievement.text}</p></div>
 
-									<div className="flex flex-wrap gap-2 sm:shrink-0">
+									<div className="flex flex-wrap gap-1.5 sm:shrink-0">
 										<Button
 											type="button"
 											variant="edit"
 											size="sm"
+											className="min-w-[4.5rem] border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 											onClick={() => {
 												setEditingId(achievement.id);
 												setEditText(achievement.text);
@@ -199,6 +200,7 @@ export function AchievementsSection() {
 											type="button"
 											variant="delete"
 											size="sm"
+											className="min-w-[4rem] border-[#E4A18D] bg-white text-[#B45E43] hover:border-[#C96C50] hover:bg-[#FFF2ED] hover:text-[#B45E43] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 											disabled={deleteAchievement.isPending}
 											onClick={() => deleteAchievement.mutate({ id: achievement.id })}
 										>
