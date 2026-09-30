@@ -1092,7 +1092,7 @@ function ClausesSection() {
 	return (
 		<section
 			aria-labelledby="master-profile-recruitment-clauses"
-			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+			className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
 		>
 			<div className="flex items-start gap-3">
 				<div
@@ -1102,10 +1102,10 @@ function ClausesSection() {
 					<FileTextIcon className="size-4" />
 				</div>
 				<div>
-					<h2 id="master-profile-recruitment-clauses" className="font-semibold text-foreground text-xl">
+					<h2 id="master-profile-recruitment-clauses" className="font-semibold text-[#3C4F27] text-xl">
 						<Trans>Recruitment clauses</Trans>
 					</h2>
-					<p className="text-muted-foreground text-sm">
+					<p className="text-[#65745A] text-sm">
 						<Trans>
 							Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV
 							language.
@@ -1114,7 +1114,13 @@ function ClausesSection() {
 				</div>
 			</div>
 
-			<div className="space-y-2 rounded-card border border-border bg-muted p-4">
+			<div
+				className={`space-y-2 rounded-card border p-4 transition-colors ${
+					selectedScope === null
+						? "border-[#8FA27F] bg-[#F3F6EF]"
+						: "border-[#D9E3D2] bg-[#F8FAF5]"
+				}`}
+			>
 				<label className="flex items-center gap-2 text-base">
 					<input
 						type="radio"
@@ -1130,8 +1136,15 @@ function ClausesSection() {
 
 			<div className="space-y-4">
 				{clauseScopeDefinitions.map((scopeDefinition) => (
-					<div key={scopeDefinition.scope} className="space-y-4 rounded-card border border-border bg-background p-4">
-						<label className="flex items-center gap-2 font-medium text-base">
+					<div
+						key={scopeDefinition.scope}
+						className={`space-y-4 rounded-card border p-4 transition-colors ${
+							selectedScope === scopeDefinition.scope
+								? "border-[#8FA27F] bg-[#F3F6EF]"
+								: "border-[#E4EBDD] bg-white"
+						}`}
+					>
+						<label className="flex items-center gap-2 font-medium text-[#3C4F27] text-base">
 							<input
 								type="radio"
 								className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
@@ -1151,8 +1164,8 @@ function ClausesSection() {
 								return (
 									<div key={key} className="space-y-3">
 										<div className="flex items-center justify-between gap-3">
-											<p className="font-medium text-sm">{i18n.t(languageDefinition.title)}</p>
-											<p className="text-muted-foreground text-sm">
+											<p className="font-medium text-[#3C4F27] text-sm">{i18n.t(languageDefinition.title)}</p>
+											<p className="text-[#65745A] text-sm">
 												{draft.isDefault ? <Trans>1story default</Trans> : <Trans>Custom text</Trans>}
 											</p>
 										</div>
@@ -1177,6 +1190,7 @@ function ClausesSection() {
 												type="button"
 												variant="outline"
 												size="sm"
+												className="border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 												disabled={mutationPending}
 												onClick={() =>
 													saveMutation.mutate({
@@ -1192,6 +1206,7 @@ function ClausesSection() {
 												type="button"
 												variant="outline"
 												size="sm"
+												className="border-[#D9E3D2] bg-white text-[#65745A] hover:border-[#8FA27F] hover:bg-[#F1F5EC] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)] disabled:border-[#D9E2D2] disabled:text-[#AAB5A1] disabled:opacity-[0.55]"
 												disabled={mutationPending || draft.isDefault}
 												onClick={() =>
 													restoreMutation.mutate({
