@@ -251,6 +251,7 @@ const getAuthConfig = () => {
 		account: {
 			accountLinking: {
 				enabled: true,
+				requireLocalEmailVerified: false,
 				trustedProviders: ["google", "github", "linkedin"],
 			},
 		},
