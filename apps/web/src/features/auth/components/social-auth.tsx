@@ -34,7 +34,7 @@ export function SocialAuth({ mode = "login" }: { mode?: "login" | "register" }) 
 
 function SocialAuthSkeleton() {
 	return (
-		<div className="grid grid-cols-2 gap-4">
+		<div className="grid grid-cols-1 gap-3">
 			<Skeleton className="h-9 w-full" />
 			<Skeleton className="h-9 w-full" />
 			<Skeleton className="h-9 w-full" />
@@ -78,7 +78,7 @@ function SocialAuthButtons({ providers, mode }: SocialAuthButtonsProps) {
 	};
 
 	return (
-		<div className="grid grid-cols-2 gap-4">
+		<div className="grid grid-cols-1 gap-3">
 			<Button
 				variant="secondary"
 				onClick={() =>
@@ -108,6 +108,7 @@ function SocialAuthButtons({ providers, mode }: SocialAuthButtonsProps) {
 			</Button>
 
 			<Button
+				variant="secondary"
 				onClick={() =>
 					runSignIn(() =>
 						authClient.signIn.social({
@@ -118,7 +119,7 @@ function SocialAuthButtons({ providers, mode }: SocialAuthButtonsProps) {
 					)
 				}
 				className={cn(
-					"hidden flex-1 bg-[#4285F4] text-white hover:bg-[#4285F4]/80",
+					"hidden",
 					"google" in providers && "inline-flex",
 				)}
 			>
@@ -131,6 +132,7 @@ function SocialAuthButtons({ providers, mode }: SocialAuthButtonsProps) {
 			</Button>
 
 			<Button
+				variant="secondary"
 				onClick={() =>
 					runSignIn(() =>
 						authClient.signIn.social({
@@ -141,7 +143,7 @@ function SocialAuthButtons({ providers, mode }: SocialAuthButtonsProps) {
 					)
 				}
 				className={cn(
-					"hidden flex-1 bg-[#2b3137] text-white hover:bg-[#2b3137]/80",
+					"hidden",
 					"github" in providers && "inline-flex",
 				)}
 			>
@@ -150,6 +152,7 @@ function SocialAuthButtons({ providers, mode }: SocialAuthButtonsProps) {
 			</Button>
 
 			<Button
+				variant="secondary"
 				onClick={() =>
 					runSignIn(() =>
 						authClient.signIn.social({
@@ -160,7 +163,7 @@ function SocialAuthButtons({ providers, mode }: SocialAuthButtonsProps) {
 					)
 				}
 				className={cn(
-					"hidden flex-1 bg-[#0A66C2] text-white hover:bg-[#0A66C2]/80",
+					"hidden",
 					"linkedin" in providers && "inline-flex",
 				)}
 			>
