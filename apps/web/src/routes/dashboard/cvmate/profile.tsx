@@ -103,7 +103,7 @@ function RouteComponent() {
 			<div className="mx-auto max-w-5xl space-y-8">
 				<section
 					aria-labelledby="master-profile-personal-details"
-					className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+					className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
 				>
 					<div className="flex items-start gap-3">
 						<div
@@ -113,10 +113,10 @@ function RouteComponent() {
 							<UserCircleIcon className="size-4" />
 						</div>
 						<div className="space-y-1">
-							<h2 id="master-profile-personal-details" className="font-semibold text-foreground text-xl">
+							<h2 id="master-profile-personal-details" className="font-semibold text-[#3C4F27] text-xl">
 								<Trans>Personal details</Trans>
 							</h2>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-[#65745A] text-sm">
 								<Trans>
 									Your Master Profile is the permanent source of facts used by 1story when creating tailored resumes.
 								</Trans>
@@ -125,7 +125,7 @@ function RouteComponent() {
 					</div>
 
 					{profileQuery.isLoading ? (
-						<p className="text-muted-foreground text-sm">
+						<p className="text-[#65745A] text-sm">
 							<Trans>Loading profile...</Trans>
 						</p>
 					) : null}
@@ -137,14 +137,14 @@ function RouteComponent() {
 					) : null}
 
 					{!profileQuery.isLoading && !profileQuery.isError && profileQuery.data === null ? (
-						<div className="rounded-card border border-border bg-muted p-3 text-muted-foreground text-sm">
+						<div className="rounded-card border border-[#E4EBDD] bg-[#F8FAF5] p-3 text-[#65745A] text-sm">
 							<Trans>
 								Your Master Profile has not been created yet. Saving these details will create it automatically.
 							</Trans>
 						</div>
 					) : null}
 
-					<form className="space-y-5" onSubmit={handleSubmit}>
+					<form className="space-y-5 rounded-card border border-[#D9E3D2] bg-[#F8FAF5] p-4" onSubmit={handleSubmit}>
 						<div className="grid gap-4 sm:grid-cols-2">
 							<div className="space-y-1.5">
 								<Label htmlFor="cvmate-first-name">
@@ -246,7 +246,7 @@ function RouteComponent() {
 						) : null}
 
 						{updateBasics.isSuccess ? (
-							<p className="text-muted-foreground text-sm">
+							<p className="text-[#65745A] text-sm">
 								<Trans>Profile saved.</Trans>
 							</p>
 						) : null}
