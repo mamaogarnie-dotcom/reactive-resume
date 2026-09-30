@@ -1,6 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { env } from "@reactive-resume/env/server";
 import { auth } from "./config";
+
+vi.mock("@better-auth/oauth-provider", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@better-auth/oauth-provider")>();
+
+	return {
+		...actual,
+		oauthProvider: (...args: Parameters<typeof actual.oauthProvider>) => {
+			const plugin = actual.oauthProvider(...args);
+			return { ...plugin, init: undefined };
+		},
+	};
+});
 
 describe("social provider signup policy", () => {
 	it.each(["google", "github", "linkedin"] as const)(
@@ -14,6 +26,13 @@ describe("social provider signup policy", () => {
 			expect(config?.disableSignUp).toBe(env.FLAG_DISABLE_SIGNUPS);
 		},
 	);
+});
+
+describe("email verification policy", () => {
+	it("uses the explicit environment flag for password signup verification and signup emails", () => {
+		expect(auth.options.emailAndPassword?.requireEmailVerification).toBe(env.FLAG_REQUIRE_EMAIL_VERIFICATION);
+		expect(auth.options.emailVerification?.sendOnSignUp).toBe(env.FLAG_REQUIRE_EMAIL_VERIFICATION);
+	});
 });
 
 describe("session freshness", () => {

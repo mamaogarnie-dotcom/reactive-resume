@@ -5,6 +5,7 @@ import { publicProcedure } from "../../context";
 export type FeatureFlags = {
 	disableSignups: boolean;
 	disableEmailAuth: boolean;
+	requireEmailVerification: boolean;
 	smtpEnabled: boolean;
 };
 
@@ -27,6 +28,7 @@ export const flagsRouter = {
 			z.object({
 				disableSignups: z.boolean().describe("Whether new user signups are disabled on this instance."),
 				disableEmailAuth: z.boolean().describe("Whether email-based authentication is disabled on this instance."),
+				requireEmailVerification: z.boolean().describe("Whether new email/password accounts must verify their email address."),
 				smtpEnabled: z.boolean().describe("Whether outbound email (SMTP) is configured on this instance."),
 			}),
 		)
@@ -34,6 +36,7 @@ export const flagsRouter = {
 			(): FeatureFlags => ({
 				disableSignups: env.FLAG_DISABLE_SIGNUPS,
 				disableEmailAuth: env.FLAG_DISABLE_EMAIL_AUTH,
+				requireEmailVerification: env.FLAG_REQUIRE_EMAIL_VERIFICATION,
 				smtpEnabled: isSmtpEnabled(),
 			}),
 		),

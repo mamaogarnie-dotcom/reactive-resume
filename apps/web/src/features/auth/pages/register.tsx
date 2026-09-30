@@ -32,9 +32,10 @@ const formSchema = z.object({
 
 type Props = {
 	disableEmailAuth: boolean;
+	requireEmailVerification: boolean;
 };
 
-export function RegisterPage({ disableEmailAuth }: Props) {
+export function RegisterPage({ disableEmailAuth, requireEmailVerification }: Props) {
 	const { callbackURL, reauthenticate } = useSearch({ from: "/auth" });
 	const [submitted, setSubmitted] = useState(false);
 	const [showPassword, toggleShowPassword] = useToggle(false);
@@ -89,7 +90,7 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 		},
 	});
 
-	if (submitted) return <PostSignupScreen />;
+	if (submitted) return <PostSignupScreen requireEmailVerification={requireEmailVerification} />;
 
 	return (
 		<>
@@ -115,6 +116,20 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 					</Trans>
 				</div>
 			</div>
+
+			{!requireEmailVerification && !disableEmailAuth && (
+				<Alert>
+					<AlertTitle>
+						<Trans>Open beta</Trans>
+					</AlertTitle>
+					<AlertDescription>
+						<Trans>
+							Email verification is disabled during beta. You may use a test address in a valid email format, such as
+							tester123@example.com.
+						</Trans>
+					</AlertDescription>
+				</Alert>
+			)}
 
 			{!disableEmailAuth && (
 				<form
@@ -264,25 +279,50 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 	);
 }
 
-function PostSignupScreen() {
+function PostSignupScreen({ requireEmailVerification }: { requireEmailVerification: boolean }) {
 	const { callbackURL } = useSearch({ from: "/auth" });
+
+	if (requireEmailVerification) {
+		return (
+			<>
+				<div className="space-y-1 text-center">
+					<h1 className="font-semibold text-2xl tracking-tight">
+						<Trans>Check your email</Trans>
+					</h1>
+					<p className="text-muted-foreground">
+						<Trans>We sent you a link to verify your account.</Trans>
+					</p>
+				</div>
+
+				<Alert>
+					<AlertTitle>
+						<Trans>Email verification required</Trans>
+					</AlertTitle>
+					<AlertDescription>
+						<Trans>Open the verification link in your email to activate your account.</Trans>
+					</AlertDescription>
+				</Alert>
+			</>
+		);
+	}
+
 	return (
 		<>
 			<div className="space-y-1 text-center">
 				<h1 className="font-semibold text-2xl tracking-tight">
-					<Trans>You've got mail!</Trans>
+					<Trans>Account created</Trans>
 				</h1>
 				<p className="text-muted-foreground">
-					<Trans>Check your email for a link to verify your account.</Trans>
+					<Trans>Your beta account is ready. You can continue without verifying your email.</Trans>
 				</p>
 			</div>
 
 			<Alert>
 				<AlertTitle>
-					<Trans>This step is optional, but recommended.</Trans>
+					<Trans>Using a test email?</Trans>
 				</AlertTitle>
 				<AlertDescription>
-					<Trans>Verifying your email is required when resetting your password.</Trans>
+					<Trans>Password recovery will not work unless you can receive messages at this address.</Trans>
 				</AlertDescription>
 			</Alert>
 
@@ -290,7 +330,9 @@ function PostSignupScreen() {
 				nativeButton={false}
 				render={
 					<a href={callbackURL ?? "/dashboard"}>
-						<Trans comment="Button label to continue to dashboard after successful registration">Continue</Trans>{" "}
+						<Trans comment="Button label to continue to dashboard after successful beta registration">
+							Continue to dashboard
+						</Trans>{" "}
 						<ArrowRightIcon />
 					</a>
 				}
