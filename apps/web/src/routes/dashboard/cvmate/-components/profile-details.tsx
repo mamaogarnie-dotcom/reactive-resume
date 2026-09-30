@@ -842,7 +842,7 @@ function ListSection({
 	return (
 		<section
 			aria-labelledby={`master-profile-${kind}`}
-			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+			className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
 		>
 			<div className="flex items-center gap-3">
 				<div
@@ -851,12 +851,12 @@ function ListSection({
 				>
 					<SectionIcon className="size-4" />
 				</div>
-				<h2 id={`master-profile-${kind}`} className="font-semibold text-foreground text-xl">
+				<h2 id={`master-profile-${kind}`} className="font-semibold text-[#3C4F27] text-xl">
 					{i18n.t(title)}
 				</h2>
 			</div>
 			<form
-				className="flex flex-wrap gap-2"
+				className="flex flex-wrap gap-2 rounded-card border border-[#D9E3D2] bg-[#F8FAF5] p-3"
 				onSubmit={(event) => {
 					event.preventDefault();
 					const trimmed = value.trim();
@@ -886,7 +886,7 @@ function ListSection({
 					editingId === item.id ? (
 						<form
 							key={item.id}
-							className="flex w-full items-center gap-2"
+							className="flex w-full items-center gap-2 rounded-input border border-[#E4EBDD] bg-white px-2 py-1 focus-within:border-[#8FA27F] focus-within:bg-[#F3F6EF]"
 							onSubmit={(event) => {
 								event.preventDefault();
 								const trimmed = editValue.trim();
@@ -900,7 +900,7 @@ function ListSection({
 								value={editValue}
 								onChange={(event) => setEditValue(event.target.value)}
 							/>
-							<div className="ml-auto flex shrink-0 gap-2">
+							<div className="ml-auto flex shrink-0 gap-1.5">
 								<Button type="submit" variant="outline" size="sm">
 									<Trans>Save</Trans>
 								</Button>
@@ -912,14 +912,15 @@ function ListSection({
 					) : (
 						<div
 							key={item.id}
-							className="flex w-full items-center gap-2 rounded-input border border-border bg-muted px-2 py-1 text-sm"
+							className="flex w-full items-center gap-2 rounded-input border border-[#E4EBDD] bg-white px-2 py-1 text-sm transition-colors hover:border-[#8FA27F] hover:bg-[#F1F5EC] focus-within:border-[#8FA27F] focus-within:bg-[#F3F6EF]"
 						>
-							<span className="min-w-0 flex-1">{item.value}</span>
-							<div className="ml-auto flex shrink-0 gap-2">
+							<span className="min-w-0 flex-1 text-[#3C4F27]">{item.value}</span>
+							<div className="ml-auto flex shrink-0 gap-1.5">
 								<Button
 									type="button"
 									variant="edit"
 									size="sm"
+									className="min-w-[4.5rem] border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 									onClick={() => {
 										setEditingId(item.id);
 										setEditValue(item.value);
@@ -931,6 +932,7 @@ function ListSection({
 									type="button"
 									variant="delete"
 									size="sm"
+									className="min-w-[4rem] border-[#E4A18D] bg-white text-[#B45E43] hover:border-[#C96C50] hover:bg-[#FFF2ED] hover:text-[#B45E43] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 									disabled={deleteMutation.isPending}
 									onClick={() => deleteMutation.mutate({ id: item.id })}
 								>
@@ -942,7 +944,7 @@ function ListSection({
 				)}
 			</div>
 			{!profileQuery.isLoading && items.length === 0 ? (
-				<p className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
+				<p className="rounded-input border border-[#E4EBDD] bg-[#F8FAF5] p-3 text-[#65745A] text-sm">
 					<Trans>Nothing added yet.</Trans>
 				</p>
 			) : null}
