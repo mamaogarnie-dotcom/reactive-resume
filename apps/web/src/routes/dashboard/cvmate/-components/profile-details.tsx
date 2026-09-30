@@ -638,7 +638,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 	return (
 		<section
 			aria-labelledby={`master-profile-${definition.kind}`}
-			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
+			className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
 		>
 			<div className="flex items-start gap-3">
 				<div
@@ -648,15 +648,15 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 					<SectionIcon className="size-4" />
 				</div>
 				<div>
-					<h2 id={`master-profile-${definition.kind}`} className="font-semibold text-foreground text-xl">
+					<h2 id={`master-profile-${definition.kind}`} className="font-semibold text-[#3C4F27] text-xl">
 						{i18n.t(definition.title)}
 					</h2>
-					<p className="text-muted-foreground text-sm">{i18n.t(definition.description)}</p>
+					<p className="text-[#65745A] text-sm">{i18n.t(definition.description)}</p>
 				</div>
 			</div>
 
 			<form
-				className="space-y-4 rounded-card border border-border bg-muted p-4"
+				className="space-y-4 rounded-card border border-[#D9E3D2] bg-[#F8FAF5] p-4"
 				onSubmit={(event: FormEvent<HTMLFormElement>) => {
 					event.preventDefault();
 					if (hasCreateContent) createMutation.mutate();
@@ -683,18 +683,18 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 
 			<div className="space-y-2">
 				{profileQuery.isLoading ? (
-					<p role="status" className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
+					<p role="status" className="rounded-input border border-[#E4EBDD] bg-[#F8FAF5] p-3 text-[#65745A] text-sm">
 						<Trans>Loading...</Trans>
 					</p>
 				) : null}
 				{!profileQuery.isLoading && items.length === 0 ? (
-					<p className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
+					<p className="rounded-input border border-[#E4EBDD] bg-[#F8FAF5] p-3 text-[#65745A] text-sm">
 						<Trans>No records added yet.</Trans>
 					</p>
 				) : null}
 
 				{items.map((item) => (
-					<div key={item.id} className="rounded-card border border-border bg-background p-4">
+					<div key={item.id} className="rounded-card border border-[#E4EBDD] bg-white p-4 transition-colors hover:border-[#8FA27F] hover:bg-[#F1F5EC] focus-within:border-[#8FA27F] focus-within:bg-[#F3F6EF]">
 						{editingId === item.id ? (
 							<div className="space-y-3">
 								<RecordFields
@@ -713,6 +713,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										type="button"
 										variant="outline"
 										size="sm"
+										className="border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										disabled={!hasEditContent || updateMutation.isPending}
 										onClick={() => updateMutation.mutate()}
 									>
@@ -722,6 +723,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										type="button"
 										variant="outline"
 										size="sm"
+										className="border-[#D9E3D2] bg-white text-[#65745A] hover:border-[#8FA27F] hover:bg-[#F1F5EC] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										disabled={updateMutation.isPending}
 										onClick={() => setEditingId(null)}
 									>
@@ -731,14 +733,14 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 							</div>
 						) : (
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-								<div className="min-w-0 space-y-1 text-sm">
+								<div className="min-w-0 space-y-1 text-[#3C4F27] text-sm">
 									{definition.fields.map((field) => {
 										const value = item[field.key];
 										if (typeof value !== "string" || value.trim().length === 0) return null;
 
 										return (
 											<p key={field.key}>
-												<span className="font-medium">{i18n.t(field.label)}:</span>{" "}
+												<span className="font-medium text-[#65745A]">{i18n.t(field.label)}:</span>{" "}
 												<span className="whitespace-pre-wrap">{value}</span>
 											</p>
 										);
@@ -765,11 +767,12 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 											{requiredField ? i18n.t(requiredField.label) : requiredKey}
 										</p>
 									);
-								})()} <div className="flex flex-wrap gap-2 sm:shrink-0">
+								})()} <div className="flex flex-wrap gap-1.5 sm:shrink-0">
 									<Button
 										type="button"
 										variant="edit"
 										size="sm"
+										className="min-w-[4.5rem] border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										onClick={() => {
 											setEditingId(item.id);
 											setEditForm(itemToValues(item, definition.fields));
@@ -781,6 +784,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										type="button"
 										variant="delete"
 										size="sm"
+										className="min-w-[4rem] border-[#E4A18D] bg-white text-[#B45E43] hover:border-[#C96C50] hover:bg-[#FFF2ED] hover:text-[#B45E43] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										disabled={deleteMutation.isPending}
 										onClick={() => deleteMutation.mutate(item.id)}
 									>
