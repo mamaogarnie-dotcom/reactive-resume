@@ -58,14 +58,20 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 						});
 
 				if (result.error) {
+					const normalizedMessage = result.error.message?.trim().toLowerCase();
+					const description =
+						normalizedMessage === "invalid username or password"
+							? t`Invalid username or password`
+							: result.error.message ||
+								t({
+									comment: "Fallback toast when sign-in fails and no server error message is available",
+									message: "Failed to sign in. Please try again.",
+								});
+
 					toast.add({
 						type: "error",
-						description:
-							result.error.message ||
-							t({
-								comment: "Fallback toast when sign-in fails and no server error message is available",
-								message: "Failed to sign in. Please try again.",
-							}),
+						description,
+
 						id: toastId,
 					});
 					return;

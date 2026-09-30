@@ -8205,3 +8205,7 @@ msgstr "Odzyskanie hasła nie będzie możliwe, jeśli nie możesz odbierać wia
 
 msgid "Continue to dashboard"
 msgstr "Dalej do aplikacji"
+
+#: src/features/auth/pages/login.tsx
+msgid "Invalid username or password"
+msgstr "Nieprawidłowa nazwa użytkownika lub hasło"
