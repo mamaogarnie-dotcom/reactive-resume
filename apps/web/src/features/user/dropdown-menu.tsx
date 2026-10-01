@@ -1,3 +1,5 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { clearAuthenticatedQueryCache } from "@/libs/query/client";
 import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
@@ -34,6 +36,7 @@ session: AuthSession;
 export function UserDropdownMenu({ children }: Props) {
 const isClient = useIsClient();
 const router = useRouter();
+const queryClient = useQueryClient();
 const { i18n } = useLingui();
 const { data: session } = authClient.useSession();
 
@@ -47,6 +50,7 @@ await authClient.signOut({
 fetchOptions: {
 onSuccess: () => {
 toast.close(toastId);
+clearAuthenticatedQueryCache(queryClient);
 void router.invalidate();
 },
 onError: ({ error }) => {

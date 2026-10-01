@@ -1,3 +1,5 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { clearAuthenticatedQueryCache } from "@/libs/query/client";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { DownloadSimpleIcon, TrashSimpleIcon } from "@phosphor-icons/react";
@@ -19,6 +21,7 @@ const CONFIRMATION_TEXT = "delete";
 export function AccountSettingsPage() {
 	const confirm = useConfirm();
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const [confirmationText, setConfirmationText] = useState("");
 	const isConfirmationValid = confirmationText === CONFIRMATION_TEXT;
 
@@ -67,6 +70,7 @@ export function AccountSettingsPage() {
 			onSuccess: async () => {
 				toast.add({ type: "success", description: t`Your account has been deleted.`, id: toastId });
 				await authClient.signOut();
+				clearAuthenticatedQueryCache(queryClient);
 				void navigate({ to: "/" });
 			},
 			onError: (error) => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { QueryClient } from "@tanstack/react-query";
-import { getQueryClient } from "./client";
+import { clearAuthenticatedQueryCache, getQueryClient } from "./client";
 
 describe("getQueryClient", () => {
 	it("returns a QueryClient instance", () => {
@@ -45,5 +45,17 @@ describe("getQueryClient", () => {
 		expect(restored.id).toBe(original.id);
 		expect(restored.count).toBe(original.count);
 		expect(restored.when.getTime()).toBe(original.when.getTime());
+	});
+
+	it("clears cached private data at an authentication boundary", () => {
+		const client = getQueryClient();
+		const key = ["private", "master-profile"] as const;
+
+		client.setQueryData(key, { owner: "user-a" });
+		expect(client.getQueryData(key)).toEqual({ owner: "user-a" });
+
+		clearAuthenticatedQueryCache(client);
+
+		expect(client.getQueryData(key)).toBeUndefined();
 	});
 });

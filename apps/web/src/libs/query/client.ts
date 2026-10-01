@@ -36,3 +36,7 @@ export const getQueryClient = () => {
 
 	return queryClient;
 };
+
+export const clearAuthenticatedQueryCache = (queryClient: QueryClient) => {
+	queryClient.clear();
+};
