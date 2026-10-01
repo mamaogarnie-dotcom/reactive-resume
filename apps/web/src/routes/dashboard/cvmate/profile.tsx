@@ -246,9 +246,12 @@ function RouteComponent() {
 						) : null}
 
 						{updateBasics.isSuccess ? (
-							<p className="text-muted-foreground text-sm">
-								<Trans>Profile saved.</Trans>
-							</p>
+							<p
+role="status"
+className="w-fit rounded-md border border-[#E2C5E7] bg-[#E2C5E7]/30 px-3 py-2 font-medium text-[#A878AA] text-base"
+>
+<Trans>Profile saved.</Trans>
+</p>
 						) : null}
 
 						<div className="flex justify-end">

@@ -8209,3 +8209,15 @@ msgstr "Dalej do aplikacji"
 #: src/features/auth/pages/login.tsx
 msgid "Invalid username or password"
 msgstr "Nieprawidłowa nazwa użytkownika lub hasło"
+
+#: src/routes/dashboard/cvmate/-components/flexible-date-input.tsx
+msgid "Do not provide day"
+msgstr "Nie podawaj dnia"
+
+#: src/routes/dashboard/cvmate/-components/flexible-date-input.tsx
+msgid "Choose month from calendar"
+msgstr "Wybierz miesiąc z kalendarza"
+
+#: src/routes/dashboard/cvmate/-components/flexible-date-input.tsx
+msgid "You can type a year, month and year, or a full date. Dots, slashes and hyphens are accepted."
+msgstr "Możesz wpisać rok, miesiąc i rok albo pełną datę. Akceptowane są kropki, ukośniki i myślniki."
