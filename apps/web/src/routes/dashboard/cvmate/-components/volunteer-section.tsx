@@ -97,7 +97,7 @@ export function VolunteerSection() {
 	return (
 		<section
 			aria-labelledby="master-profile-volunteer"
-			className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
+			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 		>
 			<div className="flex items-start gap-3">
 				<div
@@ -107,17 +107,17 @@ export function VolunteerSection() {
 					<HeartIcon className="size-4" />
 				</div>
 				<div>
-					<h2 id="master-profile-volunteer" className="font-semibold text-[#3C4F27] text-xl">
+					<h2 id="master-profile-volunteer" className="font-semibold text-foreground text-xl">
 						<Trans>Volunteer work</Trans>
 					</h2>
-					<p className="text-[#65745A] text-sm">
+					<p className="text-muted-foreground text-sm">
 						<Trans>Volunteer roles that can be relevant to an application.</Trans>
 					</p>
 				</div>
 			</div>
 
 			<form
-				className="space-y-4 rounded-card border border-[#D9E3D2] bg-[#F8FAF5] p-4"
+				className="space-y-4 rounded-card border border-border bg-muted p-4"
 				onSubmit={(event) => {
 					event.preventDefault();
 					if (hasCreateContent) createMutation.mutate();
@@ -209,13 +209,13 @@ export function VolunteerSection() {
 
 			<div className="space-y-2">
 				{!profileQuery.isLoading && items.length === 0 ? (
-					<p className="rounded-input border border-[#E4EBDD] bg-[#F8FAF5] p-3 text-[#65745A] text-sm">
+					<p className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
 						<Trans>No records added yet.</Trans>
 					</p>
 				) : null}
 
 				{items.map((item) => (
-					<div key={item.id} className="rounded-card border border-[#E4EBDD] bg-white p-4 transition-colors hover:border-[#8FA27F] hover:bg-[#F1F5EC] focus-within:border-[#8FA27F] focus-within:bg-[#F3F6EF]">
+					<div key={item.id} className="rounded-card border border-border bg-background p-4">
 						{editingId === item.id ? (
 							<div className="space-y-4">
 								<div className="grid gap-3 md:grid-cols-2">
@@ -302,7 +302,6 @@ export function VolunteerSection() {
 										type="button"
 										variant="outline"
 										size="sm"
-										className="border-[#D9E3D2] bg-white text-[#65745A] hover:border-[#8FA27F] hover:bg-[#F1F5EC] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										disabled={updateMutation.isPending}
 										onClick={() => setEditingId(null)}
 									>
@@ -320,21 +319,20 @@ export function VolunteerSection() {
 							</div>
 						) : (
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-								<div className="min-w-0 space-y-1 text-[#3C4F27] text-sm">
-									<p className="font-semibold text-[#3C4F27]">{item.role || item.organization || t`Volunteer work`}</p>
-									{item.role && item.organization ? <p className="text-[#65745A]">{item.organization}</p> : null}
-									<p className="text-[#65745A]">
+								<div className="min-w-0 space-y-1 text-sm">
+									<p className="font-medium">{item.role || item.organization || t`Volunteer work`}</p>
+									{item.role && item.organization ? <p className="text-muted-foreground">{item.organization}</p> : null}
+									<p className="text-muted-foreground">
 										{item.startDate || item.date || "?"} {" - "}
 										{item.isCurrent ? currentLabel() : item.endDate || "?"}
 									</p>
 									{item.description ? <p className="whitespace-pre-wrap">{item.description}</p> : null}
 								</div>
-								<div className="flex flex-wrap gap-1.5 sm:shrink-0">
+								<div className="flex flex-wrap gap-2 sm:shrink-0 sm:pr-3">
 									<Button
 										type="button"
 										variant="edit"
 										size="sm"
-										className="min-w-[4.5rem] border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										onClick={() => {
 											setEditingId(item.id);
 											setEditOrganization(item.organization ?? "");
@@ -351,7 +349,6 @@ export function VolunteerSection() {
 										type="button"
 										variant="delete"
 										size="sm"
-										className="min-w-[4rem] border-[#E4A18D] bg-white text-[#B45E43] hover:border-[#C96C50] hover:bg-[#FFF2ED] hover:text-[#B45E43] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										disabled={deleteMutation.isPending}
 										onClick={() => deleteMutation.mutate(item.id)}
 									>

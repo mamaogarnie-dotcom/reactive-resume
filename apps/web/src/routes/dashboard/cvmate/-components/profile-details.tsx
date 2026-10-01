@@ -638,7 +638,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 	return (
 		<section
 			aria-labelledby={`master-profile-${definition.kind}`}
-			className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
+			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 		>
 			<div className="flex items-start gap-3">
 				<div
@@ -648,15 +648,15 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 					<SectionIcon className="size-4" />
 				</div>
 				<div>
-					<h2 id={`master-profile-${definition.kind}`} className="font-semibold text-[#3C4F27] text-xl">
+					<h2 id={`master-profile-${definition.kind}`} className="font-semibold text-foreground text-xl">
 						{i18n.t(definition.title)}
 					</h2>
-					<p className="text-[#65745A] text-sm">{i18n.t(definition.description)}</p>
+					<p className="text-muted-foreground text-sm">{i18n.t(definition.description)}</p>
 				</div>
 			</div>
 
 			<form
-				className="space-y-4 rounded-card border border-[#D9E3D2] bg-[#F8FAF5] p-4"
+				className="space-y-4 rounded-card border border-border bg-muted p-4"
 				onSubmit={(event: FormEvent<HTMLFormElement>) => {
 					event.preventDefault();
 					if (hasCreateContent) createMutation.mutate();
@@ -683,18 +683,18 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 
 			<div className="space-y-2">
 				{profileQuery.isLoading ? (
-					<p role="status" className="rounded-input border border-[#E4EBDD] bg-[#F8FAF5] p-3 text-[#65745A] text-sm">
+					<p role="status" className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
 						<Trans>Loading...</Trans>
 					</p>
 				) : null}
 				{!profileQuery.isLoading && items.length === 0 ? (
-					<p className="rounded-input border border-[#E4EBDD] bg-[#F8FAF5] p-3 text-[#65745A] text-sm">
+					<p className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
 						<Trans>No records added yet.</Trans>
 					</p>
 				) : null}
 
 				{items.map((item) => (
-					<div key={item.id} className="rounded-card border border-[#E4EBDD] bg-white p-4 transition-colors hover:border-[#8FA27F] hover:bg-[#F1F5EC] focus-within:border-[#8FA27F] focus-within:bg-[#F3F6EF]">
+					<div key={item.id} className="rounded-card border border-border bg-background p-4">
 						{editingId === item.id ? (
 							<div className="space-y-3">
 								<RecordFields
@@ -713,7 +713,6 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										type="button"
 										variant="outline"
 										size="sm"
-										className="border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										disabled={!hasEditContent || updateMutation.isPending}
 										onClick={() => updateMutation.mutate()}
 									>
@@ -723,7 +722,6 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										type="button"
 										variant="outline"
 										size="sm"
-										className="border-[#D9E3D2] bg-white text-[#65745A] hover:border-[#8FA27F] hover:bg-[#F1F5EC] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										disabled={updateMutation.isPending}
 										onClick={() => setEditingId(null)}
 									>
@@ -733,14 +731,14 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 							</div>
 						) : (
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-								<div className="min-w-0 space-y-1 text-[#3C4F27] text-sm">
+								<div className="min-w-0 space-y-1 text-sm">
 									{definition.fields.map((field) => {
 										const value = item[field.key];
 										if (typeof value !== "string" || value.trim().length === 0) return null;
 
 										return (
 											<p key={field.key}>
-												<span className="font-medium text-[#65745A]">{i18n.t(field.label)}:</span>{" "}
+												<span className="font-medium">{i18n.t(field.label)}:</span>{" "}
 												<span className="whitespace-pre-wrap">{value}</span>
 											</p>
 										);
@@ -767,12 +765,11 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 											{requiredField ? i18n.t(requiredField.label) : requiredKey}
 										</p>
 									);
-								})()} <div className="flex flex-wrap gap-1.5 sm:shrink-0">
+								})()} <div className="flex flex-wrap gap-2 sm:shrink-0 sm:pr-3">
 									<Button
 										type="button"
 										variant="edit"
 										size="sm"
-										className="min-w-[4.5rem] border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										onClick={() => {
 											setEditingId(item.id);
 											setEditForm(itemToValues(item, definition.fields));
@@ -784,7 +781,6 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 										type="button"
 										variant="delete"
 										size="sm"
-										className="min-w-[4rem] border-[#E4A18D] bg-white text-[#B45E43] hover:border-[#C96C50] hover:bg-[#FFF2ED] hover:text-[#B45E43] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 										disabled={deleteMutation.isPending}
 										onClick={() => deleteMutation.mutate(item.id)}
 									>
@@ -846,7 +842,7 @@ function ListSection({
 	return (
 		<section
 			aria-labelledby={`master-profile-${kind}`}
-			className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
+			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 		>
 			<div className="flex items-center gap-3">
 				<div
@@ -855,12 +851,12 @@ function ListSection({
 				>
 					<SectionIcon className="size-4" />
 				</div>
-				<h2 id={`master-profile-${kind}`} className="font-semibold text-[#3C4F27] text-xl">
+				<h2 id={`master-profile-${kind}`} className="font-semibold text-foreground text-xl">
 					{i18n.t(title)}
 				</h2>
 			</div>
 			<form
-				className="flex flex-wrap gap-2 rounded-card border border-[#D9E3D2] bg-[#F8FAF5] p-3"
+				className="flex flex-wrap gap-2"
 				onSubmit={(event) => {
 					event.preventDefault();
 					const trimmed = value.trim();
@@ -890,7 +886,7 @@ function ListSection({
 					editingId === item.id ? (
 						<form
 							key={item.id}
-							className="flex w-full items-center gap-2 rounded-input border border-[#E4EBDD] bg-white px-2 py-1 focus-within:border-[#8FA27F] focus-within:bg-[#F3F6EF]"
+							className="flex w-full items-center gap-2"
 							onSubmit={(event) => {
 								event.preventDefault();
 								const trimmed = editValue.trim();
@@ -904,7 +900,7 @@ function ListSection({
 								value={editValue}
 								onChange={(event) => setEditValue(event.target.value)}
 							/>
-							<div className="ml-auto flex shrink-0 gap-1.5">
+							<div className="ml-auto flex shrink-0 gap-2">
 								<Button type="submit" variant="outline" size="sm">
 									<Trans>Save</Trans>
 								</Button>
@@ -916,15 +912,14 @@ function ListSection({
 					) : (
 						<div
 							key={item.id}
-							className="flex w-full items-center gap-2 rounded-input border border-[#E4EBDD] bg-white px-2 py-1 text-sm transition-colors hover:border-[#8FA27F] hover:bg-[#F1F5EC] focus-within:border-[#8FA27F] focus-within:bg-[#F3F6EF]"
+							className="flex w-full items-center gap-2 rounded-input border border-border bg-muted px-2 py-1 text-sm"
 						>
-							<span className="min-w-0 flex-1 text-[#3C4F27]">{item.value}</span>
-							<div className="ml-auto flex shrink-0 gap-1.5">
+							<span className="min-w-0 flex-1">{item.value}</span>
+							<div className="ml-auto flex shrink-0 gap-2">
 								<Button
 									type="button"
 									variant="edit"
 									size="sm"
-									className="min-w-[4.5rem] border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 									onClick={() => {
 										setEditingId(item.id);
 										setEditValue(item.value);
@@ -936,7 +931,6 @@ function ListSection({
 									type="button"
 									variant="delete"
 									size="sm"
-									className="min-w-[4rem] border-[#E4A18D] bg-white text-[#B45E43] hover:border-[#C96C50] hover:bg-[#FFF2ED] hover:text-[#B45E43] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 									disabled={deleteMutation.isPending}
 									onClick={() => deleteMutation.mutate({ id: item.id })}
 								>
@@ -948,7 +942,7 @@ function ListSection({
 				)}
 			</div>
 			{!profileQuery.isLoading && items.length === 0 ? (
-				<p className="rounded-input border border-[#E4EBDD] bg-[#F8FAF5] p-3 text-[#65745A] text-sm">
+				<p className="rounded-input border border-border bg-muted p-3 text-muted-foreground text-sm">
 					<Trans>Nothing added yet.</Trans>
 				</p>
 			) : null}
@@ -1092,7 +1086,7 @@ function ClausesSection() {
 	return (
 		<section
 			aria-labelledby="master-profile-recruitment-clauses"
-			className="space-y-5 rounded-card border border-[#D9E3D2] bg-white p-4 sm:p-6"
+			className="space-y-5 rounded-card border border-border bg-card p-4 sm:p-6"
 		>
 			<div className="flex items-start gap-3">
 				<div
@@ -1102,10 +1096,10 @@ function ClausesSection() {
 					<FileTextIcon className="size-4" />
 				</div>
 				<div>
-					<h2 id="master-profile-recruitment-clauses" className="font-semibold text-[#3C4F27] text-xl">
+					<h2 id="master-profile-recruitment-clauses" className="font-semibold text-foreground text-xl">
 						<Trans>Recruitment clauses</Trans>
 					</h2>
-					<p className="text-[#65745A] text-sm">
+					<p className="text-muted-foreground text-sm">
 						<Trans>
 							Choose one recruitment clause. 1story will automatically use the Polish or English version based on the CV
 							language.
@@ -1114,13 +1108,7 @@ function ClausesSection() {
 				</div>
 			</div>
 
-			<div
-				className={`space-y-2 rounded-card border p-4 transition-colors ${
-					selectedScope === null
-						? "border-[#8FA27F] bg-[#F3F6EF]"
-						: "border-[#D9E3D2] bg-[#F8FAF5]"
-				}`}
-			>
+			<div className="space-y-2 rounded-card border border-border bg-muted p-4">
 				<label className="flex items-center gap-2 text-base">
 					<input
 						type="radio"
@@ -1136,15 +1124,8 @@ function ClausesSection() {
 
 			<div className="space-y-4">
 				{clauseScopeDefinitions.map((scopeDefinition) => (
-					<div
-						key={scopeDefinition.scope}
-						className={`space-y-4 rounded-card border p-4 transition-colors ${
-							selectedScope === scopeDefinition.scope
-								? "border-[#8FA27F] bg-[#F3F6EF]"
-								: "border-[#E4EBDD] bg-white"
-						}`}
-					>
-						<label className="flex items-center gap-2 font-medium text-[#3C4F27] text-base">
+					<div key={scopeDefinition.scope} className="space-y-4 rounded-card border border-border bg-background p-4">
+						<label className="flex items-center gap-2 font-medium text-base">
 							<input
 								type="radio"
 								className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
@@ -1164,8 +1145,8 @@ function ClausesSection() {
 								return (
 									<div key={key} className="space-y-3">
 										<div className="flex items-center justify-between gap-3">
-											<p className="font-medium text-[#3C4F27] text-sm">{i18n.t(languageDefinition.title)}</p>
-											<p className="text-[#65745A] text-sm">
+											<p className="font-medium text-sm">{i18n.t(languageDefinition.title)}</p>
+											<p className="text-muted-foreground text-sm">
 												{draft.isDefault ? <Trans>1story default</Trans> : <Trans>Custom text</Trans>}
 											</p>
 										</div>
@@ -1190,7 +1171,6 @@ function ClausesSection() {
 												type="button"
 												variant="outline"
 												size="sm"
-												className="border-[#91A482] bg-white text-[#3C4F27] hover:border-[#3C4F27] hover:bg-[#EEF3E8] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)]"
 												disabled={mutationPending}
 												onClick={() =>
 													saveMutation.mutate({
@@ -1206,7 +1186,6 @@ function ClausesSection() {
 												type="button"
 												variant="outline"
 												size="sm"
-												className="border-[#D9E3D2] bg-white text-[#65745A] hover:border-[#8FA27F] hover:bg-[#F1F5EC] hover:text-[#3C4F27] focus-visible:border-[#3C4F27] focus-visible:ring-[rgba(168,120,170,0.18)] disabled:border-[#D9E2D2] disabled:text-[#AAB5A1] disabled:opacity-[0.55]"
 												disabled={mutationPending || draft.isDefault}
 												onClick={() =>
 													restoreMutation.mutate({
