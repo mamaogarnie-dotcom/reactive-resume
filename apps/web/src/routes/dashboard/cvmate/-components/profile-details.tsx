@@ -1,7 +1,7 @@
 import type { MessageDescriptor } from "@lingui/core";
 import type { RecruitmentClauseLanguage, RecruitmentClauseScope } from "@reactive-resume/utils/recruitment-clause";
 import type { FormEvent } from "react";
-import { msg } from "@lingui/core/macro";
+import { msg, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import {
@@ -26,6 +26,7 @@ import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
 import { getDefaultRecruitmentClause } from "@reactive-resume/utils/recruitment-clause";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { orpc } from "@/libs/orpc/client";
 import { FlexibleDateInput } from "./flexible-date-input";
 import { VolunteerSection } from "./volunteer-section";
@@ -618,6 +619,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 	const createMutation = useMutation({
 		mutationFn: () => createDetailed(definition.kind, form, items.length),
 		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
 			setForm(emptyValues(definition.fields));
 			void profileQuery.refetch();
 		},
@@ -629,6 +631,7 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 			return updateDetailed(definition.kind, editingId, editForm);
 		},
 		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
 			setEditingId(null);
 			setEditForm(emptyValues(definition.fields));
 			void profileQuery.refetch();
@@ -637,7 +640,10 @@ function DetailedSection({ definition }: { definition: DetailedDefinition }) {
 
 	const deleteMutation = useMutation({
 		mutationFn: (id: string) => deleteDetailed(definition.kind, id),
-		onSuccess: () => void profileQuery.refetch(),
+		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
+			void profileQuery.refetch();
+		},
 	});
 
 	const hasCreateContent = Object.values(form).some((value) => value.trim().length > 0);
@@ -827,6 +833,7 @@ function ListSection({
 	const createMutation = useMutation(
 		orpc.cvmateProfile.createListItem.mutationOptions({
 			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
 				setValue("");
 				void profileQuery.refetch();
 			},
@@ -835,6 +842,7 @@ function ListSection({
 	const updateMutation = useMutation(
 		orpc.cvmateProfile.updateListItem.mutationOptions({
 			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
 				setEditingId(null);
 				setEditValue("");
 				void profileQuery.refetch();
@@ -843,7 +851,10 @@ function ListSection({
 	);
 	const deleteMutation = useMutation(
 		orpc.cvmateProfile.deleteListItem.mutationOptions({
-			onSuccess: () => void profileQuery.refetch(),
+			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
+				void profileQuery.refetch();
+			},
 		}),
 	);
 	const SectionIcon = listSectionIcons[kind];
@@ -1062,7 +1073,10 @@ function ClausesSection() {
 				}
 			}
 		},
-		onSuccess: () => void profileQuery.refetch(),
+		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
+			void profileQuery.refetch();
+		},
 	});
 
 	const saveMutation = useMutation({
@@ -1076,7 +1090,10 @@ function ClausesSection() {
 				content: draft.isDefault ? null : draft.content.trim() || null,
 			});
 		},
-		onSuccess: () => void profileQuery.refetch(),
+		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
+			void profileQuery.refetch();
+		},
 	});
 
 	const restoreMutation = useMutation({
@@ -1087,7 +1104,10 @@ function ClausesSection() {
 				isEnabled: selectedScope === scope,
 				content: null,
 			}),
-		onSuccess: () => void profileQuery.refetch(),
+		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
+			void profileQuery.refetch();
+		},
 	});
 
 	const mutationPending = selectionMutation.isPending || saveMutation.isPending || restoreMutation.isPending;

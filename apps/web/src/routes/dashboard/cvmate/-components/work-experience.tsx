@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { orpc } from "@/libs/orpc/client";
 import { FlexibleDateInput } from "./flexible-date-input";
 
@@ -36,6 +37,7 @@ export function WorkExperienceSection() {
 	const createEmployment = useMutation(
 		orpc.cvmateProfile.createEmployment.mutationOptions({
 			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
 				setCompany("");
 				setJobTitle("");
 				setLocation("");
@@ -50,6 +52,7 @@ export function WorkExperienceSection() {
 	const updateEmployment = useMutation(
 		orpc.cvmateProfile.updateEmployment.mutationOptions({
 			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
 				setEditingId(null);
 				setEditCompany("");
 				setEditJobTitle("");
@@ -64,7 +67,10 @@ export function WorkExperienceSection() {
 
 	const deleteEmployment = useMutation(
 		orpc.cvmateProfile.deleteEmployment.mutationOptions({
-			onSuccess: () => void profileQuery.refetch(),
+			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
+				void profileQuery.refetch();
+			},
 		}),
 	);
 
@@ -89,6 +95,7 @@ export function WorkExperienceSection() {
 			return fact;
 		},
 		onSuccess: (_fact, input) => {
+			toast.add({ type: "success", description: t`Profile saved.` });
 			setFactTextByEmployment((current) => ({
 				...current,
 				[input.employmentId]: "",
@@ -100,6 +107,7 @@ export function WorkExperienceSection() {
 	const updateExperienceFact = useMutation(
 		orpc.cvmateProfile.updateExperienceFact.mutationOptions({
 			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
 				setEditingFactId(null);
 				setEditFactText("");
 				void profileQuery.refetch();
@@ -109,7 +117,10 @@ export function WorkExperienceSection() {
 
 	const unlinkEmploymentFact = useMutation(
 		orpc.cvmateProfile.unlinkEmploymentFact.mutationOptions({
-			onSuccess: () => void profileQuery.refetch(),
+			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
+				void profileQuery.refetch();
+			},
 		}),
 	);
 
@@ -144,7 +155,10 @@ export function WorkExperienceSection() {
 				throw error;
 			}
 		},
-		onSuccess: () => void profileQuery.refetch(),
+		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
+			void profileQuery.refetch();
+		},
 	});
 
 	const canCreate = [company, jobTitle, location, startDate, endDate].some((value) => value.trim().length > 0);

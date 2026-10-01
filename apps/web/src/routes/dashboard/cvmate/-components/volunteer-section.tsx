@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { orpc } from "@/libs/orpc/client";
 import { FlexibleDateInput } from "./flexible-date-input";
 
@@ -59,6 +60,7 @@ export function VolunteerSection() {
 				sortOrder: items.length,
 			}),
 		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
 			setOrganization("");
 			setRole("");
 			setStartDate("");
@@ -84,6 +86,7 @@ export function VolunteerSection() {
 			});
 		},
 		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
 			setEditingId(null);
 			void profileQuery.refetch();
 		},
@@ -91,7 +94,10 @@ export function VolunteerSection() {
 
 	const deleteMutation = useMutation({
 		mutationFn: (id: string) => orpc.cvmateProfile.deleteVolunteer.call({ id }),
-		onSuccess: () => void profileQuery.refetch(),
+		onSuccess: () => {
+			toast.add({ type: "success", description: t`Profile saved.` });
+			void profileQuery.refetch();
+		},
 	});
 
 	return (

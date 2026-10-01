@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { orpc } from "@/libs/orpc/client";
 
 export function AchievementsSection() {
@@ -19,6 +20,7 @@ export function AchievementsSection() {
 	const createAchievement = useMutation(
 		orpc.cvmateProfile.createExperienceFact.mutationOptions({
 			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
 				setAchievementText("");
 				void profileQuery.refetch();
 			},
@@ -28,6 +30,7 @@ export function AchievementsSection() {
 	const updateAchievement = useMutation(
 		orpc.cvmateProfile.updateExperienceFact.mutationOptions({
 			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
 				setEditingId(null);
 				setEditText("");
 				void profileQuery.refetch();
@@ -38,6 +41,7 @@ export function AchievementsSection() {
 	const deleteAchievement = useMutation(
 		orpc.cvmateProfile.deleteExperienceFact.mutationOptions({
 			onSuccess: () => {
+				toast.add({ type: "success", description: t`Profile saved.` });
 				void profileQuery.refetch();
 			},
 		}),
