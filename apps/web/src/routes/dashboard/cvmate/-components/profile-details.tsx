@@ -76,11 +76,13 @@ const detailedDefinitions: readonly DetailedDefinition[] = [
 				key: "startDate",
 				label: msg`Start date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "endDate",
 				label: msg`End date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "description",
@@ -130,6 +132,7 @@ const detailedDefinitions: readonly DetailedDefinition[] = [
 				key: "date",
 				label: msg`Date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "description",
@@ -150,11 +153,13 @@ const detailedDefinitions: readonly DetailedDefinition[] = [
 				key: "issueDate",
 				label: msg`Issue date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "expiryDate",
 				label: msg`Expiry date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{ key: "credentialNumber", label: msg`Credential number` },
 			{
@@ -182,6 +187,7 @@ const detailedDefinitions: readonly DetailedDefinition[] = [
 				key: "date",
 				label: msg`Date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "description",
@@ -211,6 +217,7 @@ const detailedDefinitions: readonly DetailedDefinition[] = [
 				key: "date",
 				label: msg`Date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "description",
@@ -231,6 +238,7 @@ const detailedDefinitions: readonly DetailedDefinition[] = [
 				key: "date",
 				label: msg`Date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "description",
@@ -250,6 +258,7 @@ const detailedDefinitions: readonly DetailedDefinition[] = [
 				key: "date",
 				label: msg`Date`,
 				placeholder: msg`YYYY, YYYY-MM or YYYY-MM-DD`,
+				date: true,
 			},
 			{
 				key: "description",
