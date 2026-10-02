@@ -1,4 +1,5 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
+import type { AiRedactionContext } from "../ai/redaction";
 import { ORPCError } from "@orpc/client";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
@@ -6,10 +7,12 @@ import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { generateId } from "@reactive-resume/utils/string";
 import { generateJson } from "../ai/generate-json";
+import { buildAiRedactionContext, redactTextForAi, redactValuesForAi } from "../ai/redaction";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
-import { compactSourceDataForAi } from "./ai-source-data";
+import { resolveCvBuildAiRedactionContext } from "./ai-redaction-context";
+import { compactSourceDataForAi, isAiAllowedSelectionSourceType } from "./ai-source-data";
 import { cvmateBuildService } from "./service";
 
 const MAX_RECOMMENDATIONS = 500;
@@ -157,6 +160,8 @@ Security and factuality rules:
   unless their IDs are explicitly present in GAP_ELIGIBLE_REQUIREMENT_IDS.
 - Do not use external knowledge about the candidate or employer.
 - Do not rewrite candidate facts in this step.
+- Values such as [EMAIL], [TELEFON], [URL], [OSOBA] and [ADRES] are redacted
+  personal data. Ignore them and never treat them as candidate evidence.
 
 Return JSON only with:
 {
@@ -243,13 +248,21 @@ function sourceDataContainsExactText(value: Record<string, unknown>, sourceText:
 function buildPrompt(input: {
 	jobOffer: z.infer<typeof jobOfferSnapshotSchema>;
 	selectionItems: SelectionItem[];
+	/** Without an identity context, contact-detail patterns are still redacted. */
+	redaction?: AiRedactionContext;
 }): string {
+	const redaction = input.redaction ?? buildAiRedactionContext([]);
+	// Job-offer text may name a recruiter or other third party; contact patterns are redacted without
+	// the candidate's identity. Only this prompt payload changes, never the stored job offer.
+	const offerRedaction = buildAiRedactionContext([]);
+	const offerText = (value: string | null | undefined) => redactTextForAi(value ?? null, offerRedaction);
+
 	const requirements = input.jobOffer.requirements.map((requirement) => ({
 		id: requirement.id,
 		category: requirement.category,
 		priority: requirement.priority,
-		text: requirement.text,
-		sourceText: requirement.sourceText ?? null,
+		text: offerText(requirement.text),
+		sourceText: offerText(requirement.sourceText),
 	}));
 
 	const requirementAliasById = new Map(
@@ -267,18 +280,17 @@ function buildPrompt(input: {
 	]);
 
 	const selectionRows = input.selectionItems
-		.filter((item) => item.sourceType !== "profile_photo" && item.sourceType !== "reference")
+		.filter((item) => isAiAllowedSelectionSourceType(item.sourceType))
 		.map((item) => {
-			const sourceDataSnapshot = compactSourceData(item.sourceDataSnapshot);
+			const sourceDataSnapshot = redactValuesForAi(compactSourceData(item.sourceDataSnapshot), redaction);
 
-			const sourceTextSnapshot = item.sourceTextSnapshot;
+			const sourceTextSnapshot = redactTextForAi(item.sourceTextSnapshot, redaction);
 
 			return [
 				selectionAliasById.get(item.id) ?? item.id,
 
-				item.parentSelectionItemId
-					? (selectionAliasById.get(item.parentSelectionItemId) ?? item.parentSelectionItemId)
-					: null,
+				// A parent outside this prompt has no alias; its database ID is never sent instead.
+				item.parentSelectionItemId ? (selectionAliasById.get(item.parentSelectionItemId) ?? null) : null,
 
 				item.sourceType,
 				sourceDataSnapshot,
@@ -299,10 +311,10 @@ candidate selection snapshots.
 
 <JOB_META columns="[roleTitle,companyName,location,language]">
 ${JSON.stringify([
-	input.jobOffer.roleTitle ?? null,
-	input.jobOffer.companyName ?? null,
-	input.jobOffer.location ?? null,
-	input.jobOffer.language ?? null,
+	offerText(input.jobOffer.roleTitle),
+	offerText(input.jobOffer.companyName),
+	offerText(input.jobOffer.location),
+	offerText(input.jobOffer.language),
 ])}
 </JOB_META>
 
@@ -1171,6 +1183,11 @@ export const cvmateBuildRecommendationsService = {
 
 		const provider = await resolveProvider(input.userId, input.aiProviderId);
 
+		const redaction = await resolveCvBuildAiRedactionContext({
+			userId: input.userId,
+			identitySnapshot: build.identitySnapshot,
+		});
+
 		const model = getModel({
 			provider: provider.provider,
 			model: provider.model,
@@ -1185,6 +1202,7 @@ export const cvmateBuildRecommendationsService = {
 				prompt: buildPrompt({
 					jobOffer,
 					selectionItems,
+					redaction,
 				}),
 			},
 			cvmateBuildAiRecommendationProviderOutputSchema,

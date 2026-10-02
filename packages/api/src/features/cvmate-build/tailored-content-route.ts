@@ -2,12 +2,13 @@ import { ORPCError } from "@orpc/client";
 import { AISDKError } from "ai";
 import { ZodError, z } from "zod";
 import { protectedProcedure } from "../../context";
-import { cvmateGeneratedContentSchema } from "../../dto/cvmate-build";
+import { cvmateGeneratedContentSchema, cvmateTailoredContentNoticeSchema } from "../../dto/cvmate-build";
 import { aiRequestRateLimit } from "../../middleware/rate-limit";
 import { cvmateBuildTailoredContentService } from "./tailored-content";
 
 const tailoredContentResultSchema = z.object({
 	generatedContent: z.array(cvmateGeneratedContentSchema),
+	notices: z.array(cvmateTailoredContentNoticeSchema),
 });
 
 export const tailoredContentRouter = {

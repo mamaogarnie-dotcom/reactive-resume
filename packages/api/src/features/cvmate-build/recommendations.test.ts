@@ -59,9 +59,24 @@ vi.mock("./service", () => ({
 	cvmateBuildService: buildServiceMock,
 }));
 
-const { __testables, cvmateBuildAiRecommendationOutputSchema, cvmateBuildAiRecommendationProviderOutputSchema, cvmateBuildRecommendationsService } = await import(
-	"./recommendations"
-);
+const resolveRedactionContextMock = vi.hoisted(() => vi.fn());
+
+vi.mock("./ai-redaction-context", () => ({
+	resolveCvBuildAiRedactionContext: resolveRedactionContextMock,
+}));
+
+const { buildAiRedactionContext } = await import("../ai/redaction");
+
+const {
+	__testables,
+	cvmateBuildAiRecommendationOutputSchema,
+	cvmateBuildAiRecommendationProviderOutputSchema,
+	cvmateBuildRecommendationsService,
+} = await import("./recommendations");
+
+beforeEach(() => {
+	resolveRedactionContextMock.mockResolvedValue(buildAiRedactionContext([]));
+});
 
 const provider = {
 	id: "provider-1",
@@ -288,39 +303,39 @@ describe("cvmateBuildAiRecommendationOutputSchema", () => {
 });
 
 describe("cvmateBuildAiRecommendationProviderOutputSchema", () => {
-it("accepts compact relationship-only provider output", () => {
-expect(
-cvmateBuildAiRecommendationProviderOutputSchema.parse({
-recommendations: [
-{
-selectionItemId: "s2",
-requirementIds: ["r1", "r2"],
-},
-],
-gapRequirementIds: ["r2"],
-gapSuggestions: [
-{
-requirementId: "r2",
-kind: "software",
-},
-],
-}),
-).toEqual({
-recommendations: [
-{
-selectionItemId: "s2",
-requirementIds: ["r1", "r2"],
-},
-],
-gapRequirementIds: ["r2"],
-gapSuggestions: [
-{
-requirementId: "r2",
-kind: "software",
-},
-],
-});
-});
+	it("accepts compact relationship-only provider output", () => {
+		expect(
+			cvmateBuildAiRecommendationProviderOutputSchema.parse({
+				recommendations: [
+					{
+						selectionItemId: "s2",
+						requirementIds: ["r1", "r2"],
+					},
+				],
+				gapRequirementIds: ["r2"],
+				gapSuggestions: [
+					{
+						requirementId: "r2",
+						kind: "software",
+					},
+				],
+			}),
+		).toEqual({
+			recommendations: [
+				{
+					selectionItemId: "s2",
+					requirementIds: ["r1", "r2"],
+				},
+			],
+			gapRequirementIds: ["r2"],
+			gapSuggestions: [
+				{
+					requirementId: "r2",
+					kind: "software",
+				},
+			],
+		});
+	});
 });
 describe("recommendation helpers", () => {
 	it("builds a prompt from frozen offer and candidate snapshots", () => {
@@ -331,41 +346,27 @@ describe("recommendation helpers", () => {
 
 		expect(prompt).toContain("Prepared Excel reports.");
 
-expect(prompt).toContain(
-'<REQUIREMENTS columns="[id,category,priority,text,sourceText]">',
-);
+		expect(prompt).toContain('<REQUIREMENTS columns="[id,category,priority,text,sourceText]">');
 
-expect(prompt).toContain(
-'["r1","required","critical","Excel","Excel required"]',
-);
+		expect(prompt).toContain('["r1","required","critical","Excel","Excel required"]');
 
-expect(prompt).toContain(
-'<CANDIDATE_ITEMS columns="[id,parentId,sourceType,data,sourceText]">',
-);
+		expect(prompt).toContain('<CANDIDATE_ITEMS columns="[id,parentId,sourceType,data,sourceText]">');
 
-expect(prompt).toContain(
-'{"text":"Prepared Excel reports."}',
-);
+		expect(prompt).toContain('{"text":"Prepared Excel reports."}');
 
-expect(prompt).toContain(
-'"Office Manager - Example Ltd"',
-);
+		expect(prompt).toContain('"Office Manager - Example Ltd"');
 
-expect(
-(prompt.match(/Prepared Excel reports\./g) ?? []).length,
-).toBe(1);
+		expect((prompt.match(/Prepared Excel reports\./g) ?? []).length).toBe(1);
 
-// Regression guard:
-// required + preferred requirements must remain gap-eligible.
-expect(prompt).toContain(
-'["r1","r2"]',
-);
+		// Regression guard:
+		// required + preferred requirements must remain gap-eligible.
+		expect(prompt).toContain('["r1","r2"]');
 
-expect(prompt).not.toContain('"sourceDataSnapshot"');
-expect(prompt).not.toContain('"sourceTextSnapshot"');
-expect(prompt).not.toContain('"parentSelectionItemId"');
-expect(prompt).not.toContain("raw-fact-id");
-expect(prompt).not.toContain("master-1");
+		expect(prompt).not.toContain('"sourceDataSnapshot"');
+		expect(prompt).not.toContain('"sourceTextSnapshot"');
+		expect(prompt).not.toContain('"parentSelectionItemId"');
+		expect(prompt).not.toContain("raw-fact-id");
+		expect(prompt).not.toContain("master-1");
 		expect(prompt).toContain("<GAP_ELIGIBLE_REQUIREMENT_IDS>");
 		expect(__testables.SYSTEM_PROMPT).toContain("Never invent, infer, embellish, or add candidate experience");
 	});
@@ -487,176 +488,158 @@ expect(prompt).not.toContain("master-1");
 });
 
 describe("prompt alias resolution", () => {
-it("tolerates provider requirement overmatch and caps derived reason coverage to four", () => {
-	const requirements = [
-		...jobOfferSnapshot.requirements,
-		{
-			id: "req-3",
-			category: "responsibility",
-			priority: "important",
-			text: "Requirement Three",
-			sourceText: null,
-		},
-		{
-			id: "req-4",
-			category: "preferred",
-			priority: "additional",
-			text: "Requirement Four",
-			sourceText: null,
-		},
-		{
-			id: "req-5",
-			category: "keyword",
-			priority: "additional",
-			text: "Requirement Five",
-			sourceText: null,
-		},
-	] as Parameters<typeof __testables.resolvePromptAliases>[2];
-
-	const providerOutput = cvmateBuildAiRecommendationProviderOutputSchema.parse({
-		recommendations: [
+	it("tolerates provider requirement overmatch and caps derived reason coverage to four", () => {
+		const requirements = [
+			...jobOfferSnapshot.requirements,
 			{
-				selectionItemId: "s2",
-				requirementIds: ["r1", "r2", "r3", "r4", "r5"],
+				id: "req-3",
+				category: "responsibility",
+				priority: "important",
+				text: "Requirement Three",
+				sourceText: null,
 			},
-		],
-		gapRequirementIds: [],
+			{
+				id: "req-4",
+				category: "preferred",
+				priority: "additional",
+				text: "Requirement Four",
+				sourceText: null,
+			},
+			{
+				id: "req-5",
+				category: "keyword",
+				priority: "additional",
+				text: "Requirement Five",
+				sourceText: null,
+			},
+		] as Parameters<typeof __testables.resolvePromptAliases>[2];
+
+		const providerOutput = cvmateBuildAiRecommendationProviderOutputSchema.parse({
+			recommendations: [
+				{
+					selectionItemId: "s2",
+					requirementIds: ["r1", "r2", "r3", "r4", "r5"],
+				},
+			],
+			gapRequirementIds: [],
+		});
+
+		const output = __testables.resolvePromptAliases(providerOutput, selectionItems, requirements);
+
+		const reason = output.recommendations[0]?.reason ?? "";
+
+		expect(reason).toContain(requirements[0]?.text ?? "");
+		expect(reason).toContain(requirements[1]?.text ?? "");
+		expect(reason).toContain("Requirement Three");
+		expect(reason).toContain("Requirement Four");
+		expect(reason).not.toContain("Requirement Five");
 	});
 
-	const output = __testables.resolvePromptAliases(
-		providerOutput,
-		selectionItems,
-		requirements,
-	);
-
-	const reason = output.recommendations[0]?.reason ?? "";
-
-	expect(reason).toContain(requirements[0]?.text ?? "");
-	expect(reason).toContain(requirements[1]?.text ?? "");
-	expect(reason).toContain("Requirement Three");
-	expect(reason).toContain("Requirement Four");
-	expect(reason).not.toContain("Requirement Five");
-});
-
-it("rejects an unknown requirement alias even when it appears after four valid aliases", () => {
-	const requirements = [
-		...jobOfferSnapshot.requirements,
-		{
-			id: "req-3",
-			category: "responsibility",
-			priority: "important",
-			text: "Requirement Three",
-			sourceText: null,
-		},
-		{
-			id: "req-4",
-			category: "preferred",
-			priority: "additional",
-			text: "Requirement Four",
-			sourceText: null,
-		},
-	] as Parameters<typeof __testables.resolvePromptAliases>[2];
-
-	const providerOutput = cvmateBuildAiRecommendationProviderOutputSchema.parse({
-		recommendations: [
+	it("rejects an unknown requirement alias even when it appears after four valid aliases", () => {
+		const requirements = [
+			...jobOfferSnapshot.requirements,
 			{
-				selectionItemId: "s2",
-				requirementIds: ["r1", "r2", "r3", "r4", "r999"],
+				id: "req-3",
+				category: "responsibility",
+				priority: "important",
+				text: "Requirement Three",
+				sourceText: null,
 			},
-		],
-		gapRequirementIds: [],
-	});
+			{
+				id: "req-4",
+				category: "preferred",
+				priority: "additional",
+				text: "Requirement Four",
+				sourceText: null,
+			},
+		] as Parameters<typeof __testables.resolvePromptAliases>[2];
 
-	expect(() =>
-		__testables.resolvePromptAliases(
-			providerOutput,
+		const providerOutput = cvmateBuildAiRecommendationProviderOutputSchema.parse({
+			recommendations: [
+				{
+					selectionItemId: "s2",
+					requirementIds: ["r1", "r2", "r3", "r4", "r999"],
+				},
+			],
+			gapRequirementIds: [],
+		});
+
+		expect(() => __testables.resolvePromptAliases(providerOutput, selectionItems, requirements)).toThrow();
+	});
+	it("maps aliases and derives display text from frozen requirements", () => {
+		const output = __testables.resolvePromptAliases(
+			{
+				recommendations: [
+					{
+						selectionItemId: "s2",
+						requirementIds: ["r1"],
+					},
+				],
+				gapRequirementIds: ["r1", "r2"],
+				gapSuggestions: [
+					{
+						requirementId: "r2",
+						kind: "software",
+					},
+				],
+			},
 			selectionItems,
-			requirements,
-		),
-	).toThrow();
-});
-it("maps aliases and derives display text from frozen requirements", () => {
-const output = __testables.resolvePromptAliases(
-{
-recommendations: [
-{
-selectionItemId: "s2",
-requirementIds: ["r1"],
-},
-],
-gapRequirementIds: ["r1", "r2"],
-gapSuggestions: [
-{
-requirementId: "r2",
-kind: "software",
-},
-],
-},
-selectionItems,
-jobOfferSnapshot.requirements as Parameters<
-typeof __testables.resolvePromptAliases
->[2],
-);
+			jobOfferSnapshot.requirements as Parameters<typeof __testables.resolvePromptAliases>[2],
+		);
 
-expect(output).toEqual({
-recommendations: [
-{
-selectionItemId: "fact-1",
-reason: "Excel",
-},
-],
-gapRequirementIds: ["req-1", "req-2"],
-gapSuggestions: [
-{
-requirementId: "req-2",
-kind: "software",
-text: "CRM",
-},
-],
-});
-});
+		expect(output).toEqual({
+			recommendations: [
+				{
+					selectionItemId: "fact-1",
+					reason: "Excel",
+				},
+			],
+			gapRequirementIds: ["req-1", "req-2"],
+			gapSuggestions: [
+				{
+					requirementId: "req-2",
+					kind: "software",
+					text: "CRM",
+				},
+			],
+		});
+	});
 
-it("leaves an unknown selection ID for existing selection validation", () => {
-const output = __testables.resolvePromptAliases(
-{
-recommendations: [
-{
-selectionItemId: "invented-item",
-requirementIds: ["r1"],
-},
-],
-gapRequirementIds: [],
-},
-selectionItems,
-jobOfferSnapshot.requirements as Parameters<
-typeof __testables.resolvePromptAliases
->[2],
-);
+	it("leaves an unknown selection ID for existing selection validation", () => {
+		const output = __testables.resolvePromptAliases(
+			{
+				recommendations: [
+					{
+						selectionItemId: "invented-item",
+						requirementIds: ["r1"],
+					},
+				],
+				gapRequirementIds: [],
+			},
+			selectionItems,
+			jobOfferSnapshot.requirements as Parameters<typeof __testables.resolvePromptAliases>[2],
+		);
 
-expect(
-output.recommendations[0]?.selectionItemId,
-).toBe("invented-item");
-});
+		expect(output.recommendations[0]?.selectionItemId).toBe("invented-item");
+	});
 
-it("rejects an unknown requirement alias before database mutation", () => {
-expect(() =>
-__testables.resolvePromptAliases(
-{
-recommendations: [
-{
-selectionItemId: "s2",
-requirementIds: ["r999"],
-},
-],
-gapRequirementIds: [],
-},
-selectionItems,
-jobOfferSnapshot.requirements as Parameters<
-typeof __testables.resolvePromptAliases
->[2],
-),
-).toThrow();
-});
+	it("rejects an unknown requirement alias before database mutation", () => {
+		expect(() =>
+			__testables.resolvePromptAliases(
+				{
+					recommendations: [
+						{
+							selectionItemId: "s2",
+							requirementIds: ["r999"],
+						},
+					],
+					gapRequirementIds: [],
+				},
+				selectionItems,
+				jobOfferSnapshot.requirements as Parameters<typeof __testables.resolvePromptAliases>[2],
+			),
+		).toThrow();
+	});
 });
 
 describe("quality coverage policy", () => {
@@ -815,19 +798,15 @@ describe("quality coverage policy", () => {
 			},
 		] as Parameters<typeof __testables.applyQualityCoveragePolicy>[1];
 
-		const result = __testables.applyQualityCoveragePolicy(
-			new Map(),
-			qualityItems,
-			[
-				{
-					id: "req-docs",
-					category: "required",
-					priority: "critical",
-					sourceText: null,
-					text: "Document workflow and deadline control",
-				},
-			],
-		);
+		const result = __testables.applyQualityCoveragePolicy(new Map(), qualityItems, [
+			{
+				id: "req-docs",
+				category: "required",
+				priority: "critical",
+				sourceText: null,
+				text: "Document workflow and deadline control",
+			},
+		]);
 
 		expect(result.has("competency-docs")).toBe(true);
 		expect(result.has("competency-unrelated")).toBe(false);
@@ -954,20 +933,14 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 	});
 	it("does not classify plain team headcount as quantified impact", () => {
 		expect(__testables.hasQuantifiedImpactEvidence("Managed 27 production workers.")).toBe(false);
+		expect(__testables.hasQuantifiedImpactEvidence("Coordinated a multinational team of 12 to 27 employees.")).toBe(
+			false,
+		);
+		expect(__testables.hasQuantifiedImpactEvidence("Prepared 483 offers and contracts worth PLN 2.89 million.")).toBe(
+			true,
+		);
 		expect(
-			__testables.hasQuantifiedImpactEvidence(
-				"Coordinated a multinational team of 12 to 27 employees.",
-			),
-		).toBe(false);
-		expect(
-			__testables.hasQuantifiedImpactEvidence(
-				"Prepared 483 offers and contracts worth PLN 2.89 million.",
-			),
-		).toBe(true);
-		expect(
-			__testables.hasQuantifiedImpactEvidence(
-				"66 applications resulted in PLN 720 thousand of secured funding.",
-			),
+			__testables.hasQuantifiedImpactEvidence("66 applications resulted in PLN 720 thousand of secured funding."),
 		).toBe(true);
 	});
 
@@ -991,7 +964,10 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 				sourceId: "ratio-a-fact-source",
 				parentSelectionItemId: "ratio-employment-a",
 				sourceTextSnapshot: "Prepared contracts, applications and document workflows with deadline control.",
-				sourceDataSnapshot: { kind: "responsibility", text: "Prepared contracts, applications and document workflows with deadline control." },
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Prepared contracts, applications and document workflows with deadline control.",
+				},
 				selected: false,
 				recommended: false,
 				recommendationReason: null,
@@ -1015,7 +991,10 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 				sourceId: "ratio-b-fact-source",
 				parentSelectionItemId: "ratio-employment-b",
 				sourceTextSnapshot: "Prepared documentation, offers and contracts and monitored deadlines.",
-				sourceDataSnapshot: { kind: "responsibility", text: "Prepared documentation, offers and contracts and monitored deadlines." },
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Prepared documentation, offers and contracts and monitored deadlines.",
+				},
 				selected: false,
 				recommended: false,
 				recommendationReason: null,
@@ -1047,23 +1026,17 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 			},
 		] as unknown as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[1];
 
-		const recommendations = new Map(
-			selectionItems.map((item) => [item.id, `reason-${item.id}`]),
-		);
+		const recommendations = new Map(selectionItems.map((item) => [item.id, `reason-${item.id}`]));
 
-		const result = __testables.applyRecommendationBudgetPolicy(
-			recommendations,
-			selectionItems,
-			[
-				{
-					id: "ratio-req",
-					category: "required",
-					priority: "critical",
-					sourceText: null,
-					text: "Office documentation, contracts, applications, offers and deadline coordination",
-				},
-			],
-		);
+		const result = __testables.applyRecommendationBudgetPolicy(recommendations, selectionItems, [
+			{
+				id: "ratio-req",
+				category: "required",
+				priority: "critical",
+				sourceText: null,
+				text: "Office documentation, contracts, applications, offers and deadline coordination",
+			},
+		]);
 
 		expect(result.has("ratio-employment-a")).toBe(true);
 		expect(result.has("ratio-employment-b")).toBe(true);
@@ -1091,7 +1064,10 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 				sourceId: `near-fact-${suffix}-source`,
 				parentSelectionItemId: `near-employment-${suffix}`,
 				sourceTextSnapshot: "Prepared contracts, applications, offers and documentation and monitored deadlines.",
-				sourceDataSnapshot: { kind: "responsibility", text: "Prepared contracts, applications, offers and documentation and monitored deadlines." },
+				sourceDataSnapshot: {
+					kind: "responsibility",
+					text: "Prepared contracts, applications, offers and documentation and monitored deadlines.",
+				},
 				selected: false,
 				recommended: false,
 				recommendationReason: null,
@@ -1099,23 +1075,17 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 			},
 		]) as unknown as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[1];
 
-		const recommendations = new Map(
-			selectionItems.map((item) => [item.id, `reason-${item.id}`]),
-		);
+		const recommendations = new Map(selectionItems.map((item) => [item.id, `reason-${item.id}`]));
 
-		const result = __testables.applyRecommendationBudgetPolicy(
-			recommendations,
-			selectionItems,
-			[
-				{
-					id: "near-req",
-					category: "required",
-					priority: "critical",
-					sourceText: null,
-					text: "Office documentation, contracts, applications, offers and deadline coordination",
-				},
-			],
-		);
+		const result = __testables.applyRecommendationBudgetPolicy(recommendations, selectionItems, [
+			{
+				id: "near-req",
+				category: "required",
+				priority: "critical",
+				sourceText: null,
+				text: "Office documentation, contracts, applications, offers and deadline coordination",
+			},
+		]);
 
 		expect(result.has("near-employment-a")).toBe(true);
 		expect(result.has("near-employment-b")).toBe(true);
@@ -1274,9 +1244,7 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 			...volunteer,
 		] as unknown as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[1];
 
-		const recommendations = new Map(
-			selectionItems.map((item) => [item.id, `reason-${item.id}`]),
-		);
+		const recommendations = new Map(selectionItems.map((item) => [item.id, `reason-${item.id}`]));
 
 		const requirements = [
 			{
@@ -1288,20 +1256,14 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 			},
 		] as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[2];
 
-		const result = __testables.applyRecommendationBudgetPolicy(
-			recommendations,
-			selectionItems,
-			requirements,
-		);
+		const result = __testables.applyRecommendationBudgetPolicy(recommendations, selectionItems, requirements);
 
 		expect(result.size).toBeLessThanOrEqual(20);
 		expect([...result.keys()].filter((id) => id.startsWith("budget-employment-"))).toHaveLength(3);
 		expect(result.has("budget-employment-3")).toBe(false);
 
 		for (const employmentIndex of [0, 1, 2]) {
-			const factIds = [...result.keys()].filter((id) =>
-				id.startsWith(`budget-fact-${employmentIndex}-`),
-			);
+			const factIds = [...result.keys()].filter((id) => id.startsWith(`budget-fact-${employmentIndex}-`));
 			expect(factIds).toHaveLength(employmentIndex < 2 ? 4 : 1);
 			expect(result.has(`budget-fact-${employmentIndex}-impact`)).toBe(true);
 		}
@@ -1391,30 +1353,22 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 			},
 		] as unknown as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[1];
 
-		const recommendations = new Map(
-			selectionItems.map((item) => [item.id, `reason-${item.id}`]),
-		);
+		const recommendations = new Map(selectionItems.map((item) => [item.id, `reason-${item.id}`]));
 
-		const result = __testables.applyRecommendationBudgetPolicy(
-			recommendations,
-			selectionItems,
-			[
-				{
-					id: "dedupe-req",
-					category: "required",
-					priority: "critical",
-					sourceText: null,
-					text: "Applications, offers, contracts, documentation and deadlines",
-				},
-			],
-		);
+		const result = __testables.applyRecommendationBudgetPolicy(recommendations, selectionItems, [
+			{
+				id: "dedupe-req",
+				category: "required",
+				priority: "critical",
+				sourceText: null,
+				text: "Applications, offers, contracts, documentation and deadlines",
+			},
+		]);
 
 		expect(result.has("dedupe-employment")).toBe(true);
 		expect(result.has("dedupe-impact-a")).toBe(true);
 		expect(result.has("dedupe-impact-b")).toBe(false);
-		expect(
-			[...result.keys()].filter((id) => id.startsWith("dedupe-") && id !== "dedupe-employment"),
-		).toHaveLength(3);
+		expect([...result.keys()].filter((id) => id.startsWith("dedupe-") && id !== "dedupe-employment")).toHaveLength(3);
 	});
 
 	it("rejects an invalid AI selection before mutating the database", async () => {
@@ -1464,184 +1418,132 @@ describe("cvmateBuildRecommendationsService.generate", () => {
 });
 
 describe("stage 9 recommendation completeness", () => {
-it("retains one available education item for cv completeness even without lexical overlap", () => {
-const baseEmployment = selectionItems[0];
-const baseFact = selectionItems[1];
+	it("retains one available education item for cv completeness even without lexical overlap", () => {
+		const baseEmployment = selectionItems[0];
+		const baseFact = selectionItems[1];
 
-if (!baseEmployment || !baseFact) {
-throw new Error("Missing base selection fixtures.");
-}
+		if (!baseEmployment || !baseFact) {
+			throw new Error("Missing base selection fixtures.");
+		}
 
-const educationItem = {
-...baseEmployment,
-id: "stage9-education",
-sourceType: "education",
-sourceId: "stage9-education-source",
-parentSelectionItemId: null,
-sourceTextSnapshot: "University of Opole | Master | Biology",
-sourceDataSnapshot: {
-institution: "University of Opole",
-degree: "Master",
-fieldOfStudy: "Biology",
-},
-selected: false,
-recommended: false,
-recommendationReason: null,
-sortOrder: 100,
-};
+		const educationItem = {
+			...baseEmployment,
+			id: "stage9-education",
+			sourceType: "education",
+			sourceId: "stage9-education-source",
+			parentSelectionItemId: null,
+			sourceTextSnapshot: "University of Opole | Master | Biology",
+			sourceDataSnapshot: {
+				institution: "University of Opole",
+				degree: "Master",
+				fieldOfStudy: "Biology",
+			},
+			selected: false,
+			recommended: false,
+			recommendationReason: null,
+			sortOrder: 100,
+		};
 
-const items = [
-baseEmployment,
-baseFact,
-educationItem,
-] as unknown as Parameters<
-typeof __testables.applyQualityCoveragePolicy
->[1];
+		const items = [baseEmployment, baseFact, educationItem] as unknown as Parameters<
+			typeof __testables.applyQualityCoveragePolicy
+		>[1];
 
-const result =
-__testables.applyQualityCoveragePolicy(
-new Map([
-[
-baseEmployment.id,
-"Office administration",
-],
-[
-baseFact.id,
-"Office administration",
-],
-]),
-items,
-[
-{
-id: "stage9-admin-req",
-category: "required",
-priority: "critical",
-sourceText: null,
-text: "Office administration and document workflow",
-},
-],
-);
+		const result = __testables.applyQualityCoveragePolicy(
+			new Map([
+				[baseEmployment.id, "Office administration"],
+				[baseFact.id, "Office administration"],
+			]),
+			items,
+			[
+				{
+					id: "stage9-admin-req",
+					category: "required",
+					priority: "critical",
+					sourceText: null,
+					text: "Office administration and document workflow",
+				},
+			],
+		);
 
-expect(result.has("stage9-education")).toBe(true);
-expect(result.get("stage9-education")).toBe(
-"Available education retained for CV completeness.",
-);
-});
+		expect(result.has("stage9-education")).toBe(true);
+		expect(result.get("stage9-education")).toBe("Available education retained for CV completeness.");
+	});
 
-it("prefers requirement diversity while preserving quantified impact within four facts", () => {
-const baseEmployment = selectionItems[0];
+	it("prefers requirement diversity while preserving quantified impact within four facts", () => {
+		const baseEmployment = selectionItems[0];
 
-if (!baseEmployment) {
-throw new Error("Missing base employment fixture.");
-}
+		if (!baseEmployment) {
+			throw new Error("Missing base employment fixture.");
+		}
 
-const employment = {
-...baseEmployment,
-id: "stage9-diverse-employment",
-sourceId: "stage9-diverse-employment-source",
-sourceTextSnapshot:
-"Office administration, document workflow and supplier coordination",
-sourceDataSnapshot: {
-company: "Example",
-jobTitle: "Office administration",
-},
-selected: false,
-recommended: false,
-recommendationReason: null,
-sortOrder: 0,
-};
+		const employment = {
+			...baseEmployment,
+			id: "stage9-diverse-employment",
+			sourceId: "stage9-diverse-employment-source",
+			sourceTextSnapshot: "Office administration, document workflow and supplier coordination",
+			sourceDataSnapshot: {
+				company: "Example",
+				jobTitle: "Office administration",
+			},
+			selected: false,
+			recommended: false,
+			recommendationReason: null,
+			sortOrder: 0,
+		};
 
-const fact = (
-id: string,
-text: string,
-sortOrder: number,
-) => ({
-...baseEmployment,
-id,
-sourceType: "experience_fact",
-sourceId: `${id}-source`,
-parentSelectionItemId: employment.id,
-sourceTextSnapshot: text,
-sourceDataSnapshot: {
-kind: "responsibility",
-text,
-},
-selected: false,
-recommended: false,
-recommendationReason: null,
-sortOrder,
-});
+		const fact = (id: string, text: string, sortOrder: number) => ({
+			...baseEmployment,
+			id,
+			sourceType: "experience_fact",
+			sourceId: `${id}-source`,
+			parentSelectionItemId: employment.id,
+			sourceTextSnapshot: text,
+			sourceDataSnapshot: {
+				kind: "responsibility",
+				text,
+			},
+			selected: false,
+			recommended: false,
+			recommendationReason: null,
+			sortOrder,
+		});
 
-const items = [
-employment,
-fact(
-"stage9-fact-impact",
-"Prepared 483 offers and contracts worth PLN 2.89 million.",
-1,
-),
-fact(
-"stage9-fact-docs-a",
-"Prepared documents, applications, contracts and offers.",
-2,
-),
-fact(
-"stage9-fact-docs-b",
-"Coordinated documents, applications, contracts and offers.",
-3,
-),
-fact(
-"stage9-fact-docs-c",
-"Managed documents, applications, contracts and offers.",
-4,
-),
-fact(
-"stage9-fact-vendors",
-"Coordinated suppliers.",
-5,
-),
-] as unknown as Parameters<
-typeof __testables.applyRecommendationBudgetPolicy
->[1];
+		const items = [
+			employment,
+			fact("stage9-fact-impact", "Prepared 483 offers and contracts worth PLN 2.89 million.", 1),
+			fact("stage9-fact-docs-a", "Prepared documents, applications, contracts and offers.", 2),
+			fact("stage9-fact-docs-b", "Coordinated documents, applications, contracts and offers.", 3),
+			fact("stage9-fact-docs-c", "Managed documents, applications, contracts and offers.", 4),
+			fact("stage9-fact-vendors", "Coordinated suppliers.", 5),
+		] as unknown as Parameters<typeof __testables.applyRecommendationBudgetPolicy>[1];
 
-const recommendations = new Map(
-items.map((item) => [
-item.id,
-`reason-${item.id}`,
-]),
-);
+		const recommendations = new Map(items.map((item) => [item.id, `reason-${item.id}`]));
 
-const result =
-__testables.applyRecommendationBudgetPolicy(
-recommendations,
-items,
-[
-{
-id: "stage9-docs-req",
-category: "required",
-priority: "critical",
-sourceText: null,
-text: "Documents applications contracts offers",
-},
-{
-id: "stage9-vendor-req",
-category: "required",
-priority: "critical",
-sourceText: null,
-text: "Suppliers",
-},
-],
-);
+		const result = __testables.applyRecommendationBudgetPolicy(recommendations, items, [
+			{
+				id: "stage9-docs-req",
+				category: "required",
+				priority: "critical",
+				sourceText: null,
+				text: "Documents applications contracts offers",
+			},
+			{
+				id: "stage9-vendor-req",
+				category: "required",
+				priority: "critical",
+				sourceText: null,
+				text: "Suppliers",
+			},
+		]);
 
-const selectedFacts = [...result.keys()].filter(
-(id) => id.startsWith("stage9-fact-"),
-);
+		const selectedFacts = [...result.keys()].filter((id) => id.startsWith("stage9-fact-"));
 
-expect(selectedFacts).toHaveLength(4);
-expect(result.has("stage9-fact-impact")).toBe(true);
-expect(result.has("stage9-fact-vendors")).toBe(true);
-expect(result.has("stage9-fact-docs-c")).toBe(false);
-expect(result.size).toBeLessThanOrEqual(20);
-});
+		expect(selectedFacts).toHaveLength(4);
+		expect(result.has("stage9-fact-impact")).toBe(true);
+		expect(result.has("stage9-fact-vendors")).toBe(true);
+		expect(result.has("stage9-fact-docs-c")).toBe(false);
+		expect(result.size).toBeLessThanOrEqual(20);
+	});
 });
 
 describe("stage 9 c6 recommendation evidence pool", () => {
@@ -1780,9 +1682,7 @@ describe("stage 9 c6 recommendation evidence pool", () => {
 			},
 		] as Requirements;
 
-		const initial = new Map<string, string>(
-			profileItems.slice(0, 5).map((item) => [item.id, "Organization"] as const),
-		);
+		const initial = new Map<string, string>(profileItems.slice(0, 5).map((item) => [item.id, "Organization"] as const));
 
 		const result = __testables.applyQualityCoveragePolicy(initial, profileItems, requirements);
 		const profileIds = [...result.keys()].filter((id) => id.startsWith("c6-profile-"));
@@ -1899,9 +1799,7 @@ describe("residual exact-evidence reconciliation", () => {
 			recommendationReason: null,
 			sortOrder: 99,
 		};
-		const baseRecommendations = new Map(
-			genericItems.map((item) => [item.id, "Provider evidence"] as const),
-		);
+		const baseRecommendations = new Map(genericItems.map((item) => [item.id, "Provider evidence"] as const));
 
 		const result = __testables.applyQualityCoveragePolicy(
 			baseRecommendations,
@@ -1912,5 +1810,191 @@ describe("residual exact-evidence reconciliation", () => {
 		expect(result.size).toBe(5);
 		expect(result.has(exactItem.id)).toBe(true);
 		expect(genericItems.filter((item) => result.has(item.id))).toHaveLength(4);
+	});
+});
+
+describe("recommendation prompt personal-data redaction (P0 #15)", () => {
+	const identity = {
+		firstName: "Anna",
+		lastName: "Zielińska",
+		email: "anna.zielinska@example.test",
+		phone: "+48 601 234 567",
+		linkedinUrl: "https://www.linkedin.com/in/anna-zielinska",
+		websiteUrl: null,
+	};
+
+	const planted = [
+		"anna.zielinska@example.test",
+		"jan.kowalski@firma.pl",
+		"601 234 567",
+		"+48 700 800 900",
+		"linkedin.com/in/anna-zielinska",
+		"https://portfolio.example.com/anna",
+		"Zielińska",
+		"Zielinska",
+	];
+
+	type Item = (typeof selectionItems)[number];
+	const [employmentItem, factItem, courseItem] = selectionItems as [Item, Item, Item];
+
+	const piiItems: Item[] = [
+		{
+			...employmentItem,
+			id: "employment-pii",
+			sourceTextSnapshot: "Office Manager — Example Ltd (contact: anna.zielinska@example.test)",
+			sourceDataSnapshot: {
+				company: "Example Ltd",
+				jobTitle: "Office Manager",
+				description: "Reported to the board, phone 601 234 567.",
+			},
+		},
+		{
+			...factItem,
+			id: "fact-pii",
+			parentSelectionItemId: "employment-pii",
+			sourceTextSnapshot: "Prepared 483 offers worth 2,89 mln PLN; questions: jan.kowalski@firma.pl",
+			sourceDataSnapshot: {
+				text: "Prepared 483 offers worth 2,89 mln PLN; questions: jan.kowalski@firma.pl",
+			},
+		},
+		{
+			...courseItem,
+			id: "custom-pii",
+			sourceType: "custom_section_item",
+			sourceTextSnapshot: "Portfolio https://portfolio.example.com/anna by Anna Zielińska",
+			sourceDataSnapshot: {
+				title: "Portfolio by Zielinska",
+				subtitle: "linkedin.com/in/anna-zielinska",
+				description: "Portfolio https://portfolio.example.com/anna by Anna Zielińska",
+			},
+		},
+		{
+			...courseItem,
+			id: "clause-pii",
+			sourceType: "clause",
+			sourceTextSnapshot: "Consent for processing; contact +48 700 800 900.",
+			sourceDataSnapshot: { content: "Consent for processing; contact +48 700 800 900.", scope: "current" },
+		},
+	];
+
+	it("sends no planted personal data from source text or allowlisted values", () => {
+		const prompt = __testables.buildPrompt({
+			jobOffer: jobOfferSnapshot,
+			selectionItems: piiItems,
+			redaction: buildAiRedactionContext([identity]),
+		});
+
+		for (const value of planted) expect(prompt).not.toContain(value);
+
+		expect(prompt).toContain("[EMAIL]");
+		expect(prompt).toContain("[TELEFON]");
+		expect(prompt).toContain("[URL]");
+		expect(prompt).toContain("[OSOBA]");
+		// Professional facts and numbers survive redaction.
+		expect(prompt).toContain("Prepared 483 offers worth 2,89 mln PLN");
+		expect(prompt).toContain('"company":"Example Ltd"');
+	});
+
+	it("redacts contact patterns even without an identity context", () => {
+		const prompt = __testables.buildPrompt({ jobOffer: jobOfferSnapshot, selectionItems: piiItems });
+
+		for (const value of ["anna.zielinska@example.test", "jan.kowalski@firma.pl", "601 234 567", "+48 700 800 900"]) {
+			expect(prompt).not.toContain(value);
+		}
+	});
+
+	it("sends only allowed source types and fails closed for unknown ones", () => {
+		const prompt = __testables.buildPrompt({
+			jobOffer: jobOfferSnapshot,
+			selectionItems: [
+				...selectionItems,
+				{ ...courseItem, id: "photo-1", sourceType: "profile_photo", sourceTextSnapshot: "PHOTO_MUST_NOT_BE_SENT" },
+				{ ...courseItem, id: "ref-1", sourceType: "reference", sourceTextSnapshot: "REFERENCE_MUST_NOT_BE_SENT" },
+				{
+					...courseItem,
+					id: "future-1",
+					sourceType: "future_source_type" as never,
+					sourceTextSnapshot: "FUTURE_TYPE_MUST_NOT_BE_SENT",
+				},
+			],
+		});
+
+		expect(prompt).not.toContain("PHOTO_MUST_NOT_BE_SENT");
+		expect(prompt).not.toContain("REFERENCE_MUST_NOT_BE_SENT");
+		expect(prompt).not.toContain("FUTURE_TYPE_MUST_NOT_BE_SENT");
+		expect(prompt).toContain("First Aid");
+	});
+
+	it("generate resolves the identity context for the build and redacts the provider payload", async () => {
+		createTransactionMock();
+
+		const identitySnapshot = { id: "profile-1", ...identity, location: "Wrocław" };
+		buildServiceMock.getById.mockResolvedValue({ ...build, identitySnapshot });
+		buildServiceMock.listSelectionItems.mockResolvedValue(piiItems);
+		resolveRedactionContextMock.mockResolvedValue(buildAiRedactionContext([identity]));
+
+		generateJsonMock.mockResolvedValue({
+			recommendations: [{ selectionItemId: "s2", requirementIds: ["r1"] }],
+			gapRequirementIds: [],
+		});
+
+		await cvmateBuildRecommendationsService.generate({ id: "build-1", userId: "user-1" });
+
+		expect(resolveRedactionContextMock).toHaveBeenCalledWith({ userId: "user-1", identitySnapshot });
+
+		const request = generateJsonMock.mock.calls[0]?.[1] as { system: string; prompt: string };
+
+		for (const value of planted) expect(request.prompt).not.toContain(value);
+		expect(request.system).toContain("[EMAIL], [TELEFON], [URL], [OSOBA] and [ADRES] are redacted");
+	});
+
+	it("sends null instead of the database ID when a parent has no prompt alias", () => {
+		const orphanFact = { ...factItem, id: "orphan-fact", parentSelectionItemId: "parent-db-id-not-in-prompt" };
+		const prompt = __testables.buildPrompt({ jobOffer: jobOfferSnapshot, selectionItems: [orphanFact] });
+
+		expect(prompt).not.toContain("parent-db-id-not-in-prompt");
+		expect(prompt).not.toContain("orphan-fact");
+
+		const candidateRows = JSON.parse(
+			prompt.match(/<CANDIDATE_ITEMS[^>]*>\n(.*)\n<\/CANDIDATE_ITEMS>/)?.[1] ?? "[]",
+		) as unknown[][];
+
+		expect(candidateRows[0]?.[0]).toBe("s1");
+		expect(candidateRows[0]?.[1]).toBeNull();
+	});
+
+	it("redacts third-party contact details in the job offer and keeps offer facts", () => {
+		const offerWithContacts: typeof jobOfferSnapshot = {
+			...jobOfferSnapshot,
+			companyName: "Acme (rekrutacja@acme.example)",
+			location: "ul. Polna 5, 00-950 Warszawa",
+			requirements: [
+				{
+					id: "req-contact",
+					category: "required",
+					priority: "critical",
+					sourceText: "Kontakt: anna.recruiter@acme.example, +48 601 234 567, linkedin.com/in/anna-recruiter",
+					text: "Experience with Booking.com, budget 125 000 000 PLN, 2019-2023",
+				},
+			],
+		};
+
+		const prompt = __testables.buildPrompt({ jobOffer: offerWithContacts, selectionItems });
+
+		for (const value of [
+			"rekrutacja@acme.example",
+			"anna.recruiter@acme.example",
+			"601 234 567",
+			"linkedin.com/in/anna-recruiter",
+			"Polna 5",
+			"00-950",
+		]) {
+			expect(prompt).not.toContain(value);
+		}
+
+		expect(prompt).toContain("Experience with Booking.com, budget 125 000 000 PLN, 2019-2023");
+		expect(prompt).toContain("[ADRES] Warszawa");
+		// The stored job offer itself is never modified.
+		expect(offerWithContacts.requirements[0]?.sourceText).toContain("anna.recruiter@acme.example");
 	});
 });

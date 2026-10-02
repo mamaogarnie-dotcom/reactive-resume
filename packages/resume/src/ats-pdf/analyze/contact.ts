@@ -1,14 +1,14 @@
 import type { ContactEntities, ExtractedDocument, RawExtraction, TextLine } from "../types";
+import {
+	BARE_DOMAIN_PATTERN,
+	EMAIL_PATTERN,
+	EMAIL_TEST,
+	PROFESSIONAL_HOSTS,
+	URL_PATTERN,
+} from "../../contact-patterns";
 
-const EMAIL_PATTERN = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
-/** Same shape without `g`: a stateful `lastIndex` would make `.test()` alternate between calls. */
-const EMAIL_TEST = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/;
 /** Seven to fifteen digits, the ITU range, with the separators people actually type. */
 const PHONE_PATTERN = /(?:\+\d{1,3}[\s.-]?)?(?:\(\d{1,4}\)[\s.-]?)?\d[\d\s.()-]{5,17}\d/g;
-const URL_PATTERN = /(?:https?:\/\/|www\.)[^\s<>"')\]]+/gi;
-const BARE_DOMAIN_PATTERN = /\b(?:[\w-]+\.)+(?:com|org|net|io|dev|me|co|ai|app|xyz|edu|gov)(?:\/[^\s<>"')\]]*)?/gi;
-
-const PROFESSIONAL_HOSTS = ["linkedin.com", "github.com", "gitlab.com", "behance.net", "dribbble.com", "medium.com"];
 
 /** Lines this far down page one are past where a parser expects contact details. */
 const FIRST_PAGE_CONTACT_LINES = 12;

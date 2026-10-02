@@ -1,6 +1,6 @@
-import * as schema from "@reactive-resume/db/schema";
 import { createSelectSchema } from "drizzle-zod";
 import z from "zod";
+import * as schema from "@reactive-resume/db/schema";
 
 const cvmateBuildStepSchema = z.enum([
 	"offer",
@@ -17,7 +17,18 @@ const cvmateBuildStatusSchema = z.enum(["active", "completed", "abandoned"]);
 const cvmateGapOriginSchema = z.enum(["detected", "user"]);
 const cvmateGapStatusSchema = z.enum(["open", "resolved", "dismissed"]);
 const cvmateRequirementPrioritySchema = z.enum(["critical", "important", "additional"]);
-const cvmateGeneratedContentKindSchema = z.enum(["professional_headline", "professional_summary", "experience_fact", "section_title", "other"]);
+const cvmateGeneratedContentKindSchema = z.enum([
+	"professional_headline",
+	"professional_summary",
+	"experience_fact",
+	"section_title",
+	"other",
+]);
+
+/** Parts of tailored content that were intentionally not generated, e.g. because the AI echoed redacted personal data. */
+export const cvmateTailoredContentNoticeSchema = z.object({
+	code: z.enum(["professional_headline_omitted", "professional_summary_omitted"]),
+});
 
 const cvmateSelectionSourceTypeSchema = z.enum([
 	"employment",

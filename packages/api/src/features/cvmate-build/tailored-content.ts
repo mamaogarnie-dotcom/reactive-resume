@@ -1,4 +1,6 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
+import type { cvmateTailoredContentNoticeSchema } from "../../dto/cvmate-build";
+import type { AiRedactionContext } from "../ai/redaction";
 import { ORPCError } from "@orpc/client";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
@@ -7,12 +9,20 @@ import * as schema from "@reactive-resume/db/schema";
 import { resolveCvLanguage } from "@reactive-resume/utils/locale";
 import { generateId } from "@reactive-resume/utils/string";
 import { generateJson } from "../ai/generate-json";
+import {
+	buildAiRedactionContext,
+	containsAiRedactionPlaceholder,
+	redactTextForAi,
+	redactValuesForAi,
+} from "../ai/redaction";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
+import { resolveCvBuildAiRedactionContext } from "./ai-redaction-context";
+import { isAiAllowedSelectionSourceType } from "./ai-source-data";
 import { cvmateBuildService } from "./service";
 
-const PROMPT_VERSION = "cvmate-tailored-content-v12";
+const PROMPT_VERSION = "cvmate-tailored-content-v14";
 const MAX_EXPERIENCE_FACTS = 500;
 const TAILORED_CONTENT_MAX_OUTPUT_TOKENS = 2048;
 const TAILORED_CONTENT_GPT_OSS_MAX_OUTPUT_TOKENS = 4096;
@@ -41,9 +51,11 @@ const jobOfferSnapshotSchema = z
 	})
 	.passthrough();
 
+// After sanitization the headline or summary may be omitted when the AI echoed redacted personal data
+// (see dropRedactionPlaceholderEchoes); the raw provider contract below still requires both.
 export const cvmateBuildAiTailoredContentOutputSchema = z.object({
 	professionalHeadline: z.string().trim().min(1).max(PROFESSIONAL_HEADLINE_MAX_CHARACTERS).optional(),
-	professionalSummary: z.string().trim().min(1).max(PROFESSIONAL_SUMMARY_MAX_CHARACTERS),
+	professionalSummary: z.string().trim().min(1).max(PROFESSIONAL_SUMMARY_MAX_CHARACTERS).optional(),
 	experienceFacts: z
 		.array(
 			z.object({
@@ -70,6 +82,8 @@ type RunnableProvider = {
 type SelectionItem = Awaited<ReturnType<typeof cvmateBuildService.listSelectionItems>>[number];
 type GeneratedContent = Awaited<ReturnType<typeof cvmateBuildService.listGeneratedContent>>[number];
 type TailoredOutput = z.infer<typeof cvmateBuildAiTailoredContentOutputSchema>;
+
+type TailoredContentNotice = z.infer<typeof cvmateTailoredContentNoticeSchema>;
 
 const SYSTEM_PROMPT = `
 You create polished, professional, ATS-readable CV wording using only facts
@@ -141,6 +155,9 @@ Security and factuality rules:
   Otherwise prefer the job-offer language. If that is unavailable, preserve
   the natural language of the candidate evidence.
 - Do not use external knowledge about the candidate or employer.
+- Values such as [EMAIL], [TELEFON], [URL], [OSOBA] and [ADRES] are redacted
+  personal data. Never copy them into generated text and never treat them as
+  evidence.
 
 Professional-summary writing rules:
 - Write one compact paragraph of 2 to 4 concise sentences.
@@ -296,40 +313,78 @@ function selectQuantifiedSummaryAnchor(selectionItems: SelectionItem[]): Selecti
 	);
 }
 
-function summaryQuantifiedAnchorPromptValue(anchor: SelectionItem | null) {
+/**
+ * The evidence the AI may see: allowed source types only, with personal data redacted. Validators
+ * compare the AI output with these same items, so they judge exactly what the AI was given. The full
+ * redacted source data stays on the server; only the fields listed in buildPrompt reach the provider.
+ */
+function toAiEvidenceItems(selectionItems: SelectionItem[], redaction: AiRedactionContext): SelectionItem[] {
+	return selectionItems
+		.filter((item) => isAiAllowedSelectionSourceType(item.sourceType))
+		.map((item) => ({
+			...item,
+			sourceTextSnapshot: redactTextForAi(item.sourceTextSnapshot, redaction),
+			sourceDataSnapshot: redactValuesForAi(item.sourceDataSnapshot, redaction),
+		}));
+}
+
+/** Prompt aliases (s1, s2, ...) instead of database IDs, consistent with CV recommendations. */
+function selectionAliases(evidenceItems: SelectionItem[]) {
+	return {
+		aliasById: new Map(evidenceItems.map((item, index) => [item.id, `s${index + 1}`] as const)),
+		idByAlias: new Map(evidenceItems.map((item, index) => [`s${index + 1}`, item.id] as const)),
+	};
+}
+
+/**
+ * Job-offer text, including recommendation reasons derived from requirement text, may name a recruiter
+ * or other third party. Contact patterns are redacted without the candidate's identity; only the
+ * prompt payload changes, never the stored job offer or selection.
+ */
+function redactJobOfferTextForAi(value: string | null | undefined): string | null {
+	return redactTextForAi(value ?? null, buildAiRedactionContext([]));
+}
+
+function summaryQuantifiedAnchorPromptValue(anchor: SelectionItem | null, aliasById: Map<string, string>) {
 	if (!anchor) return null;
 
 	return {
-		id: anchor.id,
+		id: aliasById.get(anchor.id) ?? null,
 		sourceType: anchor.sourceType,
 		sourceTextSnapshot: anchor.sourceTextSnapshot,
-		recommendationReason: anchor.recommendationReason ?? null,
+		recommendationReason: redactJobOfferTextForAi(anchor.recommendationReason),
 	};
 }
 function buildPrompt(input: {
 	jobOffer: z.infer<typeof jobOfferSnapshotSchema>;
 	selectionItems: SelectionItem[];
 	targetLanguage: string | null;
+	/** Without an identity context, contact-detail patterns are still redacted. */
+	redaction?: AiRedactionContext;
 }) {
-	const summaryQuantifiedAnchor = selectQuantifiedSummaryAnchor(input.selectionItems);
-	const candidateItems = input.selectionItems
-		.filter((item) => item.sourceType !== "profile_photo" && item.sourceType !== "reference")
-		.map((item) => ({
-			id: item.id,
-			parentSelectionItemId: item.parentSelectionItemId,
-			sourceType: item.sourceType,
-			sourceTextSnapshot: item.sourceTextSnapshot,
-		}));
+	const evidenceItems = toAiEvidenceItems(input.selectionItems, input.redaction ?? buildAiRedactionContext([]));
+	const { aliasById } = selectionAliases(evidenceItems);
+	const alias = (id: string | null) => (id === null ? null : (aliasById.get(id) ?? null));
+
+	const summaryQuantifiedAnchor = selectQuantifiedSummaryAnchor(evidenceItems);
+	// Only the alias, the parent alias, the source type and the redacted source text leave the server.
+	// Source data snapshots are never part of this payload.
+	const candidateItems = evidenceItems.map((item) => ({
+		id: alias(item.id),
+		parentSelectionItemId: alias(item.parentSelectionItemId),
+		sourceType: item.sourceType,
+		sourceTextSnapshot: item.sourceTextSnapshot,
+	}));
 
 	const requirements = input.jobOffer.requirements.map((requirement) => ({
-		text: requirement.text,
+		text: redactJobOfferTextForAi(requirement.text),
 		category: requirement.category,
 		priority: requirement.priority,
 	}));
 
-	const rewriteEligibleSelectionIds = input.selectionItems
+	const rewriteEligibleSelectionIds = evidenceItems
 		.filter((item) => item.sourceType === "experience_fact")
-		.map((item) => item.id);
+		.map((item) => alias(item.id));
 
 	return `
 Tailor the wording of the selected candidate content to the frozen job offer.
@@ -340,10 +395,10 @@ ${input.targetLanguage ?? ""}
 
 <JOB_OFFER>
 ${JSON.stringify({
-	roleTitle: input.jobOffer.roleTitle ?? null,
-	companyName: input.jobOffer.companyName ?? null,
-	location: input.jobOffer.location ?? null,
-	language: input.jobOffer.language ?? null,
+	roleTitle: redactJobOfferTextForAi(input.jobOffer.roleTitle),
+	companyName: redactJobOfferTextForAi(input.jobOffer.companyName),
+	location: redactJobOfferTextForAi(input.jobOffer.location),
+	language: redactJobOfferTextForAi(input.jobOffer.language),
 	requirements,
 })}
 </JOB_OFFER>
@@ -352,7 +407,7 @@ ${JSON.stringify({
 ${JSON.stringify(candidateItems)}
 </SELECTED_CANDIDATE_ITEMS>
 <SUMMARY_QUANTIFIED_ANCHOR>
-${JSON.stringify(summaryQuantifiedAnchorPromptValue(summaryQuantifiedAnchor))}
+${JSON.stringify(summaryQuantifiedAnchorPromptValue(summaryQuantifiedAnchor, aliasById))}
 </SUMMARY_QUANTIFIED_ANCHOR>
 
 <REWRITE_ELIGIBLE_SELECTION_IDS>
@@ -574,7 +629,11 @@ function isShortRepeatedSentenceBoundaryFragment(previousSentence: string, curre
 
 	return previousTokens[previousTokens.length - 1] === currentTokens[0];
 }
-function sanitizeProfessionalSummarySourceAttribution(summary: string, selectionItems: SelectionItem[]): string {
+function sanitizeProfessionalSummarySourceAttribution(
+	summary: string,
+	selectionItems: SelectionItem[],
+	originalById: ReadonlyMap<string, SelectionItem> = new Map(),
+): string {
 	const sentences = summary.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ?? [];
 	const safeSentences: string[] = [];
 
@@ -613,7 +672,14 @@ function sanitizeProfessionalSummarySourceAttribution(summary: string, selection
 
 			return left.id.localeCompare(right.id);
 		})[0];
-		const fallback = sourceTextAsSummarySentence(fallbackCandidate?.sourceTextSnapshot ?? null);
+		// The fallback quotes the user's original source text. When that text contained redacted personal
+		// data, the sentence is dropped instead: the summary never quotes contact details or placeholders.
+		const original = fallbackCandidate ? originalById.get(fallbackCandidate.id) : undefined;
+		const fallbackWasRedacted =
+			original !== undefined && original.sourceTextSnapshot !== fallbackCandidate?.sourceTextSnapshot;
+		const fallback = fallbackWasRedacted
+			? ""
+			: sourceTextAsSummarySentence(fallbackCandidate?.sourceTextSnapshot ?? null);
 
 		if (fallback) safeSentences.push(fallback);
 	}
@@ -657,10 +723,19 @@ function isCosmeticExperienceFactRewrite(sourceText: string | null, generatedTex
 	return Boolean(sourceSignature) && sourceSignature === generatedSignature;
 }
 
-function sanitizeExperienceFactQualitativeUpgrade(sourceText: string | null, generatedText: string): string {
-	const fallback = sourceText?.trim();
+/**
+ * `sourceText` is the evidence the AI saw (redacted); `fallbackText` is the user's original source
+ * text, which replaces a rejected rewrite. Both are the same when nothing was redacted.
+ */
+function sanitizeExperienceFactQualitativeUpgrade(
+	sourceText: string | null,
+	generatedText: string,
+	fallbackText: string | null = sourceText,
+): string {
+	const comparison = sourceText?.trim();
+	const fallback = fallbackText?.trim();
 
-	if (fallback && isCosmeticExperienceFactRewrite(fallback, generatedText)) {
+	if (comparison && fallback && isCosmeticExperienceFactRewrite(comparison, generatedText)) {
 		return fallback;
 	}
 
@@ -671,34 +746,128 @@ function sanitizeExperienceFactQualitativeUpgrade(sourceText: string | null, gen
 	return fallback ? fallback : generatedText;
 }
 
-function sanitizeTailoredOutput(output: TailoredOutput, selectionItems: SelectionItem[]): TailoredOutput {
+/**
+ * True when `text` is the user's original source text restored in place of a rejected rewrite of
+ * redacted evidence. That text is the user's own evidence rather than an AI claim. When nothing was
+ * redacted the regular checks apply unchanged.
+ */
+function isRestoredOriginalSourceText(
+	text: string,
+	original: SelectionItem | undefined,
+	evidence: SelectionItem | undefined,
+): boolean {
+	const originalText = original?.sourceTextSnapshot?.trim();
+	if (!originalText || originalText === evidence?.sourceTextSnapshot?.trim()) return false;
+	return text.trim() === originalText;
+}
+
+/**
+ * `selectionItems` are the AI evidence items (redacted); `originalItems` are the stored snapshots used
+ * for fallbacks. Without `originalItems` the evidence items double as originals.
+ */
+function sanitizeTailoredOutput(
+	output: TailoredOutput,
+	selectionItems: SelectionItem[],
+	originalItems: SelectionItem[] = selectionItems,
+): TailoredOutput {
 	const eligible = new Map(
 		selectionItems.filter((item) => item.sourceType === "experience_fact").map((item) => [item.id, item]),
 	);
+	const originalById = new Map(originalItems.map((item) => [item.id, item] as const));
 
-	const qualitativeSafeSummary = sanitizeProfessionalSummaryQualitativeUpgrades(
-		output.professionalSummary,
-		selectionItems,
-	);
-	const sourceAttributionSafeSummary = sanitizeProfessionalSummarySourceAttribution(
-		qualitativeSafeSummary,
-		selectionItems,
-	);
-	const lengthSafeSummary = trimProfessionalSummaryToLimit(sourceAttributionSafeSummary);
+	let professionalSummary: string | undefined;
+
+	if (output.professionalSummary !== undefined) {
+		const qualitativeSafeSummary = sanitizeProfessionalSummaryQualitativeUpgrades(
+			output.professionalSummary,
+			selectionItems,
+		);
+		const sourceAttributionSafeSummary = sanitizeProfessionalSummarySourceAttribution(
+			qualitativeSafeSummary,
+			selectionItems,
+			originalById,
+		);
+		professionalSummary = trimProfessionalSummaryToLimit(sourceAttributionSafeSummary);
+	}
 
 	return {
-		professionalHeadline: output.professionalHeadline,
-		professionalSummary: lengthSafeSummary,
+		...(output.professionalHeadline !== undefined ? { professionalHeadline: output.professionalHeadline } : {}),
+		...(professionalSummary !== undefined ? { professionalSummary } : {}),
 		experienceFacts: output.experienceFacts.map((item) => {
 			const sourceItem = eligible.get(item.selectionItemId);
 
 			if (!sourceItem) return item;
 
+			const original = originalById.get(item.selectionItemId) ?? sourceItem;
+
+			if (isRestoredOriginalSourceText(item.text, original, sourceItem)) return item;
+
 			return {
 				...item,
-				text: sanitizeExperienceFactQualitativeUpgrade(sourceItem.sourceTextSnapshot, item.text),
+				text: sanitizeExperienceFactQualitativeUpgrade(
+					sourceItem.sourceTextSnapshot,
+					item.text,
+					original.sourceTextSnapshot,
+				),
 			};
 		}),
+	};
+}
+
+/** Maps prompt aliases back to selection item IDs; unknown values are left for validateOutput to reject. */
+function resolveExperienceFactAliases<T extends { experienceFacts: Array<{ selectionItemId: string; text: string }> }>(
+	output: T,
+	idByAlias: ReadonlyMap<string, string>,
+): T {
+	return {
+		...output,
+		experienceFacts: output.experienceFacts.map((item) => ({
+			...item,
+			selectionItemId: idByAlias.get(item.selectionItemId) ?? item.selectionItemId,
+		})),
+	};
+}
+
+/**
+ * A redaction placeholder must never reach a finished CV. A fact that contains one falls back to the
+ * user's original source text; a headline or summary that contains one is omitted with a notice.
+ */
+function dropRedactionPlaceholderEchoes(
+	output: TailoredOutput,
+	originalItems: SelectionItem[],
+): { output: TailoredOutput; notices: TailoredContentNotice[] } {
+	const originalById = new Map(originalItems.map((item) => [item.id, item] as const));
+	const notices: TailoredContentNotice[] = [];
+
+	const headlineEchoes = containsAiRedactionPlaceholder(output.professionalHeadline);
+	const summaryEchoes = containsAiRedactionPlaceholder(output.professionalSummary);
+
+	if (headlineEchoes) notices.push({ code: "professional_headline_omitted" });
+	if (summaryEchoes) notices.push({ code: "professional_summary_omitted" });
+
+	return {
+		output: {
+			...(output.professionalHeadline !== undefined && !headlineEchoes
+				? { professionalHeadline: output.professionalHeadline }
+				: {}),
+			...(output.professionalSummary !== undefined && !summaryEchoes
+				? { professionalSummary: output.professionalSummary }
+				: {}),
+			experienceFacts: output.experienceFacts.map((item) => {
+				if (!containsAiRedactionPlaceholder(item.text)) return item;
+
+				const originalText = originalById.get(item.selectionItemId)?.sourceTextSnapshot?.trim();
+
+				if (!originalText || containsAiRedactionPlaceholder(originalText)) {
+					throw new ORPCError("BAD_REQUEST", {
+						message: "The AI returned redacted personal data for an experience fact without a usable source text.",
+					});
+				}
+
+				return { ...item, text: originalText };
+			}),
+		},
+		notices,
 	};
 }
 
@@ -822,13 +991,26 @@ function validateProfessionalHeadline(
 	}
 }
 
-function validateOutput(output: TailoredOutput, selectionItems: SelectionItem[], targetLanguage: string | null = null) {
+/**
+ * `selectionItems` are the AI evidence items (redacted), so numeric and qualitative checks compare
+ * against exactly what the AI saw. A fact restored verbatim from `originalItems` is the user's own
+ * text, not an AI claim, and is not re-validated against the redacted evidence.
+ */
+function validateOutput(
+	output: TailoredOutput,
+	selectionItems: SelectionItem[],
+	targetLanguage: string | null = null,
+	originalItems: SelectionItem[] = selectionItems,
+) {
 	if (output.professionalHeadline) {
 		validateProfessionalHeadline(output.professionalHeadline, selectionItems, targetLanguage);
 	}
 
-	validateProfessionalSummary(output.professionalSummary, selectionItems, targetLanguage);
+	if (output.professionalSummary !== undefined) {
+		validateProfessionalSummary(output.professionalSummary, selectionItems, targetLanguage);
+	}
 
+	const originalById = new Map(originalItems.map((item) => [item.id, item] as const));
 	const eligible = new Map(
 		selectionItems.filter((item) => item.sourceType === "experience_fact").map((item) => [item.id, item]),
 	);
@@ -856,7 +1038,9 @@ function validateOutput(output: TailoredOutput, selectionItems: SelectionItem[],
 			});
 		}
 
-		validateExperienceFactRewrite(sourceItem.sourceTextSnapshot, item.text);
+		if (!isRestoredOriginalSourceText(item.text, originalById.get(item.selectionItemId), sourceItem)) {
+			validateExperienceFactRewrite(sourceItem.sourceTextSnapshot, item.text);
+		}
 
 		seen.add(item.selectionItemId);
 	}
@@ -939,6 +1123,13 @@ export const cvmateBuildTailoredContentService = {
 		const provider = await resolveProvider(input.userId, input.aiProviderId);
 		const isGroqGptOss = provider.provider === "groq" && provider.model.toLowerCase().includes("gpt-oss");
 
+		const redaction = await resolveCvBuildAiRedactionContext({
+			userId: input.userId,
+			identitySnapshot: build.identitySnapshot,
+		});
+		const evidenceItems = toAiEvidenceItems(selectedItems, redaction);
+		const { idByAlias } = selectionAliases(evidenceItems);
+
 		const model = getModel({
 			provider: provider.provider,
 			model: provider.model,
@@ -954,6 +1145,7 @@ export const cvmateBuildTailoredContentService = {
 					jobOffer,
 					selectionItems: selectedItems,
 					targetLanguage: resolveCvLanguage(build.targetLanguage),
+					redaction,
 				}),
 			},
 			cvmateBuildAiTailoredContentRawOutputSchema,
@@ -982,20 +1174,34 @@ export const cvmateBuildTailoredContentService = {
 			},
 		);
 
+		const echoSafe = dropRedactionPlaceholderEchoes(resolveExperienceFactAliases(output, idByAlias), selectedItems);
+
 		const sanitizedOutput = cvmateBuildAiTailoredContentOutputSchema.parse(
-			sanitizeTailoredOutput(output, selectedItems),
+			sanitizeTailoredOutput(echoSafe.output, evidenceItems, selectedItems),
 		);
 
-		if (!sanitizedOutput.professionalHeadline) {
+		const headlineOmitted = echoSafe.notices.some((notice) => notice.code === "professional_headline_omitted");
+
+		if (!sanitizedOutput.professionalHeadline && !headlineOmitted) {
 			throw new ORPCError("BAD_REQUEST", {
 				message: "The AI omitted the professional headline.",
 			});
 		}
 
-		validateOutput(sanitizedOutput, selectedItems, resolveCvLanguage(build.targetLanguage));
+		validateOutput(sanitizedOutput, evidenceItems, resolveCvLanguage(build.targetLanguage), selectedItems);
+
+		// Sanitization only removes or restores text, so this is a final guard: nothing that echoes a
+		// redaction placeholder may be stored as CV content.
+		const finalOutput = dropRedactionPlaceholderEchoes(sanitizedOutput, selectedItems);
+		const notices = [
+			...new Map(
+				[...echoSafe.notices, ...finalOutput.notices].map((notice) => [notice.code, notice] as const),
+			).values(),
+		];
+		const { professionalHeadline, professionalSummary } = finalOutput.output;
 
 		const experienceOutputById = new Map(
-			sanitizedOutput.experienceFacts.map((item) => [item.selectionItemId, item.text]),
+			finalOutput.output.experienceFacts.map((item) => [item.selectionItemId, item.text]),
 		);
 
 		const summarySnapshot = {
@@ -1016,22 +1222,29 @@ export const cvmateBuildTailoredContentService = {
 			sourceText: string | null;
 			sourceDataSnapshot: Record<string, unknown>;
 			aiText: string;
-		}> = [
-			{
+		}> = [];
+
+		// An omitted headline or summary is not written; any earlier version stays and the notice tells
+		// the user why nothing new was generated.
+		if (professionalHeadline) {
+			targets.push({
 				kind: "professional_headline",
 				selectionItemId: null,
 				sourceText: null,
 				sourceDataSnapshot: {},
-				aiText: sanitizedOutput.professionalHeadline,
-			},
-			{
+				aiText: professionalHeadline,
+			});
+		}
+
+		if (professionalSummary) {
+			targets.push({
 				kind: "professional_summary",
 				selectionItemId: null,
 				sourceText: null,
 				sourceDataSnapshot: summarySnapshot,
-				aiText: sanitizedOutput.professionalSummary,
-			},
-		];
+				aiText: professionalSummary,
+			});
+		}
 
 		for (const item of selectedItems) {
 			if (item.sourceType !== "experience_fact") continue;
@@ -1110,11 +1323,15 @@ export const cvmateBuildTailoredContentService = {
 				cvBuildId: build.id,
 				userId: input.userId,
 			}),
+			notices,
 		};
 	},
 };
 
 export const __testables = {
+	dropRedactionPlaceholderEchoes,
+	resolveExperienceFactAliases,
+	toAiEvidenceItems,
 	rawOutputSchema: cvmateBuildAiTailoredContentRawOutputSchema,
 	trimProfessionalSummaryToLimit,
 	selectQuantifiedSummaryAnchor,
