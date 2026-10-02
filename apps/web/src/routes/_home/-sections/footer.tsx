@@ -1,7 +1,6 @@
 import type { Icon } from "@phosphor-icons/react";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { GithubLogoIcon, LinkedinLogoIcon, XLogoIcon } from "@phosphor-icons/react";
 import { m } from "motion/react";
 import { useState } from "react";
 import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
@@ -25,24 +24,13 @@ type SocialLink = {
 };
 
 const getResourceLinks = (): FooterLinkItem[] => [
-	{ url: "https://docs.rxresu.me", label: t`Documentation` },
-	{ url: "https://opencollective.com/reactive-resume/donate", label: t`Sponsorships` },
-	{ url: "https://github.com/amruthpillai/reactive-resume", label: t`Source Code` },
-	{ url: "https://docs.rxresu.me/changelog", label: t`Changelog` },
+	{ url: "/privacy", label: "Polityka prywatności" },
+	{ url: "mailto:biuro.1story@gmail.com", label: "Kontakt" },
 ];
 
-const getCommunityLinks = (): FooterLinkItem[] => [
-	{ url: "https://github.com/amruthpillai/reactive-resume/issues", label: t`Report an issue` },
-	{ url: "https://crowdin.com/project/reactive-resume", label: t`Translations` },
-	{ url: "https://reddit.com/r/reactiveresume", label: t`Subreddit` },
-	{ url: "https://discord.gg/aSyA5ZSxpb", label: t`Discord` },
-];
+const getCommunityLinks = (): FooterLinkItem[] => [{ url: "/ats-checker", label: "Sprawdzanie ATS" }];
 
-const socialLinks: SocialLink[] = [
-	{ url: "https://github.com/amruthpillai/reactive-resume", label: t`GitHub`, icon: GithubLogoIcon },
-	{ url: "https://linkedin.com/in/amruthpillai", label: t`LinkedIn`, icon: LinkedinLogoIcon },
-	{ url: "https://x.com/KingOKings", label: t`X (Twitter)`, icon: XLogoIcon },
-];
+const socialLinks: SocialLink[] = [];
 
 export function Footer() {
 	return (
@@ -61,9 +49,7 @@ export function Footer() {
 
 					<div className="space-y-2">
 						<p className="max-w-xs text-muted-foreground text-sm leading-relaxed">
-							<Trans>
-								A free and open-source resume builder that makes it easy to create, update, and share your resume.
-							</Trans>
+							Kreator CV dopasowanych do ofert pracy.
 						</p>
 					</div>
 
@@ -91,10 +77,10 @@ export function Footer() {
 				</div>
 
 				{/* Resources Column */}
-				<FooterLinkGroup title={t`Resources`} links={getResourceLinks()} />
+				<FooterLinkGroup title="Informacje" links={getResourceLinks()} />
 
 				{/* Community Column */}
-				<FooterLinkGroup title={t`Community`} links={getCommunityLinks()} />
+				<FooterLinkGroup title="Narzędzia" links={getCommunityLinks()} />
 
 				{/* Copyright Column */}
 				<div className="space-y-4 sm:col-span-2 lg:col-span-1">

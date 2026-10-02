@@ -21,24 +21,7 @@ export function Copyright({ className, ...props }: Props) {
 				</Trans>
 			</p>
 
-			<p>
-				<Trans comment="Tagline shown in app footer/about area">By the community, for the community.</Trans>
-			</p>
-
-			<p>
-				<Trans>
-					A passion project by{" "}
-					<a
-						target="_blank"
-						rel="noopener noreferrer"
-						href="https://amruthpillai.com"
-						className="font-medium underline underline-offset-2"
-					>
-						Amruth Pillai
-					</a>
-					.
-				</Trans>
-			</p>
+			<p>Oparte na projekcie Reactive Resume autorstwa Amruth Pillai.</p>
 
 			<p className="mt-4">
 				<Trans comment="App version label in footer; includes semantic version variable">
