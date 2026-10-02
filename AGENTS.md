@@ -9,34 +9,275 @@ Before editing files for a substantial task:
 - Multiple matches: prefer the most specific local skill for the package or concern you are changing; load additional skills only when the task spans multiple packages or concerns.
 <!-- intent-skills:end -->
 
-<!-- caveman-begin -->
-Respond terse like smart caveman. All technical substance stay. Only fluff die.
+# AGENTS.md — 1story
 
-Rules:
-- Drop: articles (a/an/the), filler (just/really/basically), pleasantries, hedging
-- Fragments OK. Short synonyms. Technical terms exact. Code unchanged.
-- Pattern: [thing] [action] [reason]. [next step].
-- Not: "Sure! I'd be happy to help you with that."
-- Yes: "Bug in auth middleware. Fix:"
+Instrukcje dla agentów AI i developerów pracujących w tym repozytorium.
+Stan źródłowy: 2.10.2026 · gałąź `aga-cv-builder` · baseline HEAD `22a6632569d4f00d082f7eb3eb567b1822791fc8`.
 
-Switch level: /caveman lite|full|ultra|wenyan-lite|wenyan-full|wenyan-ultra
-Stop: "stop caveman" or "normal mode"
+Plik ma dwie części:
 
-Auto-Clarity: drop caveman for security warnings, irreversible actions, user confused. Resume after.
+- **Część A — 1story (produkt, kontrakty, zakres V1, brand, zasady pracy).** Ma pierwszeństwo.
+- **Część B — konwencje techniczne monorepo** (pochodzą z upstream Reactive Resume, nadal obowiązują technicznie).
 
-Boundaries: code/commits/PRs written normal.
-<!-- caveman-end -->
+> Ten plik streszcza decyzje. Nie zastępuje dokumentów źródłowych. W razie konfliktu obowiązuje hierarchia z sekcji A2.
+
+---
+
+# Część A — 1story
+
+## A1. Czym jest ten projekt
+
+**1story** to konsumencka aplikacja kariery: użytkownik raz buduje pełną historię zawodową (Master Profile), a potem tworzy z niej CV dopasowane do konkretnych ofert pracy.
+
+- Tagline: „Jedna historia. Wiele możliwości.”
+- Nazwa zawsze jako `1story`: małe litery, bez spacji, także na początku zdania.
+- Repozytorium jest forkiem **Reactive Resume**. Obecność kodu upstream **nie oznacza**, że funkcja należy do 1story V1.
+- `README.md` nadal opisuje Reactive Resume. **Nie traktuj go jako specyfikacji 1story.**
+- Wewnętrzne route'y i identyfikatory `/dashboard/cvmate/...` oraz feature `packages/api/src/features/cvmate-build` są celowo zachowane. Nie zmieniaj ich nazw.
+- **Nie zgłaszaj issues ani PR do upstream `amruthpillai/reactive-resume`.** Tracker zadań 1story nie jest jeszcze ustalony — zgłaszaj ustalenia w raporcie dla właścicielki projektu.
+
+Główny user journey V1:
+
+```
+konto → Master Profile → Create CV → oferta pracy → analiza oferty → dobór treści
+→ generowanie/dopasowanie → podgląd → edycja → ATS Checker → My CV → eksport
+```
+
+## A2. Hierarchia źródeł prawdy
+
+1. **Brand Source of Truth V1** (15.09.2026, status CLOSED) — logo, kolory, typografia, UI, komunikacja.
+2. **Kompendium produktu i mapa decyzji** (2.10.2026) — zakres V1, stan techniczny, pozycje #1–#70.
+3. **Strategia wzrostu, cennik i plan pilotażu** (2.10.2026) — kierunki K1–K7, pozycje #71–#78, niespójności N1–N6.
+4. Docelowe pliki w repo (gdy powstaną): `PRODUCT_SPEC_V1.md`, `ARCHITECTURE.md`, `DATA_MODEL.md`, `AI_CONTRACT.md`, `AI_DATA_FLOW.md`, `SECURITY_MODEL.md`, `UPSTREAM_FEATURE_MAP.md`, `RELEASE_RUNBOOK.md`, `DECISIONS.md`.
+
+Zasady:
+
+- Plansze i mockupy generowane przez AI to materiał poglądowy, nie źródło wartości produkcyjnych.
+- Dokumentacja upstream (`README.md`, `docs/agents/*`) opisuje Reactive Resume — używaj jej tylko jako informacji technicznej, nie produktowej.
+- Jeśli wymaganie jest niejasne lub sprzeczne między dokumentami: **zatrzymaj się i zgłoś konflikt**, zamiast zgadywać.
+- Zmiana logo, HEX, fontu, skali typografii lub kluczowej zasady UI wymaga aktualizacji Brand SoT.
+
+## A3. Twarde kontrakty (nie wolno ich osłabić)
+
+### Master Profile jest źródłem prawdy
+
+- CV jest pochodną Master Profile, nie niezależną bazą faktów.
+- Nie twórz konkurencyjnego źródła faktów w CV.
+- Każde CV musi dać się prześledzić do danych/snapshotów Master Profile.
+
+### AI nie wymyśla faktów (hard contract)
+
+AI może: selekcjonować, porządkować, profesjonalizować styl, syntetyzować zaznaczone dowody.
+
+AI **nie może** dodawać: pracodawców, dat, stanowisk, narzędzi, kompetencji, wyników, liczb, certyfikatów ani innych niepotwierdzonych faktów.
+
+- Zachowaj walidacje wartości liczbowych i blokadę niepotwierdzonych wzmocnień (`successful`, `effective`, `proficient`, `advanced`, `excellent`, `strong`, `expert` i podobnych).
+- Professional Summary: każde twierdzenie musi mieć bezpośredni dowód w zaznaczonych faktach.
+- Professional Headline: bez fikcyjnego stanowiska, seniority i expertise.
+- Refaktoryzacja promptów lub walidatorów wymaga testów dowodzących braku nowych faktów.
+- Import CV (K1): AI może **ekstrahować** fakty z dokumentów użytkownika, ale każdy fakt trafia do Master Profile dopiero po zatwierdzeniu przez użytkownika.
+- Luki (K3): system zadaje otwarte pytanie; **nie podsuwa gotowej odpowiedzi**.
+
+### Granica prywatności AI
+
+Do zewnętrznego providera AI trafiają **wyłącznie** zatwierdzone dane zawodowe niezbędne do danej funkcji.
+
+- Nigdy do AI: imię, nazwisko, e-mail, telefon, LinkedIn URL, adres, zdjęcia (`profile_photo`), referencje (`reference`), nazwy plików, `storageKey`, ID, `createdAt` i inne metadane.
+- Allowlista `packages/api/src/features/cvmate-build/ai-source-data.ts` działa **fail-closed** (test: `ai-source-data.test.ts`). Nowe pole nie trafia do AI bez jawnego dopisania i testu.
+- **P0 BLOCKER:** `sourceTextSnapshot` (free-text) może zawierać PII wpisane przez użytkownika. Allowlista nazw pól tego nie rozwiązuje — wymagana sanityzacja/redakcja przed promptem.
+- Import CV/LinkedIn PDF: przed wysłaniem do AI usuń lub zredaguj nagłówek kontaktowy i obrazy.
+- Powierzchnie AI z upstreamu poza `cvmate-build` — m.in. `packages/ai`, zapisane providery AI, authenticated `/agent` workspace, MCP (`packages/mcp`) — muszą zostać zinwentaryzowane w audycie AI callsite'ów (#17) i sklasyfikowane w `UPSTREAM_FEATURE_MAP.md`.
+- Każdy nowy callsite modelu AI musi zostać dopisany do `AI_DATA_FLOW.md` i objęty testem payloadu.
+- W tekstach prawnych nie pisz „nie wysyłamy do AI żadnych danych osobowych”. Poprawnie: minimalizujemy zakres i nie wysyłamy zbędnych danych identyfikujących/kontaktowych, zdjęć ani referencji.
+
+### Izolacja kont
+
+- Dane ani chwilowy UI flash użytkownika A nie mogą pojawić się u użytkownika B.
+- Nie usuwaj ani nie osłabiaj `SessionCacheGuard` (czyszczenie authenticated query cache przy zmianie user ID).
+- Każdy endpoint zasobu musi odrzucać dostęp do zasobów innego użytkownika. Dla procedur uwierzytelnionych używaj `protectedProcedure` (część B).
+
+### Auth
+
+- **Google Login jest chroniony.** Nie przebudowuj go podczas ogólnego cleanupu bez konkretnego powodu.
+- Beta: rejestracja e-mail bez obowiązkowej weryfikacji (`FLAG_REQUIRE_EMAIL_VERIFICATION`). Przed sprzedażą weryfikacja musi działać end-to-end.
+- Reset hasła: UI, route `/auth/forgot-password` i backend `sendResetPassword` muszą mieć identyczną semantykę. Obecnie są niespójne (#24).
+- Better Auth daje szerszy surface (passkey, 2FA, OAuth, API auth, linking) — nie włączaj nowych mechanizmów bez decyzji (#68).
+
+## A4. Zakres V1
+
+| Obszar | Decyzja |
+| --- | --- |
+| Master Profile, Create CV (z ofertą i ręcznie bez AI), analiza oferty, rekomendacje, tailored content | KEEP |
+| Tryb ręczny bez AI | KEEP — nie może generować żadnego zewnętrznego requestu AI |
+| My CV: All / Ready / Drafts / Favorites / Trash | KEEP — **nie dodawaj statusu Sent** (należy do przyszłego Application Trackera) |
+| ATS Checker | KEEP |
+| Eksport PDF (`packages/pdf`) i DOCX (`packages/docx`) | KEEP — eksport zgodny z podglądem |
+| 1 vs 2 strony CV | Bez mechanicznego „zawsze 1 strona”; ważne dowody nie są usuwane dla limitu |
+| Języki UI i CV | Tylko PL/EN, domyślnie PL. Szeroki `localeMap` upstream zostaje wewnętrznie, nie eksponuj go |
+| Motyw | Light-only. Nie przywracaj kontroli dark mode w UI; infrastruktura może zostać |
+| API Keys, Integrations, wybór providera AI, `/agent` workspace | HIDE przed zwykłym użytkownikiem |
+| Cover Letters | LATER / ADAPT, P2 — adaptuj istniejący moduł, nie pisz od zera |
+| Applications / tracker | LATER / ADAPT, P4 — nie eksponuj w launchu |
+| Upstream marketing (rxresu.me, testimoniale) | REMOVE / REPLACE, jeśli widoczne |
+| Licencja MIT / atrybucja upstream | KEEP — nie usuwaj |
+
+Zasady ukrywania (HIDE):
+
+- Ukrycie musi objąć **sidebar, Command Palette i direct routes**. Samo usunięcie pozycji z menu nie wyłącza funkcji.
+- Dla każdej ukrytej funkcji zachowanie direct route ma być świadome i przetestowane.
+- Dane z modułów pobocznych (Cover Letters, Applications) nadal muszą trafiać do account export.
+
+## A5. Brand i UI w kodzie
+
+**W komponentach używaj semantic tokens, nie ręcznie kopiowanych HEX.**
+
+| Token | HEX | Zastosowanie |
+| --- | --- | --- |
+| `bg-page` | `#F5F8F2` | Główne tło |
+| `bg-surface` | `#FCFDFB` | Karty, formularze, modale |
+| `bg-soft-green` | `#EEF3E8` | Pomocnicze surface |
+| `bg-lavender` | `#E2C5E7` | Tło sekcji/badge |
+| `text-primary` | `#3C4F27` | Główny tekst |
+| `text-secondary` | `#66705F` | Tekst pomocniczy |
+| `action-primary` | `#4E6B35` | CTA, aktywne elementy, ikony |
+| `action-primary-hover` | `#425C2D` | Hover |
+| `action-primary-pressed` | `#374D26` | Pressed |
+| `accent-brand` | `#DE6E17` | Litera „s”, detal marki — **nie dla małego tekstu** |
+| `accent-purple` | `#A878AA` | Dekoracja — **nie jako tekst na lawendzie** |
+| `text-purple-accessible` | `#734A75` | Tekst na `bg-lavender` |
+| `border-subtle` | `#D9E2D2` | Separatory dekoracyjne |
+| `border-control` | `#7E8B76` | Inputy, kontrolki |
+| `border-focus` | `#4E6B35` | Focus 2 px |
+| `success` / `success-bg` | `#2B7556` / `#E7F3ED` | |
+| `warning` / `warning-bg` | `#9B6100` / `#FFF1D6` | |
+| `error` / `error-bg` | `#B84444` / `#FBEAEA` | |
+| `info` / `info-bg` | `#366A9F` / `#E8F0F8` | |
+| `disabled-bg` / `disabled-text` | `#E8ECE5` / `#7A8474` | |
+
+> **Uwaga (N1):** Kompendium, sekcja 9, błędnie nazywa `#3C4F27` „głównym zielonym”. Primary/CTA to **`#4E6B35`**. `#3C4F27` to wyłącznie `text-primary`.
+
+Reguły:
+
+- Typografia: UI/body **Source Sans 3**; H1/H2 i marketing **DM Serif Display**. Wagi 400 + 600 (700 tylko wyjątkowo).
+- Skala: H1 48, H2 36, H3 28, body 18, body pomocniczy 16, button/label 16, small 14 (tylko informacje drugorzędne); line-height body 1,5–1,6.
+- Sentence case w UI.
+- Radius: input 10, button 10–12, card 12, modal 14; pill tylko badge/status.
+- Prawie bez cieni (tylko modal/dropdown). Bez gradientów.
+- Ikony: rounded outline 1,5–2 px, glyph zawsze `#4E6B35`.
+- Spacing: baza 4 px (4, 8, 12, 16, 24, 32, 48, 64…).
+- Pomarańczowy nigdy jako podstawowe CTA.
+- Focus 2 px bez zmiany rozmiaru komponentu.
+- Znaczenie nigdy wyłącznie kolorem; błąd = kolor + komunikat/ikona.
+- WCAG AA jako twarde minimum. Przy konflikcie estetyka vs dostępność: zachowaj kierunek, zmień wartość techniczną.
+- Logo: nie rekonstruuj zwykłym fontem, nie rozciągaj, nie zmieniaj kolorów. Pełny wordmark od 48 px wysokości; 32–47 px symbol „s”; favicon 16 px ma osobny wariant.
+
+Ton komunikacji w UI:
+
+- Na „Ty”, ciepły profesjonalizm, prosto i konkretnie, bez coachingu, hype'u i presji.
+- Komunikaty systemowe: najpierw co się stało i co użytkownik może zrobić.
+- Preferowane słowa: historia zawodowa, doświadczenie, dopasowanie, oferta pracy, wybierz, uporządkuj, uzupełnij, dopasuj, sprawdź, zapisz, gotowe.
+
+## A6. Zasady pracy w repozytorium
+
+### Komunikacja agenta
+
+- Raporty pełne i jednoznaczne: co zmieniono, co zweryfikowano, czego nie zweryfikowano, ile kroków zostało.
+- Zawsze podawaj SHA, na którym opierasz ocenę.
+
+### Zanim coś zmienisz
+
+- Najpierw ustal źródło prawdy i stan obecny (read-only diagnoza), dopiero potem zmieniaj.
+- Sprawdź `git status --short`; nie cofaj plików, których nie dotykasz.
+- Przy problemie, który przetrwał kilka poprawek: analizuj cały mechanizm, nie dokładaj kolejnej wąskiej łaty.
+- Lokalny HEAD nie jest automatycznie tym, co działa na produkcji (`1story.pl`). Production deployed SHA wymaga osobnej weryfikacji.
+
+### Czego nie robić
+
+- Nie używaj `git reset --hard` ani innych destrukcyjnych operacji na historii bez wyraźnej zgody.
+- Nie edytuj `.env`, `.env.local` ani sekretów bez wyraźnego polecenia.
+- Nie edytuj ręcznie wygenerowanego `routeTree.gen.ts`.
+- Nie twórz kopii plików typu `V2`, `V3`, `FINAL`, `NEW`. Zmieniaj pliki kanoniczne.
+- Nie zmieniaj ustalonych reguł projektu ani kontraktów bez wyraźnej akceptacji.
+- Nie hardcoduj cen, limitów ani okresów pakietów — mają być konfigurowalne (#62).
+- Nie dodawaj zależności od zewnętrznego AI w ścieżkach, które mają działać bez AI.
+- Nie uruchamiaj `pnpm check` bez uprzedzenia — jest write-capable (część B, Gotchas).
+
+### Jak dostarczać zmiany
+
+- Wąski zakres: jedna logiczna zmiana na raz, z jasnym kryterium DONE.
+- Przy zmianie istniejącego pliku dostarczaj pełną treść pliku, nie fragmenty.
+- Każda zmiana w obszarach z sekcji A3 wymaga testu regresji.
+- Po zmianie: typecheck i testy dotkniętych pakietów (`pnpm --filter <pakiet> typecheck|test`), a przed release pełne `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm exec turbo boundaries` na tym samym SHA.
+
+## A7. Otwarte blokery P0 (stan na 2.10.2026)
+
+Dopóki którykolwiek jest otwarty, aplikacja **nie jest gotowa do sprzedaży**.
+
+- [ ] #15–#17 — AI data flow: `sourceTextSnapshot`, pełny audyt tailored-content, inwentaryzacja wszystkich AI callsite'ów (w tym `/agent`, MCP, `packages/ai`).
+- [ ] #18 — potwierdzenie providera/modelu AI na produkcji.
+- [ ] #24 — spójność resetu hasła (UI / route / backend).
+- [ ] #26 — E2E izolacji cache: User A → logout → User B oraz A → B w jednej karcie.
+- [ ] #27 — backendowa izolacja zasobów (próby cross-user dla każdego typu zasobu).
+- [ ] #2 — regresja edycji Master Profile po commicie `fix(cvmate): confirm master profile changes`.
+- [ ] #29–#31 — polityka prywatności zgodna z implementacją (hasło = kryptograficzny hash, nie „zaszyfrowane”; opis danych AI; retencja backupów).
+- [ ] #32–#33 — account export i account delete na pełnym koncie.
+- [ ] #52–#54 — pełny quality gate i E2E głównego flow na aktualnym SHA; eksport PDF.
+- [ ] #57–#59 — production deployed SHA, runbook release/rollback, przetestowany restore.
+- [ ] #63 — transactional email (verification, reset) przed sprzedażą. Bez SMTP e-maile trafiają tylko do logów (część B, Gotchas).
+
+## A8. Kierunki zatwierdzone po V1 (K1–K7)
+
+Realizuj dopiero po zamknięciu odpowiednich P0.
+
+| # | Kierunek | Priorytet | Ograniczenia |
+| --- | --- | --- | --- |
+| K1 / #71 | Import CV i LinkedIn PDF do Master Profile (sprawdź reuse `packages/import`) | P1, przed pilotażem | Redakcja kontaktu i obrazów przed AI; zatwierdzanie każdego faktu |
+| K2 / #72 | Źródło każdego zdania w UI | P1, przed pilotażem | Każdy punkt z AI ma klikalne źródło w Master Profile |
+| K3 / #73 | Luki jako pytania | P1, w pilotażu | Pytanie otwarte, bez podsuwania odpowiedzi |
+| K4 / #74 | Archiwum kariery (przypomnienia) | P2 | Opt-in, wypisanie jednym kliknięciem |
+| K5 / #75 | Cennik pakietowy „Bez pułapek subskrypcyjnych” | P1, przed płatnym pilotażem | Domyślnie bez auto-odnawiania; ceny i limity w konfiguracji |
+| K6 / #76 | Panel doradcy B2B2C | P2 | Osobna, odwoływalna zgoda klienta; brak mieszania danych |
+| K7 / #77 | List motywacyjny z Master Profile | P2 | Adaptacja istniejącego modułu; ten sam kontrakt grounding |
+
+Reguły „Bez pułapek subskrypcyjnych” do implementacji:
+
+1. Brak domyślnego auto-odnawiania; pakiet wygasa.
+2. Brak triali zamieniających się w subskrypcję.
+3. Cena brutto widoczna przed płatnością.
+4. Przypomnienie przed końcem pakietu i przedłużenie jednym kliknięciem.
+5. Master Profile, pobrane CV i eksport konta dostępne po wygaśnięciu pakietu.
+6. Darmowy PDF bez znaku wodnego.
+7. Auto-odnowienie tylko jako świadomy wybór użytkownika, łatwe do wyłączenia.
+
+## A9. Znane niespójności dokumentacji (#78)
+
+| # | Problem | Obowiązująca interpretacja dla kodu |
+| --- | --- | --- |
+| N1 | Kompendium §9: „główny zielony #3C4F27” | Primary = `#4E6B35`; `#3C4F27` = `text-primary` |
+| N2 | Mapa decyzji #41: „brak Brand SoT” | Brand SoT V1 obowiązuje (CLOSED 15.09.2026) |
+| N3 | Kompendium §4: „użytkownik sam wpisuje fakty” | Dopuszczalna ekstrakcja AI z dokumentów użytkownika z zatwierdzeniem każdego faktu (K1) |
+| N4 | Import CV a granica prywatności | Import podlega tej samej redakcji co `sourceTextSnapshot` |
+| N5 | Mapa decyzji #43: Cover Letters P4 | Obecnie P2 (K7) |
+| N6 | Brand SoT: jedno CTA „Zbuduj swoją historię zawodową” | Główne CTA bez zmian; drugie CTA „Zacznij od swojego CV” wymaga aktualizacji Brand SoT |
+
+## A10. Definicja „gotowe do sprzedaży”
+
+Funkcjonalne CV + bezpieczne konto + kontrolowany AI data flow + odzyskiwalne dane + powtarzalny release.
+Brak któregokolwiek z tych elementów oznacza, że produkt nadal jest betą.
+
+---
+
+# Część B — Technical conventions (from upstream Reactive Resume)
 
 <!-- graphify-begin -->
 
 ## Agent skills
 
-- Issues and specs: GitHub Issues for `amruthpillai/reactive-resume`. See `docs/agents/issue-tracker.md`.
-- Domain docs use a multi-context layout. See `docs/agents/domain.md`.
+- Domain docs use a multi-context layout. See `docs/agents/domain.md` (upstream content — technical reference only; product rules are in Part A).
 
 ## Overview
 
-Reactive Resume is a pnpm monorepo (Turborepo) with two deployable apps: `apps/web` (TanStack Start / React 19 / Vite) and `apps/server` (Hono / Node.js). The production Docker image runs a single Node.js process on port 3000; `apps/server` mounts the API/auth/MCP/static routes and serves the built web app.
+1story is built on the Reactive Resume pnpm monorepo (Turborepo) with two deployable apps: `apps/web` (TanStack Start / React 19 / Vite) and `apps/server` (Hono / Node.js). The production Docker image runs a single Node.js process on port 3000; `apps/server` mounts the API/auth/MCP/static routes and serves the built web app.
 
 Internal packages are source-consumed through `package.json` export maps pointing at `src` files. Do not assume package-local `dist` output exists unless a package explicitly adds it.
 
