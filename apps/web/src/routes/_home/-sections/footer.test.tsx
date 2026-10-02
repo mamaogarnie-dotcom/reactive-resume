@@ -7,9 +7,6 @@ import { I18nProvider } from "@lingui/react";
 
 vi.stubGlobal("__APP_VERSION__", "9.9.9");
 
-// The footer module evaluates `socialLinks = [{ label: t`...`, ... }]` at module
-// scope. That `t` call needs an activated locale BEFORE the import, so do that
-// here instead of in beforeAll.
 i18n.loadAndActivate({ locale: "en", messages: {} });
 
 const { Footer } = await import("./footer");
@@ -22,39 +19,38 @@ const renderFooter = () =>
 	);
 
 describe("Footer", () => {
-	it("renders Resources and Community link group headings", () => {
+	it("renders the 1story link group headings", () => {
 		renderFooter();
-		expect(screen.getByText("Resources")).toBeInTheDocument();
-		expect(screen.getByText("Community")).toBeInTheDocument();
+		expect(screen.getByText("Informacje")).toBeInTheDocument();
+		expect(screen.getByText("Narzędzia")).toBeInTheDocument();
 	});
 
-	it("renders the documented resource links", () => {
+	it("renders the 1story links", () => {
 		const { container } = renderFooter();
 		const text = container.textContent ?? "";
-		for (const label of ["Documentation", "Sponsorships", "Source Code", "Changelog"]) {
+		for (const label of ["Polityka prywatności", "Kontakt", "Sprawdzanie ATS"]) {
 			expect(text, label).toContain(label);
 		}
 	});
 
-	it("renders the documented community links", () => {
-		const { container } = renderFooter();
-		const text = container.textContent ?? "";
-		for (const label of ["Report an issue", "Translations", "Subreddit", "Discord"]) {
-			expect(text, label).toContain(label);
-		}
-	});
-
-	it("renders social media icon links to GitHub, LinkedIn, and X", () => {
+	it("does not link to upstream community, social or donation channels", () => {
 		const { container } = renderFooter();
 		const hrefs = Array.from(container.querySelectorAll<HTMLAnchorElement>("a")).map((a) => a.href);
-		expect(hrefs.some((h) => h.includes("github.com/amruthpillai/reactive-resume"))).toBe(true);
-		expect(hrefs.some((h) => h.includes("linkedin.com/in/amruthpillai"))).toBe(true);
-		expect(hrefs.some((h) => h.includes("x.com/KingOKings"))).toBe(true);
+		for (const blocked of ["discord.gg", "reddit.com", "linkedin.com", "x.com", "opencollective.com", "rxresu.me"]) {
+			expect(
+				hrefs.some((h) => h.includes(blocked)),
+				blocked,
+			).toBe(false);
+		}
 	});
 
-	it("includes Reactive Resume version copy via Copyright", () => {
+	it("keeps the MIT license notice", () => {
 		renderFooter();
-		// The version is wrapped in <bdi> for RTL isolation, so it is its own text node.
+		expect(screen.getByText("MIT")).toBeInTheDocument();
+	});
+
+	it("includes version copy via Copyright", () => {
+		renderFooter();
 		expect(screen.getByText("9.9.9")).toBeInTheDocument();
 	});
 });
