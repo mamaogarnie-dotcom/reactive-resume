@@ -58,49 +58,49 @@ const jobOfferSnapshotSchema = z
 	.passthrough();
 
 export const cvmateBuildAiRecommendationProviderOutputSchema = z.object({
-recommendations: z
-.array(
-z.object({
-selectionItemId: z.string().trim().min(1),
-requirementIds: z
-.array(z.string().trim().min(1))
-.min(1)
-.max(MAX_PROVIDER_MATCHED_REQUIREMENTS_PER_RECOMMENDATION),
-}),
-)
-.max(MAX_RECOMMENDATIONS),
-gapRequirementIds: z.array(z.string().trim().min(1)).max(MAX_GAPS),
-gapSuggestions: z
-.array(
-z.object({
-requirementId: z.string().trim().min(1),
-kind: z.enum(["competency", "software", "tool", "responsibility"]),
-}),
-)
-.max(MAX_GAP_SUGGESTIONS)
-.optional(),
+	recommendations: z
+		.array(
+			z.object({
+				selectionItemId: z.string().trim().min(1),
+				requirementIds: z
+					.array(z.string().trim().min(1))
+					.min(1)
+					.max(MAX_PROVIDER_MATCHED_REQUIREMENTS_PER_RECOMMENDATION),
+			}),
+		)
+		.max(MAX_RECOMMENDATIONS),
+	gapRequirementIds: z.array(z.string().trim().min(1)).max(MAX_GAPS),
+	gapSuggestions: z
+		.array(
+			z.object({
+				requirementId: z.string().trim().min(1),
+				kind: z.enum(["competency", "software", "tool", "responsibility"]),
+			}),
+		)
+		.max(MAX_GAP_SUGGESTIONS)
+		.optional(),
 });
 
 export const cvmateBuildAiRecommendationOutputSchema = z.object({
-recommendations: z
-.array(
-z.object({
-selectionItemId: z.string().trim().min(1),
-reason: z.string().trim().min(1).max(500),
-}),
-)
-.max(MAX_RECOMMENDATIONS),
-gapRequirementIds: z.array(z.string().trim().min(1)).max(MAX_GAPS),
-gapSuggestions: z
-.array(
-z.object({
-requirementId: z.string().trim().min(1),
-kind: z.enum(["competency", "software", "tool", "responsibility"]),
-text: z.string().trim().min(1).max(500),
-}),
-)
-.max(MAX_GAP_SUGGESTIONS)
-.optional(),
+	recommendations: z
+		.array(
+			z.object({
+				selectionItemId: z.string().trim().min(1),
+				reason: z.string().trim().min(1).max(500),
+			}),
+		)
+		.max(MAX_RECOMMENDATIONS),
+	gapRequirementIds: z.array(z.string().trim().min(1)).max(MAX_GAPS),
+	gapSuggestions: z
+		.array(
+			z.object({
+				requirementId: z.string().trim().min(1),
+				kind: z.enum(["competency", "software", "tool", "responsibility"]),
+				text: z.string().trim().min(1).max(500),
+			}),
+		)
+		.max(MAX_GAP_SUGGESTIONS)
+		.optional(),
 });
 
 type RunnableProvider = {
@@ -186,10 +186,7 @@ function isProtectedDirectRequirement(requirement: JobRequirementSnapshot): bool
 	);
 }
 
-function selectionItemHasExactRequirementText(
-	item: SelectionItem,
-	requirement: JobRequirementSnapshot,
-): boolean {
+function selectionItemHasExactRequirementText(item: SelectionItem, requirement: JobRequirementSnapshot): boolean {
 	const normalizedRequirement = normalizeText(requirement.text);
 
 	return (
@@ -198,14 +195,10 @@ function selectionItemHasExactRequirementText(
 	);
 }
 
-function countExactProtectedRequirementMatches(
-	item: SelectionItem,
-	requirements: JobRequirementSnapshot[],
-): number {
+function countExactProtectedRequirementMatches(item: SelectionItem, requirements: JobRequirementSnapshot[]): number {
 	return requirements.filter(
 		(requirement) =>
-			isProtectedDirectRequirement(requirement) &&
-			selectionItemHasExactRequirementText(item, requirement),
+			isProtectedDirectRequirement(requirement) && selectionItemHasExactRequirementText(item, requirement),
 	).length;
 }
 
@@ -235,108 +228,78 @@ function parseJobOfferSnapshot(value: unknown) {
 }
 
 function compactSourceData(value: Record<string, unknown>): Record<string, unknown> {
-	return Object.fromEntries(
-		Object.entries(value).filter(([key]) => !TECHNICAL_SOURCE_DATA_KEYS.has(key)),
-	);
+	return Object.fromEntries(Object.entries(value).filter(([key]) => !TECHNICAL_SOURCE_DATA_KEYS.has(key)));
 }
 
-function sourceDataContainsExactText(
-	value: Record<string, unknown>,
-	sourceText: string | null,
-): boolean {
+function sourceDataContainsExactText(value: Record<string, unknown>, sourceText: string | null): boolean {
 	if (!sourceText) return false;
 
-	return Object.values(value).some(
-		(candidate) => typeof candidate === "string" && candidate === sourceText,
-	);
+	return Object.values(value).some((candidate) => typeof candidate === "string" && candidate === sourceText);
 }
 
 function buildPrompt(input: {
-jobOffer: z.infer<typeof jobOfferSnapshotSchema>;
-selectionItems: SelectionItem[];
+	jobOffer: z.infer<typeof jobOfferSnapshotSchema>;
+	selectionItems: SelectionItem[];
 }): string {
-const requirements = input.jobOffer.requirements.map((requirement) => ({
-id: requirement.id,
-category: requirement.category,
-priority: requirement.priority,
-text: requirement.text,
-sourceText: requirement.sourceText ?? null,
-}));
+	const requirements = input.jobOffer.requirements.map((requirement) => ({
+		id: requirement.id,
+		category: requirement.category,
+		priority: requirement.priority,
+		text: requirement.text,
+		sourceText: requirement.sourceText ?? null,
+	}));
 
-const requirementAliasById = new Map(
-requirements.map(
-(requirement, index) =>
-[requirement.id, `r${index + 1}`] as const,
-),
-);
+	const requirementAliasById = new Map(
+		requirements.map((requirement, index) => [requirement.id, `r${index + 1}`] as const),
+	);
 
-const selectionAliasById = new Map(
-input.selectionItems.map(
-(item, index) =>
-[item.id, `s${index + 1}`] as const,
-),
-);
+	const selectionAliasById = new Map(input.selectionItems.map((item, index) => [item.id, `s${index + 1}`] as const));
 
-const requirementRows = requirements.map((requirement) => [
-requirementAliasById.get(requirement.id) ?? requirement.id,
-requirement.category,
-requirement.priority,
-requirement.text,
-requirement.sourceText && requirement.sourceText !== requirement.text
-? requirement.sourceText
-: null,
-]);
+	const requirementRows = requirements.map((requirement) => [
+		requirementAliasById.get(requirement.id) ?? requirement.id,
+		requirement.category,
+		requirement.priority,
+		requirement.text,
+		requirement.sourceText && requirement.sourceText !== requirement.text ? requirement.sourceText : null,
+	]);
 
-const selectionRows = input.selectionItems.map((item) => {
-const sourceDataSnapshot =
-compactSourceData(item.sourceDataSnapshot);
+	const selectionRows = input.selectionItems
+		.filter((item) => item.sourceType !== "profile_photo" && item.sourceType !== "reference")
+		.map((item) => {
+			const sourceDataSnapshot = compactSourceData(item.sourceDataSnapshot);
 
-const sourceTextSnapshot =
-item.sourceTextSnapshot;
+			const sourceTextSnapshot = item.sourceTextSnapshot;
 
-return [
-selectionAliasById.get(item.id) ?? item.id,
+			return [
+				selectionAliasById.get(item.id) ?? item.id,
 
-item.parentSelectionItemId
-? selectionAliasById.get(item.parentSelectionItemId) ??
-item.parentSelectionItemId
-: null,
+				item.parentSelectionItemId
+					? (selectionAliasById.get(item.parentSelectionItemId) ?? item.parentSelectionItemId)
+					: null,
 
-item.sourceType,
-sourceDataSnapshot,
+				item.sourceType,
+				sourceDataSnapshot,
 
-sourceTextSnapshot &&
-!sourceDataContainsExactText(
-sourceDataSnapshot,
-sourceTextSnapshot,
-)
-? sourceTextSnapshot
-: null,
-];
-});
+				sourceTextSnapshot && !sourceDataContainsExactText(sourceDataSnapshot, sourceTextSnapshot)
+					? sourceTextSnapshot
+					: null,
+			];
+		});
 
-const gapEligibleRequirementIds = requirements
-.filter(
-(requirement) =>
-requirement.category === "required" ||
-requirement.category === "preferred",
-)
-.map(
-(requirement) =>
-requirementAliasById.get(requirement.id) ??
-requirement.id,
-);
+	const gapEligibleRequirementIds = requirements
+		.filter((requirement) => requirement.category === "required" || requirement.category === "preferred")
+		.map((requirement) => requirementAliasById.get(requirement.id) ?? requirement.id);
 
-return `
+	return `
 Analyze relevance between the frozen job-offer requirements and the frozen
 candidate selection snapshots.
 
 <JOB_META columns="[roleTitle,companyName,location,language]">
 ${JSON.stringify([
-input.jobOffer.roleTitle ?? null,
-input.jobOffer.companyName ?? null,
-input.jobOffer.location ?? null,
-input.jobOffer.language ?? null,
+	input.jobOffer.roleTitle ?? null,
+	input.jobOffer.companyName ?? null,
+	input.jobOffer.location ?? null,
+	input.jobOffer.language ?? null,
 ])}
 </JOB_META>
 
@@ -355,130 +318,80 @@ ${JSON.stringify(gapEligibleRequirementIds)}
 }
 
 function resolvePromptAliases(
-output: z.infer<typeof cvmateBuildAiRecommendationProviderOutputSchema>,
-selectionItems: SelectionItem[],
-requirements: JobRequirementSnapshot[],
+	output: z.infer<typeof cvmateBuildAiRecommendationProviderOutputSchema>,
+	selectionItems: SelectionItem[],
+	requirements: JobRequirementSnapshot[],
 ): z.infer<typeof cvmateBuildAiRecommendationOutputSchema> {
-const selectionIdByAlias = new Map<string, string>(
-selectionItems.map(
-(item, index) =>
-[`s${index + 1}`, item.id] as const,
-),
-);
+	const selectionIdByAlias = new Map<string, string>(
+		selectionItems.map((item, index) => [`s${index + 1}`, item.id] as const),
+	);
 
-const requirementIdByAlias = new Map<string, string>(
-requirements.map(
-(requirement, index) =>
-[`r${index + 1}`, requirement.id] as const,
-),
-);
+	const requirementIdByAlias = new Map<string, string>(
+		requirements.map((requirement, index) => [`r${index + 1}`, requirement.id] as const),
+	);
 
-const requirementById = new Map(
-requirements.map(
-(requirement) =>
-[requirement.id, requirement] as const,
-),
-);
+	const requirementById = new Map(requirements.map((requirement) => [requirement.id, requirement] as const));
 
-const resolveSelectionId = (value: string) =>
-selectionIdByAlias.get(value) ?? value;
+	const resolveSelectionId = (value: string) => selectionIdByAlias.get(value) ?? value;
 
-const resolveRequirement = (value: string) => {
-const id =
-requirementIdByAlias.get(value) ??
-value;
+	const resolveRequirement = (value: string) => {
+		const id = requirementIdByAlias.get(value) ?? value;
 
-const requirement =
-requirementById.get(id);
+		const requirement = requirementById.get(id);
 
-if (!requirement) {
-throw new ORPCError("BAD_REQUEST", {
-message: "The AI returned an unknown job requirement.",
-});
-}
+		if (!requirement) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "The AI returned an unknown job requirement.",
+			});
+		}
 
-return requirement;
-};
+		return requirement;
+	};
 
-const boundedText = (value: string) => {
-const trimmed = value.trim();
+	const boundedText = (value: string) => {
+		const trimmed = value.trim();
 
-if (trimmed.length <= 500) {
-return trimmed;
-}
+		if (trimmed.length <= 500) {
+			return trimmed;
+		}
 
-return `${trimmed.slice(0, 499).trimEnd()}…`;
-};
+		return `${trimmed.slice(0, 499).trimEnd()}…`;
+	};
 
-return {
-recommendations:
-output.recommendations.map(
-(recommendation) => {
-const matchedRequirementIds = [
-...new Set(
-recommendation.requirementIds.map(
-(requirementId) =>
-resolveRequirement(
-requirementId,
-).id,
-),
-),
-].slice(0, MAX_MATCHED_REQUIREMENTS_PER_RECOMMENDATION);
-const reason = boundedText(
-matchedRequirementIds
-.map(
-(requirementId) =>
-requirementById.get(
-requirementId,
-)?.text ?? "",
-)
-.filter(Boolean)
-.join(" · "),
-);
+	return {
+		recommendations: output.recommendations.map((recommendation) => {
+			const matchedRequirementIds = [
+				...new Set(recommendation.requirementIds.map((requirementId) => resolveRequirement(requirementId).id)),
+			].slice(0, MAX_MATCHED_REQUIREMENTS_PER_RECOMMENDATION);
+			const reason = boundedText(
+				matchedRequirementIds
+					.map((requirementId) => requirementById.get(requirementId)?.text ?? "")
+					.filter(Boolean)
+					.join(" · "),
+			);
 
-return {
-selectionItemId:
-resolveSelectionId(
-recommendation.selectionItemId,
-),
-reason,
-};
-},
-),
+			return {
+				selectionItemId: resolveSelectionId(recommendation.selectionItemId),
+				reason,
+			};
+		}),
 
-gapRequirementIds:
-output.gapRequirementIds.map(
-(requirementId) =>
-resolveRequirement(
-requirementId,
-).id,
-),
+		gapRequirementIds: output.gapRequirementIds.map((requirementId) => resolveRequirement(requirementId).id),
 
-...(output.gapSuggestions
-? {
-gapSuggestions:
-output.gapSuggestions.map(
-(suggestion) => {
-const requirement =
-resolveRequirement(
-suggestion.requirementId,
-);
+		...(output.gapSuggestions
+			? {
+					gapSuggestions: output.gapSuggestions.map((suggestion) => {
+						const requirement = resolveRequirement(suggestion.requirementId);
 
-return {
-requirementId:
-requirement.id,
-kind:
-suggestion.kind,
-text:
-boundedText(
-requirement.text,
-),
-};
-},
-),
-}
-: {}),
-};
+						return {
+							requirementId: requirement.id,
+							kind: suggestion.kind,
+							text: boundedText(requirement.text),
+						};
+					}),
+				}
+			: {}),
+	};
 }
 
 type QualityScoredItem = {
@@ -529,15 +442,11 @@ function qualityTokenStems(value: string): Set<string> {
 }
 
 function qualityCandidateText(item: SelectionItem): string {
-	return [
-		item.sourceTextSnapshot ?? "",
-		JSON.stringify(compactSourceData(item.sourceDataSnapshot)),
-	].join(" ");
+	return [item.sourceTextSnapshot ?? "", JSON.stringify(compactSourceData(item.sourceDataSnapshot))].join(" ");
 }
 
 function qualityRequirementWeight(requirement: JobRequirementSnapshot): number {
-	const priorityWeight =
-		requirement.priority === "critical" ? 6 : requirement.priority === "important" ? 3 : 1;
+	const priorityWeight = requirement.priority === "critical" ? 6 : requirement.priority === "important" ? 3 : 1;
 	const categoryWeight =
 		requirement.category === "required"
 			? 4
@@ -555,8 +464,7 @@ function qualityRequirementWeight(requirement: JobRequirementSnapshot): number {
 function hasQuantifiedImpactEvidence(value: string): boolean {
 	const normalized = foldQualityText(value);
 	const hasMoneyOrPercentage =
-		/%/.test(normalized) ||
-		/\b(?:pln|zl|tys|mln|million|milion|thousand|tysiac)\b/.test(normalized);
+		/%/.test(normalized) || /\b(?:pln|zl|tys|mln|million|milion|thousand|tysiac)\b/.test(normalized);
 
 	if (hasMoneyOrPercentage) return true;
 
@@ -568,19 +476,14 @@ function hasQuantifiedImpactEvidence(value: string): boolean {
 	);
 }
 
-function scoreQualityItem(
-	item: SelectionItem,
-	requirements: JobRequirementSnapshot[],
-): QualityScoredItem {
+function scoreQualityItem(item: SelectionItem, requirements: JobRequirementSnapshot[]): QualityScoredItem {
 	const candidateText = qualityCandidateText(item);
 	const candidateTokens = qualityTokenStems(candidateText);
 	const requirementIds: string[] = [];
 	let score = 0;
 
 	for (const requirement of requirements) {
-		const requirementTokens = qualityTokenStems(
-			[requirement.text, requirement.sourceText ?? ""].join(" "),
-		);
+		const requirementTokens = qualityTokenStems([requirement.text, requirement.sourceText ?? ""].join(" "));
 		let shared = 0;
 
 		for (const token of candidateTokens) {
@@ -612,9 +515,7 @@ function qualityReason(
 	requirements: JobRequirementSnapshot[],
 	fallbackReason?: string | null,
 ): string {
-	const requirementById = new Map(
-		requirements.map((requirement) => [requirement.id, requirement] as const),
-	);
+	const requirementById = new Map(requirements.map((requirement) => [requirement.id, requirement] as const));
 	const reason = scored.requirementIds
 		.map((id) => requirementById.get(id)?.text)
 		.filter((value): value is string => Boolean(value))
@@ -637,289 +538,203 @@ function quantifiedImpactSignature(item: SelectionItem): string | null {
 }
 
 function applyRecommendationBudgetPolicy(
-baseRecommendations: Map<string, string>,
-selectionItems: SelectionItem[],
-requirements: JobRequirementSnapshot[],
+	baseRecommendations: Map<string, string>,
+	selectionItems: SelectionItem[],
+	requirements: JobRequirementSnapshot[],
 ): Map<string, string> {
-const budgeted = new Map<string, string>();
-const scoredById = new Map(
-selectionItems.map((item) => [item.id, scoreQualityItem(item, requirements)] as const),
-);
+	const budgeted = new Map<string, string>();
+	const scoredById = new Map(selectionItems.map((item) => [item.id, scoreQualityItem(item, requirements)] as const));
 
-const exactProtectedRequirementMatchCount = (item: QualityScoredItem) =>
-	countExactProtectedRequirementMatches(item.item, requirements);
+	const exactProtectedRequirementMatchCount = (item: QualityScoredItem) =>
+		countExactProtectedRequirementMatches(item.item, requirements);
 
-const importantKeywordRequirementIds = new Set(
-requirements
-.filter(
-(requirement) =>
-requirement.category === "keyword" &&
-(requirement.priority === "critical" || requirement.priority === "important"),
-)
-.map((requirement) => requirement.id),
-);
-const importantKeywordMatchCount = (item: QualityScoredItem) =>
-item.requirementIds.filter((requirementId) => importantKeywordRequirementIds.has(requirementId)).length;
+	const importantKeywordRequirementIds = new Set(
+		requirements
+			.filter(
+				(requirement) =>
+					requirement.category === "keyword" &&
+					(requirement.priority === "critical" || requirement.priority === "important"),
+			)
+			.map((requirement) => requirement.id),
+	);
+	const importantKeywordMatchCount = (item: QualityScoredItem) =>
+		item.requirementIds.filter((requirementId) => importantKeywordRequirementIds.has(requirementId)).length;
 
-const compareScored = (a: QualityScoredItem, b: QualityScoredItem) =>
-b.score - a.score ||
-Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
-a.item.sortOrder - b.item.sortOrder;
+	const compareScored = (a: QualityScoredItem, b: QualityScoredItem) =>
+		b.score - a.score ||
+		Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
+		a.item.sortOrder - b.item.sortOrder;
 
-const rankedEmploymentGroups = selectionItems
-.filter(
-(item) =>
-item.sourceType === "employment" &&
-baseRecommendations.has(item.id),
-)
-.map((employment) => {
-const facts = selectionItems
-.filter(
-(item) =>
-item.sourceType === "experience_fact" &&
-item.parentSelectionItemId === employment.id &&
-baseRecommendations.has(item.id),
-)
-.map((item) => scoredById.get(item.id))
-.filter((item): item is QualityScoredItem => Boolean(item))
-.sort(compareScored);
+	const rankedEmploymentGroups = selectionItems
+		.filter((item) => item.sourceType === "employment" && baseRecommendations.has(item.id))
+		.map((employment) => {
+			const facts = selectionItems
+				.filter(
+					(item) =>
+						item.sourceType === "experience_fact" &&
+						item.parentSelectionItemId === employment.id &&
+						baseRecommendations.has(item.id),
+				)
+				.map((item) => scoredById.get(item.id))
+				.filter((item): item is QualityScoredItem => Boolean(item))
+				.sort(compareScored);
 
-const employmentScore = scoredById.get(employment.id)?.score ?? 0;
-const supportingScore = facts
-.slice(0, RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT)
-.reduce((sum, fact) => sum + fact.score, 0);
+			const employmentScore = scoredById.get(employment.id)?.score ?? 0;
+			const supportingScore = facts
+				.slice(0, RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT)
+				.reduce((sum, fact) => sum + fact.score, 0);
 
-return {
-employment,
-facts,
-score: employmentScore + supportingScore,
-};
-})
-.sort(
-(a, b) =>
-b.score - a.score ||
-a.employment.sortOrder - b.employment.sortOrder,
-);
+			return {
+				employment,
+				facts,
+				score: employmentScore + supportingScore,
+			};
+		})
+		.sort((a, b) => b.score - a.score || a.employment.sortOrder - b.employment.sortOrder);
 
-const minimumCoveredEmploymentScore =
-rankedEmploymentGroups[QUALITY_TARGET_EMPLOYMENTS - 1]?.score ?? 0;
+	const minimumCoveredEmploymentScore = rankedEmploymentGroups[QUALITY_TARGET_EMPLOYMENTS - 1]?.score ?? 0;
 
-const optionalEmploymentThreshold =
-minimumCoveredEmploymentScore *
-RECOMMENDATION_BUDGET_OPTIONAL_EMPLOYMENT_MIN_RATIO;
+	const optionalEmploymentThreshold =
+		minimumCoveredEmploymentScore * RECOMMENDATION_BUDGET_OPTIONAL_EMPLOYMENT_MIN_RATIO;
 
-const recommendedEmploymentGroups = rankedEmploymentGroups
-.filter(
-(group, index) =>
-index < QUALITY_TARGET_EMPLOYMENTS ||
-(minimumCoveredEmploymentScore > 0 &&
-group.score >= optionalEmploymentThreshold),
-)
-.slice(0, RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS);
+	const recommendedEmploymentGroups = rankedEmploymentGroups
+		.filter(
+			(group, index) =>
+				index < QUALITY_TARGET_EMPLOYMENTS ||
+				(minimumCoveredEmploymentScore > 0 && group.score >= optionalEmploymentThreshold),
+		)
+		.slice(0, RECOMMENDATION_BUDGET_MAX_EMPLOYMENTS);
 
-const addEmploymentGroup = (
-group: (typeof recommendedEmploymentGroups)[number],
-) => {
-const employmentReason =
-baseRecommendations.get(group.employment.id);
+	const addEmploymentGroup = (group: (typeof recommendedEmploymentGroups)[number]) => {
+		const employmentReason = baseRecommendations.get(group.employment.id);
 
-if (employmentReason) {
-budgeted.set(
-group.employment.id,
-employmentReason,
-);
-}
+		if (employmentReason) {
+			budgeted.set(group.employment.id, employmentReason);
+		}
 
-const selectedFacts: QualityScoredItem[] = [];
-const usedImpactSignatures = new Set<string>();
-const usedRequirementIds = new Set<string>();
+		const selectedFacts: QualityScoredItem[] = [];
+		const usedImpactSignatures = new Set<string>();
+		const usedRequirementIds = new Set<string>();
 
-const selectFact = (fact: QualityScoredItem) => {
-if (
-selectedFacts.length >=
-RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT
-) {
-return false;
-}
+		const selectFact = (fact: QualityScoredItem) => {
+			if (selectedFacts.length >= RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT) {
+				return false;
+			}
 
-if (
-selectedFacts.some(
-(selected) =>
-selected.item.id === fact.item.id,
-)
-) {
-return false;
-}
+			if (selectedFacts.some((selected) => selected.item.id === fact.item.id)) {
+				return false;
+			}
 
-if (fact.hasQuantifiedImpact) {
-const signature =
-quantifiedImpactSignature(fact.item);
+			if (fact.hasQuantifiedImpact) {
+				const signature = quantifiedImpactSignature(fact.item);
 
-if (
-signature &&
-usedImpactSignatures.has(signature)
-) {
-return false;
-}
+				if (signature && usedImpactSignatures.has(signature)) {
+					return false;
+				}
 
-if (signature) {
-usedImpactSignatures.add(signature);
-}
-}
+				if (signature) {
+					usedImpactSignatures.add(signature);
+				}
+			}
 
-selectedFacts.push(fact);
+			selectedFacts.push(fact);
 
-for (const requirementId of fact.requirementIds) {
-usedRequirementIds.add(requirementId);
-}
+			for (const requirementId of fact.requirementIds) {
+				usedRequirementIds.add(requirementId);
+			}
 
-return true;
-};
+			return true;
+		};
 
-const bestImpact = group.facts
-.filter(
-(fact) =>
-fact.hasQuantifiedImpact &&
-fact.score > 0,
-)
-.sort(compareScored)[0];
+		const bestImpact = group.facts.filter((fact) => fact.hasQuantifiedImpact && fact.score > 0).sort(compareScored)[0];
 
-if (bestImpact) {
-selectFact(bestImpact);
-}
+		if (bestImpact) {
+			selectFact(bestImpact);
+		}
 
-for (const fact of group.facts) {
-if (
-selectedFacts.length >=
-RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT
-) {
-break;
-}
+		for (const fact of group.facts) {
+			if (selectedFacts.length >= RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT) {
+				break;
+			}
 
-const addsRequirementCoverage =
-fact.requirementIds.some(
-(requirementId) =>
-!usedRequirementIds.has(requirementId),
-);
+			const addsRequirementCoverage = fact.requirementIds.some(
+				(requirementId) => !usedRequirementIds.has(requirementId),
+			);
 
-if (!addsRequirementCoverage) {
-continue;
-}
+			if (!addsRequirementCoverage) {
+				continue;
+			}
 
-selectFact(fact);
-}
+			selectFact(fact);
+		}
 
-for (const fact of group.facts) {
-if (
-selectedFacts.length >=
-RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT
-) {
-break;
-}
+		for (const fact of group.facts) {
+			if (selectedFacts.length >= RECOMMENDATION_BUDGET_MAX_FACTS_PER_EMPLOYMENT) {
+				break;
+			}
 
-selectFact(fact);
-}
+			selectFact(fact);
+		}
 
-for (const fact of selectedFacts) {
-const reason =
-baseRecommendations.get(fact.item.id);
+		for (const fact of selectedFacts) {
+			const reason = baseRecommendations.get(fact.item.id);
 
-if (reason) {
-budgeted.set(
-fact.item.id,
-reason,
-);
-}
-}
-};
+			if (reason) {
+				budgeted.set(fact.item.id, reason);
+			}
+		}
+	};
 
-const addStandalone = (
-sourceType: SelectionItem["sourceType"],
-limit: number,
-) => {
-const candidates = selectionItems
-.filter(
-(item) =>
-item.sourceType === sourceType &&
-baseRecommendations.has(item.id),
-)
-.map((item) => scoredById.get(item.id))
-.filter((item): item is QualityScoredItem => Boolean(item))
-.sort((a, b) =>
-sourceType === "profile_list_item"
-				? exactProtectedRequirementMatchCount(b) - exactProtectedRequirementMatchCount(a) ||
-					importantKeywordMatchCount(b) - importantKeywordMatchCount(a) ||
-					compareScored(a, b)
-				: compareScored(a, b),
-)
-.slice(0, limit);
+	const addStandalone = (sourceType: SelectionItem["sourceType"], limit: number) => {
+		const candidates = selectionItems
+			.filter((item) => item.sourceType === sourceType && baseRecommendations.has(item.id))
+			.map((item) => scoredById.get(item.id))
+			.filter((item): item is QualityScoredItem => Boolean(item))
+			.sort((a, b) =>
+				sourceType === "profile_list_item"
+					? exactProtectedRequirementMatchCount(b) - exactProtectedRequirementMatchCount(a) ||
+						importantKeywordMatchCount(b) - importantKeywordMatchCount(a) ||
+						compareScored(a, b)
+					: compareScored(a, b),
+			)
+			.slice(0, limit);
 
-for (const candidate of candidates) {
-const reason =
-baseRecommendations.get(candidate.item.id);
+		for (const candidate of candidates) {
+			const reason = baseRecommendations.get(candidate.item.id);
 
-if (reason) {
-budgeted.set(
-candidate.item.id,
-reason,
-);
-}
-}
-};
+			if (reason) {
+				budgeted.set(candidate.item.id, reason);
+			}
+		}
+	};
 
-const coreEmploymentGroups =
-recommendedEmploymentGroups.slice(
-0,
-QUALITY_TARGET_EMPLOYMENTS,
-);
+	const coreEmploymentGroups = recommendedEmploymentGroups.slice(0, QUALITY_TARGET_EMPLOYMENTS);
 
-const optionalEmploymentGroups =
-recommendedEmploymentGroups.slice(
-QUALITY_TARGET_EMPLOYMENTS,
-);
+	const optionalEmploymentGroups = recommendedEmploymentGroups.slice(QUALITY_TARGET_EMPLOYMENTS);
 
-for (const group of coreEmploymentGroups) {
-addEmploymentGroup(group);
-}
+	for (const group of coreEmploymentGroups) {
+		addEmploymentGroup(group);
+	}
 
-addStandalone(
-"profile_list_item",
-RECOMMENDATION_BUDGET_MAX_PROFILE_ITEMS,
-);
+	addStandalone("profile_list_item", RECOMMENDATION_BUDGET_MAX_PROFILE_ITEMS);
 
-addStandalone(
-"project",
-RECOMMENDATION_BUDGET_MAX_PROJECTS,
-);
+	addStandalone("project", RECOMMENDATION_BUDGET_MAX_PROJECTS);
 
-addStandalone(
-"education",
-RECOMMENDATION_BUDGET_MAX_EDUCATION,
-);
+	addStandalone("education", RECOMMENDATION_BUDGET_MAX_EDUCATION);
 
-addStandalone(
-"volunteer",
-RECOMMENDATION_BUDGET_MAX_VOLUNTEER,
-);
+	addStandalone("volunteer", RECOMMENDATION_BUDGET_MAX_VOLUNTEER);
 
-for (const group of optionalEmploymentGroups) {
-const availableSlots =
-RECOMMENDATION_BUDGET_MAX_TOTAL -
-budgeted.size;
+	for (const group of optionalEmploymentGroups) {
+		const availableSlots = RECOMMENDATION_BUDGET_MAX_TOTAL - budgeted.size;
 
-if (availableSlots < 2) {
-break;
-}
+		if (availableSlots < 2) {
+			break;
+		}
 
-addEmploymentGroup(group);
-}
+		addEmploymentGroup(group);
+	}
 
-return new Map(
-[...budgeted.entries()].slice(
-0,
-RECOMMENDATION_BUDGET_MAX_TOTAL,
-),
-);
+	return new Map([...budgeted.entries()].slice(0, RECOMMENDATION_BUDGET_MAX_TOTAL));
 }
 
 function applyQualityCoveragePolicy(
@@ -987,10 +802,7 @@ function applyQualityCoveragePolicy(
 
 		if (!reasonSource) continue;
 
-		recommendations.set(
-			group.employment.id,
-			qualityReason(reasonSource, requirements),
-		);
+		recommendations.set(group.employment.id, qualityReason(reasonSource, requirements));
 		recommendedEmploymentCount += 1;
 	}
 
@@ -1004,22 +816,13 @@ function applyQualityCoveragePolicy(
 		const facts = [...(factsByEmploymentId.get(employmentId) ?? [])].sort(
 			(a, b) => b.score - a.score || a.item.sortOrder - b.item.sortOrder,
 		);
-		let recommendedFactCount = facts.filter((fact) =>
-			recommendations.has(fact.item.id),
-		).length;
+		let recommendedFactCount = facts.filter((fact) => recommendations.has(fact.item.id)).length;
 
 		for (const fact of facts) {
 			if (recommendedFactCount >= QUALITY_TARGET_FACTS_PER_EMPLOYMENT) break;
 			if (fact.score <= 0 || recommendations.has(fact.item.id)) continue;
 
-			recommendations.set(
-				fact.item.id,
-				qualityReason(
-					fact,
-					requirements,
-					recommendations.get(employmentId),
-				),
-			);
+			recommendations.set(fact.item.id, qualityReason(fact, requirements, recommendations.get(employmentId)));
 			recommendedFactCount += 1;
 		}
 
@@ -1030,178 +833,133 @@ function applyQualityCoveragePolicy(
 		if (!alreadyHasQuantifiedImpact) {
 			const impactFact = facts
 				.filter((fact) => fact.hasQuantifiedImpact)
-				.sort(
-					(a, b) =>
-						b.score - a.score ||
-						a.item.sortOrder - b.item.sortOrder,
-				)[0];
+				.sort((a, b) => b.score - a.score || a.item.sortOrder - b.item.sortOrder)[0];
 
 			if (impactFact) {
 				recommendations.set(
 					impactFact.item.id,
-					qualityReason(
-						impactFact,
-						requirements,
-						recommendations.get(employmentId),
-					),
+					qualityReason(impactFact, requirements, recommendations.get(employmentId)),
 				);
 			}
 		}
 	}
 
-// C6: expose omitted facts that add requirement coverage before the hard budget trims the pool.
-for (const employmentId of coveredEmploymentIds) {
-const facts = [...(factsByEmploymentId.get(employmentId) ?? [])].sort(
-(a, b) => b.score - a.score || a.item.sortOrder - b.item.sortOrder,
-);
-const coveredRequirementIds = new Set(
-facts
-.filter((fact) => recommendations.has(fact.item.id))
-.flatMap((fact) => fact.requirementIds),
-);
+	// C6: expose omitted facts that add requirement coverage before the hard budget trims the pool.
+	for (const employmentId of coveredEmploymentIds) {
+		const facts = [...(factsByEmploymentId.get(employmentId) ?? [])].sort(
+			(a, b) => b.score - a.score || a.item.sortOrder - b.item.sortOrder,
+		);
+		const coveredRequirementIds = new Set(
+			facts.filter((fact) => recommendations.has(fact.item.id)).flatMap((fact) => fact.requirementIds),
+		);
 
-for (const fact of facts) {
-if (fact.score <= 0 || recommendations.has(fact.item.id)) continue;
+		for (const fact of facts) {
+			if (fact.score <= 0 || recommendations.has(fact.item.id)) continue;
 
-const uncoveredRequirementIds = fact.requirementIds.filter(
-(requirementId) => !coveredRequirementIds.has(requirementId),
-);
+			const uncoveredRequirementIds = fact.requirementIds.filter(
+				(requirementId) => !coveredRequirementIds.has(requirementId),
+			);
 
-if (uncoveredRequirementIds.length === 0) continue;
+			if (uncoveredRequirementIds.length === 0) continue;
 
-recommendations.set(
-fact.item.id,
-qualityReason(fact, requirements, recommendations.get(employmentId)),
-);
+			recommendations.set(fact.item.id, qualityReason(fact, requirements, recommendations.get(employmentId)));
 
-for (const requirementId of uncoveredRequirementIds) {
-coveredRequirementIds.add(requirementId);
-}
-}
-}
+			for (const requirementId of uncoveredRequirementIds) {
+				coveredRequirementIds.add(requirementId);
+			}
+		}
+	}
 
-const supplementStandalone = (
-sourceType: SelectionItem["sourceType"],
-targetCount: number,
-allowZeroScore = false,
-) => {
-let currentCount = selectionItems.filter(
-(item) =>
-item.sourceType === sourceType &&
-recommendations.has(item.id),
-).length;
+	const supplementStandalone = (
+		sourceType: SelectionItem["sourceType"],
+		targetCount: number,
+		allowZeroScore = false,
+	) => {
+		let currentCount = selectionItems.filter(
+			(item) => item.sourceType === sourceType && recommendations.has(item.id),
+		).length;
 
-if (currentCount >= targetCount) return;
+		if (currentCount >= targetCount) return;
 
-const candidates = selectionItems
-.filter(
-(item) =>
-item.sourceType === sourceType &&
-(sourceType !== "education" ||
-(item.sourceTextSnapshot ?? "").trim().length > 0),
-)
-.map((item) => scoredById.get(item.id))
-.filter((item): item is QualityScoredItem => Boolean(item))
-.filter(
-(item) =>
-allowZeroScore ||
-item.score > 0,
-)
-.sort(
-(a, b) =>
-b.score - a.score ||
-a.item.sortOrder - b.item.sortOrder,
-);
+		const candidates = selectionItems
+			.filter(
+				(item) =>
+					item.sourceType === sourceType &&
+					(sourceType !== "education" || (item.sourceTextSnapshot ?? "").trim().length > 0),
+			)
+			.map((item) => scoredById.get(item.id))
+			.filter((item): item is QualityScoredItem => Boolean(item))
+			.filter((item) => allowZeroScore || item.score > 0)
+			.sort((a, b) => b.score - a.score || a.item.sortOrder - b.item.sortOrder);
 
-for (const candidate of candidates) {
-if (currentCount >= targetCount) break;
-if (recommendations.has(candidate.item.id)) continue;
+		for (const candidate of candidates) {
+			if (currentCount >= targetCount) break;
+			if (recommendations.has(candidate.item.id)) continue;
 
-const reason =
-candidate.score > 0
-? qualityReason(candidate, requirements)
-: "Available education retained for CV completeness.";
+			const reason =
+				candidate.score > 0
+					? qualityReason(candidate, requirements)
+					: "Available education retained for CV completeness.";
 
-recommendations.set(
-candidate.item.id,
-reason,
-);
+			recommendations.set(candidate.item.id, reason);
 
-currentCount += 1;
-}
-};
+			currentCount += 1;
+		}
+	};
 
-supplementStandalone(
-"profile_list_item",
-QUALITY_TARGET_PROFILE_ITEMS,
-);
+	supplementStandalone("profile_list_item", QUALITY_TARGET_PROFILE_ITEMS);
 
-const protectedDirectRequirements = requirements.filter(isProtectedDirectRequirement);
+	const protectedDirectRequirements = requirements.filter(isProtectedDirectRequirement);
 
-for (const requirement of protectedDirectRequirements) {
-	const candidate = selectionItems
-		.filter((item) => item.sourceType === "profile_list_item")
-		.map((item) => scoredById.get(item.id))
-		.filter((item): item is QualityScoredItem => Boolean(item))
+	for (const requirement of protectedDirectRequirements) {
+		const candidate = selectionItems
+			.filter((item) => item.sourceType === "profile_list_item")
+			.map((item) => scoredById.get(item.id))
+			.filter((item): item is QualityScoredItem => Boolean(item))
+			.filter((item) => item.score > 0 && selectionItemHasExactRequirementText(item.item, requirement))
+			.sort(
+				(a, b) =>
+					b.score - a.score ||
+					Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
+					a.item.sortOrder - b.item.sortOrder,
+			)[0];
+
+		if (!candidate || recommendations.has(candidate.item.id)) continue;
+
+		recommendations.set(candidate.item.id, qualityReason(candidate, requirements));
+	}
+
+	// C6: explicit important ATS keywords may enter the pre-budget pool even when the normal target is full.
+	const protectedKeywordRequirementIds = requirements
 		.filter(
-			(item) =>
-				item.score > 0 &&
-				selectionItemHasExactRequirementText(item.item, requirement),
+			(requirement) =>
+				requirement.category === "keyword" &&
+				(requirement.priority === "critical" || requirement.priority === "important"),
 		)
-		.sort(
-			(a, b) =>
-				b.score - a.score ||
-				Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
-				a.item.sortOrder - b.item.sortOrder,
-		)[0];
+		.map((requirement) => requirement.id);
 
-	if (!candidate || recommendations.has(candidate.item.id)) continue;
+	for (const requirementId of protectedKeywordRequirementIds) {
+		const candidate = selectionItems
+			.filter((item) => item.sourceType === "profile_list_item")
+			.map((item) => scoredById.get(item.id))
+			.filter((item): item is QualityScoredItem => Boolean(item))
+			.filter((item) => item.score > 0 && item.requirementIds.includes(requirementId))
+			.sort(
+				(a, b) =>
+					b.score - a.score ||
+					Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
+					a.item.sortOrder - b.item.sortOrder,
+			)[0];
 
-	recommendations.set(candidate.item.id, qualityReason(candidate, requirements));
-}
+		if (!candidate || recommendations.has(candidate.item.id)) continue;
 
-// C6: explicit important ATS keywords may enter the pre-budget pool even when the normal target is full.
-const protectedKeywordRequirementIds = requirements
-.filter(
-(requirement) =>
-requirement.category === "keyword" &&
-(requirement.priority === "critical" || requirement.priority === "important"),
-)
-.map((requirement) => requirement.id);
+		recommendations.set(candidate.item.id, qualityReason(candidate, requirements));
+	}
 
-for (const requirementId of protectedKeywordRequirementIds) {
-const candidate = selectionItems
-.filter((item) => item.sourceType === "profile_list_item")
-.map((item) => scoredById.get(item.id))
-.filter((item): item is QualityScoredItem => Boolean(item))
-.filter((item) => item.score > 0 && item.requirementIds.includes(requirementId))
-.sort(
-(a, b) =>
-b.score - a.score ||
-Number(b.hasQuantifiedImpact) - Number(a.hasQuantifiedImpact) ||
-a.item.sortOrder - b.item.sortOrder,
-)[0];
+	supplementStandalone("project", QUALITY_TARGET_PROJECTS);
 
-if (!candidate || recommendations.has(candidate.item.id)) continue;
-
-recommendations.set(candidate.item.id, qualityReason(candidate, requirements));
-}
-
-supplementStandalone(
-"project",
-QUALITY_TARGET_PROJECTS,
-);
-
-supplementStandalone(
-"education",
-RECOMMENDATION_BUDGET_MAX_EDUCATION,
-true,
-);
-	return applyRecommendationBudgetPolicy(
-		recommendations,
-		selectionItems,
-		requirements,
-	);
+	supplementStandalone("education", RECOMMENDATION_BUDGET_MAX_EDUCATION, true);
+	return applyRecommendationBudgetPolicy(recommendations, selectionItems, requirements);
 }
 
 function validateAndExpandRecommendations(
@@ -1290,7 +1048,7 @@ function resolveGapRequirements(
 			continue;
 		}
 
-if (selectionItems.some((item) => selectionItemHasExactRequirementText(item, requirement))) {
+		if (selectionItems.some((item) => selectionItemHasExactRequirementText(item, requirement))) {
 			continue;
 		}
 
@@ -1430,8 +1188,7 @@ export const cvmateBuildRecommendationsService = {
 			{
 				maxOutputTokens: RECOMMENDATIONS_MAX_OUTPUT_TOKENS,
 				...(provider.provider === "groq" &&
-				(provider.model === "openai/gpt-oss-120b" ||
-					provider.model === "openai/gpt-oss-20b")
+				(provider.model === "openai/gpt-oss-120b" || provider.model === "openai/gpt-oss-20b")
 					? {
 							providerOptions: {
 								groq: {
@@ -1454,28 +1211,13 @@ export const cvmateBuildRecommendationsService = {
 			},
 		);
 
-		const output = resolvePromptAliases(
-rawOutput,
-selectionItems,
-jobOffer.requirements,
-);
+		const output = resolvePromptAliases(rawOutput, selectionItems, jobOffer.requirements);
 
-const aiRecommendations = validateAndExpandRecommendations(output, selectionItems);
-		const recommendations = applyQualityCoveragePolicy(
-			aiRecommendations,
-			selectionItems,
-			jobOffer.requirements,
-		);
+		const aiRecommendations = validateAndExpandRecommendations(output, selectionItems);
+		const recommendations = applyQualityCoveragePolicy(aiRecommendations, selectionItems, jobOffer.requirements);
 
-		const detectedGaps = resolveGapRequirements(
-			output,
-			jobOffer.requirements,
-			existingGaps,
-			selectionItems,
-		);
-		const detectedGapRequirementIds = new Set(
-			detectedGaps.map((requirement) => requirement.id),
-		);
+		const detectedGaps = resolveGapRequirements(output, jobOffer.requirements, existingGaps, selectionItems);
+		const detectedGapRequirementIds = new Set(detectedGaps.map((requirement) => requirement.id));
 		const reconciledOutput = {
 			...output,
 			...(output.gapSuggestions
@@ -1564,8 +1306,8 @@ const aiRecommendations = validateAndExpandRecommendations(output, selectionItem
 };
 
 export const __testables = {
-buildPrompt,
-resolvePromptAliases,
+	buildPrompt,
+	resolvePromptAliases,
 	parseJobOfferSnapshot,
 	resolveGapRequirements,
 	resolveGapSuggestions,

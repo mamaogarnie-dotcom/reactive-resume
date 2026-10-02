@@ -1,11 +1,11 @@
-import { ORPCError } from "@orpc/client";
 import type { AIProvider } from "@reactive-resume/ai/types";
+import { ORPCError } from "@orpc/client";
+import { and, eq } from "drizzle-orm";
+import z from "zod";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { resolveCvLanguage } from "@reactive-resume/utils/locale";
 import { generateId } from "@reactive-resume/utils/string";
-import { and, eq } from "drizzle-orm";
-import z from "zod";
 import { generateJson } from "../ai/generate-json";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
@@ -24,13 +24,7 @@ const EXPERIENCE_FACT_MAX_CHARACTERS = 320;
 const requirementSnapshotSchema = z
 	.object({
 		id: z.string().trim().min(1),
-		category: z.enum([
-			"required",
-			"preferred",
-			"responsibility",
-			"keyword",
-			"other",
-		]),
+		category: z.enum(["required", "preferred", "responsibility", "keyword", "other"]),
 		priority: z.enum(["critical", "important", "additional"]),
 		sourceText: z.string().nullable().optional(),
 		text: z.string().trim().min(1),
@@ -60,15 +54,10 @@ export const cvmateBuildAiTailoredContentOutputSchema = z.object({
 		.max(MAX_EXPERIENCE_FACTS),
 });
 
-const cvmateBuildAiTailoredContentRawOutputSchema =
-	cvmateBuildAiTailoredContentOutputSchema.extend({
-		professionalHeadline: z.string().trim().min(1).max(PROFESSIONAL_HEADLINE_MAX_CHARACTERS),
-		professionalSummary: z
-			.string()
-			.trim()
-			.min(1)
-			.max(RAW_PROVIDER_PROFESSIONAL_SUMMARY_MAX_CHARACTERS),
-	});
+const cvmateBuildAiTailoredContentRawOutputSchema = cvmateBuildAiTailoredContentOutputSchema.extend({
+	professionalHeadline: z.string().trim().min(1).max(PROFESSIONAL_HEADLINE_MAX_CHARACTERS),
+	professionalSummary: z.string().trim().min(1).max(RAW_PROVIDER_PROFESSIONAL_SUMMARY_MAX_CHARACTERS),
+});
 
 type RunnableProvider = {
 	id: string;
@@ -78,12 +67,8 @@ type RunnableProvider = {
 	baseURL: string | null;
 };
 
-type SelectionItem = Awaited<
-	ReturnType<typeof cvmateBuildService.listSelectionItems>
->[number];
-type GeneratedContent = Awaited<
-	ReturnType<typeof cvmateBuildService.listGeneratedContent>
->[number];
+type SelectionItem = Awaited<ReturnType<typeof cvmateBuildService.listSelectionItems>>[number];
+type GeneratedContent = Awaited<ReturnType<typeof cvmateBuildService.listGeneratedContent>>[number];
 type TailoredOutput = z.infer<typeof cvmateBuildAiTailoredContentOutputSchema>;
 
 const SYSTEM_PROMPT = `
@@ -264,8 +249,7 @@ function parseJobOfferSnapshot(value: unknown) {
 
 	if (parsed.data.requirements.length === 0) {
 		throw new ORPCError("BAD_REQUEST", {
-			message:
-				"The job offer must be analyzed before tailored CV content can be generated.",
+			message: "The job offer must be analyzed before tailored CV content can be generated.",
 		});
 	}
 
@@ -278,9 +262,7 @@ function trimProfessionalSummaryToLimit(summary: string): string {
 		return trimmed;
 	}
 
-	const sentences =
-		trimmed.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ??
-		[];
+	const sentences = trimmed.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ?? [];
 
 	let result = "";
 
@@ -295,9 +277,7 @@ function trimProfessionalSummaryToLimit(summary: string): string {
 	return result || trimmed;
 }
 
-function selectQuantifiedSummaryAnchor(
-	selectionItems: SelectionItem[],
-): SelectionItem | null {
+function selectQuantifiedSummaryAnchor(selectionItems: SelectionItem[]): SelectionItem | null {
 	return (
 		[...selectionItems]
 			.filter(
@@ -309,8 +289,7 @@ function selectQuantifiedSummaryAnchor(
 			)
 			.sort((left, right) => {
 				const sortOrderDifference =
-					(left.sortOrder ?? Number.MAX_SAFE_INTEGER) -
-					(right.sortOrder ?? Number.MAX_SAFE_INTEGER);
+					(left.sortOrder ?? Number.MAX_SAFE_INTEGER) - (right.sortOrder ?? Number.MAX_SAFE_INTEGER);
 				if (sortOrderDifference !== 0) return sortOrderDifference;
 				return left.id.localeCompare(right.id);
 			})[0] ?? null
@@ -332,15 +311,15 @@ function buildPrompt(input: {
 	selectionItems: SelectionItem[];
 	targetLanguage: string | null;
 }) {
-	const summaryQuantifiedAnchor = selectQuantifiedSummaryAnchor(
-		input.selectionItems,
-	);
-	const candidateItems = input.selectionItems.map((item) => ({
-		id: item.id,
-		parentSelectionItemId: item.parentSelectionItemId,
-		sourceType: item.sourceType,
-		sourceTextSnapshot: item.sourceTextSnapshot,
-	}));
+	const summaryQuantifiedAnchor = selectQuantifiedSummaryAnchor(input.selectionItems);
+	const candidateItems = input.selectionItems
+		.filter((item) => item.sourceType !== "profile_photo" && item.sourceType !== "reference")
+		.map((item) => ({
+			id: item.id,
+			parentSelectionItemId: item.parentSelectionItemId,
+			sourceType: item.sourceType,
+			sourceTextSnapshot: item.sourceTextSnapshot,
+		}));
 
 	const requirements = input.jobOffer.requirements.map((requirement) => ({
 		text: requirement.text,
@@ -365,7 +344,7 @@ ${JSON.stringify({
 	companyName: input.jobOffer.companyName ?? null,
 	location: input.jobOffer.location ?? null,
 	language: input.jobOffer.language ?? null,
-		requirements,
+	requirements,
 })}
 </JOB_OFFER>
 
@@ -388,14 +367,11 @@ function validateSelectedHierarchy(selectionItems: SelectionItem[]) {
 	for (const item of selectionItems) {
 		if (item.sourceType !== "experience_fact") continue;
 
-		const parent = item.parentSelectionItemId
-			? selectedById.get(item.parentSelectionItemId)
-			: undefined;
+		const parent = item.parentSelectionItemId ? selectedById.get(item.parentSelectionItemId) : undefined;
 
 		if (parent?.sourceType !== "employment") {
 			throw new ORPCError("BAD_REQUEST", {
-				message:
-					"Every selected experience fact must belong to a selected employment.",
+				message: "Every selected experience fact must belong to a selected employment.",
 			});
 		}
 	}
@@ -404,11 +380,7 @@ function validateSelectedHierarchy(selectionItems: SelectionItem[]) {
 function numericTokens(value: string | null): Set<string> {
 	if (!value) return new Set();
 
-	return new Set(
-		(value.match(/\d+(?:[.,]\d+)*/g) ?? []).map((token) =>
-			token.replace(",", "."),
-		),
-	);
+	return new Set((value.match(/\d+(?:[.,]\d+)*/g) ?? []).map((token) => token.replace(",", ".")));
 }
 
 const QUALITATIVE_UPGRADE_PATTERNS = [
@@ -445,11 +417,7 @@ function qualitativeUpgradeTokens(value: string | null): Set<string> {
 	return result;
 }
 
-function validateNoInventedNumbers(
-	sourceText: string | null,
-	generatedText: string,
-	label: string,
-) {
+function validateNoInventedNumbers(sourceText: string | null, generatedText: string, label: string) {
 	const sourceNumbers = numericTokens(sourceText);
 	const generatedNumbers = numericTokens(generatedText);
 
@@ -462,27 +430,15 @@ function validateNoInventedNumbers(
 	}
 }
 
-function unsupportedQualitativeUpgradeTokens(
-	sourceText: string | null,
-	generatedText: string,
-): Set<string> {
+function unsupportedQualitativeUpgradeTokens(sourceText: string | null, generatedText: string): Set<string> {
 	const sourceQualifiers = qualitativeUpgradeTokens(sourceText);
 	const generatedQualifiers = qualitativeUpgradeTokens(generatedText);
 
-	return new Set(
-		[...generatedQualifiers].filter((token) => !sourceQualifiers.has(token)),
-	);
+	return new Set([...generatedQualifiers].filter((token) => !sourceQualifiers.has(token)));
 }
 
-function validateNoUnsupportedQualitativeUpgrades(
-	sourceText: string | null,
-	generatedText: string,
-	label: string,
-) {
-	const unsupported = unsupportedQualitativeUpgradeTokens(
-		sourceText,
-		generatedText,
-	);
+function validateNoUnsupportedQualitativeUpgrades(sourceText: string | null, generatedText: string, label: string) {
+	const unsupported = unsupportedQualitativeUpgradeTokens(sourceText, generatedText);
 
 	for (const token of unsupported) {
 		throw new ORPCError("BAD_REQUEST", {
@@ -535,36 +491,23 @@ function summaryAttributionTokensRelated(left: string, right: string): boolean {
 	return left.startsWith(right) || right.startsWith(left);
 }
 
-function summaryAttributionGroup(
-	sourceItem: SelectionItem,
-	selectionItems: SelectionItem[],
-): SelectionItem[] {
+function summaryAttributionGroup(sourceItem: SelectionItem, selectionItems: SelectionItem[]): SelectionItem[] {
 	const parentId = sourceItem.parentSelectionItemId;
 
 	if (parentId) {
 		return selectionItems.filter(
-			(item) =>
-				item.id === parentId ||
-				item.id === sourceItem.id ||
-				item.parentSelectionItemId === parentId,
+			(item) => item.id === parentId || item.id === sourceItem.id || item.parentSelectionItemId === parentId,
 		);
 	}
 
 	if (sourceItem.sourceType === "employment") {
-		return selectionItems.filter(
-			(item) =>
-				item.id === sourceItem.id ||
-				item.parentSelectionItemId === sourceItem.id,
-		);
+		return selectionItems.filter((item) => item.id === sourceItem.id || item.parentSelectionItemId === sourceItem.id);
 	}
 
 	return [sourceItem];
 }
 
-function summaryNumericSourceCandidates(
-	sentence: string,
-	selectionItems: SelectionItem[],
-): SelectionItem[] {
+function summaryNumericSourceCandidates(sentence: string, selectionItems: SelectionItem[]): SelectionItem[] {
 	const sentenceNumbers = numericTokens(sentence);
 	if (sentenceNumbers.size === 0) return [];
 
@@ -582,17 +525,11 @@ function summarySentenceBorrowsOutsideSourceGroup(
 ): boolean {
 	const sourceGroup = summaryAttributionGroup(sourceItem, selectionItems);
 	const sourceGroupIds = new Set(sourceGroup.map((item) => item.id));
-	const sourceTokens = new Set(
-		sourceGroup.flatMap((item) => [
-			...summaryAttributionTokens(item.sourceTextSnapshot),
-		]),
-	);
+	const sourceTokens = new Set(sourceGroup.flatMap((item) => [...summaryAttributionTokens(item.sourceTextSnapshot)]));
 	const outsideTokens = new Set(
 		selectionItems
 			.filter((item) => !sourceGroupIds.has(item.id))
-			.flatMap((item) => [
-				...summaryAttributionTokens(item.sourceTextSnapshot),
-			]),
+			.flatMap((item) => [...summaryAttributionTokens(item.sourceTextSnapshot)]),
 	);
 	const sentenceTokens = summaryAttributionTokens(sentence);
 
@@ -621,10 +558,7 @@ function summaryBoundaryTokens(value: string): string[] {
 	return value.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
 }
 
-function isShortRepeatedSentenceBoundaryFragment(
-	previousSentence: string,
-	currentSentence: string,
-): boolean {
+function isShortRepeatedSentenceBoundaryFragment(previousSentence: string, currentSentence: string): boolean {
 	const previousTokens = summaryBoundaryTokens(previousSentence);
 	const currentTokens = summaryBoundaryTokens(currentSentence);
 
@@ -638,18 +572,10 @@ function isShortRepeatedSentenceBoundaryFragment(
 		return false;
 	}
 
-	return (
-		previousTokens[previousTokens.length - 1] ===
-		currentTokens[0]
-	);
+	return previousTokens[previousTokens.length - 1] === currentTokens[0];
 }
-function sanitizeProfessionalSummarySourceAttribution(
-	summary: string,
-	selectionItems: SelectionItem[],
-): string {
-	const sentences =
-		summary.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ??
-		[];
+function sanitizeProfessionalSummarySourceAttribution(summary: string, selectionItems: SelectionItem[]): string {
+	const sentences = summary.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ?? [];
 	const safeSentences: string[] = [];
 
 	for (const sentence of sentences) {
@@ -658,12 +584,7 @@ function sanitizeProfessionalSummarySourceAttribution(
 		if (sentenceNumbers.size === 0) {
 			const previousSentence = safeSentences[safeSentences.length - 1] ?? "";
 
-			if (
-				!isShortRepeatedSentenceBoundaryFragment(
-					previousSentence,
-					sentence,
-				)
-			) {
+			if (!isShortRepeatedSentenceBoundaryFragment(previousSentence, sentence)) {
 				safeSentences.push(sentence);
 			}
 
@@ -677,12 +598,7 @@ function sanitizeProfessionalSummarySourceAttribution(
 		}
 
 		const safeCandidate = candidates.find(
-			(candidate) =>
-				!summarySentenceBorrowsOutsideSourceGroup(
-					sentence,
-					candidate,
-					selectionItems,
-				),
+			(candidate) => !summarySentenceBorrowsOutsideSourceGroup(sentence, candidate, selectionItems),
 		);
 
 		if (safeCandidate) {
@@ -692,33 +608,24 @@ function sanitizeProfessionalSummarySourceAttribution(
 
 		const fallbackCandidate = [...candidates].sort((left, right) => {
 			const sortOrderDifference =
-				(left.sortOrder ?? Number.MAX_SAFE_INTEGER) -
-				(right.sortOrder ?? Number.MAX_SAFE_INTEGER);
+				(left.sortOrder ?? Number.MAX_SAFE_INTEGER) - (right.sortOrder ?? Number.MAX_SAFE_INTEGER);
 			if (sortOrderDifference !== 0) return sortOrderDifference;
 
 			return left.id.localeCompare(right.id);
 		})[0];
-		const fallback = sourceTextAsSummarySentence(
-			fallbackCandidate?.sourceTextSnapshot ?? null,
-		);
+		const fallback = sourceTextAsSummarySentence(fallbackCandidate?.sourceTextSnapshot ?? null);
 
 		if (fallback) safeSentences.push(fallback);
 	}
 
 	return safeSentences.join(" ").trim();
 }
-function sanitizeProfessionalSummaryQualitativeUpgrades(
-	summary: string,
-	selectionItems: SelectionItem[],
-): string {
+function sanitizeProfessionalSummaryQualitativeUpgrades(summary: string, selectionItems: SelectionItem[]): string {
 	const evidenceText = selectedEvidenceText(selectionItems);
-	const sentences =
-		summary.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ??
-		[];
+	const sentences = summary.match(/[^.!?]+(?:[.!?]+|$)/gu)?.map((sentence) => sentence.trim()) ?? [];
 
 	const safeSentences = sentences.filter(
-		(sentence) =>
-			unsupportedQualitativeUpgradeTokens(evidenceText, sentence).size === 0,
+		(sentence) => unsupportedQualitativeUpgradeTokens(evidenceText, sentence).size === 0,
 	);
 
 	if (safeSentences.length === 0) return summary;
@@ -743,58 +650,41 @@ function experienceFactSubstantiveSignature(value: string | null): string {
 		.join(" ");
 }
 
-function isCosmeticExperienceFactRewrite(
-	sourceText: string | null,
-	generatedText: string,
-): boolean {
+function isCosmeticExperienceFactRewrite(sourceText: string | null, generatedText: string): boolean {
 	const sourceSignature = experienceFactSubstantiveSignature(sourceText);
 	const generatedSignature = experienceFactSubstantiveSignature(generatedText);
 
 	return Boolean(sourceSignature) && sourceSignature === generatedSignature;
 }
 
-function sanitizeExperienceFactQualitativeUpgrade(
-	sourceText: string | null,
-	generatedText: string,
-): string {
+function sanitizeExperienceFactQualitativeUpgrade(sourceText: string | null, generatedText: string): string {
 	const fallback = sourceText?.trim();
 
 	if (fallback && isCosmeticExperienceFactRewrite(fallback, generatedText)) {
 		return fallback;
 	}
 
-	if (
-		unsupportedQualitativeUpgradeTokens(sourceText, generatedText).size === 0
-	) {
+	if (unsupportedQualitativeUpgradeTokens(sourceText, generatedText).size === 0) {
 		return generatedText;
 	}
 
 	return fallback ? fallback : generatedText;
 }
 
-function sanitizeTailoredOutput(
-	output: TailoredOutput,
-	selectionItems: SelectionItem[],
-): TailoredOutput {
+function sanitizeTailoredOutput(output: TailoredOutput, selectionItems: SelectionItem[]): TailoredOutput {
 	const eligible = new Map(
-		selectionItems
-			.filter((item) => item.sourceType === "experience_fact")
-			.map((item) => [item.id, item]),
+		selectionItems.filter((item) => item.sourceType === "experience_fact").map((item) => [item.id, item]),
 	);
 
-	const qualitativeSafeSummary =
-		sanitizeProfessionalSummaryQualitativeUpgrades(
-			output.professionalSummary,
-			selectionItems,
-		);
-	const sourceAttributionSafeSummary =
-		sanitizeProfessionalSummarySourceAttribution(
-			qualitativeSafeSummary,
-			selectionItems,
-		);
-	const lengthSafeSummary = trimProfessionalSummaryToLimit(
-		sourceAttributionSafeSummary,
+	const qualitativeSafeSummary = sanitizeProfessionalSummaryQualitativeUpgrades(
+		output.professionalSummary,
+		selectionItems,
 	);
+	const sourceAttributionSafeSummary = sanitizeProfessionalSummarySourceAttribution(
+		qualitativeSafeSummary,
+		selectionItems,
+	);
+	const lengthSafeSummary = trimProfessionalSummaryToLimit(sourceAttributionSafeSummary);
 
 	return {
 		professionalHeadline: output.professionalHeadline,
@@ -806,10 +696,7 @@ function sanitizeTailoredOutput(
 
 			return {
 				...item,
-				text: sanitizeExperienceFactQualitativeUpgrade(
-					sourceItem.sourceTextSnapshot,
-					item.text,
-				),
+				text: sanitizeExperienceFactQualitativeUpgrade(sourceItem.sourceTextSnapshot, item.text),
 			};
 		}),
 	};
@@ -818,12 +705,7 @@ function sanitizeTailoredOutput(
 function selectedEvidenceText(selectionItems: SelectionItem[]): string {
 	return selectionItems
 		.map((item) =>
-			[
-				item.sourceTextSnapshot ?? "",
-				JSON.stringify(item.sourceDataSnapshot ?? {}),
-			]
-				.filter(Boolean)
-				.join(" "),
+			[item.sourceTextSnapshot ?? "", JSON.stringify(item.sourceDataSnapshot ?? {})].filter(Boolean).join(" "),
 		)
 		.join("\n");
 }
@@ -836,10 +718,7 @@ const POLISH_PERSONAL_SUMMARY_PATTERNS = [
 	],
 ] as const;
 
-function validateNeutralProfessionalSummary(
-	summary: string,
-	targetLanguage: string | null,
-) {
+function validateNeutralProfessionalSummary(summary: string, targetLanguage: string | null) {
 	if (targetLanguage !== "pl") return;
 
 	const normalized = normalizeQualitativeText(summary);
@@ -861,37 +740,21 @@ function validateProfessionalSummary(
 	validateNeutralProfessionalSummary(summary, targetLanguage);
 	if (/[\r\n]/.test(summary) || /^\s*(?:[-*]|\u2022)/u.test(summary)) {
 		throw new ORPCError("BAD_REQUEST", {
-			message:
-				"The AI professional summary must be a single paragraph without a bullet marker.",
+			message: "The AI professional summary must be a single paragraph without a bullet marker.",
 		});
 	}
 
 	const evidenceText = selectedEvidenceText(selectionItems);
 
-	validateNoInventedNumbers(
-		evidenceText,
-		summary,
-		"professional summary",
-	);
+	validateNoInventedNumbers(evidenceText, summary, "professional summary");
 
-	validateNoUnsupportedQualitativeUpgrades(
-		evidenceText,
-		summary,
-		"professional summary",
-	);
+	validateNoUnsupportedQualitativeUpgrades(evidenceText, summary, "professional summary");
 }
 
-function validateExperienceFactRewrite(
-	sourceText: string | null,
-	rewrittenText: string,
-) {
-	if (
-		/[\r\n]/.test(rewrittenText) ||
-		/^\s*(?:[-*]|\u2022)/u.test(rewrittenText)
-	) {
+function validateExperienceFactRewrite(sourceText: string | null, rewrittenText: string) {
+	if (/[\r\n]/.test(rewrittenText) || /^\s*(?:[-*]|\u2022)/u.test(rewrittenText)) {
 		throw new ORPCError("BAD_REQUEST", {
-			message:
-				"The AI experience rewrite must be a single bullet-ready line without a bullet marker.",
+			message: "The AI experience rewrite must be a single bullet-ready line without a bullet marker.",
 		});
 	}
 
@@ -901,8 +764,7 @@ function validateExperienceFactRewrite(
 	for (const token of sourceNumbers) {
 		if (!rewrittenNumbers.has(token)) {
 			throw new ORPCError("BAD_REQUEST", {
-				message:
-					"The AI experience rewrite must preserve every numeric value from the selected source fact.",
+				message: "The AI experience rewrite must preserve every numeric value from the selected source fact.",
 			});
 		}
 	}
@@ -910,16 +772,11 @@ function validateExperienceFactRewrite(
 	for (const token of rewrittenNumbers) {
 		if (!sourceNumbers.has(token)) {
 			throw new ORPCError("BAD_REQUEST", {
-				message:
-					"The AI experience rewrite must not add numeric values that are absent from the selected source fact.",
+				message: "The AI experience rewrite must not add numeric values that are absent from the selected source fact.",
 			});
 		}
 	}
-	validateNoUnsupportedQualitativeUpgrades(
-		sourceText,
-		rewrittenText,
-		"experience rewrite",
-	);
+	validateNoUnsupportedQualitativeUpgrades(sourceText, rewrittenText, "experience rewrite");
 }
 
 function validateProfessionalHeadline(
@@ -950,11 +807,7 @@ function validateProfessionalHeadline(
 		});
 	}
 
-	validateNoUnsupportedQualitativeUpgrades(
-		selectedEvidenceText(selectionItems),
-		headline,
-		"professional headline",
-	);
+	validateNoUnsupportedQualitativeUpgrades(selectedEvidenceText(selectionItems), headline, "professional headline");
 
 	if (targetLanguage === "pl") {
 		const normalized = normalizeQualitativeText(headline);
@@ -969,31 +822,20 @@ function validateProfessionalHeadline(
 	}
 }
 
-function validateOutput(
-	output: TailoredOutput,
-	selectionItems: SelectionItem[],
-	targetLanguage: string | null = null,
-) {
+function validateOutput(output: TailoredOutput, selectionItems: SelectionItem[], targetLanguage: string | null = null) {
 	if (output.professionalHeadline) {
 		validateProfessionalHeadline(output.professionalHeadline, selectionItems, targetLanguage);
 	}
 
-	validateProfessionalSummary(
-		output.professionalSummary,
-		selectionItems,
-		targetLanguage,
-	);
+	validateProfessionalSummary(output.professionalSummary, selectionItems, targetLanguage);
 
 	const eligible = new Map(
-		selectionItems
-			.filter((item) => item.sourceType === "experience_fact")
-			.map((item) => [item.id, item]),
+		selectionItems.filter((item) => item.sourceType === "experience_fact").map((item) => [item.id, item]),
 	);
 
 	if (output.experienceFacts.length !== eligible.size) {
 		throw new ORPCError("BAD_REQUEST", {
-			message:
-				"The AI must return exactly one rewrite for every selected experience fact.",
+			message: "The AI must return exactly one rewrite for every selected experience fact.",
 		});
 	}
 
@@ -1004,22 +846,17 @@ function validateOutput(
 
 		if (!sourceItem) {
 			throw new ORPCError("BAD_REQUEST", {
-				message:
-					"The AI returned tailored text for an unknown or ineligible selection item.",
+				message: "The AI returned tailored text for an unknown or ineligible selection item.",
 			});
 		}
 
 		if (seen.has(item.selectionItemId)) {
 			throw new ORPCError("BAD_REQUEST", {
-				message:
-					"The AI returned duplicate tailored text for a selection item.",
+				message: "The AI returned duplicate tailored text for a selection item.",
 			});
 		}
 
-		validateExperienceFactRewrite(
-			sourceItem.sourceTextSnapshot,
-			item.text,
-		);
+		validateExperienceFactRewrite(sourceItem.sourceTextSnapshot, item.text);
 
 		seen.add(item.selectionItemId);
 	}
@@ -1039,14 +876,11 @@ function latestExistingGeneratedContent(
 	selectionItemId: string | null,
 ) {
 	return items
-		.filter(
-			(item) => item.kind === kind && item.selectionItemId === selectionItemId,
-		)
+		.filter((item) => item.kind === kind && item.selectionItemId === selectionItemId)
 		.reduce<GeneratedContent | null>((latest, item) => {
 			if (!latest) return item;
 
-			const timeDifference =
-				item.createdAt.getTime() - latest.createdAt.getTime();
+			const timeDifference = item.createdAt.getTime() - latest.createdAt.getTime();
 
 			if (timeDifference > 0) return item;
 			if (timeDifference < 0) return latest;
@@ -1055,10 +889,7 @@ function latestExistingGeneratedContent(
 		}, null);
 }
 
-async function resolveProvider(
-	userId: string,
-	aiProviderId?: string,
-): Promise<RunnableProvider> {
+async function resolveProvider(userId: string, aiProviderId?: string): Promise<RunnableProvider> {
 	const provider = aiProviderId
 		? await aiProvidersService.getRunnableById({
 				id: aiProviderId,
@@ -1076,11 +907,7 @@ async function resolveProvider(
 }
 
 export const cvmateBuildTailoredContentService = {
-	generate: async (input: {
-		id: string;
-		userId: string;
-		aiProviderId?: string;
-	}) => {
+	generate: async (input: { id: string; userId: string; aiProviderId?: string }) => {
 		const build = await cvmateBuildService.getById({
 			id: input.id,
 			userId: input.userId,
@@ -1103,17 +930,14 @@ export const cvmateBuildTailoredContentService = {
 
 		if (selectedItems.length === 0) {
 			throw new ORPCError("BAD_REQUEST", {
-				message:
-					"Select at least one candidate item before generating tailored CV content.",
+				message: "Select at least one candidate item before generating tailored CV content.",
 			});
 		}
 
 		validateSelectedHierarchy(selectedItems);
 
 		const provider = await resolveProvider(input.userId, input.aiProviderId);
-		const isGroqGptOss =
-			provider.provider === "groq" &&
-			provider.model.toLowerCase().includes("gpt-oss");
+		const isGroqGptOss = provider.provider === "groq" && provider.model.toLowerCase().includes("gpt-oss");
 
 		const model = getModel({
 			provider: provider.provider,
@@ -1134,9 +958,7 @@ export const cvmateBuildTailoredContentService = {
 			},
 			cvmateBuildAiTailoredContentRawOutputSchema,
 			{
-				maxOutputTokens: isGroqGptOss
-					? TAILORED_CONTENT_GPT_OSS_MAX_OUTPUT_TOKENS
-					: TAILORED_CONTENT_MAX_OUTPUT_TOKENS,
+				maxOutputTokens: isGroqGptOss ? TAILORED_CONTENT_GPT_OSS_MAX_OUTPUT_TOKENS : TAILORED_CONTENT_MAX_OUTPUT_TOKENS,
 				...(isGroqGptOss
 					? {
 							providerOptions: {
@@ -1170,17 +992,10 @@ export const cvmateBuildTailoredContentService = {
 			});
 		}
 
-		validateOutput(
-			sanitizedOutput,
-			selectedItems,
-			resolveCvLanguage(build.targetLanguage),
-		);
+		validateOutput(sanitizedOutput, selectedItems, resolveCvLanguage(build.targetLanguage));
 
 		const experienceOutputById = new Map(
-			sanitizedOutput.experienceFacts.map((item) => [
-				item.selectionItemId,
-				item.text,
-			]),
+			sanitizedOutput.experienceFacts.map((item) => [item.selectionItemId, item.text]),
 		);
 
 		const summarySnapshot = {
@@ -1225,8 +1040,7 @@ export const cvmateBuildTailoredContentService = {
 
 			if (!aiText) {
 				throw new ORPCError("BAD_REQUEST", {
-					message:
-						"The AI omitted tailored text for a selected experience fact.",
+					message: "The AI omitted tailored text for a selected experience fact.",
 				});
 			}
 
@@ -1240,16 +1054,10 @@ export const cvmateBuildTailoredContentService = {
 		}
 
 		await db.transaction(async (tx) => {
-			const inserts: Array<
-				typeof schema.cvmateCvGeneratedContent.$inferInsert
-			> = [];
+			const inserts: Array<typeof schema.cvmateCvGeneratedContent.$inferInsert> = [];
 
 			for (const target of targets) {
-				const existing = latestExistingGeneratedContent(
-					existingGeneratedContent,
-					target.kind,
-					target.selectionItemId,
-				);
+				const existing = latestExistingGeneratedContent(existingGeneratedContent, target.kind, target.selectionItemId);
 
 				if (existing) {
 					await tx
@@ -1310,8 +1118,8 @@ export const __testables = {
 	rawOutputSchema: cvmateBuildAiTailoredContentRawOutputSchema,
 	trimProfessionalSummaryToLimit,
 	selectQuantifiedSummaryAnchor,
-	 sanitizeProfessionalSummarySourceAttribution,
-	 sanitizeTailoredOutput,
+	sanitizeProfessionalSummarySourceAttribution,
+	sanitizeTailoredOutput,
 	buildPrompt,
 	latestExistingGeneratedContent,
 	parseJobOfferSnapshot,
