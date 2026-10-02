@@ -1,7 +1,8 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { ArrowRightIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { clearAuthenticatedQueryCache } from "@/libs/query/client";
 import { Link, useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { useToggle } from "usehooks-ts";
@@ -28,6 +29,7 @@ type Props = {
 
 export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const { callbackURL, reauthenticate } = useSearch({ from: "/auth" });
 	const navigate = useNavigate();
 
@@ -91,6 +93,7 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 
 				toast.close(toastId);
 				if (isOAuthRedirect(result.data)) return;
+				clearAuthenticatedQueryCache(queryClient);
 				await router.invalidate();
 				void navigate(getAuthRedirectOptions(callbackURL));
 			} catch {
@@ -117,10 +120,11 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 			});
 			if (error || isOAuthRedirect(data)) return;
 
+			clearAuthenticatedQueryCache(queryClient);
 			await router.invalidate();
 			void navigate(getAuthRedirectOptions(callbackURL));
 		});
-	}, [providers, router, navigate, callbackURL]);
+	}, [providers, router, navigate, callbackURL, queryClient]);
 
 	return (
 		<>
