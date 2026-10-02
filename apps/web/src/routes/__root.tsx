@@ -21,6 +21,7 @@ import { CommandPalette } from "@/features/command-palette";
 import { ThemeProvider } from "@/features/theme/provider";
 import { ConfirmDialogProvider } from "@/hooks/use-confirm";
 import { PromptDialogProvider } from "@/hooks/use-prompt";
+import { SessionCacheGuard } from "@/features/auth/session-cache-guard";
 import { getSession } from "@/libs/auth/session";
 import { getLocale, isRTL, loadLocale } from "@/libs/locale";
 import { client } from "@/libs/orpc/client";
@@ -133,6 +134,7 @@ function RootComponent() {
 											<TooltipProvider>
 												<ConfirmDialogProvider>
 													<PromptDialogProvider>
+														<SessionCacheGuard />
 														<Outlet />
 														<DialogManager />
 														<CommandPalette />
