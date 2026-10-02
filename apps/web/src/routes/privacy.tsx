@@ -55,8 +55,9 @@ function PrivacyPage() {
 					<li>OVHcloud: hosting serwera (Warszawa, Polska),</li>
 					<li>Google: logowanie kontem Google,</li>
 					<li>
-						Groq (siedziba w USA): dostawca funkcji AI. Treść, którą wysyłasz do funkcji AI (fragmenty profilu, ofert,
-						CV), trafia do tego dostawcy tylko wtedy, gdy z nich korzystasz.
+						Groq (siedziba w USA): dostawca funkcji AI. Treść, którą wysyłasz do funkcji AI (dane zawodowe: stanowiska,
+						osiągnięcia, umiejętności, wykształcenie i treść ofert; bez danych kontaktowych, zdjęcia i referencji),
+						trafia do tego dostawcy tylko wtedy, gdy z nich korzystasz.
 					</li>
 				</ul>
 				<p>

@@ -9,6 +9,7 @@ import { generateJson } from "../ai/generate-json";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
+import { compactSourceDataForAi } from "./ai-source-data";
 import { cvmateBuildService } from "./service";
 
 const MAX_RECOMMENDATIONS = 500;
@@ -228,7 +229,9 @@ function parseJobOfferSnapshot(value: unknown) {
 }
 
 function compactSourceData(value: Record<string, unknown>): Record<string, unknown> {
-	return Object.fromEntries(Object.entries(value).filter(([key]) => !TECHNICAL_SOURCE_DATA_KEYS.has(key)));
+	return Object.fromEntries(
+		Object.entries(compactSourceDataForAi(value)).filter(([key]) => !TECHNICAL_SOURCE_DATA_KEYS.has(key)),
+	);
 }
 
 function sourceDataContainsExactText(value: Record<string, unknown>, sourceText: string | null): boolean {
