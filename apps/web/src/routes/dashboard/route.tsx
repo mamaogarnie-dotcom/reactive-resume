@@ -1,6 +1,7 @@
 import { Trans } from "@lingui/react/macro";
 import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-router";
 import { SidebarProvider } from "@reactive-resume/ui/components/sidebar";
+import { BetaNotice } from "@/features/beta/beta-notice";
 import { createNoindexFollowMeta } from "@/libs/seo";
 import { getDashboardSidebarState, setDashboardSidebarState } from "./-components/functions";
 import { DashboardSidebar } from "./-components/sidebar";
@@ -41,6 +42,7 @@ function RouteComponent() {
 			<DashboardSidebar />
 
 			<main id="main-content" className="@container flex-1 bg-background p-4 md:p-6 md:ps-4">
+				<BetaNotice />
 				<Outlet />
 			</main>
 		</SidebarProvider>
