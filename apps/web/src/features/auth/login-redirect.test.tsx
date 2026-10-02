@@ -20,7 +20,9 @@ const mocks = vi.hoisted(() => ({
 	continueOAuth: vi.fn(),
 }));
 
+vi.mock("@/libs/query/client", () => ({ clearAuthenticatedQueryCache: vi.fn() }));
 vi.mock("@tanstack/react-query", () => ({
+	useQueryClient: () => ({}),
 	useQuery: () => ({
 		data: { google: "Google", github: "GitHub", linkedin: "LinkedIn", custom: "SSO", passkey: true },
 	}),

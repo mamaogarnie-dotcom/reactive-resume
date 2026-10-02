@@ -199,18 +199,6 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 									<FormLabel>
 										<Trans comment="Label for password input on login form">Password</Trans>
 									</FormLabel>
-
-									<Button
-										tabIndex={-1}
-										variant="link"
-										nativeButton={false}
-										className="h-auto p-0 text-sm leading-none"
-										render={
-											<Link to="/auth/forgot-password">
-												<Trans comment="Link label to password reset page from login form">Forgot Password?</Trans>
-											</Link>
-										}
-									/>
 								</div>
 								<div className="flex items-center gap-x-1.5">
 									<FormControl

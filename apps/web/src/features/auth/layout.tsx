@@ -11,7 +11,7 @@ export function AuthLayout() {
 
 			<Outlet />
 			<p className="text-center text-muted-foreground text-xs">
-				Wersja testowa: nie wpisuj prawdziwych danych osobowych.{" "}
+				Wersja testowa: nie wpisuj prawdziwych danych osobowych. Zapamiętaj hasło, reset hasła jest wyłączony.{" "}
 				<a href="/privacy" className="font-medium underline underline-offset-2">
 					Polityka prywatności
 				</a>
