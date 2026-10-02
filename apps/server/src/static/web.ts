@@ -26,7 +26,7 @@ const noindexShellPrefixes = ["/auth", "/dashboard", "/builder", "/agent", "/tem
  * Without an entry here the fallback below returns 404 for the path in production — the dev Vite
  * server serves the shell for anything, so this failure only ever shows up once deployed.
  */
-const indexableAppPaths = new Set(["/ats-checker"]);
+const indexableAppPaths = new Set(["/ats-checker", "/privacy"]);
 const reservedPublicResumeSegments = new Set([
 	"api",
 	"mcp",
@@ -38,6 +38,7 @@ const reservedPublicResumeSegments = new Set([
 	"agent",
 	"templates",
 	"ats-checker",
+	"privacy",
 ]);
 
 function isAssetPath(pathname: string): boolean {
