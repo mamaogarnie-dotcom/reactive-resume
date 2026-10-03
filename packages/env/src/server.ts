@@ -66,6 +66,12 @@ export const env = createEnv({
 		SMTP_PASS: z.string().min(1).optional(),
 		SMTP_FROM: z.string().min(1).optional(),
 		SMTP_SECURE: z.stringbool().default(false),
+		// Dev only: print skipped emails (recipient, links with tokens) to the log. Honoured only when NODE_ENV=development.
+		// Fail-closed: only the exact string "true" enables it (stringbool would also accept "1", "yes", "on").
+		EMAIL_PREVIEW_LOG: z
+			.string()
+			.optional()
+			.transform((value) => value === "true"),
 
 		// Storage (Optional)
 		LOCAL_STORAGE_PATH: z.string().min(1).refine(isAbsolute, "LOCAL_STORAGE_PATH must be an absolute path").optional(),

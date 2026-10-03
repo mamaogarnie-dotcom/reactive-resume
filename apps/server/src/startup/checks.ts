@@ -62,6 +62,16 @@ async function validateLocalStoragePath() {
 	}
 }
 
+// Mirrors the transport check in @reactive-resume/email: without all four, emails are skipped.
+export function warnIfSmtpNotConfigured() {
+	if (env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS && env.SMTP_FROM) return;
+
+	console.warn(
+		"SMTP is not configured: verification, password reset and email change emails will not be sent. " +
+			"Set SMTP_HOST, SMTP_USER, SMTP_PASS and SMTP_FROM.",
+	);
+}
+
 async function reapStaleAgentRuns() {
 	try {
 		const { reapStaleAgentRunsAtBoot } = await import("@reactive-resume/api/features/agent/runs");
@@ -75,5 +85,6 @@ async function reapStaleAgentRuns() {
 export async function runStartupChecks() {
 	await runDatabaseMigrations();
 	await validateLocalStoragePath();
+	warnIfSmtpNotConfigured();
 	await reapStaleAgentRuns();
 }

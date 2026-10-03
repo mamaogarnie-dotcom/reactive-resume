@@ -4,7 +4,11 @@ import nodemailer from "nodemailer";
 import { render } from "react-email";
 import { env } from "@reactive-resume/env/server";
 
+// Logged instead of the message when SMTP is missing, so it must never carry user data.
+export type EmailKind = "verification" | "password-reset" | "email-change";
+
 type SendEmailOptions = {
+	kind: EmailKind;
 	to: string | string[];
 	subject: string;
 	text?: string;
@@ -30,6 +34,11 @@ function safeErrorToken(error: unknown, key: "name" | "code"): string | undefine
 function mailErrorSummary(error: unknown) {
 	return { name: safeErrorToken(error, "name"), code: safeErrorToken(error, "code") };
 }
+
+// Message previews contain the recipient and verification/reset links with live tokens.
+// Fail-closed: only an explicit development runtime with the explicit flag prints them;
+// a missing or any other NODE_ENV (including production) never does.
+const isEmailPreviewLogEnabled = () => process.env.NODE_ENV === "development" && env.EMAIL_PREVIEW_LOG;
 
 const getTransport = () => {
 	const { SMTP_HOST: host, SMTP_USER: user, SMTP_PASS: pass, SMTP_FROM: from } = env;
@@ -64,12 +73,18 @@ export const sendEmail = async (options: SendEmailOptions) => {
 	if (!payload.text && !payload.html) return;
 
 	if (!transport) {
-		console.info("SMTP not configured; skipping email send.", {
-			to: payload.to,
-			subject: payload.subject,
-			text: payload.text,
-			html: payload.html,
-		});
+		if (isEmailPreviewLogEnabled()) {
+			console.info("[email preview] SMTP not configured; email not sent.", {
+				kind: options.kind,
+				to: payload.to,
+				subject: payload.subject,
+				text: payload.text,
+				html: payload.html,
+			});
+			return;
+		}
+
+		console.warn("Email skipped: SMTP not configured.", { kind: options.kind });
 		return;
 	}
 
