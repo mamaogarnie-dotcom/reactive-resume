@@ -58,15 +58,17 @@ function PrivacyPage() {
 					<li>OVHcloud: hosting serwera (Warszawa, Polska),</li>
 					<li>Google: logowanie kontem Google,</li>
 					<li>
-						Groq (siedziba w USA): dostawca funkcji AI. Treść, którą wysyłasz do funkcji AI (dane zawodowe: stanowiska,
-						osiągnięcia, umiejętności, wykształcenie i treść ofert; bez danych kontaktowych, zdjęcia i referencji),
-						trafia do tego dostawcy tylko wtedy, gdy z nich korzystasz.
+						Groq, Inc. (USA): przetwarzanie treści przez sztuczną inteligencję w funkcjach AI 1story (analiza oferty
+						pracy, dopasowanie CV, ocena ATS z AI), gdy nie korzystasz z własnego dostawcy AI. Przed wysłaniem usuwamy z
+						Twojego profilu i CV dane kontaktowe (adres e-mail, numer telefonu, adres, linki) oraz imię i nazwisko, a z
+						treści oferty dane kontaktowe rekrutera. Do AI nie przekazujemy zdjęcia z CV ani rozpoznanych automatycznie
+						sekcji z referencjami (dane osób trzecich). Treść załączonego pliku z ofertą (PDF lub obraz) jest
+						przekazywana w całości. Dane są przekazywane poza Europejski Obszar Gospodarczy na podstawie zabezpieczeń
+						przewidzianych w RODO; informacje o nich udostępnimy na prośbę pod adresem kontaktowym podanym wyżej.
 					</li>
+					<li>Jeśli podłączysz własnego dostawcę AI, treści są przekazywane do wybranego przez Ciebie dostawcy.</li>
 				</ul>
-				<p>
-					Dane wysyłane do funkcji AI mogą być przetwarzane poza Europejskim Obszarem Gospodarczym. Nie wpisuj w nich
-					danych wrażliwych.
-				</p>
+				<p>Nie wpisuj w funkcjach AI danych wrażliwych.</p>
 			</section>
 
 			<section className="space-y-2">
