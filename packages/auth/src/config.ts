@@ -22,6 +22,7 @@ import { env } from "@reactive-resume/env/server";
 import { rateLimitConfig, TRUSTED_IP_HEADERS } from "@reactive-resume/utils/rate-limit";
 import { generateId, toUsername } from "@reactive-resume/utils/string";
 import { isAllowedOAuthRedirectUri } from "@reactive-resume/utils/url-security.node";
+import { createSafeAuthLogger } from "./logger";
 import { createGithubProfileMapper, createProfileMapper } from "./oauth-profile";
 import { getTrustedOrigins } from "./trusted-origins";
 
@@ -149,6 +150,7 @@ const getAuthConfig = () => {
 		database: drizzleAdapter(db, { schema, provider: "pg" }),
 
 		telemetry: { enabled: false },
+		logger: createSafeAuthLogger(),
 		trustedOrigins: TRUSTED_ORIGINS,
 		rateLimit: {
 			...rateLimitConfig.betterAuth.global,
