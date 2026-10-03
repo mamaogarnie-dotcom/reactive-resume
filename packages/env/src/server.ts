@@ -86,6 +86,13 @@ export const env = createEnv({
 		REDIS_URL: z.url({ protocol: /redis(s)?/ }).optional(),
 		ENCRYPTION_SECRET: z.string().min(32, "ENCRYPTION_SECRET must be at least 32 characters").optional(),
 
+		// 1story platform AI provider (optional): the fallback for users without a tested provider of their own.
+		// Plain strings so a bad value never blocks startup; validated in the cvmate-ai-provider feature.
+		ONE_STORY_AI_PROVIDER: z.string().optional(),
+		ONE_STORY_AI_MODEL: z.string().optional(),
+		ONE_STORY_AI_API_KEY: z.string().optional(),
+		ONE_STORY_AI_BASE_URL: z.string().optional(),
+
 		// Feature Flags
 		FLAG_DISABLE_SIGNUPS: z.stringbool().default(false),
 		FLAG_DISABLE_EMAIL_AUTH: z.stringbool().default(false),

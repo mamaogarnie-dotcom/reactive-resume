@@ -1494,3 +1494,98 @@ describe("tailored content personal-data redaction (P0 #15)", () => {
 		expect(sanitized).toContain("Practical knowledge of the real-estate process.");
 	});
 });
+
+// --- 1story platform provider fallback -------------------------------------------------------
+
+const platformMocks = vi.hoisted(() => ({
+	env: {} as Record<string, string | undefined>,
+	recordUsage: vi.fn(),
+}));
+
+vi.mock("@reactive-resume/env/server", () => ({ env: platformMocks.env }));
+vi.mock("../cvmate-ai-usage/service", () => ({ cvmateAiUsageService: { record: platformMocks.recordUsage } }));
+
+// Fictional values only.
+const PLATFORM_KEY = "gsk_platform_fictional_key_123";
+
+function enablePlatformProvider() {
+	Object.assign(platformMocks.env, {
+		ONE_STORY_AI_PROVIDER: "groq",
+		ONE_STORY_AI_MODEL: "openai/gpt-oss-120b",
+		ONE_STORY_AI_API_KEY: PLATFORM_KEY,
+	});
+}
+
+function disablePlatformProvider() {
+	for (const key of Object.keys(platformMocks.env)) delete platformMocks.env[key];
+}
+
+async function runOnUsage(call: unknown[] | undefined) {
+	const options = call?.[3] as { onUsage?: (usage: unknown) => Promise<void> | void } | undefined;
+	await options?.onUsage?.({ inputTokens: 10, outputTokens: 5, totalTokens: 15 });
+}
+
+describe("tailored content with the platform provider", () => {
+	beforeEach(disablePlatformProvider);
+
+	it("falls back to the platform provider, redacts the payload and records usage without a provider id", async () => {
+		createTransactionMocks();
+		enablePlatformProvider();
+		getDefaultRunnableMock.mockResolvedValue(null);
+
+		const identity = {
+			firstName: "Anna",
+			lastName: "Zielińska",
+			email: "anna.zielinska@example.test",
+			phone: "+48 601 234 567",
+			linkedinUrl: null,
+			websiteUrl: null,
+		};
+		const factText = "Coordinated a production team of 27 people; contact anna.zielinska@example.test or 601 234 567.";
+		resolveRedactionContextMock.mockResolvedValue(buildAiRedactionContext([identity]));
+		buildServiceMock.listSelectionItems.mockResolvedValue([
+			employmentSelection,
+			{ ...factSelection, sourceTextSnapshot: factText, sourceDataSnapshot: { text: factText } },
+		]);
+		generateJsonMock.mockResolvedValue({
+			professionalHeadline: "PRODUCTION | TEAM COORDINATION",
+			professionalSummary: "Production team coordination experience.",
+			experienceFacts: [{ selectionItemId: "s2", text: "Coordinated a 27-person production team." }],
+		});
+
+		await cvmateBuildTailoredContentService.generate({ id: "build-1", userId: "user-1" });
+
+		expect(getModelMock).toHaveBeenCalledWith({
+			provider: "groq",
+			model: "openai/gpt-oss-120b",
+			apiKey: PLATFORM_KEY,
+			baseURL: "",
+		});
+
+		const prompt = generateJsonMock.mock.calls[0]?.[1]?.prompt as string;
+		expect(prompt).toContain("[EMAIL]");
+		for (const value of ["anna.zielinska@example.test", "601 234 567", "Zielińska", PLATFORM_KEY]) {
+			expect(prompt).not.toContain(value);
+		}
+
+		// Same model settings as a groq provider saved on the account: GPT-OSS gets medium reasoning and more tokens.
+		expect(generateJsonMock.mock.calls[0]?.[3]).toMatchObject({
+			maxOutputTokens: 4096,
+			providerOptions: { groq: { reasoningEffort: "medium" } },
+		});
+
+		await runOnUsage(generateJsonMock.mock.calls[0]);
+		expect(platformMocks.recordUsage).toHaveBeenCalledWith(expect.objectContaining({ aiProviderId: null }));
+		expect(markUsedMock).not.toHaveBeenCalled();
+	});
+
+	it("keeps the existing error without a user or platform provider", async () => {
+		getDefaultRunnableMock.mockResolvedValue(null);
+
+		await expect(cvmateBuildTailoredContentService.generate({ id: "build-1", userId: "user-1" })).rejects.toMatchObject(
+			{
+				message: "No tested AI provider is available.",
+			},
+		);
+	});
+});

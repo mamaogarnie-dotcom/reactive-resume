@@ -6,6 +6,7 @@
 	"exports": {
 		"./context": "./src/context.ts",
 		"./features/agent/runs": "./src/features/agent/runs.ts",
+		"./features/cvmate-ai-provider": "./src/features/cvmate-ai-provider/service.ts",
 		"./features/cvmate-build/resume-adapter": "./src/features/cvmate-build/resume-adapter.ts",
 		"./features/flags": "./src/features/flags/index.ts",
 		"./features/resume/export": "./src/features/resume/export.ts",

@@ -701,3 +701,77 @@ describe("analysis helpers", () => {
 		]);
 	});
 });
+
+// --- 1story platform provider fallback -------------------------------------------------------
+
+const platformMocks = vi.hoisted(() => ({
+	env: {} as Record<string, string | undefined>,
+	recordUsage: vi.fn(),
+}));
+
+vi.mock("@reactive-resume/env/server", () => ({ env: platformMocks.env }));
+vi.mock("../cvmate-ai-usage/service", () => ({ cvmateAiUsageService: { record: platformMocks.recordUsage } }));
+
+// Fictional values only.
+const PLATFORM_KEY = "gsk_platform_fictional_key_123";
+
+function enablePlatformProvider() {
+	Object.assign(platformMocks.env, {
+		ONE_STORY_AI_PROVIDER: "groq",
+		ONE_STORY_AI_MODEL: "openai/gpt-oss-120b",
+		ONE_STORY_AI_API_KEY: PLATFORM_KEY,
+	});
+}
+
+function disablePlatformProvider() {
+	for (const key of Object.keys(platformMocks.env)) delete platformMocks.env[key];
+}
+
+async function runOnUsage(call: unknown[] | undefined) {
+	const options = call?.[3] as { onUsage?: (usage: unknown) => Promise<void> | void } | undefined;
+	await options?.onUsage?.({ inputTokens: 10, outputTokens: 5, totalTokens: 15 });
+}
+
+describe("cvmateJobOfferAnalysisService with the platform provider", () => {
+	beforeEach(disablePlatformProvider);
+
+	it("falls back to the platform provider and records usage without a provider id", async () => {
+		mockSuccessTransaction();
+		enablePlatformProvider();
+		providerMock.getDefaultRunnable.mockResolvedValue(null);
+		generateJsonMock.mockResolvedValue({
+			roleTitle: "Office Manager",
+			companyName: "Acme",
+			location: "Wroclaw",
+			language: "en",
+			requirements: [{ category: "required", priority: "critical", sourceText: "Excel", text: "Excel" }],
+		});
+
+		await cvmateJobOfferAnalysisService.analyze({ id: "offer-1", userId: "user-1" });
+
+		expect(getModelMock).toHaveBeenCalledWith({
+			provider: "groq",
+			model: "openai/gpt-oss-120b",
+			apiKey: PLATFORM_KEY,
+			baseURL: "",
+		});
+		// Same model settings as a groq provider saved on the account: analysis sets no provider options.
+		expect(generateJsonMock.mock.calls[0]?.[3]).not.toHaveProperty("providerOptions");
+
+		await runOnUsage(generateJsonMock.mock.calls[0]);
+		expect(platformMocks.recordUsage).toHaveBeenCalledWith(
+			expect.objectContaining({ aiProviderId: null, provider: "groq", model: "openai/gpt-oss-120b" }),
+		);
+		expect(JSON.stringify(platformMocks.recordUsage.mock.calls)).not.toContain(PLATFORM_KEY);
+		expect(providerMock.markUsed).not.toHaveBeenCalled();
+	});
+
+	it("keeps the existing error without a user or platform provider", async () => {
+		providerMock.getDefaultRunnable.mockResolvedValue(null);
+
+		await expect(cvmateJobOfferAnalysisService.analyze({ id: "offer-1", userId: "user-1" })).rejects.toMatchObject({
+			message: "No tested AI provider is available.",
+		});
+		expect(generateJsonMock).not.toHaveBeenCalled();
+	});
+});

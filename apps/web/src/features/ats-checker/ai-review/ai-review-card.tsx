@@ -4,7 +4,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { ArrowRightIcon, InfoIcon, SparkleIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouteContext } from "@tanstack/react-router";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@reactive-resume/ui/components/alert";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -38,6 +38,9 @@ type AiReviewCardProps = {
  */
 export function AiReviewCard({ report, fullText, jobDescription, resumeId }: AiReviewCardProps) {
 	const { usableProviders, hasUsableProvider, isLoading } = useHasUsableAiProvider();
+	const context = useRouteContext({ strict: false });
+	// Without a provider of their own, the user's review runs on the 1story platform provider (when configured).
+	const usesPlatformProvider = !hasUsableProvider && (context.flags?.platformAiEnabled ?? false);
 	const [providerOverride, setProviderOverride] = useState<string | null | undefined>(undefined);
 	const [review, setReview] = useState<AtsAiReview | null>(null);
 
@@ -63,7 +66,7 @@ export function AiReviewCard({ report, fullText, jobDescription, resumeId }: AiR
 
 	if (isLoading) return null;
 
-	if (!hasUsableProvider) return <NoProviderState />;
+	if (!hasUsableProvider && !usesPlatformProvider) return <NoProviderState />;
 
 	const trimmedText = fullText.slice(0, MAX_EXTRACTED_TEXT_CHARS).trim();
 
@@ -100,7 +103,12 @@ export function AiReviewCard({ report, fullText, jobDescription, resumeId }: AiR
 			</p>
 
 			<p className="text-muted-foreground text-xs leading-normal">
-				{jobDescription?.trim() ? (
+				{usesPlatformProvider ? (
+					<Trans>
+						Sends the text extracted from your PDF, and the job description if you pasted one, to the 1story AI
+						provider. The PDF file itself is never uploaded.
+					</Trans>
+				) : jobDescription?.trim() ? (
 					<Trans>
 						Sends the text already extracted from your PDF, plus the job description you pasted, to the AI provider you
 						choose below. The PDF file itself is never uploaded.
@@ -113,17 +121,19 @@ export function AiReviewCard({ report, fullText, jobDescription, resumeId }: AiR
 				)}
 			</p>
 
-			<div className="space-y-2">
-				<Label>
-					<Trans>AI provider</Trans>
-				</Label>
-				<AiProviderPicker
-					value={aiProviderId}
-					providers={usableProviders}
-					disabled={isPending}
-					onValueChange={setProviderOverride}
-				/>
-			</div>
+			{!usesPlatformProvider && (
+				<div className="space-y-2">
+					<Label>
+						<Trans>AI provider</Trans>
+					</Label>
+					<AiProviderPicker
+						value={aiProviderId}
+						providers={usableProviders}
+						disabled={isPending}
+						onValueChange={setProviderOverride}
+					/>
+				</div>
+			)}
 
 			<Button size="sm" disabled={isPending || !trimmedText} onClick={onRun}>
 				{isPending ? <Spinner /> : <SparkleIcon />}

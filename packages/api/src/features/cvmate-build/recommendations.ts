@@ -1,4 +1,3 @@
-import type { AIProvider } from "@reactive-resume/ai/types";
 import type { AiRedactionContext } from "../ai/redaction";
 import { ORPCError } from "@orpc/client";
 import { and, eq } from "drizzle-orm";
@@ -10,6 +9,7 @@ import { generateJson } from "../ai/generate-json";
 import { buildAiRedactionContext, redactTextForAi, redactValuesForAi } from "../ai/redaction";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
+import { resolveCvmateAiProvider } from "../cvmate-ai-provider/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
 import { resolveCvBuildAiRedactionContext } from "./ai-redaction-context";
 import { compactSourceDataForAi, isAiAllowedSelectionSourceType } from "./ai-source-data";
@@ -106,14 +106,6 @@ export const cvmateBuildAiRecommendationOutputSchema = z.object({
 		.max(MAX_GAP_SUGGESTIONS)
 		.optional(),
 });
-
-type RunnableProvider = {
-	id: string;
-	provider: AIProvider;
-	model: string;
-	apiKey: string;
-	baseURL: string | null;
-};
 
 type SelectionItem = Awaited<ReturnType<typeof cvmateBuildService.listSelectionItems>>[number];
 
@@ -1138,23 +1130,6 @@ function resolveGapSuggestions(
 	return suggestions;
 }
 
-async function resolveProvider(userId: string, aiProviderId?: string): Promise<RunnableProvider> {
-	const provider = aiProviderId
-		? await aiProvidersService.getRunnableById({
-				id: aiProviderId,
-				userId,
-			})
-		: await aiProvidersService.getDefaultRunnable({ userId });
-
-	if (!provider) {
-		throw new ORPCError("BAD_REQUEST", {
-			message: "No tested AI provider is available.",
-		});
-	}
-
-	return provider;
-}
-
 export const cvmateBuildRecommendationsService = {
 	generate: async (input: { id: string; userId: string; aiProviderId?: string }) => {
 		const build = await cvmateBuildService.getById({
@@ -1181,7 +1156,10 @@ export const cvmateBuildRecommendationsService = {
 			});
 		}
 
-		const provider = await resolveProvider(input.userId, input.aiProviderId);
+		const provider = await resolveCvmateAiProvider({
+			userId: input.userId,
+			...(input.aiProviderId ? { aiProviderId: input.aiProviderId } : {}),
+		});
 
 		const redaction = await resolveCvBuildAiRedactionContext({
 			userId: input.userId,
@@ -1298,12 +1276,10 @@ export const cvmateBuildRecommendationsService = {
 			}
 		});
 
-		await aiProvidersService
-			.markUsed({
-				id: provider.id,
-				userId: input.userId,
-			})
-			.catch(() => undefined);
+		// The platform provider has no saved row to mark.
+		if (provider.id) {
+			await aiProvidersService.markUsed({ id: provider.id, userId: input.userId }).catch(() => undefined);
+		}
 
 		const [updatedSelectionItems, updatedGaps] = await Promise.all([
 			cvmateBuildService.listSelectionItems({

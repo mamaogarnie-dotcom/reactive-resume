@@ -72,6 +72,23 @@ export function warnIfSmtpNotConfigured() {
 	);
 }
 
+const PLATFORM_AI_ISSUE_MESSAGES = {
+	unsupported_provider: "ONE_STORY_AI_PROVIDER is not a supported platform provider (only groq is)",
+	incomplete: "ONE_STORY_AI_PROVIDER, ONE_STORY_AI_MODEL and ONE_STORY_AI_API_KEY must all be set",
+} as const;
+
+// Names the problem only: a configured value (the API key above all) never reaches the log.
+export async function warnIfPlatformAiMisconfigured() {
+	const { getPlatformAiConfigIssue } = await import("@reactive-resume/api/features/cvmate-ai-provider");
+	const issue = getPlatformAiConfigIssue();
+	if (!issue) return;
+
+	console.warn(
+		`The 1story platform AI provider is unavailable: ${PLATFORM_AI_ISSUE_MESSAGES[issue]}. ` +
+			"Users without a tested AI provider of their own cannot use AI features.",
+	);
+}
+
 async function reapStaleAgentRuns() {
 	try {
 		const { reapStaleAgentRunsAtBoot } = await import("@reactive-resume/api/features/agent/runs");
@@ -86,5 +103,6 @@ export async function runStartupChecks() {
 	await runDatabaseMigrations();
 	await validateLocalStoragePath();
 	warnIfSmtpNotConfigured();
+	await warnIfPlatformAiMisconfigured();
 	await reapStaleAgentRuns();
 }

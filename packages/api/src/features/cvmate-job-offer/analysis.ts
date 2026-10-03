@@ -12,6 +12,7 @@ import { generateId } from "@reactive-resume/utils/string";
 import { generateJson, parseJsonWithRepair } from "../ai/generate-json";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
+import { resolveCvmateAiProvider } from "../cvmate-ai-provider/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
 import { getStorageService } from "../storage/service";
 import { cvmateJobOfferService } from "./service";
@@ -44,14 +45,6 @@ export const cvmateJobOfferAnalysisOutputSchema = z.object({
 });
 
 export type CvmateJobOfferAnalysisOutput = z.infer<typeof cvmateJobOfferAnalysisOutputSchema>;
-
-type RunnableProvider = {
-	id: string;
-	provider: AIProvider;
-	model: string;
-	apiKey: string;
-	baseURL: string | null;
-};
 
 type AnalyzeTextInput = {
 	provider: AIProvider;
@@ -390,23 +383,6 @@ function dedupeRequirements(
 	});
 }
 
-async function resolveProvider(userId: string, aiProviderId?: string): Promise<RunnableProvider> {
-	const provider = aiProviderId
-		? await aiProvidersService.getRunnableById({
-				id: aiProviderId,
-				userId,
-			})
-		: await aiProvidersService.getDefaultRunnable({ userId });
-
-	if (!provider) {
-		throw new ORPCError("BAD_REQUEST", {
-			message: "No tested AI provider is available.",
-		});
-	}
-
-	return provider;
-}
-
 function loadOfferAssets(assets: OfferAsset[]): Promise<AnalysisAsset[]> {
 	const storage = getStorageService();
 
@@ -458,7 +434,10 @@ async function analyzeOwnedOffer(input: { id: string; userId: string; aiProvider
 		});
 	}
 
-	const provider = await resolveProvider(input.userId, input.aiProviderId);
+	const provider = await resolveCvmateAiProvider({
+		userId: input.userId,
+		...(input.aiProviderId ? { aiProviderId: input.aiProviderId } : {}),
+	});
 
 	try {
 		const fetchedText = sourceUrl ? await fetchJobOfferTextFromUrl(sourceUrl) : "";
@@ -534,12 +513,10 @@ async function analyzeOwnedOffer(input: { id: string; userId: string; aiProvider
 			if (!updated) throw new ORPCError("NOT_FOUND");
 		});
 
-		await aiProvidersService
-			.markUsed({
-				id: provider.id,
-				userId: input.userId,
-			})
-			.catch(() => undefined);
+		// The platform provider has no saved row to mark.
+		if (provider.id) {
+			await aiProvidersService.markUsed({ id: provider.id, userId: input.userId }).catch(() => undefined);
+		}
 
 		return cvmateJobOfferService.getById({
 			id: offer.id,

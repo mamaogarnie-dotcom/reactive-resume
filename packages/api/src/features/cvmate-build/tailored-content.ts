@@ -1,4 +1,3 @@
-import type { AIProvider } from "@reactive-resume/ai/types";
 import type { cvmateTailoredContentNoticeSchema } from "../../dto/cvmate-build";
 import type { AiRedactionContext } from "../ai/redaction";
 import { ORPCError } from "@orpc/client";
@@ -17,6 +16,7 @@ import {
 } from "../ai/redaction";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
+import { resolveCvmateAiProvider } from "../cvmate-ai-provider/service";
 import { cvmateAiUsageService } from "../cvmate-ai-usage/service";
 import { resolveCvBuildAiRedactionContext } from "./ai-redaction-context";
 import { isAiAllowedSelectionSourceType } from "./ai-source-data";
@@ -70,14 +70,6 @@ const cvmateBuildAiTailoredContentRawOutputSchema = cvmateBuildAiTailoredContent
 	professionalHeadline: z.string().trim().min(1).max(PROFESSIONAL_HEADLINE_MAX_CHARACTERS),
 	professionalSummary: z.string().trim().min(1).max(RAW_PROVIDER_PROFESSIONAL_SUMMARY_MAX_CHARACTERS),
 });
-
-type RunnableProvider = {
-	id: string;
-	provider: AIProvider;
-	model: string;
-	apiKey: string;
-	baseURL: string | null;
-};
 
 type SelectionItem = Awaited<ReturnType<typeof cvmateBuildService.listSelectionItems>>[number];
 type GeneratedContent = Awaited<ReturnType<typeof cvmateBuildService.listGeneratedContent>>[number];
@@ -1073,23 +1065,6 @@ function latestExistingGeneratedContent(
 		}, null);
 }
 
-async function resolveProvider(userId: string, aiProviderId?: string): Promise<RunnableProvider> {
-	const provider = aiProviderId
-		? await aiProvidersService.getRunnableById({
-				id: aiProviderId,
-				userId,
-			})
-		: await aiProvidersService.getDefaultRunnable({ userId });
-
-	if (!provider) {
-		throw new ORPCError("BAD_REQUEST", {
-			message: "No tested AI provider is available.",
-		});
-	}
-
-	return provider;
-}
-
 export const cvmateBuildTailoredContentService = {
 	generate: async (input: { id: string; userId: string; aiProviderId?: string }) => {
 		const build = await cvmateBuildService.getById({
@@ -1120,7 +1095,10 @@ export const cvmateBuildTailoredContentService = {
 
 		validateSelectedHierarchy(selectedItems);
 
-		const provider = await resolveProvider(input.userId, input.aiProviderId);
+		const provider = await resolveCvmateAiProvider({
+			userId: input.userId,
+			...(input.aiProviderId ? { aiProviderId: input.aiProviderId } : {}),
+		});
 		const isGroqGptOss = provider.provider === "groq" && provider.model.toLowerCase().includes("gpt-oss");
 
 		const redaction = await resolveCvBuildAiRedactionContext({
@@ -1311,12 +1289,10 @@ export const cvmateBuildTailoredContentService = {
 			}
 		});
 
-		await aiProvidersService
-			.markUsed({
-				id: provider.id,
-				userId: input.userId,
-			})
-			.catch(() => undefined);
+		// The platform provider has no saved row to mark.
+		if (provider.id) {
+			await aiProvidersService.markUsed({ id: provider.id, userId: input.userId }).catch(() => undefined);
+		}
 
 		return {
 			generatedContent: await cvmateBuildService.listGeneratedContent({

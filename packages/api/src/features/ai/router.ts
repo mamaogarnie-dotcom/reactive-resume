@@ -7,6 +7,7 @@ import { flattenError, ZodError, z } from "zod";
 import { protectedProcedure } from "../../context";
 import { aiRequestRateLimit } from "../../middleware/rate-limit";
 import { aiProvidersService } from "../ai-providers/service";
+import { resolveCvmateAiProvider } from "../cvmate-ai-provider/service";
 import { resumeService } from "../resume/service";
 import { atsReviewInputSchema, atsReviewOutputSchema, reviewResumeText } from "./ats-review";
 import { resolveAtsReviewRedaction } from "./ats-review-redaction-context";
@@ -46,6 +47,8 @@ function throwResumeStructureError(error: ZodError): never {
 	});
 }
 
+// The user's own providers only. Parsing sends the whole unredacted CV, and chat is hidden in V1, so
+// neither may fall back to the 1story platform provider.
 async function getRunnableProvider(userId: string, aiProviderId?: string) {
 	const provider = aiProviderId
 		? await aiProvidersService.getRunnableById({ id: aiProviderId, userId })
@@ -207,7 +210,11 @@ export const aiRouter = {
 					user: context.user,
 					...(input.resumeId ? { resumeId: input.resumeId } : {}),
 				});
-				const provider = await getRunnableProvider(context.user.id, input.aiProviderId);
+				// The only procedure here that may fall back to the 1story platform provider: its input is redacted.
+				const provider = await resolveCvmateAiProvider({
+					userId: context.user.id,
+					...(input.aiProviderId ? { aiProviderId: input.aiProviderId } : {}),
+				});
 
 				return await reviewResumeText(
 					{
