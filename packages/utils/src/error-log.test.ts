@@ -148,6 +148,46 @@ describe("sanitizeErrorForLog", () => {
 		expect(JSON.stringify(sanitizeErrorForLog(custom))).not.toContain("kowalski");
 	});
 
+	it("keeps the scrubbed message of a Node module resolution error, which names the missing module", async () => {
+		const error = await import(/* @vite-ignore */ ["1story-missing-package", "for-error-log-test"].join("-")).catch(
+			(caught: unknown) => caught,
+		);
+
+		const entry = sanitizeErrorForLog(error).chain[0];
+
+		expect(entry).toMatchObject({ code: "ERR_MODULE_NOT_FOUND" });
+		expect(entry?.message).toContain("1story-missing-package-for-error-log-test");
+	});
+
+	it("keeps the message of ERR_PACKAGE_PATH_NOT_EXPORTED and still scrubs it", () => {
+		const error = Object.assign(
+			new Error(
+				`Package subpath './missing' is not defined by "exports" in /app/node_modules/pkg/package.json imported from /app/apps/server/dist/index.mjs ${EMAIL}`,
+			),
+			{ code: "ERR_PACKAGE_PATH_NOT_EXPORTED" },
+		);
+
+		const entry = sanitizeErrorForLog(error).chain[0];
+
+		expectNoSecrets(entry);
+		expect(entry?.message).toContain("Package subpath './missing' is not defined by \"exports\"");
+		expect(entry?.message).toContain("[EMAIL]");
+	});
+
+	it("drops the message of a module resolution error marked unsafe, and of other Node error codes", () => {
+		const marked = markLogMessageUnsafe(
+			Object.assign(new Error(`Cannot find module '${FILE_NAME}'`), { code: "ERR_MODULE_NOT_FOUND" }),
+		);
+		const enoent = Object.assign(new Error(`ENOENT: no such file or directory, open '/data/${FILE_NAME}'`), {
+			code: "ENOENT",
+		});
+
+		expect(sanitizeErrorForLog(marked).chain[0]).toMatchObject({ code: "ERR_MODULE_NOT_FOUND" });
+		expect(sanitizeErrorForLog(marked).chain[0]?.message).toBeUndefined();
+		expect(sanitizeErrorForLog(enoent).chain[0]).toMatchObject({ code: "ENOENT" });
+		expect(sanitizeErrorForLog(enoent).chain[0]?.message).toBeUndefined();
+	});
+
 	it("follows a nested cause chain without leaking query params or Postgres detail", () => {
 		const pgError = Object.assign(new Error("duplicate key value violates unique constraint"), {
 			name: "error",

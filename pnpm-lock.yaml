@@ -359,6 +359,9 @@ importers:
       ollama-ai-provider-v2:
         specifier: ^4.0.1
         version: 4.0.1(ai@7.0.93(zod@4.5.4))(zod@4.5.4)
+      pdfjs-dist:
+        specifier: 6.3.289
+        version: 6.3.289
       pg:
         specifier: ^8.23.0
         version: 8.23.0

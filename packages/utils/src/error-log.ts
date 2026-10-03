@@ -47,6 +47,13 @@ const DIGIT_RUN_PATTERN = /\+?\d(?:[ .-]?\d){6,}/g;
 
 const UNSAFE_MESSAGE = Symbol.for("@reactive-resume/utils/error-log.unsafe-message");
 
+// Node module resolution errors name only the import specifier and server file paths, and without
+// the message the log cannot say which module is missing.
+const NODE_RESOLUTION_ERROR_CODES: ReadonlySet<unknown> = new Set([
+	"ERR_MODULE_NOT_FOUND",
+	"ERR_PACKAGE_PATH_NOT_EXPORTED",
+]);
+
 // Hosts of the providers' default base URLs; any other (user-configured) host is logged as "custom".
 const KNOWN_AI_PROVIDER_HOSTS: ReadonlySet<string> = new Set([
 	"api.openai.com",
@@ -243,6 +250,7 @@ function isOrpcError(value: object): boolean {
 function hasSafeMessage(value: object, name: string): boolean {
 	if (read(value, UNSAFE_MESSAGE) === true) return false;
 	if (isOrpcError(value)) return true;
+	if (NODE_RESOLUTION_ERROR_CODES.has(read(value, "code"))) return true;
 	if (name === "ValidationError" && Array.isArray(read(value, "issues"))) return true;
 	return name === "AbortError" || name === "TimeoutError";
 }
