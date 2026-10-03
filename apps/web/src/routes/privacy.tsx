@@ -9,7 +9,7 @@ function PrivacyPage() {
 	return (
 		<main className="mx-auto max-w-2xl space-y-6 px-4 py-10 text-sm leading-relaxed">
 			<h1 className="font-semibold text-2xl tracking-tight">Polityka prywatności 1story (wersja testowa)</h1>
-			<p className="text-muted-foreground">Ostatnia aktualizacja: 2 października 2026.</p>
+			<p className="text-muted-foreground">Ostatnia aktualizacja: 3 października 2026.</p>
 
 			<section className="space-y-2">
 				<h2 className="font-semibold text-base">Administrator danych</h2>
@@ -34,7 +34,10 @@ function PrivacyPage() {
 			<section className="space-y-2">
 				<h2 className="font-semibold text-base">Jakie dane przetwarzamy</h2>
 				<ul className="list-disc space-y-1 ps-5">
-					<li>dane konta: adres e-mail, nazwa użytkownika, hasło (przechowywane w postaci zaszyfrowanej),</li>
+					<li>
+						dane konta: adres e-mail, nazwa użytkownika, hasło (przechowywane wyłącznie w postaci kryptograficznego
+						skrótu, nie w formie możliwej do odczytania),
+					</li>
 					<li>przy logowaniu przez Google: podstawowe dane profilu konta Google,</li>
 					<li>dane, które sam wpisujesz: profil zawodowy, treść CV, oferty pracy i listy motywacyjne,</li>
 					<li>dane techniczne: adres IP, ciasteczka sesji niezbędne do logowania, logi błędów.</li>
