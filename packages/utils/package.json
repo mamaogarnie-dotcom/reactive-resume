@@ -5,6 +5,7 @@
 	"private": true,
 	"exports": {
 		"./color": "./src/color.ts",
+		"./error-log": "./src/error-log.ts",
 		"./file": "./src/file.ts",
 		"./locale": "./src/locale.ts",
 		"./recruitment-clause": "./src/recruitment-clause.ts",

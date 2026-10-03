@@ -18,6 +18,7 @@ import { and, asc, count, desc, eq, gte, inArray, isNull, max, sql } from "drizz
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
+import { logSafeError, markLogMessageUnsafe } from "@reactive-resume/utils/error-log";
 import { generateId } from "@reactive-resume/utils/string";
 import { assertAgentEnvironment, getAgentToolApprovalSecret } from "../ai/credentials";
 import { getAgentModel } from "../ai/service";
@@ -378,7 +379,10 @@ function readAttachmentModelInputs(attachments: AgentAttachmentRecord[]): Promis
 		attachments.map(async (attachment) => {
 			const stored = await storage.read(attachment.storageKey);
 			if (!stored) {
-				throw new ORPCError("BAD_REQUEST", { message: `Attachment ${attachment.filename} could not be read.` });
+				// The file name is user data: kept in the response, never in logs.
+				throw markLogMessageUnsafe(
+					new ORPCError("BAD_REQUEST", { message: `Attachment ${attachment.filename} could not be read.` }),
+				);
 			}
 
 			return { attachment, data: stored.data };
@@ -612,7 +616,7 @@ async function cleanupActiveRun(input: {
 		await clearActiveAgentRunIfCurrent(input);
 	} catch (error) {
 		if (!input.primaryError) throw error;
-		console.error("[agent] Failed to clear active run after run error", error);
+		logSafeError("[agent] Failed to clear active run after run error", error);
 	}
 }
 
@@ -1106,7 +1110,7 @@ export const agentService = {
 						streamId: activeStreamId,
 					});
 				} catch (error) {
-					console.error("[agent] Failed to clear active run during archive", error);
+					logSafeError("[agent] Failed to clear active run during archive", error);
 				}
 			}
 
@@ -1132,10 +1136,9 @@ export const agentService = {
 			try {
 				await getStorageService().delete(`uploads/${input.userId}/agent/${input.id}`);
 			} catch (error) {
-				console.error("[agent] Failed to delete thread storage after soft-delete", {
+				logSafeError("[agent] Failed to delete thread storage after soft-delete", error, {
 					threadId: input.id,
 					userId: input.userId,
-					error,
 				});
 			}
 		},
@@ -1330,7 +1333,7 @@ export const agentService = {
 							});
 							draftRowId = upserted.rowId;
 						} catch (error) {
-							console.error("[agent] Failed to persist step draft", error);
+							logSafeError("[agent] Failed to persist step draft", error);
 						}
 					},
 				});
@@ -1377,7 +1380,7 @@ export const agentService = {
 			} catch (error) {
 				if (insertedDraft && draftRowId) {
 					await deleteDraftIfEmpty({ rowId: draftRowId, threadId: input.threadId, userId: input.userId }).catch(
-						(cleanupError: unknown) => console.error("[agent] Failed to delete empty draft", cleanupError),
+						(cleanupError: unknown) => logSafeError("[agent] Failed to delete empty draft", cleanupError),
 					);
 				}
 				await cleanupActiveRun({

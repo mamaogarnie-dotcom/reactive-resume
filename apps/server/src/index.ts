@@ -1,6 +1,8 @@
 import { pathToFileURL } from "node:url";
 import { serve } from "@hono/node-server";
 import { env } from "@reactive-resume/env/server";
+import { logSafeError } from "@reactive-resume/utils/error-log";
+import { exitOnFatalError } from "./fatal-error";
 import { runStartupChecks } from "./startup/checks";
 
 export async function main() {
@@ -13,9 +15,13 @@ export async function main() {
 	// Safety net: Node 24 crashes the whole process on an unhandled rejection. One request's
 	// stray promise must not take the server down for everyone, so log and keep serving.
 	// Registered after startup checks so a broken startup still fails loudly. (Left uncaught
-	// exceptions on Node's default crash-and-restart, since process state is unsafe after one.)
+	// exceptions crashing, since process state is unsafe after one — but through the log
+	// sanitizer, so Node does not print the error with its user-data-carrying causes.)
 	process.on("unhandledRejection", (reason) => {
-		console.error("[unhandledRejection]", reason);
+		logSafeError("[unhandledRejection]", reason);
+	});
+	process.on("uncaughtException", (error) => {
+		exitOnFatalError("[uncaughtException]", error);
 	});
 
 	const port =
@@ -36,7 +42,6 @@ export async function main() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 	main().catch((error) => {
-		console.error(error);
-		process.exit(1);
+		exitOnFatalError("[startup]", error);
 	});
 }

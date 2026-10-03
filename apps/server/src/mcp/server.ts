@@ -1,19 +1,17 @@
 import type { RouterClient } from "@orpc/server";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { onError } from "@orpc/client";
 import { createRouterClient } from "@orpc/server";
 import router from "@reactive-resume/api/routers";
 import { MCP_TOOL_NAME, registerPrompts, registerResources, registerTools } from "@reactive-resume/mcp";
 import { appVersion } from "../app-version";
+import { createOrpcErrorLogging } from "../rpc/error-logging";
 import { getRequestLocale } from "../rpc/locale";
+
+const errorLogging = createOrpcErrorLogging("[MCP oRPC]", { logRoute: false });
 
 function createRequestClient(request: Request): RouterClient<typeof router> {
 	return createRouterClient(router, {
-		interceptors: [
-			onError((error) => {
-				console.error("[MCP oRPC]", error);
-			}),
-		],
+		interceptors: [errorLogging.clientInterceptor],
 		context: () => ({
 			locale: getRequestLocale(request),
 			reqHeaders: request.headers,

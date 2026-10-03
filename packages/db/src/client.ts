@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { env } from "@reactive-resume/env/server";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 
 declare global {
 	var __pool: Pool | undefined;
@@ -11,7 +12,7 @@ export function getPool() {
 	if (!globalThis.__pool) {
 		const pool = new Pool({ connectionString: env.DATABASE_URL });
 		const logPgError = (error: unknown) => {
-			console.error("[db] postgres connection error:", error);
+			logSafeError("[db] postgres connection error:", error);
 		};
 		// A Postgres connection can drop at any time — e.g. a serverless Postgres such as Neon
 		// terminating the connection (code 57P01). `pg` surfaces this as an 'error' event, and

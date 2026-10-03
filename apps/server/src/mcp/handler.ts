@@ -1,5 +1,6 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { env } from "@reactive-resume/env/server";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 import { AuthError, authenticateRequest } from "./auth";
 import { createMcpServer } from "./server";
 
@@ -28,7 +29,7 @@ export async function handleMcp(request: Request) {
 			);
 		}
 
-		console.error("[MCP]", error);
+		logSafeError("[MCP]", error);
 
 		return Response.json({
 			id: null,

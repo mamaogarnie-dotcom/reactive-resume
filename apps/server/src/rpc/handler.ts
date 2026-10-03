@@ -1,17 +1,16 @@
-import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 import { BatchHandlerPlugin, RequestHeadersPlugin, StrictGetMethodPlugin } from "@orpc/server/plugins";
 import router from "@reactive-resume/api/routers";
 import { mergeResponseHeaders } from "../http/headers";
+import { createOrpcErrorLogging } from "./error-logging";
 import { getRequestLocale } from "./locale";
+
+const errorLogging = createOrpcErrorLogging("[oRPC Server]", { logRoute: true });
 
 const rpcHandler = new RPCHandler(router, {
 	plugins: [new BatchHandlerPlugin(), new RequestHeadersPlugin(), new StrictGetMethodPlugin()],
-	interceptors: [
-		onError((error) => {
-			console.error("[oRPC Server]", error);
-		}),
-	],
+	interceptors: [errorLogging.handlerInterceptor],
+	clientInterceptors: [errorLogging.clientInterceptor],
 });
 
 export async function handleRpc(request: Request, trustedClient = "unknown") {

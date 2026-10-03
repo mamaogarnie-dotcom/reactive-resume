@@ -1,13 +1,14 @@
-import { ORPCError } from "@orpc/client";
 import type { AIProvider } from "@reactive-resume/ai/types";
-import { db } from "@reactive-resume/db/client";
-import * as schema from "@reactive-resume/db/schema";
-import { generateId } from "@reactive-resume/utils/string";
 import type { ModelMessage } from "ai";
+import type { AiTokenUsage } from "../ai/generate-json";
+import { ORPCError } from "@orpc/client";
 import { generateText } from "ai";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
-import type { AiTokenUsage } from "../ai/generate-json";
+import { db } from "@reactive-resume/db/client";
+import * as schema from "@reactive-resume/db/schema";
+import { markLogMessageUnsafe } from "@reactive-resume/utils/error-log";
+import { generateId } from "@reactive-resume/utils/string";
 import { generateJson, parseJsonWithRepair } from "../ai/generate-json";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
@@ -19,19 +20,9 @@ import { fetchJobOfferTextFromUrl } from "./url-fetch";
 const MAX_JOB_OFFER_TEXT_CHARS = 50_000;
 const MAX_REQUIREMENTS = 80;
 
-const requirementCategorySchema = z.enum([
-	"required",
-	"preferred",
-	"responsibility",
-	"keyword",
-	"other",
-]);
+const requirementCategorySchema = z.enum(["required", "preferred", "responsibility", "keyword", "other"]);
 
-const requirementPrioritySchema = z.enum([
-	"critical",
-	"important",
-	"additional",
-]);
+const requirementPrioritySchema = z.enum(["critical", "important", "additional"]);
 
 const nullableMetadataSchema = z.string().trim().min(1).max(300).nullable();
 
@@ -52,9 +43,7 @@ export const cvmateJobOfferAnalysisOutputSchema = z.object({
 		.max(MAX_REQUIREMENTS),
 });
 
-export type CvmateJobOfferAnalysisOutput = z.infer<
-	typeof cvmateJobOfferAnalysisOutputSchema
->;
+export type CvmateJobOfferAnalysisOutput = z.infer<typeof cvmateJobOfferAnalysisOutputSchema>;
 
 type RunnableProvider = {
 	id: string;
@@ -206,9 +195,7 @@ function parseAnalysisResponse(text: string): CvmateJobOfferAnalysisOutput {
 	}
 
 	try {
-		return cvmateJobOfferAnalysisOutputSchema.parse(
-			parseJsonWithRepair(candidate.slice(start, end + 1)),
-		);
+		return cvmateJobOfferAnalysisOutputSchema.parse(parseJsonWithRepair(candidate.slice(start, end + 1)));
 	} catch (error) {
 		throw new ORPCError("BAD_REQUEST", {
 			message: "The AI returned an improperly formatted job-offer analysis.",
@@ -217,10 +204,7 @@ function parseAnalysisResponse(text: string): CvmateJobOfferAnalysisOutput {
 	}
 }
 
-function buildSourceMessages(
-	rawText: string,
-	assets: AnalysisAsset[],
-): ModelMessage[] {
+function buildSourceMessages(rawText: string, assets: AnalysisAsset[]): ModelMessage[] {
 	const content: Array<
 		| { type: "text"; text: string }
 		| {
@@ -261,9 +245,12 @@ function buildSourceMessages(
 			continue;
 		}
 
-		throw new ORPCError("BAD_REQUEST", {
-			message: `Unsupported job-offer asset type: ${asset.mediaType}.`,
-		});
+		// The media type is declared by the client: kept in the response, never in logs.
+		throw markLogMessageUnsafe(
+			new ORPCError("BAD_REQUEST", {
+				message: `Unsupported job-offer asset type: ${asset.mediaType}.`,
+			}),
+		);
 	}
 
 	return [
@@ -274,9 +261,7 @@ function buildSourceMessages(
 	];
 }
 
-export function analyzeJobOfferText(
-	input: AnalyzeTextInput,
-): Promise<CvmateJobOfferAnalysisOutput> {
+export function analyzeJobOfferText(input: AnalyzeTextInput): Promise<CvmateJobOfferAnalysisOutput> {
 	const rawText = validateRawText(input.rawText);
 
 	const model = getModel({
@@ -297,9 +282,7 @@ export function analyzeJobOfferText(
 	);
 }
 
-export async function analyzeJobOfferSources(
-	input: AnalyzeSourcesInput,
-): Promise<CvmateJobOfferAnalysisOutput> {
+export async function analyzeJobOfferSources(input: AnalyzeSourcesInput): Promise<CvmateJobOfferAnalysisOutput> {
 	const rawText = validateOptionalRawText(input.rawText);
 
 	if (!rawText && input.assets.length === 0) {
@@ -371,9 +354,7 @@ function normalizeRequirementPolicy(
 			priority = "additional";
 		}
 
-		return priority === requirement.priority
-			? requirement
-			: { ...requirement, priority };
+		return priority === requirement.priority ? requirement : { ...requirement, priority };
 	});
 }
 
@@ -381,15 +362,11 @@ function dedupeRequirements(
 	requirements: CvmateJobOfferAnalysisOutput["requirements"],
 	existingManualTexts: string[] = [],
 ) {
-	const seen = new Set(
-		existingManualTexts.map((text) => normalizedRequirementKey(text)),
-	);
+	const seen = new Set(existingManualTexts.map((text) => normalizedRequirementKey(text)));
 
 	const representedNonKeywordTexts = [
 		...existingManualTexts,
-		...requirements
-			.filter((requirement) => requirement.category !== "keyword")
-			.map((requirement) => requirement.text),
+		...requirements.filter((requirement) => requirement.category !== "keyword").map((requirement) => requirement.text),
 	];
 
 	return requirements.filter((requirement) => {
@@ -402,9 +379,7 @@ function dedupeRequirements(
 			representedNonKeywordTexts.some(
 				(text) =>
 					containsNormalizedRequirementPhrase(text, requirement.text) ||
-					(requirement.sourceText
-						? containsNormalizedRequirementPhrase(text, requirement.sourceText)
-						: false),
+					(requirement.sourceText ? containsNormalizedRequirementPhrase(text, requirement.sourceText) : false),
 			)
 		) {
 			return false;
@@ -415,10 +390,7 @@ function dedupeRequirements(
 	});
 }
 
-async function resolveProvider(
-	userId: string,
-	aiProviderId?: string,
-): Promise<RunnableProvider> {
+async function resolveProvider(userId: string, aiProviderId?: string): Promise<RunnableProvider> {
 	const provider = aiProviderId
 		? await aiProvidersService.getRunnableById({
 				id: aiProviderId,
@@ -443,9 +415,12 @@ function loadOfferAssets(assets: OfferAsset[]): Promise<AnalysisAsset[]> {
 			const stored = await storage.read(asset.storageKey);
 
 			if (!stored) {
-				throw new ORPCError("BAD_REQUEST", {
-					message: `Stored job-offer asset is unavailable: ${asset.filename}.`,
-				});
+				// The file name is user data: kept in the response, never in logs.
+				throw markLogMessageUnsafe(
+					new ORPCError("BAD_REQUEST", {
+						message: `Stored job-offer asset is unavailable: ${asset.filename}.`,
+					}),
+				);
 			}
 
 			return {
@@ -464,20 +439,11 @@ async function markAnalysisFailed(offerId: string, userId: string) {
 			analysisStatus: "failed",
 			analyzedAt: null,
 		})
-		.where(
-			and(
-				eq(schema.cvmateJobOffer.id, offerId),
-				eq(schema.cvmateJobOffer.userId, userId),
-			),
-		)
+		.where(and(eq(schema.cvmateJobOffer.id, offerId), eq(schema.cvmateJobOffer.userId, userId)))
 		.catch(() => undefined);
 }
 
-async function analyzeOwnedOffer(input: {
-	id: string;
-	userId: string;
-	aiProviderId?: string;
-}) {
+async function analyzeOwnedOffer(input: { id: string; userId: string; aiProviderId?: string }) {
 	const offer = await cvmateJobOfferService.getById({
 		id: input.id,
 		userId: input.userId,
@@ -523,10 +489,7 @@ async function analyzeOwnedOffer(input: {
 			.filter((requirement) => requirement.isUserEdited)
 			.map((requirement) => requirement.text);
 
-		const requirements = dedupeRequirements(
-			normalizeRequirementPolicy(analysis.requirements),
-			manualRequirementTexts,
-		);
+		const requirements = dedupeRequirements(normalizeRequirementPolicy(analysis.requirements), manualRequirementTexts);
 
 		const analyzedAt = new Date();
 
@@ -565,12 +528,7 @@ async function analyzeOwnedOffer(input: {
 					analysisStatus: "analyzed",
 					analyzedAt,
 				})
-				.where(
-					and(
-						eq(schema.cvmateJobOffer.id, offer.id),
-						eq(schema.cvmateJobOffer.userId, input.userId),
-					),
-				)
+				.where(and(eq(schema.cvmateJobOffer.id, offer.id), eq(schema.cvmateJobOffer.userId, input.userId)))
 				.returning({ id: schema.cvmateJobOffer.id });
 
 			if (!updated) throw new ORPCError("NOT_FOUND");

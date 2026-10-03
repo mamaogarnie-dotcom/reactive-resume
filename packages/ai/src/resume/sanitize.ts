@@ -4,6 +4,7 @@ import { jsonrepair } from "jsonrepair";
 import { flattenError, ZodError } from "zod";
 import { resumeDataSchema } from "@reactive-resume/schema/resume/data";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 import { generateId } from "@reactive-resume/utils/string";
 import { buildAiExtractionTemplate } from "./extraction-template";
 
@@ -260,7 +261,7 @@ export function sanitizeAndParseResumeJson(resultText: string): ResumeSanitizati
 			throw error;
 		}
 
-		console.error("Unknown error during resume data validation:", error);
+		logSafeError("Unknown error during resume data validation:", error);
 		throw new Error("An unknown error occurred while validating the merged resume data.");
 	}
 }

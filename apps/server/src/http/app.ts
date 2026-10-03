@@ -3,6 +3,7 @@ import type { Context } from "hono";
 import { isIP } from "node:net";
 import { getConnInfo } from "@hono/node-server/conninfo";
 import { Hono } from "hono";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 import { handleMcp } from "../mcp/handler";
 import { handleOpenApi } from "../openapi/handler";
 import {
@@ -35,6 +36,16 @@ const getTrustedClient = (context: Context<ServerEnvironment>): string => {
 
 export function createApp() {
 	const app = new Hono<ServerEnvironment>();
+
+	// Same responses as Hono's default error handler, which would log the raw error instead.
+	app.onError((error, c) => {
+		if ("getResponse" in error) {
+			const response = error.getResponse();
+			return c.newResponse(response.body, response);
+		}
+		logSafeError("[HTTP]", error, { method: c.req.method });
+		return c.text("Internal Server Error", 500);
+	});
 
 	app.use("/auth/*", async (c, next) => {
 		await next();

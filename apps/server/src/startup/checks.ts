@@ -6,6 +6,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
 import { env } from "@reactive-resume/env/server";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 import { getLocalDataDirectory } from "@reactive-resume/utils/monorepo.node";
 
 function resolveFromCurrentModule(relativePath: string) {
@@ -34,7 +35,7 @@ async function runDatabaseMigrations() {
 		await migrate(db, { migrationsFolder: resolveWorkspaceFolder("migrations") });
 		console.info("Database migrations completed");
 	} catch (error) {
-		console.error("Database migrations failed", { error });
+		logSafeError("Database migrations failed", error);
 		throw error;
 	} finally {
 		await pool.end();
@@ -67,7 +68,7 @@ async function reapStaleAgentRuns() {
 		await reapStaleAgentRunsAtBoot();
 	} catch (error) {
 		// A reap failure must not block serving traffic; stuck runs also heal lazily on access.
-		console.error("Failed to reap stale agent runs at boot", { error });
+		logSafeError("Failed to reap stale agent runs at boot", error);
 	}
 }
 

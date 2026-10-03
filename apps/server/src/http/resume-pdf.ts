@@ -1,4 +1,5 @@
 import { createResumePdfDownload, verifyResumePdfDownloadToken } from "@reactive-resume/api/features/resume/export";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 
 function unauthorizedResponse() {
 	return new Response("Unauthorized", {
@@ -51,7 +52,7 @@ export async function handleResumePdfDownload(request: Request, id: string) {
 			},
 		});
 	} catch (error) {
-		console.error("[PDF Download]", error);
+		logSafeError("[PDF Download]", error);
 		return new Response("Failed to generate resume PDF", {
 			status: errorStatus(error),
 			headers: {

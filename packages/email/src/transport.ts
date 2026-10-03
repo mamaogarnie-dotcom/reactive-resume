@@ -1,8 +1,8 @@
-import { env } from "@reactive-resume/env/server";
 import type { SendMailOptions, Transporter } from "nodemailer";
-import nodemailer from "nodemailer";
 import type { ReactElement } from "react";
+import nodemailer from "nodemailer";
 import { render } from "react-email";
+import { env } from "@reactive-resume/env/server";
 
 type SendEmailOptions = {
 	to: string | string[];
@@ -14,6 +14,22 @@ type SendEmailOptions = {
 };
 
 let cachedTransport: Transporter | undefined;
+
+const SAFE_ERROR_TOKEN = /^[\w.:-]{1,64}$/;
+
+function safeErrorToken(error: unknown, key: "name" | "code"): string | undefined {
+	if (error === null || typeof error !== "object") return undefined;
+	try {
+		const value = (error as Record<string, unknown>)[key];
+		return typeof value === "string" && SAFE_ERROR_TOKEN.test(value) ? value : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+function mailErrorSummary(error: unknown) {
+	return { name: safeErrorToken(error, "name"), code: safeErrorToken(error, "code") };
+}
 
 const getTransport = () => {
 	const { SMTP_HOST: host, SMTP_USER: user, SMTP_PASS: pass, SMTP_FROM: from } = env;
@@ -60,6 +76,7 @@ export const sendEmail = async (options: SendEmailOptions) => {
 	try {
 		await transport.sendMail(payload);
 	} catch (error) {
-		console.error("There was an error sending mail.", error);
+		// Name and code only: mailer errors carry the envelope and recipient addresses.
+		console.error("There was an error sending mail.", mailErrorSummary(error));
 	}
 };

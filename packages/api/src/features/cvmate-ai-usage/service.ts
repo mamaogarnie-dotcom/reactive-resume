@@ -1,8 +1,9 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
-import { db } from "@reactive-resume/db/client";
 import type { CvmateAiOperation } from "@reactive-resume/db/schema";
-import * as schema from "@reactive-resume/db/schema";
 import type { AiTokenUsage } from "../ai/generate-json";
+import { db } from "@reactive-resume/db/client";
+import * as schema from "@reactive-resume/db/schema";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 
 type RecordCvmateAiUsageInput = {
 	userId: string;
@@ -40,9 +41,7 @@ export const cvmateAiUsageService = {
 				model: input.model,
 				inputTokens: normalizeTokenCount(input.usage.inputTokens),
 				outputTokens: normalizeTokenCount(input.usage.outputTokens),
-				cachedInputTokens: normalizeTokenCount(
-					input.usage.inputTokenDetails?.cacheReadTokens,
-				),
+				cachedInputTokens: normalizeTokenCount(input.usage.inputTokenDetails?.cacheReadTokens),
 				totalTokens: normalizeTokenCount(input.usage.totalTokens),
 				usageSnapshot: usageSnapshot(input.usage),
 			});
@@ -50,11 +49,10 @@ export const cvmateAiUsageService = {
 			// The provider call has already incurred cost. Failing the user's operation here
 			// would encourage a retry and could spend tokens twice, so telemetry persistence
 			// is best-effort until pre-call budgets are introduced in AI-COST 2.
-			console.error("Failed to persist 1story AI usage.", {
+			logSafeError("Failed to persist 1story AI usage.", error, {
 				operation: input.operation,
 				provider: input.provider,
 				model: input.model,
-				error,
 			});
 		}
 	},

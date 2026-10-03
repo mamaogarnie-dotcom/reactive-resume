@@ -46,18 +46,18 @@ import {
 } from "@reactive-resume/ai/tools/patch-proposal";
 import { AI_PROVIDER_DEFAULT_BASE_URLS, AI_PROVIDER_DISPLAY_NAMES, aiProviderSchema } from "@reactive-resume/ai/types";
 import { applyResumePatches } from "@reactive-resume/resume/patch";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 import { supportsProviderNativeWebSearch } from "./capabilities";
 import { resolveAiBaseUrl } from "./url-policy";
 
 const aiExtractionTemplate = buildAiExtractionTemplate();
 
+// Provider errors carry the full prompt (`requestBodyValues`) and response body, so they are
+// logged only through the sanitizer.
 function logAndRethrow(context: string, error: unknown): never {
-	if (error instanceof Error) {
-		console.error(`${context}:`, error);
-		throw error;
-	}
+	logSafeError(`${context}:`, error);
+	if (error instanceof Error) throw error;
 
-	console.error(`${context}:`, error);
 	throw new Error(`An unknown error occurred during ${context}.`);
 }
 

@@ -2,6 +2,7 @@ import type { ResumeExportTarget } from "@reactive-resume/resume/export-sections
 import { ORPCError } from "@orpc/server";
 import z from "zod";
 import { getResumeExportData, resumeHasCoverLetter } from "@reactive-resume/resume/export-sections";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 import { generateFilename } from "@reactive-resume/utils/file";
 import { protectedProcedure } from "../../context";
 import { pdfExportRateLimit } from "../../middleware/rate-limit";
@@ -45,7 +46,7 @@ export async function createResumePdfDownload(input: CreateResumePdfDownloadInpu
 			body,
 		};
 	} catch (error) {
-		console.error("[PDF API] Failed to render resume PDF", { resumeId: input.id, error });
+		logSafeError("[PDF API] Failed to render resume PDF", error, { resumeId: input.id });
 		throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to generate resume PDF" });
 	}
 }

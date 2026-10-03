@@ -11,6 +11,7 @@ import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { applyResumePatches, ResumePatchError } from "@reactive-resume/resume/patch";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
+import { logSafeError, logSafeWarning } from "@reactive-resume/utils/error-log";
 import { generateId } from "@reactive-resume/utils/string";
 import { getStorageService } from "../storage/service";
 import { grantResumeAccess, hasResumeAccess } from "./access";
@@ -107,7 +108,7 @@ async function maybeSnapshotOnSave(input: { resumeId: string; userId: string; da
 
 		await writeResumeVersion(db, input);
 	} catch (error) {
-		console.warn("Failed to snapshot resume version:", error);
+		logSafeWarning("Failed to snapshot resume version:", error);
 	}
 }
 
@@ -374,7 +375,7 @@ async function notifyResumeUpdated(event: ResumeUpdatedEvent) {
 	try {
 		await publishResumeUpdated(event);
 	} catch (error) {
-		console.warn("Failed to publish resume.updated event:", error);
+		logSafeWarning("Failed to publish resume.updated event:", error);
 	}
 }
 
@@ -408,7 +409,7 @@ export const resumeService = {
 			try {
 				await writeResumeVersion(db, input);
 			} catch (error) {
-				console.warn("Failed to snapshot resume version:", error);
+				logSafeWarning("Failed to snapshot resume version:", error);
 			}
 		},
 
@@ -604,7 +605,7 @@ export const resumeService = {
 				throw new ORPCError("RESUME_SLUG_ALREADY_EXISTS", { status: 400 });
 			}
 
-			console.error("Failed to create resume:", error);
+			logSafeError("Failed to create resume:", error);
 			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create resume" });
 		}
 	},
@@ -676,7 +677,7 @@ export const resumeService = {
 					throw new ORPCError("RESUME_SLUG_ALREADY_EXISTS", { status: 400 });
 				}
 
-				console.error("Failed to update resume:", error);
+				logSafeError("Failed to update resume:", error);
 				throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update resume" });
 			});
 

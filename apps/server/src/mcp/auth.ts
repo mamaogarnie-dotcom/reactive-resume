@@ -1,4 +1,5 @@
 import { auth, verifyOAuthToken } from "@reactive-resume/auth/config";
+import { logSafeWarning } from "@reactive-resume/utils/error-log";
 
 const OAUTH_WARN_THROTTLE_MS = 60_000;
 let lastOAuthWarnAt = 0;
@@ -9,7 +10,8 @@ function warnOAuthThrottled(message: string, detail?: unknown): void {
 	lastOAuthWarnAt = now;
 
 	if (detail !== undefined) {
-		console.warn(message, detail);
+		// Never verbatim: jose claim errors carry the token payload.
+		logSafeWarning(message, detail);
 		return;
 	}
 

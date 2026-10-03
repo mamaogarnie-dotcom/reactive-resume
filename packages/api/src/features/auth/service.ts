@@ -5,6 +5,7 @@ import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { env } from "@reactive-resume/env/server";
 import { coverLetterSchema } from "@reactive-resume/schema/cover-letter/data";
+import { logSafeError } from "@reactive-resume/utils/error-log";
 import { applicationService } from "../applications/service";
 import { cvmateBuildService } from "../cvmate-build/service";
 import { cvmateJobOfferService } from "../cvmate-job-offer/service";
@@ -102,13 +103,13 @@ export const authService = {
 			await storageService.delete(`uploads/${input.userId}`);
 		} catch (err) {
 			// Log orphaned-file failures (GDPR erasure signal) but proceed with deleting the user.
-			console.error("Failed to delete storage for user %s:", input.userId, err);
+			logSafeError("Failed to delete storage for user", err, { userId: input.userId });
 		}
 
 		try {
 			await db.delete(schema.user).where(eq(schema.user.id, input.userId));
 		} catch (err) {
-			console.error("Failed to delete user record:", err);
+			logSafeError("Failed to delete user record:", err);
 
 			throw new ORPCError("INTERNAL_SERVER_ERROR");
 		}

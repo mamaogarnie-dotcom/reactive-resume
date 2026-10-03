@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { auth, verifyOAuthToken } from "@reactive-resume/auth/config";
 import { db } from "@reactive-resume/db/client";
 import { user } from "@reactive-resume/db/schema";
+import { logSafeWarning } from "@reactive-resume/utils/error-log";
 
 interface ORPCContext {
 	locale: Locale;
@@ -24,7 +25,7 @@ async function getUserFromBearerToken(headers: Headers): Promise<User | null> {
 		const [userResult] = await db.select().from(user).where(eq(user.id, payload.sub)).limit(1);
 		return userResult ?? null;
 	} catch (error) {
-		console.warn("Bearer token verification failed:", error);
+		logSafeWarning("Bearer token verification failed:", error);
 		return null;
 	}
 }
@@ -36,7 +37,7 @@ async function getUserFromHeaders(headers: Headers): Promise<User | null> {
 
 		return result.user;
 	} catch (error) {
-		console.warn("Session verification failed:", error);
+		logSafeWarning("Session verification failed:", error);
 		return null;
 	}
 }
@@ -51,7 +52,7 @@ async function getUserFromApiKey(apiKey: string): Promise<User | null> {
 
 		return userResult;
 	} catch (error) {
-		console.warn("API key verification failed:", error);
+		logSafeWarning("API key verification failed:", error);
 		return null;
 	}
 }
