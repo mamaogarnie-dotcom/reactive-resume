@@ -314,7 +314,9 @@ describe("analyzeJobOfferSources", () => {
 
 		expect(messages).toContain('"type":"image"');
 		expect(messages).toContain('"type":"file"');
-		expect(messages).toContain('"filename":"offer.pdf"');
+		// The uploaded file name never reaches the model; a neutral one is sent instead.
+		expect(messages).toContain('"filename":"job-offer.pdf"');
+		expect(messages).not.toContain('"filename":"offer.pdf"');
 		expect(messages).toContain("Additional pasted text");
 	});
 });
@@ -773,5 +775,115 @@ describe("cvmateJobOfferAnalysisService with the platform provider", () => {
 			message: "No tested AI provider is available.",
 		});
 		expect(generateJsonMock).not.toHaveBeenCalled();
+	});
+});
+
+describe("job-offer prompt redaction (Codex #1)", () => {
+	// Fictional data only.
+	const pastedText = [
+		"Specjalista ds. ofertowania. Wymagamy znajomości ustawy Prawo zamówień publicznych.",
+		"Kontakt: rekrutacja.anna@fbserwis.example, tel. +48 601 234 567, https://kariera.example.com/oferta/123",
+	].join("\n");
+	const fetchedText = "Aplikuj: jan.rekruter@firma.example lub 22 555 66 77. Więcej: www.firma.example/praca";
+	const planted = [
+		"rekrutacja.anna@fbserwis.example",
+		"601 234 567",
+		"kariera.example.com",
+		"jan.rekruter@firma.example",
+		"22 555 66 77",
+		"www.firma.example",
+		"CV_Jan_Kowalski",
+	];
+
+	function offerWith(overrides: Record<string, unknown>) {
+		getOfferMock.mockReset();
+		getOfferMock
+			.mockResolvedValueOnce({ ...offer, ...overrides })
+			.mockResolvedValueOnce({ ...offer, ...overrides, analysisStatus: "analyzed" });
+	}
+
+	it("redacts pasted and linked text and hides the file name in the model request", async () => {
+		const tx = mockSuccessTransaction();
+		offerWith({
+			rawText: pastedText,
+			sourceUrl: "https://firma.example/oferta",
+			assets: [{ storageKey: "offers/asset-1", filename: "CV_Jan_Kowalski.pdf", mediaType: "application/pdf" }],
+		});
+		fetchJobOfferTextFromUrlMock.mockResolvedValueOnce(fetchedText);
+		storageReadMock.mockResolvedValueOnce({ data: Buffer.from("%PDF-1.4") });
+		generateTextMock.mockResolvedValueOnce({
+			text: JSON.stringify({
+				roleTitle: "Specjalista ds. ofertowania",
+				companyName: null,
+				location: null,
+				language: "pl",
+				requirements: [
+					{ category: "required", priority: "critical", sourceText: "Wymagamy znajomości PZP", text: "Znajomość PZP" },
+				],
+			}),
+			usage: {},
+		});
+
+		await cvmateJobOfferAnalysisService.analyze({ id: "offer-1", userId: "user-1" });
+
+		const request = JSON.stringify(generateTextMock.mock.calls[0]?.[0]);
+		for (const value of planted) expect(request).not.toContain(value);
+		expect(request).toContain("[EMAIL]");
+		expect(request).toContain("[TELEFON]");
+		expect(request).toContain("[URL]");
+		expect(request).toContain("Prawo zamówień publicznych");
+		expect(request).toContain('"filename":"job-offer.pdf"');
+
+		// What is stored comes from the model's answer; the offer text itself is never rewritten.
+		expect(JSON.stringify(tx.updateSet.mock.calls)).not.toContain("rawText");
+	});
+
+	it("redacts the text-only path the same way", async () => {
+		mockSuccessTransaction();
+		offerWith({ rawText: pastedText });
+		generateJsonMock.mockResolvedValueOnce({
+			roleTitle: null,
+			companyName: null,
+			location: null,
+			language: null,
+			requirements: [],
+		});
+
+		await cvmateJobOfferAnalysisService.analyze({ id: "offer-1", userId: "user-1" });
+
+		const request = generateJsonMock.mock.calls[0]?.[1] as { prompt: string } | undefined;
+		const prompt = request?.prompt ?? "";
+		for (const value of planted) expect(prompt).not.toContain(value);
+		expect(prompt).toContain("[EMAIL]");
+		expect(__testables.SYSTEM_PROMPT).toContain("Never copy them into any output field.");
+	});
+
+	it("never stores a placeholder the model echoed back", async () => {
+		const tx = mockSuccessTransaction();
+		offerWith({ rawText: pastedText, companyName: "Acme" });
+		generateJsonMock.mockResolvedValueOnce({
+			roleTitle: "Specjalista [OSOBA]",
+			companyName: "[URL]",
+			location: "Warszawa",
+			language: "pl",
+			requirements: [
+				{ category: "required", priority: "critical", sourceText: null, text: "Kontakt pod [EMAIL]" },
+				{ category: "required", priority: "critical", sourceText: "tel. [TELEFON]", text: "Znajomość PZP" },
+				{ category: "preferred", priority: "additional", sourceText: "Excel", text: "Excel" },
+			],
+		});
+
+		await cvmateJobOfferAnalysisService.analyze({ id: "offer-1", userId: "user-1" });
+
+		const stored = JSON.stringify([tx.insertValues.mock.calls, tx.updateSet.mock.calls]);
+		expect(stored).not.toMatch(/\[(?:EMAIL|TELEFON|URL|OSOBA|ADRES)\]/);
+		expect(tx.insertValues).toHaveBeenCalledWith([
+			expect.objectContaining({ text: "Znajomość PZP", sourceText: null }),
+			expect.objectContaining({ text: "Excel", sourceText: "Excel" }),
+		]);
+		// Echoed metadata falls back to the offer's own values; clean metadata is kept.
+		expect(tx.updateSet).toHaveBeenCalledWith(
+			expect.objectContaining({ roleTitle: null, companyName: "Acme", location: "Warszawa" }),
+		);
 	});
 });

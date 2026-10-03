@@ -10,6 +10,7 @@ import * as schema from "@reactive-resume/db/schema";
 import { markLogMessageUnsafe } from "@reactive-resume/utils/error-log";
 import { generateId } from "@reactive-resume/utils/string";
 import { generateJson, parseJsonWithRepair } from "../ai/generate-json";
+import { buildAiRedactionContext, containsAiRedactionPlaceholder, redactTextForAi } from "../ai/redaction";
 import { getModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
 import { resolveCvmateAiProvider } from "../cvmate-ai-provider/service";
@@ -20,6 +21,8 @@ import { fetchJobOfferTextFromUrl } from "./url-fetch";
 
 const MAX_JOB_OFFER_TEXT_CHARS = 50_000;
 const MAX_REQUIREMENTS = 80;
+/** Sent to the model instead of the uploaded file's name, which can identify a person. */
+const NEUTRAL_PDF_FILENAME = "job-offer.pdf";
 
 const requirementCategorySchema = z.enum(["required", "preferred", "responsibility", "keyword", "other"]);
 
@@ -123,13 +126,19 @@ For every requirement:
   or null only when no short excerpt can reasonably be supplied
 - do not duplicate the same meaning across categories
 
+Values such as [EMAIL], [TELEFON], [URL], [OSOBA] and [ADRES] are redacted
+contact details. Never copy them into any output field.
+
 Return JSON only.
 `.trim();
 
 function buildPrompt(rawText: string): string {
-	const textSection = rawText
+	// The advertisement may name a recruiter or other third party: contact patterns are redacted without
+	// any identity. Only this prompt changes; the stored offer and the user's view keep the original text.
+	const promptText = redactTextForAi(rawText, buildAiRedactionContext([]));
+	const textSection = promptText
 		? `<JOB_ADVERTISEMENT_TEXT>
-${rawText}
+${promptText}
 </JOB_ADVERTISEMENT_TEXT>`
 		: "No pasted advertisement text was supplied. Analyze the attached files.";
 
@@ -233,7 +242,7 @@ function buildSourceMessages(rawText: string, assets: AnalysisAsset[]): ModelMes
 				type: "file",
 				data: asset.data,
 				mediaType: asset.mediaType,
-				filename: asset.filename,
+				filename: NEUTRAL_PDF_FILENAME,
 			});
 			continue;
 		}
@@ -383,6 +392,25 @@ function dedupeRequirements(
 	});
 }
 
+/**
+ * The model saw redacted text, so it may echo a placeholder. Nothing with one is ever stored: such
+ * metadata falls back to the offer's own value, such a requirement is dropped, and such an excerpt
+ * is cleared.
+ */
+function withoutPlaceholderEchoes(analysis: CvmateJobOfferAnalysisOutput): CvmateJobOfferAnalysisOutput {
+	const clean = (value: string | null) => (containsAiRedactionPlaceholder(value) ? null : value);
+
+	return {
+		...analysis,
+		roleTitle: clean(analysis.roleTitle),
+		companyName: clean(analysis.companyName),
+		location: clean(analysis.location),
+		requirements: analysis.requirements
+			.filter((requirement) => !containsAiRedactionPlaceholder(requirement.text))
+			.map((requirement) => ({ ...requirement, sourceText: clean(requirement.sourceText) })),
+	};
+}
+
 function loadOfferAssets(assets: OfferAsset[]): Promise<AnalysisAsset[]> {
 	const storage = getStorageService();
 
@@ -464,11 +492,15 @@ async function analyzeOwnedOffer(input: { id: string; userId: string; aiProvider
 				}),
 		});
 
+		const cleanAnalysis = withoutPlaceholderEchoes(analysis);
 		const manualRequirementTexts = offer.requirements
 			.filter((requirement) => requirement.isUserEdited)
 			.map((requirement) => requirement.text);
 
-		const requirements = dedupeRequirements(normalizeRequirementPolicy(analysis.requirements), manualRequirementTexts);
+		const requirements = dedupeRequirements(
+			normalizeRequirementPolicy(cleanAnalysis.requirements),
+			manualRequirementTexts,
+		);
 
 		const analyzedAt = new Date();
 
@@ -500,9 +532,9 @@ async function analyzeOwnedOffer(input: { id: string; userId: string; aiProvider
 			const [updated] = await tx
 				.update(schema.cvmateJobOffer)
 				.set({
-					roleTitle: analysis.roleTitle ?? offer.roleTitle,
-					companyName: analysis.companyName ?? offer.companyName,
-					location: analysis.location ?? offer.location,
+					roleTitle: cleanAnalysis.roleTitle ?? offer.roleTitle,
+					companyName: cleanAnalysis.companyName ?? offer.companyName,
+					location: cleanAnalysis.location ?? offer.location,
 					language: analysis.language ?? offer.language,
 					analysisStatus: "analyzed",
 					analyzedAt,
@@ -535,9 +567,11 @@ export const cvmateJobOfferAnalysisService = {
 
 export const __testables = {
 	buildPrompt,
+	NEUTRAL_PDF_FILENAME,
 	buildSourceMessages,
 	dedupeRequirements,
 	normalizeRequirementPolicy,
 	parseAnalysisResponse,
 	SYSTEM_PROMPT,
+	withoutPlaceholderEchoes,
 };
