@@ -64,6 +64,38 @@ describe("registerResources", () => {
 		await expect(resume.handler(new URL("resume://"))).rejects.toThrow(/Invalid resume URI/);
 	});
 
+	it("resume handler never returns a raw internal error message", async () => {
+		// Fictional data only.
+		const sql = 'select "data" from "resume" where "id" = $1 and "user_id" = $2';
+		const driverError = Object.assign(new Error(`Failed query: ${sql}\nparams: abc,jan.kowalski@example.com`), {
+			name: "DrizzleQueryError",
+			query: sql,
+			params: ["abc", "jan.kowalski@example.com"],
+		});
+		clientMock.resume.getById.mockRejectedValueOnce(driverError);
+
+		const { server, registered } = makeFakeServer();
+		registerResources(server as never, clientMock as never);
+
+		const resume = registered.find((r) => r.name === "resume")!;
+		const error = await resume.handler(new URL("resume://abc")).catch((thrown: unknown) => thrown);
+
+		expect(error).toBeInstanceOf(Error);
+		expect((error as Error).message).toBe("INTERNAL_SERVER_ERROR: Internal server error");
+		expect((error as Error).cause).toBeUndefined();
+	});
+
+	it("resume handler keeps an oRPC error's code and message", async () => {
+		const { ORPCError } = await import("@orpc/server");
+		clientMock.resume.getById.mockRejectedValueOnce(new ORPCError("NOT_FOUND"));
+
+		const { server, registered } = makeFakeServer();
+		registerResources(server as never, clientMock as never);
+
+		const resume = registered.find((r) => r.name === "resume")!;
+		await expect(resume.handler(new URL("resume://abc"))).rejects.toThrow("NOT_FOUND: Not Found");
+	});
+
 	it("resume-schema handler returns the static JSON schema as text", async () => {
 		const { server, registered } = makeFakeServer();
 		registerResources(server as never, clientMock as never);

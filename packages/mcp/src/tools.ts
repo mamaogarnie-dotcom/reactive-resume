@@ -11,16 +11,13 @@ import { createResumePdfDownloadUrl } from "@reactive-resume/api/features/resume
 import { env } from "@reactive-resume/env/server";
 import { resumeHasCoverLetter } from "@reactive-resume/resume/export-sections";
 import { resumeDataSchema } from "@reactive-resume/schema/resume/data";
+import { formatMcpClientError } from "./errors";
 import { MCP_TOOL_NAME } from "./mcp-tool-names";
 import { TOOL_META } from "./tool-meta";
 
 type PatchOperation = z.infer<typeof resumePatchOperationsSchema>[number];
 
 // ── Shared Helpers ───────────────���──────────────────────────────
-
-function errorMessage(error: unknown): string {
-	return error instanceof Error ? error.message : String(error);
-}
 
 /**
  * Maps a failed router call to an actionable next step for the model.
@@ -29,6 +26,7 @@ function errorMessage(error: unknown): string {
  * throw `new ORPCError("RESUME_LOCKED")` and friends without a message, so the
  * message is the code itself (`"RESUME_LOCKED"`) or oRPC's own default
  * (`"Not Found"` for `NOT_FOUND`), and HTTP status never appears in it at all.
+ * Hints are fixed texts and must never echo the error: only `ORPCError`s get one.
  */
 function errorHint(error: unknown): string {
 	if (!(error instanceof ORPCError)) return "";
@@ -61,7 +59,7 @@ function withErrorHandling<T>(label: string, handler: (params: T) => Promise<Cal
 		} catch (error) {
 			return {
 				isError: true,
-				content: [{ type: "text", text: `Error ${label}: ${errorMessage(error)}${errorHint(error)}` }],
+				content: [{ type: "text", text: `Error ${label}: ${formatMcpClientError(error)}${errorHint(error)}` }],
 			};
 		}
 	};
@@ -76,10 +74,11 @@ function json(value: unknown): CallToolResult {
 }
 
 function fileFromBase64(input: { fileName: string; contentType: string; dataBase64: string }): File {
-	if (input.contentType !== "application/pdf") throw new Error("Application documents must be PDF files.");
+	if (input.contentType !== "application/pdf")
+		throw new ORPCError("BAD_REQUEST", { message: "Application documents must be PDF files." });
 
 	const bytes = Buffer.from(input.dataBase64, "base64");
-	if (bytes.length === 0) throw new Error("Application document cannot be empty.");
+	if (bytes.length === 0) throw new ORPCError("BAD_REQUEST", { message: "Application document cannot be empty." });
 
 	return new File([bytes], input.fileName, { type: input.contentType });
 }
@@ -168,11 +167,11 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 			async ({ id, target }: { id: string; target?: "resume" | "cover-letter" }) => {
 				const resume = await client.resume.getById({ id });
 				const user = await resolveUserFromRequestHeaders(requestHeaders);
-				if (!user) throw new Error("Unauthorized");
+				if (!user) throw new ORPCError("UNAUTHORIZED");
 
 				const documentTarget = target ?? "resume";
 				if (documentTarget === "cover-letter" && !resumeHasCoverLetter(resume.data))
-					throw new Error("No visible cover letter found for this resume.");
+					throw new ORPCError("BAD_REQUEST", { message: "No visible cover letter found for this resume." });
 
 				const signedUrl = createResumePdfDownloadUrl({ resumeId: id, userId: user.id, target: documentTarget });
 
@@ -287,7 +286,7 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 				isPublic?: boolean;
 			};
 			if (name === undefined && slug === undefined && tags === undefined && isPublic === undefined)
-				throw new Error("Provide at least one of: name, slug, tags, isPublic.");
+				throw new ORPCError("BAD_REQUEST", { message: "Provide at least one of: name, slug, tags, isPublic." });
 
 			const resume = await client.resume.update({
 				id,

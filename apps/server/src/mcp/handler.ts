@@ -1,5 +1,6 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { env } from "@reactive-resume/env/server";
+import { formatMcpClientError } from "@reactive-resume/mcp";
 import { logSafeError } from "@reactive-resume/utils/error-log";
 import { AuthError, authenticateRequest } from "./auth";
 import { createMcpServer } from "./server";
@@ -36,7 +37,7 @@ export async function handleMcp(request: Request) {
 			jsonrpc: "2.0",
 			error: {
 				code: -32603,
-				message: `Error handling request: ${error instanceof Error ? error.message : String(error)}`,
+				message: `Error handling request: ${formatMcpClientError(error)}`,
 			},
 		});
 	}

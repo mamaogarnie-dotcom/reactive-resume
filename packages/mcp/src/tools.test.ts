@@ -23,6 +23,30 @@ vi.mock("@reactive-resume/env/server", () => ({
 	},
 }));
 
+// Fictional data only.
+const EMAIL = "jan.kowalski@example.com";
+const SQL = 'insert into "resume" ("id", "user_id", "data") values ($1, $2, $3)';
+const PROVIDER_BODY = "Incorrect API key provided: sk-proj-abc123. Prompt: Jan Kowalski, Senior Analyst";
+
+class DrizzleQueryErrorLike extends Error {
+	override name = "DrizzleQueryError";
+	query = SQL;
+	params = ["resume-1", "user-1", EMAIL];
+
+	constructor() {
+		super(`Failed query: ${SQL}\nparams: resume-1,user-1,${EMAIL}`);
+	}
+}
+
+class APICallErrorLike extends Error {
+	override name = "AI_APICallError";
+	responseBody = JSON.stringify({ error: { message: PROVIDER_BODY } });
+
+	constructor() {
+		super(PROVIDER_BODY);
+	}
+}
+
 const { MCP_TOOL_NAME } = await import("./mcp-tool-names");
 const { registerTools } = await import("./tools");
 
@@ -384,11 +408,80 @@ describe("registerTools", () => {
 			expect(result.content[0]!.text).toContain(expected);
 		});
 
-		it("adds no hint for an unrecognized failure", async () => {
+		it("adds no hint and no message for an unrecognized failure", async () => {
 			const result = await readResume(new Error("socket hang up"));
 
 			expect(result.isError).toBe(true);
-			expect(result.content[0]!.text).toBe("Error getting resume: socket hang up");
+			expect(result.content[0]!.text).toBe("Error getting resume: INTERNAL_SERVER_ERROR: Internal server error");
+		});
+
+		it("never carries a sensitive message into the hint", async () => {
+			// Looks like a hint trigger (code + status) but is not an ORPCError, e.g. a driver error.
+			const disguised = Object.assign(new Error(`select * from "user" where "email" = '${EMAIL}'`), {
+				code: "NOT_FOUND",
+				status: 404,
+			});
+			const result = await readResume(disguised);
+
+			expect(result.content[0]!.text).toBe("Error getting resume: INTERNAL_SERVER_ERROR: Internal server error");
+		});
+
+		it("adds the hint as fixed text after an ORPCError's own message", async () => {
+			const result = await readResume(new ORPCError("NOT_FOUND", { message: "Resume resume-1 was not found." }));
+
+			expect(result.content[0]!.text).toBe(
+				"Error getting resume: NOT_FOUND: Resume resume-1 was not found.\n\nHint: Not found. Check the ID — " +
+					`\`${MCP_TOOL_NAME.listResumes}\` and \`${MCP_TOOL_NAME.listApplications}\` return valid ones.`,
+			);
+		});
+	});
+
+	describe("client-facing errors", () => {
+		const callGetResume = (error: unknown) => {
+			clientMock.resume.getById.mockRejectedValueOnce(error);
+
+			const { server, registered } = makeFakeServer();
+			registerTools(server as never, clientMock as never, new Headers());
+
+			return registered.find((item) => item.name === MCP_TOOL_NAME.getResume)!.handler({ id: "resume-1" });
+		};
+
+		it.each([
+			["a Drizzle query error", new DrizzleQueryErrorLike()],
+			["an AI provider call error", new APICallErrorLike()],
+			["a plain Error with user data", new Error(`Cannot parse resume of ${EMAIL}`)],
+		])("does not return the raw message of %s", async (_name, error) => {
+			const result = await callGetResume(error);
+			const text = result.content[0]!.text;
+
+			expect(result.isError).toBe(true);
+			expect(text).toBe("Error getting resume: INTERNAL_SERVER_ERROR: Internal server error");
+			expect(text).not.toContain("insert into");
+			expect(text).not.toContain(EMAIL);
+			expect(text).not.toContain("sk-proj");
+		});
+
+		it("keeps an ORPCError's code and message", async () => {
+			const result = await callGetResume(
+				new ORPCError("RESUME_VERSION_CONFLICT", {
+					status: 409,
+					message: "The resume changed after this patch was generated.",
+				}),
+			);
+
+			expect(result.content[0]!.text).toBe(
+				"Error getting resume: RESUME_VERSION_CONFLICT: The resume changed after this patch was generated.",
+			);
+		});
+
+		it("keeps the messages of the tools' own input checks", async () => {
+			const { server, registered } = makeFakeServer();
+			registerTools(server as never, clientMock as never, new Headers());
+
+			const tool = registered.find((item) => item.name === MCP_TOOL_NAME.updateResume)!;
+			const result = await tool.handler({ id: "resume-1" });
+
+			expect(result.content[0]!.text).toContain("BAD_REQUEST: Provide at least one of: name, slug, tags, isPublic.");
 		});
 	});
 });
