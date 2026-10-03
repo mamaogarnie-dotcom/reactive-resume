@@ -1,4 +1,9 @@
-import { BARE_DOMAIN_PATTERN, EMAIL_PATTERN, URL_PATTERN } from "@reactive-resume/resume/contact-patterns";
+import {
+	BARE_DOMAIN_PATTERN,
+	EMAIL_PATTERN,
+	SPACED_EMAIL_PATTERN,
+	URL_PATTERN,
+} from "@reactive-resume/resume/contact-patterns";
 
 // Deterministic redaction of contact and identity details from free text before it is sent to an
 // external AI provider. It only ever changes the AI payload: stored Master Profile data, CV builds
@@ -81,6 +86,31 @@ const PHONE_REPLACEMENTS: readonly Replacement[] = [
 	},
 ];
 
+// Phone shapes too ambiguous for free text, applied only where a caller knows it is looking at contact
+// details (see redactContactLinePhones). In a CV fact "600 10 20 30" can be an order number and
+// "600100200" a REGON or invoice number, so callsites redacting facts keep both unchanged.
+const CONTACT_LINE_PHONE_PATTERNS: readonly RegExp[] = [
+	// Nine digits with no separators, alone or after +48 / 0048: 600100200, +48600100200.
+	new RegExp(
+		`(?<!(?:nip|regon|krs|pesel|iban|konto|nr|no)\\.?:?[\\s\\u00a0]{0,3})${NOT_AFTER_DIGIT}` +
+			`(?:(?:\\+|00)48[\\s\\u00a0]?)?\\d{9}${NOT_BEFORE_DIGIT_OR_UNIT}`,
+		"giu",
+	),
+	// Polish mobile in 3-2-2-2 groups with one consistent separator: 601 23 45 67, 601-23-45-67.
+	new RegExp(`${NOT_AFTER_DIGIT}[4-8]\\d{2}([ -])\\d{2}\\1\\d{2}\\1\\d{2}${NOT_BEFORE_DIGIT_OR_UNIT}`, "giu"),
+];
+
+/**
+ * Redacts the phone shapes that are only safe to read as phones in contact details, such as the
+ * contact lines of a resume header. Elsewhere they would also hit order, registry and invoice numbers.
+ */
+export function redactContactLinePhones(text: string): string {
+	return CONTACT_LINE_PHONE_PATTERNS.reduce(
+		(result, pattern) => result.replace(pattern, AI_REDACTION_PLACEHOLDERS.phone),
+		text,
+	);
+}
+
 /** Trailing sentence punctuation is part of the sentence, not of the URL. */
 function splitTrailingPunctuation(value: string): [string, string] {
 	const match = value.match(/[.,;:!?]+$/u);
@@ -92,13 +122,15 @@ const URL_REPLACEMENTS: readonly Replacement[] = [{ pattern: URL_PATTERN, placeh
 
 const EMAIL_REPLACEMENTS: readonly Replacement[] = [
 	{ pattern: EMAIL_PATTERN, placeholder: AI_REDACTION_PLACEHOLDERS.email },
+	{ pattern: SPACED_EMAIL_PATTERN, placeholder: AI_REDACTION_PLACEHOLDERS.email },
 ];
 
 // A bare domain is redacted only with a path (linkedin.com/in/jan, portfolio.pl/cv). Without one it
 // is usually an employer or product name (Booking.com), which is a professional fact. The host is
 // matched regardless of case (LINKEDIN.COM/in/jan); only the technology names listed below, written
 // like a host with a path (ASP.NET/MVC), are not links.
-const EXTRA_BARE_DOMAIN_PATTERN = /\b(?:[\w-]+\.)+(?:pl|eu|de|uk|info|biz)(?:\/[^\s<>"')\]]*)?/gi;
+// Label chain bounded like BARE_DOMAIN_PATTERN, so `a.a.a.…` stays linear.
+const EXTRA_BARE_DOMAIN_PATTERN = /\b(?:[\w-]{1,63}\.){1,8}(?:pl|eu|de|uk|info|biz)(?:\/[^\s<>"')\]]*)?/gi;
 
 const TECHNOLOGY_NAME_HOSTS = new Set(["asp.net", "vb.net", "ado.net"]);
 
@@ -183,13 +215,26 @@ function cleanTerm(value: string | null | undefined): string {
 	return value?.trim().replace(/\s+/g, " ") ?? "";
 }
 
+// Short names spelt out letter by letter collide with runs of one-letter Polish words ("a i w").
+const MIN_LETTER_SPACED_LENGTH = 4;
+
+/** `K o w a l s k i`: a heading set with letter spacing comes out of PDF extraction one letter at a time. */
+function letterSpacedSource(term: string): string | null {
+	const words = term.split(" ").filter(Boolean);
+	if (words.join("").length < MIN_LETTER_SPACED_LENGTH) return null;
+
+	return words.map((word) => [...word].map(escapeRegExp).join(" ")).join(" +");
+}
+
 /** A term with flexible inner whitespace, matched as whole words, with and without Polish diacritics. */
 function wordTermPatterns(term: string): RegExp[] {
 	const variants = [...new Set([term, foldPolish(term)])];
+	const sources = variants.flatMap((variant) => {
+		const spaced = letterSpacedSource(variant);
+		return [escapeRegExp(variant).replace(/ /g, "\\s+"), ...(spaced ? [spaced] : [])];
+	});
 
-	return variants.map(
-		(variant) => new RegExp(`${NOT_AFTER_WORD}${escapeRegExp(variant).replace(/ /g, "\\s+")}${NOT_BEFORE_WORD}`, "giu"),
-	);
+	return sources.map((source) => new RegExp(`${NOT_AFTER_WORD}${source}${NOT_BEFORE_WORD}`, "giu"));
 }
 
 function personReplacements(identity: AiIdentityTerms): Replacement[] {
@@ -248,7 +293,8 @@ function profileUrlReplacements(identity: AiIdentityTerms): Replacement[] {
 
 		return [
 			{
-				pattern: new RegExp(`(?:https?:\\/\\/)?(?:www\\.)?${escapeRegExp(core)}\\/?`, "giu"),
+				// Takes the rest of the path too, so `annazielinska.pl/portfolio` leaves no fragment behind.
+				pattern: new RegExp(`(?:https?:\\/\\/)?(?:www\\.)?${escapeRegExp(core)}(?:\\/[^\\s<>"')\\]]*)?`, "giu"),
 				placeholder: AI_REDACTION_PLACEHOLDERS.url,
 			},
 		];
@@ -268,10 +314,27 @@ export function buildAiRedactionContext(
 		identityReplacements: [
 			...present.flatMap(profileUrlReplacements),
 			...present.flatMap(emailReplacements),
-			...present.flatMap(personReplacements),
+			// Longest first across all sources, so one source's bare last name cannot split another
+			// source's full name ("Jan Maria Kowalski" must not become "Jan Maria [OSOBA]").
+			...present
+				.flatMap(personReplacements)
+				.sort((left, right) => right.pattern.source.length - left.pattern.source.length),
 			...present.flatMap(phoneReplacements),
 		],
 	};
+}
+
+/**
+ * Undoes PDF text-extraction artefacts that would let contact details slip past the patterns:
+ * compatibility forms (fullwidth `＠`, ligatures), invisible soft hyphens and zero-width characters,
+ * and stray spaces around line breaks. Only ever applied to an AI payload, never to stored text.
+ */
+export function normalizeTextForAi(text: string): string {
+	return text
+		.normalize("NFKC")
+		.replace(/[­​-‍⁠﻿]/gu, "")
+		.replace(/[^\S\n]+/gu, " ")
+		.replace(/ ?\n ?/gu, "\n");
 }
 
 function applyReplacements(text: string, replacements: readonly Replacement[]): string {

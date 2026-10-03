@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { EMAIL_PATTERN, SPACED_EMAIL_PATTERN } from "@reactive-resume/resume/contact-patterns";
 import {
 	buildAiRedactionContext,
 	containsAiRedactionPlaceholder,
+	normalizeTextForAi,
+	redactContactLinePhones,
 	redactTextForAi,
 	redactValuesForAi,
 } from "./redaction";
@@ -171,6 +174,15 @@ describe("redactTextForAi: identity values", () => {
 		expect(redactTextForAi("Zielińska, Nowak, anna@nowa.test", merged)).toBe("[OSOBA], [OSOBA], [EMAIL]");
 	});
 
+	it("redacts a longer full name from one source before a bare last name from another", () => {
+		const merged = buildAiRedactionContext([
+			{ firstName: "Jan", lastName: "Kowalski" },
+			{ firstName: "Jan Maria", lastName: "Kowalski" },
+		]);
+
+		expect(redactTextForAi("Jan Maria Kowalski", merged)).toBe("[OSOBA]");
+	});
+
 	it.each([
 		"Project manager 2019-2023 and coordinator 2019–2023.",
 		"Budget of 125 000 000 PLN and 500 000 000 zł.",
@@ -206,6 +218,135 @@ describe("redactTextForAi: identity values", () => {
 		expect(redactTextForAi("Office in Wrocław, 483 offers in 2019–2023.", withLocation)).toBe(
 			"Office in Wrocław, 483 offers in 2019–2023.",
 		);
+	});
+});
+
+describe("normalizeTextForAi", () => {
+	it("folds compatibility forms such as a fullwidth at sign and ligatures", () => {
+		expect(normalizeTextForAi("jan＠firma.pl, ﬁnanse")).toBe("jan@firma.pl, finanse");
+	});
+
+	it("drops soft hyphens and zero-width characters left by PDF extraction", () => {
+		expect(normalizeTextForAi("jan.kowa­lski@fir​ma.pl﻿")).toBe("jan.kowalski@firma.pl");
+	});
+
+	it("removes stray spaces around line breaks and collapses horizontal whitespace", () => {
+		expect(normalizeTextForAi("+48 600 \n 100 200\r\nWarszawa\t  Polska")).toBe("+48 600\n100 200\nWarszawa Polska");
+	});
+});
+
+describe("redactTextForAi: PDF extraction artefacts", () => {
+	it.each([
+		["Kontakt: jan.kowalski@ gmail.com", "Kontakt: [EMAIL]"],
+		["Kontakt: jan.kowalski @ gmail . com", "Kontakt: [EMAIL]"],
+		["Kontakt: jan.kowalski@gmail.\ncom", "Kontakt: [EMAIL]"],
+	])("redacts %j", (input, expected) => {
+		expect(redactTextForAi(normalizeTextForAi(input), patternsOnly)).toBe(expected);
+	});
+
+	it("keeps the next sentence after an address that ends a sentence", () => {
+		expect(redactTextForAi("Pisz na jan@firma.pl. Dalej opis projektu.", patternsOnly)).toBe(
+			"Pisz na [EMAIL]. Dalej opis projektu.",
+		);
+		expect(redactTextForAi("Pisz na jan@firma.pl. ZESPÓŁ IT", patternsOnly)).toBe("Pisz na [EMAIL]. ZESPÓŁ IT");
+	});
+
+	it.each([
+		["Kontakt: jan@ gmail . COM", "Kontakt: [EMAIL]"],
+		["Kontakt: JAN @ GMAIL . PL", "Kontakt: [EMAIL]"],
+		["Kontakt: jan@Gmail .com", "Kontakt: [EMAIL]"],
+	])("redacts a spaced address with an upper-case domain: %j", (input, expected) => {
+		expect(redactTextForAi(normalizeTextForAi(input), patternsOnly)).toBe(expected);
+	});
+
+	// Callsites that redact CV facts keep these exactly as at 62eb05b: the shapes are only phones in
+	// contact lines (see redactContactLinePhones).
+	it.each([
+		"Numer zamówienia 600 10 20 30 zrealizowany w 2021.",
+		"Sprzedaż wzrosła o 601 23 45 67 sztuk.",
+		"Obsłużyłem zamówienie 600100200 w SAP.",
+		"Budżet 500 10 20 30 zł w 2021.",
+	])("keeps 3-2-2-2 and bare nine-digit numbers in free text: %j", (input) => {
+		expect(redactTextForAi(input, patternsOnly)).toBe(input);
+	});
+
+	it("redacts a letter-spaced name heading from the identity", () => {
+		const jan = buildAiRedactionContext([{ firstName: "Jan", lastName: "Kowalski" }]);
+
+		expect(redactTextForAi(normalizeTextForAi("J A N   K O W A L S K I\nSpecjalista"), jan)).toBe(
+			"[OSOBA]\nSpecjalista",
+		);
+		expect(redactTextForAi("K o w a l s k i", jan)).toBe("[OSOBA]");
+	});
+
+	it("does not spell out short last names letter by letter", () => {
+		const short = buildAiRedactionContext([{ firstName: "Jan", lastName: "Iwa" }]);
+
+		expect(redactTextForAi("a i w a", short)).toBe("a i w a");
+	});
+
+	it("redacts the whole path of the identity website", () => {
+		expect(redactTextForAi("Portfolio: annazielinska.pl/portfolio/2023, more", context)).toBe("Portfolio: [URL], more");
+	});
+});
+
+describe("redactContactLinePhones", () => {
+	it.each([
+		["600100200", "[TELEFON]"],
+		["Kontakt: 600100200, Kraków", "Kontakt: [TELEFON], Kraków"],
+		["+48600100200", "[TELEFON]"],
+		["+48 600100200", "[TELEFON]"],
+		["0048600100200", "[TELEFON]"],
+		["Kom. 601 23 45 67 lub 601-23-45-67", "Kom. [TELEFON] lub [TELEFON]"],
+	])("redacts %j", (input, expected) => {
+		expect(redactContactLinePhones(input)).toBe(expected);
+	});
+
+	it.each([
+		"NIP 5250000000",
+		"REGON 012345678",
+		"REGON: 012345678",
+		"KRS 000012345",
+		"PESEL 90010112345",
+		"nr 600100200",
+		"125000000 zł",
+		"600100200 PLN",
+		"2019–2023",
+		"Budżet 500 10 20 30 zł",
+		"6001002001",
+	])("keeps %j", (input) => {
+		expect(redactContactLinePhones(input)).toBe(input);
+	});
+});
+
+describe("adversarial input performance", () => {
+	// Generous threshold so the test stays stable on slow machines; the quadratic versions took seconds.
+	const LIMIT_MS = 500;
+	const ADVERSARIAL_INPUTS: Record<string, string> = {
+		"local part without @": `${"a".repeat(49_999)}!`,
+		"dotted labels": "a.".repeat(25_000),
+		"dashed digits": "1-".repeat(25_000),
+		"spaced at signs": "a @ ".repeat(12_500),
+		"spaced dots": "a@a .".repeat(10_000),
+	};
+
+	function elapsed(run: () => unknown): number {
+		const started = performance.now();
+		run();
+		return performance.now() - started;
+	}
+
+	it.each(Object.entries(ADVERSARIAL_INPUTS))("keeps both e-mail patterns linear on %s", (_label, input) => {
+		expect(elapsed(() => input.replace(new RegExp(EMAIL_PATTERN.source, EMAIL_PATTERN.flags), "x"))).toBeLessThan(
+			LIMIT_MS,
+		);
+		expect(
+			elapsed(() => input.replace(new RegExp(SPACED_EMAIL_PATTERN.source, SPACED_EMAIL_PATTERN.flags), "x")),
+		).toBeLessThan(LIMIT_MS);
+	});
+
+	it.each(Object.entries(ADVERSARIAL_INPUTS))("keeps the whole redaction fast on %s", (_label, input) => {
+		expect(elapsed(() => redactTextForAi(normalizeTextForAi(input), context))).toBeLessThan(LIMIT_MS);
 	});
 });
 

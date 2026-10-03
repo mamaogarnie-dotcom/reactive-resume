@@ -17,7 +17,7 @@ import { cn } from "@reactive-resume/utils/style";
 import { AiReviewCard } from "@/features/ats-checker/ai-review/ai-review-card";
 import { AtsPdfReportView } from "@/features/ats-checker/report/report-view";
 import { blobToPdfFile, runAtsCheck } from "@/features/ats-checker/run-ats-check";
-import { useResumeData } from "@/features/resume/builder/draft";
+import { useResume, useResumeData } from "@/features/resume/builder/draft";
 import { createResumePdfBlob } from "@/features/resume/export/pdf-document";
 import {
 	atsFindingItemElementId,
@@ -188,6 +188,7 @@ function LiveLintTier() {
  */
 function DeepCheckTier() {
 	const data = useResumeData();
+	const resumeId = useResume()?.id;
 
 	const [jobDescription, setJobDescription] = useState("");
 	const [result, setResult] = useState<AtsCheckResult | null>(null);
@@ -256,7 +257,12 @@ function DeepCheckTier() {
 			{result && (
 				<>
 					<AtsPdfReportView report={result.report} />
-					<AiReviewCard report={result.report} fullText={result.fullText} jobDescription={jobDescription} />
+					<AiReviewCard
+						report={result.report}
+						fullText={result.fullText}
+						jobDescription={jobDescription}
+						resumeId={resumeId}
+					/>
 				</>
 			)}
 		</div>

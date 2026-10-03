@@ -6,6 +6,10 @@ Review the resume below and return the JSON object described in your instruction
 {{EXTRACTED_TEXT}}
 <<<RESUME_TEXT_END>>>
 
+## Contact details (values hidden for privacy)
+
+{{CONTACT_PRESENCE}}
+
 ## Formatting findings already reported (context only — do not repeat these)
 
 {{FINDINGS}}

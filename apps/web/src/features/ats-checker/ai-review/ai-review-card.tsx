@@ -26,6 +26,8 @@ type AiReviewCardProps = {
 	report: PdfAtsReport;
 	fullText: string;
 	jobDescription?: string;
+	/** Set in the builder, so the server can also redact the identity details of that resume. */
+	resumeId?: string;
 };
 
 /**
@@ -34,7 +36,7 @@ type AiReviewCardProps = {
  * Everything sent is stated on the card before the button is pressed. The PDF itself never leaves
  * the browser. Only the text already extracted from it travels.
  */
-export function AiReviewCard({ report, fullText, jobDescription }: AiReviewCardProps) {
+export function AiReviewCard({ report, fullText, jobDescription, resumeId }: AiReviewCardProps) {
 	const { usableProviders, hasUsableProvider, isLoading } = useHasUsableAiProvider();
 	const [providerOverride, setProviderOverride] = useState<string | null | undefined>(undefined);
 	const [review, setReview] = useState<AtsAiReview | null>(null);
@@ -70,6 +72,7 @@ export function AiReviewCard({ report, fullText, jobDescription }: AiReviewCardP
 
 		mutate({
 			...(aiProviderId ? { aiProviderId } : {}),
+			...(resumeId ? { resumeId } : {}),
 			extractedText: trimmedText,
 			findings: report.findings.slice(0, MAX_FINDINGS).map((finding) => ({
 				code: finding.code,

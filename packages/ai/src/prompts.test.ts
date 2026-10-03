@@ -25,4 +25,13 @@ describe("prompts", () => {
 		expect(atsReviewUserPromptTemplate).toContain("{{FINDINGS}}");
 		expect(atsReviewUserPromptTemplate).toContain("{{JOB_DESCRIPTION_SECTION}}");
 	});
+
+	it("explains the ATS review's redaction placeholders and forbids echoing them", () => {
+		for (const placeholder of ["[OSOBA]", "[EMAIL]", "[TELEFON]", "[URL]", "[ADRES]"]) {
+			expect(atsReviewSystemPrompt).toContain(placeholder);
+		}
+		expect(atsReviewSystemPrompt).toContain("Never quote, repeat, rewrite or mention these placeholders");
+		expect(atsReviewSystemPrompt).toContain("Do not comment on contact details");
+		expect(atsReviewUserPromptTemplate).toContain("{{CONTACT_PRESENCE}}");
+	});
 });

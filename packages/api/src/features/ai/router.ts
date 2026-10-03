@@ -9,6 +9,7 @@ import { aiRequestRateLimit } from "../../middleware/rate-limit";
 import { aiProvidersService } from "../ai-providers/service";
 import { resumeService } from "../resume/service";
 import { atsReviewInputSchema, atsReviewOutputSchema, reviewResumeText } from "./ats-review";
+import { resolveAtsReviewRedaction } from "./ats-review-redaction-context";
 import { aiService, fileInputSchema } from "./service";
 
 function isInvalidAiBaseUrlError(error: unknown): boolean {
@@ -200,20 +201,31 @@ export const aiRouter = {
 		})
 		.handler(async ({ context, input }) => {
 			try {
+				// Resolved first: if the redaction context cannot be built, nothing is sent to the provider.
+				const redaction = await resolveAtsReviewRedaction({
+					userId: context.user.id,
+					user: context.user,
+					...(input.resumeId ? { resumeId: input.resumeId } : {}),
+				});
 				const provider = await getRunnableProvider(context.user.id, input.aiProviderId);
 
-				return await reviewResumeText({
-					...input,
-					provider: provider.provider,
-					model: provider.model,
-					apiKey: provider.apiKey,
-					baseURL: provider.baseURL ?? "",
-				});
+				return await reviewResumeText(
+					{
+						...input,
+						provider: provider.provider,
+						model: provider.model,
+						apiKey: provider.apiKey,
+						baseURL: provider.baseURL ?? "",
+					},
+					redaction,
+				);
 			} catch (error) {
 				if (isCredentialEncryptionUnavailable(error)) throwCredentialEncryptionUnavailable();
 				if (isInvalidAiBaseUrlError(error)) throwAiProviderConfigError();
-				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError(error);
+				// No cause here: a provider error carries the request body, and the server logs causes.
+				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError();
 				if (error instanceof ZodError) {
+					// Issue paths and messages only; the provider output itself is not attached.
 					throw new ORPCError("BAD_REQUEST", { message: "Invalid ATS review structure", cause: flattenError(error) });
 				}
 				throw error;

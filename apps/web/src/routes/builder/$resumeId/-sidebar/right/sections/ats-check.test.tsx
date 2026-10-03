@@ -49,11 +49,12 @@ vi.mock("@/features/ats-checker/report/report-view", () => ({
 	AtsPdfReportView: ({ report }: { report: { score: number } }) => <div>Deep report: {report.score}</div>,
 }));
 vi.mock("@/features/ats-checker/ai-review/ai-review-card", () => ({
-	AiReviewCard: () => <div>AI review card</div>,
+	AiReviewCard: ({ resumeId }: { resumeId?: string }) => <div>AI review card for {resumeId ?? "no resume"}</div>,
 }));
 
 vi.mock("@/features/resume/builder/draft", () => ({
 	useResumeData: () => resumeState.data,
+	useResume: () => (resumeState.data ? { id: "resume-1", data: resumeState.data } : undefined),
 }));
 vi.mock("../../../-store/sidebar", () => ({
 	useBuilderSidebar: () => sidebarState,
@@ -200,11 +201,19 @@ describe("the deep check tier", () => {
 	it("offers the AI review only once a deep check has produced a report", async () => {
 		renderPanel();
 
-		expect(screen.queryByText("AI review card")).toBeNull();
+		expect(screen.queryByText(/AI review card/)).toBeNull();
 
 		fireEvent.click(screen.getByRole("button", { name: /Run deep check/ }));
 
-		await waitFor(() => expect(screen.getByText("AI review card")).toBeTruthy());
+		await waitFor(() => expect(screen.getByText(/AI review card/)).toBeTruthy());
+	});
+
+	it("tells the AI review which resume it is reviewing, so its identity details are redacted too", async () => {
+		renderPanel();
+
+		fireEvent.click(screen.getByRole("button", { name: /Run deep check/ }));
+
+		await waitFor(() => expect(screen.getByText("AI review card for resume-1")).toBeTruthy());
 	});
 
 	it("passes a pasted job description through to the check", async () => {
